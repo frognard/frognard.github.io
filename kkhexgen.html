@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,13 +28,21 @@
             margin: 0px;
             top: 0;
         }
+        #terrainReferenceBar {
+            text-align: center;
+            padding: 10px;
+            background-color: #ddd;
+            font-family: Arial, sans-serif;
+            position: relative; /* Make sure it can be positioned */
+            top: -60px; /* Move it 20px up */
+       }
     </style>
 </head>
 <body>
     <canvas id="hexCanvas"></canvas>
-    <div id="legend" style="text-align: center; padding: 10px; background-color: #eee; font-family: Arial, sans-serif;"></div>
+    <div id="legend" style="text-align: center; padding: 10px; background-color: #eeeeee; font-family: Arial, sans-serif;"></div>
     <div>
-        <legend>Διαστάσεις Χάρτη</legend>
+      
         <style>
             #width, #height {
               width: 50px;
@@ -44,10 +53,10 @@
               padding: 5px 10px;
             }
             div {
-              margin-bottom: 50px;
+              margin-bottom: 30px;
               text-align: center;
-              margin: 50px;
-              margin-top: -60px;
+              margin: 40px;
+              margin-top: -50px;
             }
           </style>
           
@@ -60,6 +69,9 @@
         <!-- Add the generate button -->
         <button id="generateButton">Δημιουργία Χάρτη</button>
       </div>
+
+      <div id="terrainReferenceBar" style="text-align: center; padding: 10px; background-color: #eeeeee; font-family: Arial, sans-serif;"></div>
+
     <script>
 // Constants
 const hexRadius = 30;
@@ -122,6 +134,36 @@ const verticalSpacing = hexHeight; // Vertical distance between rows
 const directions = [
     [0, -1], [0, 1], [1, -1], [1, 0], [-1, 0], [-1, 1]
 ];
+
+
+function generateTerrainReference() {
+    const terrainReferenceContainer = document.getElementById("terrainReferenceBar");
+    const terrainData = {
+        "Πεδιάδες": "#C0CF8C",
+        "Δάση": "#327129",
+        "Λόφοι": "#B7A762",
+        "Βουνά": "#827746",
+        "Λίμνες": "#4682B4",
+        "Βάλτοι": "#6B8E23"
+    };
+
+    // Clear existing content
+    terrainReferenceContainer.innerHTML = "";
+
+    // Build terrain reference entries
+    for (const [terrain, color] of Object.entries(terrainData)) {
+        const terrainItem = document.createElement("div");
+        terrainItem.style.display = "inline-block";
+        terrainItem.style.margin = "0 10px";
+        terrainItem.style.fontSize = "16px";
+        terrainItem.innerHTML = `<span style="font-weight: bold; color:${color};">${terrain}</span>`;
+        terrainReferenceContainer.appendChild(terrainItem);
+    }
+}
+
+// Call this function to generate the terrain reference bar
+generateTerrainReference();
+
 
 // Helper Functions
 function rollDice(sides) {
