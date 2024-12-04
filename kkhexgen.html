@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +13,7 @@
         }
         canvas {
             display: block;
-            margin: -40px auto 0 auto;
+            margin: -30px auto 0 auto;
             padding: 0;
           
         }
@@ -23,6 +24,7 @@
             font-family: Arial, sans-serif;
             position: fixed; /* Keep it visible at the top */
             width: 100%;
+            margin: 0px;
             top: 0;
         }
     </style>
@@ -30,12 +32,40 @@
 <body>
     <canvas id="hexCanvas"></canvas>
     <div id="legend" style="text-align: center; padding: 10px; background-color: #eee; font-family: Arial, sans-serif;"></div>
-
+    <div>
+        <legend>Map Settings</legend>
+        <style>
+            #width, #height {
+              width: 50px;
+              margin-right: 10px;
+              
+            }
+            button {
+              padding: 5px 10px;
+            }
+            div {
+              margin-bottom: 50px;
+              text-align: center;
+              margin: 50px;
+              margin-top: -60px;
+            }
+          </style>
+          
+        <!-- Add the width and height textboxes -->
+        <label for="width">Width:</label>
+        <input type="number" id="width" name="width" min="1" value="16">
+        <label for="height">Height:</label>
+        <input type="number" id="height" name="height" min="1" value="12">
+        
+        <!-- Add the generate button -->
+        <button id="generateButton">Generate Map</button>
+      </div>
     <script>
 // Constants
 const hexRadius = 30;
-const mapWidth = 20;  // Number of columns
-const mapHeight = 12; // Number of rows
+let mapWidth = 20;  // Number of columns
+let mapHeight = 12; // Number of rows
+
 
 
 const terrainColors = {
@@ -235,18 +265,57 @@ function main() {
     canvas.height = screenHeight;
     document.body.appendChild(canvas);
 
+    const generateButton = document.getElementById("generateButton");
+    const widthInput = document.getElementById("width");
+    const heightInput = document.getElementById("height");
+
+
     const ctx = canvas.getContext('2d');
     const hexMap = generateHexMap();
 
-    function render() {
-        ctx.fillStyle = "#F4F4F4";
-        ctx.fillRect(0, 0, screenWidth, screenHeight);
-        drawHexGrid(ctx, hexMap);
-    
+    function regenerateMap() {
+        // Read values from input boxes
+        const newWidth = parseInt(widthInput.value, 10);
+        const newHeight = parseInt(heightInput.value, 10);
+
+        // Validate the input
+        if (isNaN(newWidth) || isNaN(newHeight) || newWidth < 1 || newHeight < 1) {
+            alert("Please enter valid positive integers for width and height.");
+            return;
+        }
+
+        // Update global dimensions
+        mapWidth = newWidth;
+        mapHeight = newHeight;
+
+        // Adjust canvas size
+        const screenWidth = Math.ceil(mapWidth * horizontalSpacing + hexRadius);
+        const screenHeight = Math.ceil(mapHeight * verticalSpacing + hexRadius);
+        canvas.width = screenWidth;
+        canvas.height = screenHeight;
+
+        // Generate a new map and draw it
+        const ctx = canvas.getContext("2d");
+        const hexMap = generateHexMap();
+
+        // Clear the canvas and redraw the map
+        function render() {
+            ctx.fillStyle = "#F4F4F4";
+            ctx.fillRect(0, 0, screenWidth, screenHeight);
+            drawHexGrid(ctx, hexMap);
+        }
+
+        render();
     }
 
-    render();
+    // Attach event listener to the button
+    generateButton.addEventListener("click", regenerateMap);
+
+    // Generate the initial map on page load
+    regenerateMap();
 }
+    
+
 
 // Run the main function
 main();
