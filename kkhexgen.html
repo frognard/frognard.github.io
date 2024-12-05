@@ -47,7 +47,7 @@
     <div>
       
         <style>
-            #width, #height {
+            #width, #height, #RadiusIn {
               width: 50px;
               margin-right: 10px;
               
@@ -68,6 +68,8 @@
         <input type="number" id="width" name="width" min="1" value="16">
         <label for="height">Ύψος:</label>
         <input type="number" id="height" name="height" min="1" value="12">
+        <label for="RadiusIn">Μέγεθος Εξαγώνου:</label>
+        <input type="number" id="RadiusIn" name="RadiusIn" min="1" value="30">
         
         <!-- Add the generate button -->
         <button id="generateButton">Δημιουργία Χάρτη</button>
@@ -77,8 +79,8 @@
 
     <script>
 // Constants
-const hexRadius = 30;
-let mapWidth = 20;  // Number of columns
+let hexRadius = 10;
+let mapWidth = 16;  // Number of columns
 let mapHeight = 12; // Number of rows
 
 
@@ -129,10 +131,10 @@ const hexContentTable = {
         ]
         };
 
-const hexWidth = 2 * hexRadius; // Width of the hexagon (flat-side to flat-side)
-const hexHeight = Math.sqrt(3) * hexRadius; // Height of the hexagon (point to point)
-const horizontalSpacing = hexWidth * 0.75; // Horizontal distance between columns
-const verticalSpacing = hexHeight; // Vertical distance between rows
+let hexWidth = 2 * hexRadius; // Width of the hexagon (flat-side to flat-side)
+let hexHeight = Math.sqrt(3) * hexRadius; // Height of the hexagon (point to point)
+let horizontalSpacing = hexWidth * 0.75; // Horizontal distance between columns
+let verticalSpacing = hexHeight; // Vertical distance between rows
 
 const directions = [
     [0, -1], [0, 1], [1, -1], [1, 0], [-1, 0], [-1, 1]
@@ -284,6 +286,7 @@ function main() {
     const generateButton = document.getElementById("generateButton");
     const widthInput = document.getElementById("width");
     const heightInput = document.getElementById("height");
+    const RadiusInput = document.getElementById("RadiusIn");
 
 
     const ctx = canvas.getContext('2d');
@@ -293,9 +296,10 @@ function main() {
         // Read values from input boxes
         const newWidth = parseInt(widthInput.value, 10);
         const newHeight = parseInt(heightInput.value, 10);
+        const newRadius = parseInt(RadiusInput.value, 10);
 
         // Validate the input
-        if (isNaN(newWidth) || isNaN(newHeight) || newWidth < 1 || newHeight < 1) {
+        if (isNaN(newWidth) || isNaN(newHeight) || isNaN(newRadius) || newWidth < 1 || newHeight < 1 || newRadius < 1) {
             alert("Please enter valid positive integers for width and height.");
             return;
         }
@@ -303,13 +307,21 @@ function main() {
         // Update global dimensions
         mapWidth = newWidth;
         mapHeight = newHeight;
+        hexRadius = newRadius;
+
+        // Recalculate hex dimensions
+        hexWidth = 2 * hexRadius;
+        hexHeight = Math.sqrt(3) * hexRadius;
+        horizontalSpacing = hexWidth * 0.75;
+        verticalSpacing = hexHeight;
 
         // Adjust canvas size
-        const screenWidth = Math.ceil(mapWidth * horizontalSpacing + hexRadius);
+         const screenWidth = Math.ceil(mapWidth * horizontalSpacing + hexRadius);
         const screenHeight = Math.ceil(mapHeight * verticalSpacing + hexRadius);
         canvas.width = screenWidth;
         canvas.height = screenHeight;
-
+        
+        
         // Generate a new map and draw it
         const ctx = canvas.getContext("2d");
         const hexMap = generateHexMap();
