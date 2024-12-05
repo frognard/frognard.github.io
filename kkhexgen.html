@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hex Terrain Generator</title>
+    <title>Γεννήτρια Τοπίου</title>
     <style>
         body {
             margin: 0;
@@ -14,33 +14,36 @@
         }
         canvas {
             display: block;
-            margin: -30px auto 0 auto;
+            margin: 30px auto 0 auto;
             padding: 0;
           
         }
-        #legend {
-            text-align: center;
-            padding: 10px;
-            background-color: #eee;
-            font-family: Arial, sans-serif;
-            position: fixed; /* Keep it visible at the top */
-            width: 100%;
-            margin: 0px;
-            top: 0;
-        }
-        #terrainReferenceBar {
-            text-align: center;
-            padding: 10px;
-            background-color: #ddd;
-            font-family: Arial, sans-serif;
-            position: relative; /* Make sure it can be positioned */
-            top: -60px; /* Move it 20px up */
-       }
-    </style>
+     </style>
 </head>
 <body>
-    <canvas id="hexCanvas"></canvas>
-    <div id="legend" style="text-align: center; padding: 10px; background-color: #eeeeee; font-family: Arial, sans-serif;"></div>
+    <div style="text-align: center; background-color: #ddd; padding: 10px; font-family: Arial, sans-serif; font-size: 12px;">
+        <!-- Terrain features -->
+        <div style="margin-bottom: 10px;">
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">🏠</span> - Οικισμός</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">⛪</span> - Κτήριο</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">💀</span> - Λημέρι</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">🪦</span> - Ερείπιο</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">🌀</span> - Λαβύρινθος</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">⚡</span> - Ασυνήθιστο</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">🌲</span> - Φυσικό Χαρακτηριστικό</span>
+        </div>
+
+        <!-- Color-coded terrain types -->
+        <div>
+            <span style="margin: 0 10px; padding: 5px; background-color: #C0CF8C; color: #000; font-weight: bold;">Πεδιάδες</span>
+            <span style="margin: 0 10px; padding: 5px; background-color: #327129; color: #000; font-weight: bold;">Δάση</span>
+            <span style="margin: 0 10px; padding: 5px; background-color: #B7A762; color: #000; font-weight: bold;">Λόφοι</span>
+            <span style="margin: 0 10px; padding: 5px; background-color: #827746; color: #000; font-weight: bold;">Βουνά</span>
+            <span style="margin: 0 10px; padding: 5px; background-color: #4682B4; color: #000; font-weight: bold;">Λίμνες</span>
+            <span style="margin: 0 10px; padding: 5px; background-color: #6B8E23; color: #000; font-weight: bold;">Βάλτοι</span>
+        </div>
+    </div>   
+    
     <div>
       
         <style>
@@ -53,10 +56,10 @@
               padding: 5px 10px;
             }
             div {
-              margin-bottom: 30px;
+              margin-bottom: 0px;
               text-align: center;
-              margin: 40px;
-              margin-top: -50px;
+              margin: 10px;
+              margin-top: 0px;
             }
           </style>
           
@@ -70,7 +73,7 @@
         <button id="generateButton">Δημιουργία Χάρτη</button>
       </div>
 
-      <div id="terrainReferenceBar" style="text-align: center; padding: 10px; background-color: #eeeeee; font-family: Arial, sans-serif;"></div>
+      
 
     <script>
 // Constants
@@ -134,35 +137,6 @@ const verticalSpacing = hexHeight; // Vertical distance between rows
 const directions = [
     [0, -1], [0, 1], [1, -1], [1, 0], [-1, 0], [-1, 1]
 ];
-
-
-function generateTerrainReference() {
-    const terrainReferenceContainer = document.getElementById("terrainReferenceBar");
-    const terrainData = {
-        "Πεδιάδες": "#C0CF8C",
-        "Δάση": "#327129",
-        "Λόφοι": "#B7A762",
-        "Βουνά": "#827746",
-        "Λίμνες": "#4682B4",
-        "Βάλτοι": "#6B8E23"
-    };
-
-    // Clear existing content
-    terrainReferenceContainer.innerHTML = "";
-
-    // Build terrain reference entries
-    for (const [terrain, color] of Object.entries(terrainData)) {
-        const terrainItem = document.createElement("div");
-        terrainItem.style.display = "inline-block";
-        terrainItem.style.margin = "0 10px";
-        terrainItem.style.fontSize = "16px";
-        terrainItem.innerHTML = `<span style="font-weight: bold; color:${color};">${terrain}</span>`;
-        terrainReferenceContainer.appendChild(terrainItem);
-    }
-}
-
-// Call this function to generate the terrain reference bar
-generateTerrainReference();
 
 
 // Helper Functions
@@ -361,34 +335,8 @@ function main() {
 
 // Run the main function
 main();
-function generateLegend() {
-    const legendContainer = document.getElementById("legend");
-    const legendData = {
-        "🏠": "Οικισμός",
-        "⛪": "Κτήριο",
-        "💀": "Λημέρι",
-        "🪦": "Ερείπιο",
-        "🌀": "Λαβύρινθος",
-        "⚡": "Ασυνήθιστο",
-        "🌲": "Φυσικό Χαρακτηριστικό"
-    };
 
-    // Clear existing content
-    legendContainer.innerHTML = "";
 
-    // Build legend entries
-    for (const [icon, label] of Object.entries(legendData)) {
-        const legendItem = document.createElement("div");
-        legendItem.style.display = "inline-block";
-        legendItem.style.margin = "0 10px";
-        legendItem.style.fontSize = "16px";
-        legendItem.innerHTML = `<span style="font-weight: bold;">${icon}</span> - ${label}`;
-        legendContainer.appendChild(legendItem);
-    }
-}
-
-// Call this function after the DOM is loaded
-generateLegend();
 
     </script>
 </body>
