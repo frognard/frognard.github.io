@@ -61,6 +61,7 @@
               margin: 10px;
               margin-top: 0px;
             }
+            
           </style>
           
         <!-- Add the width and height textboxes -->
@@ -74,7 +75,9 @@
         <!-- Add the generate button -->
         <button id="generateButton">Δημιουργία Χάρτη</button>
         <input type="checkbox" id="toggleContent" checked>
-        <label for="toggleContent">Γέμισμα Περιεχομένων</label>
+        <label for="toggleContent">Περιεχόμενα</label>
+        <input type="checkbox" id="toggleNumbering" checked>
+        <label for="toggleNumbering">Αρίθμηση</label>
       </div>
 
       
@@ -207,11 +210,14 @@ function drawHexagon(ctx, centerX, centerY, terrain) {
 
 function drawHexLabel(ctx, centerX, centerY, row, col) {
     // Σχεδίαση συντεταγμένων (λίγο πάνω από το κέντρο)
+    const toggleNumbering = document.getElementById("toggleNumbering");
     ctx.font = "9px Arial";
     ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(`${row},${col}`, centerX, centerY - hexRadius * 0.6);
+    if (toggleNumbering && toggleNumbering.checked) {
+        ctx.fillText(`${row},${col}`, centerX, centerY - hexRadius * 0.6);
+    }
 }
 
 function drawHexGrid(ctx, mapData) {
