@@ -73,6 +73,8 @@
         
         <!-- Add the generate button -->
         <button id="generateButton">Δημιουργία Χάρτη</button>
+        <input type="checkbox" id="toggleContent" checked>
+        <label for="toggleContent">Γέμισμα Περιεχομένων</label>
       </div>
 
       
@@ -166,14 +168,15 @@ function getRandomTerrain() {
 }
 
 function getHexContent(terrain) {
-            if (Math.random() > 1 / 6) return ""; // 1 στις 6 πιθανότητες
-            const roll = rollDice(6) * 10 + rollDice(6); // Ρίξε d66
-            const table = hexContentTable[terrain];
-            for (let [min, max, content] of table) {
-                if (roll >= min && roll <= max) return content;
-            }
-            return "";
-        }
+    const toggleContent = document.getElementById("toggleContent");
+    if (!toggleContent.checked || Math.random() > 1 / 6) return ""; // 1 στις 6 πιθανότητες
+    const roll = rollDice(6) * 10 + rollDice(6); // Ρίξε d66
+    const table = hexContentTable[terrain];
+    for (let [min, max, content] of table) {
+        if (roll >= min && roll <= max) return content;
+    }
+    return "";
+}
 
     function drawHexContents(ctx, centerX, centerY, content) {
     if (!content) return; // Αν δεν υπάρχει περιεχόμενο, δεν κάνουμε τίποτα
