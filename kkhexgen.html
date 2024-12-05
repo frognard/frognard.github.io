@@ -272,7 +272,7 @@ function generateHexMap() {
         } else {
             // If a defined neighbor is chosen, determine terrain based on base/metabasis
             const roll = rollDice(6);
-            mapData[row][col] = roll <= 2 ? chosenNeighbor : metabasisMap[chosenNeighbor] || chosenNeighbor;
+            mapData[row][col] = roll <= 4 ? chosenNeighbor : metabasisMap[chosenNeighbor] || chosenNeighbor;
         }
 
         filledCells++; // Increment the count of filled cells
