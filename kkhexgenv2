@@ -1,0 +1,369 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Γεννήτρια Τοπίου</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        canvas {
+            display: block;
+            margin: 30px auto 0 auto;
+            padding: 0;
+          
+        }
+     </style>
+</head>
+<body>
+    <div style="text-align: center; background-color: #ddd; padding: 10px; font-family: Arial, sans-serif; font-size: 12px;">
+        <!-- Terrain features -->
+        <div style="margin-bottom: 10px;">
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">🏠</span> - Οικισμός</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">⛪</span> - Κτήριο</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">💀</span> - Λημέρι</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">🪦</span> - Ερείπιο</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">🌀</span> - Λαβύρινθος</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">⚡</span> - Ασυνήθιστο</span>
+            <span style="margin: 0 10px;"><span style="font-weight: bold;">🌲</span> - Φυσικό Χαρακτηριστικό</span>
+        </div>
+
+        <!-- Color-coded terrain types -->
+        <div>
+            <span style="margin: 0 10px; padding: 5px; background-color: #C0CF8C; color: #000; font-weight: bold;">Πεδιάδες</span>
+            <span style="margin: 0 10px; padding: 5px; background-color: #327129; color: #000; font-weight: bold;">Δάση</span>
+            <span style="margin: 0 10px; padding: 5px; background-color: #B7A762; color: #000; font-weight: bold;">Λόφοι</span>
+            <span style="margin: 0 10px; padding: 5px; background-color: #827746; color: #000; font-weight: bold;">Βουνά</span>
+            <span style="margin: 0 10px; padding: 5px; background-color: #4682B4; color: #000; font-weight: bold;">Λίμνες</span>
+            <span style="margin: 0 10px; padding: 5px; background-color: #6B8E23; color: #000; font-weight: bold;">Βάλτοι</span>
+        </div>
+    </div>   
+    
+    <div>
+      
+        <style>
+            #width, #height, #RadiusIn {
+              width: 40px;
+              margin-right: 10px;
+              
+            }
+            button {
+              padding: 5px 10px;
+            }
+            div {
+              margin-bottom: 0px;
+              text-align: center;
+              margin: 10px;
+              margin-top: 0px;
+            }
+            
+          </style>
+          
+        <!-- Add the width and height textboxes -->
+        <label for="width">Πλάτος:</label>
+        <input type="number" id="width" name="width" min="1" value="16">
+        <label for="height">Ύψος:</label>
+        <input type="number" id="height" name="height" min="1" value="12">
+        <label for="RadiusIn">Μέγεθος:</label>
+        <input type="number" id="RadiusIn" name="RadiusIn" min="1" value="30">
+        
+        <!-- Add the generate button -->
+        <button id="generateButton">Δημιουργία</button>
+        <input type="checkbox" id="toggleContent" checked>
+        <label for="toggleContent">Περιεχόμενα</label>
+        <input type="checkbox" id="toggleNumbering" checked>
+        <label for="toggleNumbering">Αρίθμηση</label>
+      </div>
+
+      
+
+    <script>
+// Constants
+let hexRadius = 10;
+let mapWidth = 16;  // Number of columns
+let mapHeight = 12; // Number of rows
+
+
+
+const terrainColors = {
+    "Plains": "#C0CF8C",
+    "Forest": "#327129",
+    "Hill": "#B7A762",
+    "Mountain": "#827746",
+    "Lake": "#4682B4",
+    "Swamp": "#6B8E23"
+};
+
+const metabasisMap = {
+    "Plains": "Forest",
+    "Forest": "Plains",
+    "Hill": "Mountain",
+    "Mountain": "Hill",
+    "Lake": "Swamp",
+    "Swamp": "Lake"
+};
+
+const hexContentTable = {
+            Plains: [
+                [11, 25, "🏠"], [26, 42, "⛪"], [43, 52, "💀"],
+                [53, 55, "🪦"], [56, 63, "🌲"], [64, 65, "⚡"], [66, "🌀"]
+            ],
+            Forest: [
+                [11, 16, "🏠"], [21, 31, "⛪"], [32, 46, "💀"],
+                [51, 53, "🪦"], [54, 61, "🌲"], [62, 64, "⚡"], [65, 66, "🌀"]
+            ],
+            Hill: [
+                [11, 22, "🏠"], [23, 33, "⛪"], [34, 46, "💀"],
+                [51, 53, "🪦"], [54, 61, "🌲"], [62, 63, "⚡"], [64, 66, "🌀"]
+            ],
+            Mountain: [
+                [11, 15, "🏠"], [16, 24, "⛪"], [25, 44, "💀"],
+                [45, 51, "🪦"], [52, 55, "🌲"], [56, 63, "⚡"], [64, 66, "🌀"]
+            ],
+            Swamp: [
+                [11, 13, "🏠"], [14, 16, "⛪"], [21, 36, "💀"],
+                [41, 52, "🪦"], [53, 56, "🌲"], [61, 64, "⚡"], [65, 66, "🌀"]
+            
+            ],
+            Lake: [
+                [11, 13, ""], [14, 16, ""], [21, 36, ""],
+                [41, 52, ""], [53, 56, ""], [61, 64, ""], [65, 66, ""]
+        ]
+        };
+
+let hexWidth = 2 * hexRadius; // Width of the hexagon (flat-side to flat-side)
+let hexHeight = Math.sqrt(3) * hexRadius; // Height of the hexagon (point to point)
+let horizontalSpacing = hexWidth * 0.75; // Horizontal distance between columns
+let verticalSpacing = hexHeight; // Vertical distance between rows
+
+const directions = [
+    [0, -1], [0, 1], [1, -1], [1, 0], [-1, 0], [-1, 1]
+];
+
+
+// Helper Functions
+function rollDice(sides) {
+    return Math.floor(Math.random() * sides) + 1;
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function getRandomTerrain() {
+    const roll = rollDice(36);
+    if (roll <= 12) return "Plains";
+    if (roll <= 21) return "Forest";
+    if (roll <= 29) return "Hill";
+    if (roll <= 34) return "Mountain";
+    if (roll === 35) return "Swamp";
+    if (roll === 36) return "Lake";
+    return "Plains";
+}
+
+function getHexContent(terrain) {
+    const toggleContent = document.getElementById("toggleContent");
+    if (!toggleContent.checked || Math.random() > 1 / 6) return ""; // 1 στις 6 πιθανότητες
+    const roll = rollDice(6) * 10 + rollDice(6); // Ρίξε d66
+    const table = hexContentTable[terrain];
+    for (let [min, max, content] of table) {
+        if (roll >= min && roll <= max) return content;
+    }
+    return "";
+}
+
+    function drawHexContents(ctx, centerX, centerY, content) {
+    if (!content) return; // Αν δεν υπάρχει περιεχόμενο, δεν κάνουμε τίποτα
+    // Σχεδίαση περιεχομένου στο ακριβές κέντρο
+	ctx.font = "bold 15px Arial";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(content, centerX, centerY);
+    }
+
+function drawHexagon(ctx, centerX, centerY, terrain) {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 180) * (60 * i);
+        const x = centerX + hexRadius * Math.cos(angle);
+        const y = centerY + hexRadius * Math.sin(angle);
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    }
+    ctx.closePath();
+    ctx.fillStyle = terrainColors[terrain];
+    ctx.fill();
+}
+
+function drawHexLabel(ctx, centerX, centerY, row, col) {
+    // Σχεδίαση συντεταγμένων (λίγο πάνω από το κέντρο)
+    const toggleNumbering = document.getElementById("toggleNumbering");
+    ctx.font = "9px Arial";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    if (toggleNumbering && toggleNumbering.checked) {
+        ctx.fillText(`${row},${col}`, centerX, centerY - hexRadius * 0.6);
+    }
+}
+
+function drawHexGrid(ctx, mapData) {
+    for (let row = 0; row < mapHeight; row++) {
+        for (let col = 0; col < mapWidth; col++) {
+            if (!mapData[row][col]) continue;
+            const x = col * horizontalSpacing + hexRadius;
+            const y = row * verticalSpacing + (col % 2) * (hexHeight / 2) + hexRadius;
+            const terrain = mapData[row][col];  // Get the terrain for this hex
+            const content = getHexContent(terrain);  // Get the content for this terrain
+
+            drawHexagon(ctx, x, y, terrain);
+            drawHexLabel(ctx, x, y, row, col);
+            drawHexContents(ctx, x, y, content);  // Draw the content in the hex
+        }
+    }
+}
+
+function generateHexMap() {
+    const mapData = Array.from({ length: mapHeight }, () => Array(mapWidth).fill(null));
+    let filledCells = 0; // Track the number of filled cells
+    const totalCells = mapWidth * mapHeight; // Total number of cells in the grid
+
+    while (filledCells < totalCells) {
+        const row = rollDice(mapHeight) - 1;
+        const col = rollDice(mapWidth) - 1;
+
+        // Skip if the current cell is already filled
+        if (mapData[row][col]) continue;
+
+        // Gather neighbors into a 6-element array
+        const neighbors = directions.map(([dr, dc]) => {
+            const adjRow = row + dr;
+            const adjCol = col + dc;
+
+            // Check bounds and return either the terrain type or undefined
+            if (
+                adjRow >= 0 && adjRow < mapHeight &&
+                adjCol >= 0 && adjCol < mapWidth
+            ) {
+                return mapData[adjRow][adjCol] || undefined;
+            } else {
+                return undefined;
+            }
+        });
+
+        // Choose terrain based on neighbors
+        const chosenNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+        if (chosenNeighbor !== undefined) {
+            // If not undefined is chosen, eksaplosis
+            mapData[row][col] = chosenNeighbor;
+            
+        } else  {
+            // If undefined, try again
+            const chosenNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+                if (chosenNeighbor !== undefined) {
+                    // if defined, metabasis
+                    mapData[row][col] = metabasisMap[chosenNeighbor]; }
+                    else {mapData[row][col] = getRandomTerrain();}
+        }
+
+        filledCells++; // Increment the count of filled cells
+    }
+
+    return mapData;
+}
+
+/////////    mapData[row][col] = getRandomTerrain();
+
+// Main Function
+function main() {
+    const canvas = document.createElement('canvas');
+    const screenWidth = Math.ceil(mapWidth * horizontalSpacing + hexRadius);
+    const screenHeight = Math.ceil(mapHeight * verticalSpacing + hexRadius);
+    canvas.width = screenWidth;
+    canvas.height = screenHeight;
+    document.body.appendChild(canvas);
+
+    const generateButton = document.getElementById("generateButton");
+    const widthInput = document.getElementById("width");
+    const heightInput = document.getElementById("height");
+    const RadiusInput = document.getElementById("RadiusIn");
+
+
+    const ctx = canvas.getContext('2d');
+    const hexMap = generateHexMap();
+
+    function regenerateMap() {
+        // Read values from input boxes
+        const newWidth = parseInt(widthInput.value, 10);
+        const newHeight = parseInt(heightInput.value, 10);
+        const newRadius = parseInt(RadiusInput.value, 10);
+
+        // Validate the input
+        if (isNaN(newWidth) || isNaN(newHeight) || isNaN(newRadius) || newWidth < 1 || newHeight < 1 || newRadius < 1) {
+            alert("Please enter valid positive integers for width and height.");
+            return;
+        }
+
+        // Update global dimensions
+        mapWidth = newWidth;
+        mapHeight = newHeight;
+        hexRadius = newRadius;
+
+        // Recalculate hex dimensions
+        hexWidth = 2 * hexRadius;
+        hexHeight = Math.sqrt(3) * hexRadius;
+        horizontalSpacing = hexWidth * 0.75;
+        verticalSpacing = hexHeight;
+
+        // Adjust canvas size
+         const screenWidth = Math.ceil(mapWidth * horizontalSpacing + hexRadius);
+        const screenHeight = Math.ceil(mapHeight * verticalSpacing + hexRadius);
+        canvas.width = screenWidth;
+        canvas.height = screenHeight;
+        
+        
+        // Generate a new map and draw it
+        const ctx = canvas.getContext("2d");
+        const hexMap = generateHexMap();
+
+        // Clear the canvas and redraw the map
+        function render() {
+            ctx.fillStyle = "#F4F4F4";
+            ctx.fillRect(0, 0, screenWidth, screenHeight);
+            drawHexGrid(ctx, hexMap);
+        }
+
+        render();
+    }
+
+    // Attach event listener to the button
+    generateButton.addEventListener("click", regenerateMap);
+
+    // Generate the initial map on page load
+    regenerateMap();
+}
+    
+
+
+// Run the main function
+main();
+
+
+
+    </script>
+</body>
+</html>
