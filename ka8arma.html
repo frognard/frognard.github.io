@@ -1209,18 +1209,11 @@ setInterval(updateRates,1000);
 
         let playerDamageCalculated = 0;
         let monsterDamageCalculated = 0;
-        let retreatSuccessful = false;
-
+        
         let playerActionLog = "";
         let monsterActionLog = "";
 
-        if (isAttemptingRetreat) {
-            if (Math.random() < (2/5)) { retreatSuccessful = true; }
-            logMessage("Επιχειρείτε να διαφύγετε...", 'retreat');
-            playerDamageCalculated = 0;
-            isSkillQueued = false;
-        } 
-        else if (isSkillQueued) {
+        if (isSkillQueued) {
             let d6 = Math.floor(Math.random() * 6) + 1;
             let baseDmg = (getPlayerAtk() / monster.def) * d6 * 5 * player.level;
             playerDamageCalculated = Math.max(1, Math.round(baseDmg * 3));
@@ -1273,16 +1266,6 @@ setInterval(updateRates,1000);
         }
         if (player.hp <= 0) { endCombat('defeat'); return; }
         if (monster.hp <= 0) { endCombat('victory'); return; }
-
-        if (isAttemptingRetreat) {
-            if (retreatSuccessful) {
-                logMessage("Επιτυχής υποχώρηση στην πόλη.", 'retreat');
-                endCombat('retreat');
-                return;
-            } else {
-                logMessage("Η προσπάθεια διαφυγής απέτυχε! Η μάχη συνεχίζεται.", 'retreat');
-            }
-        }
     }
 
     function handleEquipmentDrop(type, rolledTier) {
@@ -1307,7 +1290,9 @@ setInterval(updateRates,1000);
     }
 
    function endCombat(outcome) {
-        isAttemptingRetreat = false;
+        if (outcome !== 'victory') {
+            isAttemptingRetreat = false;
+        }
         isSkillQueued = false;
 
         if (outcome === 'victory' || outcome === 'mutual_death') {
@@ -1359,7 +1344,21 @@ setInterval(updateRates,1000);
             }
 
             saveGame();
-            if (outcome === 'victory') { monster = null; spawnMonster(); }
+            if (outcome === 'victory') {
+                if (isAttemptingRetreat) {
+                    if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+                    inCombat = false;
+                    monster = null;
+                    isAttemptingRetreat = false;
+                    startTownRegen();
+                    document.getElementById('town-interface').classList.remove('hidden');
+                    document.getElementById('combat-interface').classList.add('hidden');
+                    logMessage("Επιστρέψατε στον Τεκέ μετά τη νίκη.", 'retreat');
+                } else {
+                    monster = null;
+                    spawnMonster();
+                }
+            }
             updateUI();
 
             if (outcome === 'mutual_death') {
