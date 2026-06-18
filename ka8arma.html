@@ -771,9 +771,9 @@ const weaponNames = [
         xp: 0,
         nextXp: 50,
         gold: 0,
-        weapon: { name: "Σπασμένο Κλαδί", power: 1 },
-        armor: { name: "Φθαρμένα Ρούχα", power: 1 },
-        magic: { name: "Ξύλινο Φυλακτό", power: 1 },
+        weapon: { name: "Σπασμένο Κλαδί", power: 100 },
+        armor: { name: "Φθαρμένα Ρούχα", power: 100 },
+        magic: { name: "Ξύλινο Φυλακτό", power: 100 },
         maxUnlockedLevel: 100
     };
 
@@ -804,13 +804,13 @@ const weaponNames = [
 
     function getPlayerMaxHp() { return Math.floor(player.level * 120); }
     
-   // XP REQ FORULA - old and harder 
-    function calculateNextXpRequirement(lvl) { return Math.ceil(((5 * Math.pow(lvl, 3)) + (50 * lvl) + 45) / 2); }
+   // XP REQ FORMULA - old and harder AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 1.5)); }
   //function calculateNextXpRequirement(lvl) { return Math.ceil(25 * Math.pow(1.0664, lvl - 1)); }
   // function calculateNextXpRequirement(lvl) { return Math.ceil((((5 * Math.pow(lvl, 3)) + (50 * lvl) + 45) / 2) * (1 + (9 * (lvl - 1) / 99))); }
     function getUpgradeCost(currentPower) { return (currentPower + 1) * 50 + 100; }
     
-    function getMonsterXpReward(monsterLvl) { return Math.ceil(calculateNextXpRequirement(monsterLvl) * 1 / (monsterLvl + 4)); }
+    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(lvl, 1.25)); }
 
     function createFloatingText(parentId, text, color) {
         const parent = document.getElementById(parentId);
@@ -1253,7 +1253,7 @@ const weaponNames = [
             setTimeout(() => document.getElementById('monster-hp-bar').classList.remove('monster-death'), 500);
             logMessage(`Ο ${monster.name} εξοντώθηκε.`, 'victory');
 
-            // Υπολογισμός χρυσού με bonus 5x για τα μη-normal τέρατα
+            // Υπολογισμός χρυσού με bonus για τα μη-normal τέρατα
             let d6Gold = Math.floor(Math.random() * 6) + 1;
             let goldMultiplier = (monster.variant !== 'normal') ? 3 : 1;
             let gainedGold = d6Gold * monster.level * 2 * goldMultiplier;
