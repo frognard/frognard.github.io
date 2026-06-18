@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimal RPG v44 - Endurance Magic Edition</title>
+    <title>Κάθαρμα v44</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -793,7 +793,7 @@ const weaponNames = [
         hp: 100, 
         xp: 0,
         nextXp: 50,
-        gold: 0,
+        gold: 10000,
         weapon: { name: "Σπασμένο Κλαδί", power: 1 },
         armor: { name: "Φθαρμένα Ρούχα", power: 1 },
         magic: { name: "Ξύλινο Φυλακτό", power: 1 },
@@ -831,7 +831,8 @@ const weaponNames = [
     function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 1.8)); }
   //function calculateNextXpRequirement(lvl) { return Math.ceil(25 * Math.pow(1.0664, lvl - 1)); }
   // function calculateNextXpRequirement(lvl) { return Math.ceil((((5 * Math.pow(lvl, 3)) + (50 * lvl) + 45) / 2) * (1 + (9 * (lvl - 1) / 99))); }
-    function getUpgradeCost(currentPower) { return (currentPower + 1) * 50 + 100; }
+    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 100 + 0); }
+    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
     
     function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 1.5)); }
 
@@ -957,8 +958,8 @@ setInterval(updateRates,1000);
         document.getElementById('eq-magic').innerText = player.magic.name;
         document.getElementById('p-mag-bonus').innerText = player.magic.power > 0 ? `(T${player.magic.power})` : '';
 
-        let wCost = Math.floor((getUpgradeCost(player.weapon.power) ** 1.3) / 2) ;
-        let aCost = Math.floor((getUpgradeCost(player.armor.power) ** 1.3) / 4) ;  
+        let wCost = getWeaponUpgradeCost(player.weapon.power);
+        let aCost = getArmorUpgradeCost(player.armor.power);  
         
         const btnWep = document.getElementById('btn-upgrade-weapon');
         const btnArm = document.getElementById('btn-upgrade-armor');
@@ -1102,7 +1103,7 @@ setInterval(updateRates,1000);
     function upgradeEquipment(type) {
         if (inCombat) return;
         let currentPower = player[type].power;
-        let cost = getUpgradeCost(currentPower);
+        let cost = (type === 'weapon') ? getWeaponUpgradeCost(currentPower) : getArmorUpgradeCost(currentPower);
         if (player.gold >= cost) {
             player.gold -= cost;
             player[type].power++;
