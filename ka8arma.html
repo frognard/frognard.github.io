@@ -1331,10 +1331,12 @@ setInterval(updateRates,1000);
             logMessage(`[+${gainedXp} XP] Κερδίσατε πόντους εμπειρίας από την εξόντωση του εχθρού.`, 'victory');
             createFloatingText('xp-parent', `+${gainedXp} XP`, "var(--accent-gold)");
 
-            let weaponChance = 0.025;
-            let armorChance  = 0.025;
-            // Αυξημένη πιθανότητα για μαγικά αντικείμενα στα "Τρομερά" (magic) τέρατα
+            
+            // weaponchances
+            let weaponChance  = (monster.variant === 'weapon') ? 0.025 * 3 : 0.025;
+            let armorChance  = (monster.variant === 'armor') ? 0.025 * 3 : 0.025;
             let magicChance  = (monster.variant === 'magic') ? 0.025 * 3 : 0.025;
+
             
             let rolledPower = monster.level;
             let droppedSomething = false;
