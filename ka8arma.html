@@ -957,8 +957,8 @@ setInterval(updateRates,1000);
         document.getElementById('eq-magic').innerText = player.magic.name;
         document.getElementById('p-mag-bonus').innerText = player.magic.power > 0 ? `(T${player.magic.power})` : '';
 
-        let wCost = Math.floor(getUpgradeCost(player.weapon.power) ** 1.3) / 2 ;
-        let aCost = Math.floor(getUpgradeCost(player.armor.power) ** 1.3) / 4 ;  
+        let wCost = Math.floor((getUpgradeCost(player.weapon.power) ** 1.3) / 2) ;
+        let aCost = Math.floor((getUpgradeCost(player.armor.power) ** 1.3) / 4) ;  
         
         const btnWep = document.getElementById('btn-upgrade-weapon');
         const btnArm = document.getElementById('btn-upgrade-armor');
