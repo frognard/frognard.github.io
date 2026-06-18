@@ -1037,8 +1037,10 @@ setInterval(updateRates,1000);
         const entry = document.createElement('div');
         entry.className = `log-entry log-${type}`;
         entry.innerText = text;
-        logDiv.appendChild(entry);
-        logDiv.scrollTop = logDiv.scrollHeight;
+        // Εισαγωγή του νέου μηνύματος στην κορυφή (αντί για το τέλος)
+        logDiv.prepend(entry);
+        // Διατήρηση της κύλισης στην κορυφή για άμεση ορατότητα
+        logDiv.scrollTop = 0;
     }
 
     function triggerSmoothTransition(colorHex) {
