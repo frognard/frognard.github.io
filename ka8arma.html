@@ -315,7 +315,14 @@
             <span id="p-name" class="editable-name" contenteditable="true" onblur="savePlayerName()" onkeydown="handleNameKey(event)">Κάθαρμα</span>: 
             Επίπεδο <span id="p-level">1</span>
         </h3>
+        
+    <div style="display:flex;align-items:center;gap:4px;">
+        <input id="xpmin" style="width:70px;font-size:11px;" readonly value="0 XP/m">
+        <input id="gpmin" style="width:70px;font-size:11px;" readonly value="0 GP/m">
+        <button class="btn-delete-save" style="padding:2px 6px;" onclick="resetRates()">↺</button>
         <button class="btn-delete-save" onclick="resetGame()">Διαγραφή Save</button>
+    </div>
+
     </div>
     
     <div>
@@ -884,6 +891,28 @@ const weaponNames = [
     }
 
     loadGame();
+
+let rateStartTime = Date.now();
+let sessionXp = 0;
+let sessionGold = 0;
+
+function updateRates(){
+    let mins = Math.max((Date.now()-rateStartTime)/60000,0.001);
+    let xpMin = (sessionXp/mins).toFixed(0);
+    let gpMin = (sessionGold/mins).toFixed(0);
+    document.getElementById('xpmin').value = xpMin + ' XP/m';
+    document.getElementById('gpmin').value = gpMin + ' GP/m';
+}
+
+function resetRates(){
+    rateStartTime = Date.now();
+    sessionXp = 0;
+    sessionGold = 0;
+    updateRates();
+}
+
+setInterval(updateRates,1000);
+
     updateAreaSelector();
     updateUI();
     startTownRegen(); 
@@ -1292,11 +1321,13 @@ const weaponNames = [
             let gainedGold = d6Gold * monster.level * 2 * goldMultiplier;
             
             player.gold += gainedGold;
+            sessionGold += gainedGold;
             logMessage(`Βρέθηκαν ${gainedGold} χρυσά.`, 'victory');
             createFloatingText('stat-gold-box', `+${gainedGold}g`, "var(--accent-gold)");
 
             let gainedXp = getMonsterXpReward(monster.level);
             player.xp += gainedXp;
+            sessionXp += gainedXp;
             logMessage(`[+${gainedXp} XP] Κερδίσατε πόντους εμπειρίας από την εξόντωση του εχθρού.`, 'victory');
             createFloatingText('xp-parent', `+${gainedXp} XP`, "var(--accent-gold)");
 
