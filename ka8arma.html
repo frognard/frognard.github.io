@@ -151,7 +151,7 @@
             gap: 8px; /* Κενό μεταξύ μπάρας, κουμπιού και κειμένου */
             width: 100%;
         }
-        .cd-action-cell .cd-wrapper { flex: none; width: 160px }
+        .cd-action-cell .cd-wrapper { flex: none; width: 60px }
         .cd-action-cell button { margin-left: 0; flex-shrink: 0; }
 
         .bar-container {
@@ -376,9 +376,9 @@
         <span class="hotkey-hint">[Num5]</span>
     </div>
     
-    <div id="context-hotkey-label">Έναρξη Κυνηγιού:</div>
+    <div id="context-hotkey-label">Σκότωσε</div>
     <div class="cd-action-cell">
-        <button id="btn-hunt-retreat" class="inline-upgrade-btn" onclick="handleHuntRetreatClick()">Έναρξη Κυνηγιού</button>
+        <button id="btn-hunt-retreat" class="inline-upgrade-btn" onclick="handleHuntRetreatClick()">Σκότωσε</button>
         <span class="hotkey-hint" style="color: #e67e22; font-weight: bold;">[Enter]</span>
     </div>
 </div>
@@ -1008,7 +1008,7 @@ setInterval(updateRates,1000);
         }
 
         if (isAttemptingRetreat) {
-            document.getElementById('retreat-status-text').innerText = "(Προετοιμασία Φυγής...)";
+            document.getElementById('retreat-status-text').innerText = "(Υποχώρηση...)";
         } else {
             document.getElementById('retreat-status-text').innerText = "";
         }
@@ -1019,8 +1019,8 @@ setInterval(updateRates,1000);
             contextLabel.innerText = "Υποχώρηση:";
             btnHuntRetreat.innerText = "Υποχώρηση";
         } else {
-            contextLabel.innerText = "Έναρξη Κυνηγιού:";
-            btnHuntRetreat.innerText = "Έναρξη Κυνηγιού";
+            contextLabel.innerText = "Έναρξη Κυνηγιού";
+            btnHuntRetreat.innerText = "Σκότωσε!";
         }
 
         const btnSkill = document.getElementById('btn-skill');
