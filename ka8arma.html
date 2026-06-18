@@ -349,15 +349,15 @@
 
         <div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
             <div class="stat-row" id="stat-atk-box">
-                <div>Όπλο: <span id="eq-weapon" style="color: #5dade2;">Γυμνά Χέρια</span> <span id="p-wep-bonus" class="log-system"></span></div>
+                <div>Όπλο: <span id="eq-weapon" style="color: #990a0a;">Γυμνά Χέρια</span> <span id="p-wep-bonus" class="log-system"></span></div>
                 <button id="btn-upgrade-weapon" class="inline-upgrade-btn" onclick="upgradeEquipment('weapon')">Up</button>
             </div>
             <div class="stat-row" id="stat-def-box">
-                <div>Πανοπλία: <span id="eq-armor" style="color: #f1948a;">Κουρέλια</span> <span id="p-arm-bonus" class="log-system"></span></div>
+                <div>Πανοπλία: <span id="eq-armor" style="color: #2b75e2;">Κουρέλια</span> <span id="p-arm-bonus" class="log-system"></span></div>
                 <button id="btn-upgrade-armor" class="inline-upgrade-btn" onclick="upgradeEquipment('armor')">Up</button>
             </div>
             <div class="stat-row">
-                <div>Μαγικό: <span id="eq-magic" style="color: #bb8fce;">Κανένα</span> <span id="p-mag-bonus" class="log-system"></span></div>
+                <div>Μαγικό: <span id="eq-magic" style="color: #8c17be;">Κανένα</span> <span id="p-mag-bonus" class="log-system"></span></div>
             </div>
         </div>
 
@@ -957,8 +957,8 @@ setInterval(updateRates,1000);
         document.getElementById('eq-magic').innerText = player.magic.name;
         document.getElementById('p-mag-bonus').innerText = player.magic.power > 0 ? `(T${player.magic.power})` : '';
 
-        let wCost = getUpgradeCost(player.weapon.power)*2;
-        let aCost = getUpgradeCost(player.armor.power);
+        let wCost = Math.floor(getUpgradeCost(player.weapon.power * 2) ** 1.3);
+        let aCost = Math.floor(getUpgradeCost(player.armor.power) ** 1.3);
         
         const btnWep = document.getElementById('btn-upgrade-weapon');
         const btnArm = document.getElementById('btn-upgrade-armor');
@@ -1318,7 +1318,7 @@ setInterval(updateRates,1000);
             // Υπολογισμός χρυσού με bonus για τα μη-normal τέρατα
             let d6Gold = Math.floor(Math.random() * 6) + 1;
             let goldMultiplier = (monster.variant !== 'normal') ? 3 : 1;
-            let gainedGold = d6Gold * monster.level * 2 * goldMultiplier;
+            let gainedGold = Math.floor(d6Gold * (monster.level ** 1.3) * goldMultiplier);
             
             player.gold += gainedGold;
             sessionGold += gainedGold;
