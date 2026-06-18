@@ -113,8 +113,8 @@
             background-color: #2a2a2a;
             color: var(--accent-gold);
             border: 1px solid #444;
-            padding: 2px 6px;
-            font-size: 0.75rem;
+            padding: 8px 12px;
+            font-size: 0.85rem;
             cursor: pointer;
             border-radius: 2px;
             font-family: inherit;
@@ -137,7 +137,7 @@
 
         .cooldown-grid {
             display: grid;
-            grid-template-columns: 160px 1fr 140px;
+            grid-template-columns: 140px 1fr;
             gap: 10px;
             align-items: center;
             margin-top: 10px;
@@ -148,9 +148,10 @@
         .cd-action-cell {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px; /* Κενό μεταξύ μπάρας, κουμπιού και κειμένου */
+            width: 100%;
         }
-        .cd-action-cell .cd-wrapper { flex: 1; }
+        .cd-action-cell .cd-wrapper { flex: none; width: 160px }
         .cd-action-cell button { margin-left: 0; flex-shrink: 0; }
 
         .bar-container {
@@ -354,18 +355,26 @@
         </div>
 
         <div class="cooldown-grid">
-            <div>Ισχυρό πλήγμα:</div>
-            <div class="cd-action-cell"><div class="cd-wrapper"><div id="skill-cd-bar" class="cd-inner"></div></div><button id="btn-skill" class="inline-upgrade-btn" onclick="queueSpecialAttack()">Επίθεση</button></div>
-            <div class="hotkey-hint" id="skill-status-hint">[Num4]</div>
+    <div>Ισχυρό πλήγμα:</div>
+    <div class="cd-action-cell">
+        <div class="cd-wrapper"><div id="skill-cd-bar" class="cd-inner"></div></div>
+        <button id="btn-skill" class="inline-upgrade-btn" onclick="queueSpecialAttack()">Επίθεση</button>
+        <span class="hotkey-hint" id="skill-status-hint">[Num4]</span>
+    </div>
 
-            <div>Φίλτρο Υγείας:</div>
-            <div class="cd-action-cell"><div class="cd-wrapper"><div id="potion-cd-bar" class="cd-inner"></div></div><button id="btn-potion" class="inline-upgrade-btn" onclick="usePotion()">Φίλτρο</button></div>
-            <div class="hotkey-hint">[Num5]</div>
-            
-            <div id="context-hotkey-label">Έναρξη Κυνηγιού:</div>
-            <div class="cd-action-cell"><button id="btn-hunt-retreat" onclick="handleHuntRetreatClick()">Έναρξη Κυνηγιού</button></div>
-            <div class="hotkey-hint" style="color: #e67e22; font-weight: bold;">[Enter]</div>
-        </div>
+    <div>Φίλτρο Υγείας:</div>
+    <div class="cd-action-cell">
+        <div class="cd-wrapper"><div id="potion-cd-bar" class="cd-inner"></div></div>
+        <button id="btn-potion" class="inline-upgrade-btn" onclick="usePotion()">Φίλτρο</button>
+        <span class="hotkey-hint">[Num5]</span>
+    </div>
+    
+    <div id="context-hotkey-label">Έναρξη Κυνηγιού:</div>
+    <div class="cd-action-cell">
+        <button id="btn-hunt-retreat" class="inline-upgrade-btn" onclick="handleHuntRetreatClick()">Έναρξη Κυνηγιού</button>
+        <span class="hotkey-hint" style="color: #e67e22; font-weight: bold;">[Enter]</span>
+    </div>
+</div>
 
         <div class="bar-container" id="player-hp-parent">
             <div id="player-hp-bar" class="bar"></div>
