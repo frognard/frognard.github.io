@@ -137,13 +137,21 @@
 
         .cooldown-grid {
             display: grid;
-            grid-template-columns: 160px 60px 140px;
+            grid-template-columns: 160px 1fr 140px;
             gap: 10px;
             align-items: center;
             margin-top: 10px;
             margin-bottom: 15px;
             font-size: 0.95rem;
         }
+
+        .cd-action-cell {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .cd-action-cell .cd-wrapper { flex: 1; }
+        .cd-action-cell button { margin-left: 0; flex-shrink: 0; }
 
         .bar-container {
             background-color: #333;
@@ -347,15 +355,15 @@
 
         <div class="cooldown-grid">
             <div>Ισχυρό πλήγμα:</div>
-            <div><div class="cd-wrapper"><div id="skill-cd-bar" class="cd-inner"></div></div></div>
+            <div class="cd-action-cell"><div class="cd-wrapper"><div id="skill-cd-bar" class="cd-inner"></div></div><button id="btn-skill" class="inline-upgrade-btn" onclick="queueSpecialAttack()">Επίθεση</button></div>
             <div class="hotkey-hint" id="skill-status-hint">[Num4]</div>
 
             <div>Φίλτρο Υγείας:</div>
-            <div><div class="cd-wrapper"><div id="potion-cd-bar" class="cd-inner"></div></div></div>
+            <div class="cd-action-cell"><div class="cd-wrapper"><div id="potion-cd-bar" class="cd-inner"></div></div><button id="btn-potion" class="inline-upgrade-btn" onclick="usePotion()">Φίλτρο</button></div>
             <div class="hotkey-hint">[Num5]</div>
             
             <div id="context-hotkey-label">Έναρξη Κυνηγιού:</div>
-            <div></div>
+            <div class="cd-action-cell"><button id="btn-hunt-retreat" onclick="handleHuntRetreatClick()">Έναρξη Κυνηγιού</button></div>
             <div class="hotkey-hint" style="color: #e67e22; font-weight: bold;">[Enter]</div>
         </div>
 
@@ -370,7 +378,6 @@
         <div class="area-select-container">
             <label for="area-selector">Κυνηγότοπος:</label>
             <select id="area-selector"></select>
-            <button onclick="enterCombatFromSelector()">Έναρξη Κυνηγιού</button>
         </div>
     </div>
 
@@ -968,11 +975,20 @@ const weaponNames = [
         }
 
         const contextLabel = document.getElementById('context-hotkey-label');
+        const btnHuntRetreat = document.getElementById('btn-hunt-retreat');
         if (inCombat) {
             contextLabel.innerText = "Υποχώρηση:";
+            btnHuntRetreat.innerText = "Υποχώρηση";
         } else {
             contextLabel.innerText = "Έναρξη Κυνηγιού:";
+            btnHuntRetreat.innerText = "Έναρξη Κυνηγιού";
         }
+
+        const btnSkill = document.getElementById('btn-skill');
+        btnSkill.disabled = !inCombat || !monster || skillCooldownActive || isSkillQueued;
+
+        const btnPotion = document.getElementById('btn-potion');
+        btnPotion.disabled = potionCooldownActive;
 
         updateAreaSelector();
     }
@@ -1128,6 +1144,14 @@ const weaponNames = [
             logMessage("Η προσπάθεια υποχώρησης ακυρώθηκε.", 'system');
         }
         updateUI();
+    }
+
+    function handleHuntRetreatClick() {
+        if (inCombat) {
+            toggleRetreat();
+        } else {
+            enterCombatFromSelector();
+        }
     }
 
     function queueSpecialAttack() {
