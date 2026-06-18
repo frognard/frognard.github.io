@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal RPG v44 - Endurance Magic Edition</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --panel-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-muted: #888888;
+            --accent-gold: #ffd700;
+            --hp-player: #2ecc71;
+            --hp-monster: #e74c3c;
+            --border-color: #333333;
+            --skill-blue: #3498db;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 650px;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.7);
+            transition: background-color 3s ease;
+        }
+
+        h2, h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .header-row h3 {
+            margin: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .editable-name {
+            border-bottom: 1px dashed var(--accent-gold);
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .editable-name:focus {
+            outline: none;
+            background-color: #2a2a2a;
+            border-bottom: 1px solid var(--accent-gold);
+        }
+
+        .xp-wrapper-area {
+            position: relative;
+            margin: -2px 0 15px 0;
+        }
+
+        .xp-bar-container {
+            background-color: #333;
+            width: 100%;
+            height: 6px;
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        #p-xp-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--accent-gold);
+            transition: width 0.2s ease;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            align-items: center;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #171717;
+            padding: 4px 8px;
+            border: 1px solid #252525;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .inline-upgrade-btn {
+            background-color: #2a2a2a;
+            color: var(--accent-gold);
+            border: 1px solid #444;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border-radius: 2px;
+            font-family: inherit;
+            transition: all 0.2s;
+            margin-left: 10px;
+        }
+        .inline-upgrade-btn:hover:not(:disabled) {
+            background-color: #3a3a3a;
+            border-color: var(--accent-gold);
+        }
+        .inline-upgrade-btn:disabled {
+            color: var(--text-muted);
+            border-color: #222;
+            background-color: #1a1a1a;
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+
+        .gold { color: var(--accent-gold); font-weight: bold; }
+
+        .cooldown-grid {
+            display: grid;
+            grid-template-columns: 160px 60px 140px;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .bar-container {
+            background-color: #333;
+            width: 100%;
+            height: 20px;
+            border-radius: 3px;
+            overflow: visible;
+            margin: 5px 0 15px 0;
+            position: relative;
+        }
+
+        .bar {
+            height: 100%;
+            width: 100%;
+            transition: width 0.2s ease;
+            border-radius: 3px;
+        }
+
+        #player-hp-bar { background-color: var(--hp-player); }
+        #monster-hp-bar { background-color: var(--hp-monster); }
+
+        .bar-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            top: 0;
+            left: 0;
+            font-size: 0.85rem;
+            line-height: 20px;
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+            pointer-events: none;
+        }
+
+        .cd-wrapper {
+            width: 100%;
+            height: 6px;
+            background-color: #333;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .cd-inner {
+            height: 100%;
+            width: 100%;
+            background-color: var(--hp-player);
+            transition: width 0.1s linear;
+        }
+        .cd-inner.active {
+            background-color: var(--hp-monster);
+        }
+
+        #log {
+            height: 220px;
+            border: 1px solid var(--border-color);
+            background-color: #0a0a0a;
+            padding: 10px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            border-radius: 3px;
+        }
+
+        .log-entry { margin-bottom: 4px; }
+        .log-player { color: #5dade2; }
+        .log-monster { color: #f1948a; }
+        .log-system { color: #95a5a6; }
+        .log-victory { color: var(--accent-gold); font-weight: bold; }
+        .log-retreat { color: #e67e22; font-weight: bold; }
+
+        .area-select-container {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        select {
+            background-color: #2a2a2a;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            font-family: inherit;
+            border-radius: 3px;
+            cursor: pointer;
+            max-width: 100%;
+        }
+
+        button {
+            background-color: #2a2a2a;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            border-radius: 3px;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #3a3a3a;
+            border-color: #555;
+        }
+
+        button:disabled {
+            color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .btn-delete-save {
+            border-color: #c0392b; 
+            padding: 4px 8px; 
+            font-size: 0.75rem;
+            background-color: #1a1a1a;
+            color: #e74c3c;
+        }
+        .btn-delete-save:hover {
+            background-color: #c0392b !important;
+            color: #fff;
+        }
+
+        .hidden { display: none; }
+        .hotkey-hint { color: var(--text-muted); font-size: 0.8rem; text-align: right; white-space: nowrap; }
+
+        .floating-text {
+            position: absolute;
+            font-weight: bold;
+            font-size: 1.15rem;
+            pointer-events: none;
+            z-index: 10;
+            animation: floatUp 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            text-shadow: 1px 1px 3px #000, -1px -1px 3px #000;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            20% { transform: translateY(-12px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-55px) scale(0.85); }
+        }
+
+        .monster-death {
+            animation: fadekill .9s ease;
+            filter: brightness(2);
+        }
+
+        @keyframes fadekill {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: .2; transform: scale(1.35); }
+            100% { opacity: 0; transform: scale(1.6); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="header-row">
+        <h3>
+            <span id="p-name" class="editable-name" contenteditable="true" onblur="savePlayerName()" onkeydown="handleNameKey(event)">Κάθαρμα</span>: 
+            Επίπεδο <span id="p-level">1</span>
+        </h3>
+        <button class="btn-delete-save" onclick="resetGame()">Διαγραφή Save</button>
+    </div>
+    
+    <div>
+        <div class="xp-wrapper-area" id="xp-parent">
+            <div class="xp-bar-container">
+                <div id="p-xp-bar"></div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-row">
+                <div>Επίθεση: <span id="p-atk">10</span></div>
+            </div>
+            <div class="stat-row">
+                <div>Άμυνα: <span id="p-def">10</span></div>
+            </div>
+            <div class="stat-row">
+                <div>XP: <span id="p-xp">0</span> / <span id="p-next-xp">50</span></div>
+            </div>
+            <div class="stat-row" id="stat-gold-box">
+                <div>Χρυσός: <span id="p-gold" class="gold">0</span></div>
+            </div>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
+            <div class="stat-row" id="stat-atk-box">
+                <div>Όπλο: <span id="eq-weapon" style="color: #5dade2;">Γυμνά Χέρια</span> <span id="p-wep-bonus" class="log-system"></span></div>
+                <button id="btn-upgrade-weapon" class="inline-upgrade-btn" onclick="upgradeEquipment('weapon')">Up</button>
+            </div>
+            <div class="stat-row" id="stat-def-box">
+                <div>Πανοπλία: <span id="eq-armor" style="color: #f1948a;">Κουρέλια</span> <span id="p-arm-bonus" class="log-system"></span></div>
+                <button id="btn-upgrade-armor" class="inline-upgrade-btn" onclick="upgradeEquipment('armor')">Up</button>
+            </div>
+            <div class="stat-row">
+                <div>Μαγικό: <span id="eq-magic" style="color: #bb8fce;">Κανένα</span> <span id="p-mag-bonus" class="log-system"></span></div>
+            </div>
+        </div>
+
+        <div class="cooldown-grid">
+            <div>Ισχυρό πλήγμα:</div>
+            <div><div class="cd-wrapper"><div id="skill-cd-bar" class="cd-inner"></div></div></div>
+            <div class="hotkey-hint" id="skill-status-hint">[Num4]</div>
+
+            <div>Φίλτρο Υγείας:</div>
+            <div><div class="cd-wrapper"><div id="potion-cd-bar" class="cd-inner"></div></div></div>
+            <div class="hotkey-hint">[Num5]</div>
+            
+            <div id="context-hotkey-label">Έναρξη Κυνηγιού:</div>
+            <div></div>
+            <div class="hotkey-hint" style="color: #e67e22; font-weight: bold;">[Enter]</div>
+        </div>
+
+        <div class="bar-container" id="player-hp-parent">
+            <div id="player-hp-bar" class="bar"></div>
+            <div id="player-hp-text" class="bar-text">100 / 100 HP</div>
+        </div>
+    </div>
+
+    <div id="town-interface">
+        <h3>Τεκές του Ζαλαδούρα</h3>
+        <div class="area-select-container">
+            <label for="area-selector">Κυνηγότοπος:</label>
+            <select id="area-selector"></select>
+            <button onclick="enterCombatFromSelector()">Έναρξη Κυνηγιού</button>
+        </div>
+    </div>
+
+    <div id="combat-interface" class="hidden">
+        <h3>Μάχη: <span id="m-name">Τέρας</span> (Επίπεδο <span id="m-level">1</span>) <span id="retreat-status-text" style="color: #e67e22; font-size: 0.85rem; font-weight: normal; margin-left: 10px;"></span></h3>
+        
+        <div class="stats-grid" style="margin-bottom: 5px;">
+          <div class="stat-row">Επίθεση Εχθρού: <span id="m-atk" style="color: #f1948a; font-weight: bold;">0</span></div>
+            <div class="stat-row">Άμυνα Εχθρού: <span id="m-def" style="color: #5dade2; font-weight: bold;">0</span></div>
+        </div>
+
+        <div class="bar-container" id="monster-hp-parent">
+            <div id="monster-hp-bar" class="bar"></div>
+            <div id="monster-hp-text" class="bar-text">0 / 0 HP</div>
+        </div>
+    </div>
+
+    <main style="margin-top: 20px;">
+        <h3>Καταγραφή Δραστηριότητας</h3>
+        <div id="log"></div>
+    </main>
+</div>
+
+<script>
+    const monsterNames = [
+        "Γιγάντιος Αρουραίος", "Σπαθοσκώληκας", "Σκίταλος", "Κόβαλος", "Τραμπούκος",
+        "Βαθρακοδαίμονας", "Αγριάνθρωπος", "Μπασιμποζούκος", "Σκέλεθρο", "Σφήκα δολοφόνος",
+        "Τελώνι", "Δερβίσης", "Επικλητής", "Απελάτης", "Σμερδοκόβαλος",
+        "Γιγάντια αράχνη", "Κυνοκέφαλος", "Σαρκοσκώληκας", "Οφίονας", "Σμερδόλυκος",
+        "Ανδροβλάττη", "Νεκροφάγος", "Δρασκελιστής", "Μπούγαρος", "Γιγάντιο ερπετό",
+        "Γεκ", "Ποντικόμορφος", "Σφαγέας", "Καταχανάς", "Νεοσσός δράκου",
+        "Εξάχειρας", "Μάυρος μύωψ", "Σκουλκάτερο", "Δαιμονιστής", "Σκορπίονας",
+        "Καπρόμορφος", "Ογρίονας", "Ξωτικό", "Λυκάνθρωπος", "Νοσοφόρος",
+        "Σαλαχίτης", "Φένακας", "Σιδερένιο γκόλεμ", "Στυγικός ιππότης", "Μέδουσα",
+        "Σπηλαιολέοντας", "Μικρός δράκος", "Αραχναίος", "Στοιχειό", "Οξειδωτής",
+        "Αρκόγλαυκα", "Αραχνοθήρας", "Γιγάντιος κάπρος", "Ύδρα, 5 κεφάλια", "Πέτρινο άγαλμα",
+        "Λιθόρνιθα", "Μινώταυρος", "Γιγάντιος σκορπιός", "Νεκροκένταυρος", "Ψευδαίσθηση",
+        "Ύδρα, 6 κεφάλια", "Νεαρός δράκος", "Σμερδαλέος", "Μούμια", "Βασιλίσκος",
+        "Σικάριος", "Μαρτιχώρα", "Φάσμα", "Γιγάντιο μυρμήγκι", "Τυμβολίτης",
+        "Γρύπας", "Στρίγκλα", "Δράκαινα", "Γνοφιστής", "Ιφρίτης",
+        "Αβυσσαλέος", "Γίγαντας", "Σκαπανέας", "Εχιδναίος", "Χαλκόταυρος",
+        "Αιρεσιάρχης", "Βρυκόλακας", "Σάρκινο γκόλεμ", "Νεκρομάντης", "Δράκοντας",
+        "Κύκλωπας", "Νάγκα", "Στοιχειακός άρχοντας", "Χίμαιρα", "Πρεσβύτερος",
+        "Μελανή μάγισσα", "Κακοδαίμονας", "Πήλινο γκόλεμ", "Λευκός γίγαντας", "Κόκκινος γίγαντας",
+        "Τιτάνας", "Πορφυρός δράκος", "Γιγάντιο στοιχειό", "Αλίβαντας", "Αρχαίος δράκος"
+    ];
+
+const weaponNames = [
+"Σπασμένο Κλαδί",
+"Ακονισμένη Πέτρα",
+"Ξύλινη Ράβδος",
+"Σκουριασμένο Μαχαίρι",
+"Παλιό Δρεπάνι",
+"Μικρή Μάχαιρα",
+"Ξύλινο Ρόπαλο",
+"Κυνηγετικό Μαχαίρι",
+"Χοντρό Ραβδί",
+"Κυνηγετικό Εγχειρίδιο",
+
+"Χάλκινο Απελατίκι",
+"Χάλκινο Δόρυ",
+"Χάλκινη Λόγχη",
+"Σιδηρό Εγχειρίδιο",
+"Δόρυ Στρατιώτη",
+"Κοντό Ξίφος",
+"Ρόπαλο με Καρφιά",
+"Κυνηγετικό Τσεκούρι",
+"Πολεμικό Τσεκούρι",
+"Ορειχάλκινη Σπάθη",
+
+"Απελατίκι της Φρουράς",
+"Βαρύ Ρόπαλο",
+"Σιδερένια Λόγχη",
+"Σιδηρά Σπάθη",
+"Πολεμική Σφύρα",
+"Μακρύ Ξίφος",
+"Ατσαλένιο Εγχειρίδιο",
+"Σπαθί Φρουράς",
+"Τσεκούρι Μάχης",
+"Ξίφος των Δασών",
+
+"Ατσαλένια Σπάθη",
+"Βασιλικό Απελατίκι",
+"Ξίφος των Ιπποτών",
+"Μεγάλο Τσεκούρι",
+"Βαρύς Πέλεκυς",
+"Σπαθί Δύο Χεριών",
+"Ξίφος του Τάγματος",
+"Ασημένιο Απελατίκι",
+"Ασημένια Ρομφαία",
+"Ασημένια Λόγχη",
+
+"Μαγικό Εγχειρίδιο",
+"Κρυστάλλινη Λεπίδα",
+"Ακόντιο του Μυρμιδόνα",
+"Σπάθη των Ερήμων",
+"Τσεκούρι του Μινώταυρου",
+"Σφύρα του Ηφαιστείου",
+"Ρομφαία του Νεκρομάντη",
+"Λεπίδα του Ανέμου",
+"Μαγνητικό Ξίφος",
+"Ξίφος του Παλαντίν",
+
+"Λογχοπέλεκυς του Εκτελεστή",
+"Απελατίκι από Μιθρίλ",
+"Λεπίδα του Πάγου",
+"Φλεγόμενη Ρομφαία",
+"Ξίφος της Καταιγίδας",
+"Σκοτεινό Δορυδρέπανο",
+"Δαιμονικό Εγχειρίδιο",
+"Ξίφος του Δρακοκτόνου",
+"Λεπίδα του Ολέθρου",
+"Τσεκούρι του Χάους",
+
+"Σπάθη του Αβύσσου",
+"Φαλξ από Αδαμάντιο",
+"Ουράνιο Ξίφος",
+"Τζάγγρα του Φωτός",
+"Ξίφος των Αρχαίων",
+"Ρομφαία του Τιτάνα",
+"Σφυρί του Κεραυνού",
+"Σύνθετο Τόξο της Κρίσεως",
+"Λεπίδα της Σελήνης",
+"Δόρυ της Αυγής",
+
+"Ξίφος του Φοίνικα",
+"Αστρικός Πέλεκυς",
+"Κρυστάλλινη Ρομφαία",
+"Σκοτεινή Λεπίδα",
+"Λεπίδα των Ψυχών",
+"Δρακόδοντο",
+"Λόγχη του Αρχιστράτηγου",
+"Αιματοβαμμένο Τσεκούρι",
+"Ξίφος της Νύχτας",
+"Σπάθη των Σκιών",
+
+"Σφύρα των Βουνών",
+"Δόρυ της Καταστροφής",
+"Λεπίδα του Κενού",
+"Ρομφαία της Αιωνιότητας",
+"Ξίφος του Αρχάγγελου",
+"Αστρική Σπάθη",
+"Κοσμική Λεπίδα",
+"Δρακοκτόνος του Βορρά",
+"Σπαθί των Άστρων",
+"Δόρυ του Φωτός",
+
+"Σφύρα του Γίγαντα",
+"Ξίφος της Μοίρας",
+"Τσεκούρι του Κατακτητή",
+"Σπάθη του Πρωταθλητή",
+"Δόρυ του Ολέθρου",
+"Φαλξ του Κόσμου",
+"Ξίφος του Δημιουργού",
+"Θεϊκή Ρομφαία",
+"Αιώνια Λεπίδα",
+"Απόλυτο Ξίφος"
+];
+
+    const armorNames = [
+"Φθαρμένα Ρούχα",
+"Μπαλωμένος Χιτώνας",
+"Απλό Καββάδιο",
+"Τραχύ Δερμάτινο Γιλέκο",
+"Ενισχυμένο Δέρμα",
+"Παχύς Θώρακας Δέρματος",
+"Δερμάτινη Επένδυση",
+"Δερμάτινος Χιτώνας Κυνηγού",
+"Θώρακας από Φλοιό",
+"Σκληρυμένο Καββάδιο",
+
+"Κρίκος Στρατιώτη",
+"Χάλκινο Λωρίκιο",
+"Ελαφριά Ζάβα",
+"Χάλκινος Κλιβάνιος",
+"Ορειχάλκινο Λωρίκιο",
+"Σιδερένια Ζάβα",
+"Σιδερένιος Κλιβάνιος",
+"Πανοπλία της Φρουράς",
+"Βαρύ Σιδερένιο Λωρίκιο",
+"Ατσαλένια Ζάβα",
+
+"Ατσαλένιος Κλιβάνιος",
+"Πανοπλία Ιππότη",
+"Θώρακας του Τάγματος",
+"Βασιλικό Λωρίκιο",
+"Ενισχυμένο Ατσάλι",
+"Καββάδιο των Δασών",
+"Ασημένια Ζάβα",
+"Ασημένιος Κλιβάνιος",
+"Ασημένια Πανοπλία",
+"Θώρακας του Φρουρίου",
+
+"Μαγικός Χιτώνας",
+"Κρυστάλλινος Κλιβάνιος",
+"Λωρίκιο του Μυρμιδόνα",
+"Πανοπλία των Ερήμων",
+"Κλιβάνιος του Μαγμάτος",
+"Ζάβα από Μιθρίλ",
+"Θώρακας από Μιθρίλ",
+"Λωρίκιο του Παλαντίν",
+"Σκοτεινός Κλιβάνιος",
+"Δαιμονική Πανοπλία",
+
+"Θώρακας του Δράκου",
+"Ζάβα από Αδαμάντιο",
+"Ουράνιο Λωρίκιο",
+"Κλιβάνιος του Φωτός",
+"Θώρακας του Τιτάνα",
+"Αιθέρια Πανοπλία",
+"Πανοπλία του Αρχιφύλακα",
+"Θώρακας του Κεραυνού",
+"Πανοπλία της Αυγής",
+"Θώρακας του Φοίνικα",
+
+"Δρακόδερμη Ζάβα",
+"Κλιβάνιος των Αρχαίων",
+"Ουράνια Πανοπλία Μάχης",
+"Θώρακας του Βορρά",
+"Αστρικό Λωρίκιο",
+"Θώρακας του Ωκεανού",
+"Πανοπλία της Σελήνης",
+"Κλιβάνιος του Ήλιου",
+"Θώρακας του Κενού",
+"Δρακόδερμος Κλιβάνιος",
+
+"Αδαμάντινη Ζάβα Φρουράς",
+"Θώρακας της Κρίσεως",
+"Πανοπλία των Ψυχών",
+"Λωρίκιο του Φωτός",
+"Σκοτεινή Πανοπλία",
+"Κλιβάνιος του Παλαιού Βασιλιά",
+"Αστρική Ζάβα",
+"Θώρακας της Αιωνιότητας",
+"Πανοπλία του Αρχάγγελου",
+"Δρακόδερμη Πανοπλία Μάχης",
+
+"Κλιβάνιος του Χάους",
+"Πανοπλία των Τιτάνων",
+"Ουράνιος Θώρακας",
+"Αιθερικό Λωρίκιο",
+"Κοσμική Πανοπλία",
+"Θώρακας των Άστρων",
+"Λωρίκιο του Δημιουργού",
+"Πανοπλία του Ολύμπου",
+"Θώρακας της Μοίρας",
+"Θεϊκή Ζάβα",
+
+"Απόλυτος Κλιβάνιος",
+"Θώρακας της Αθανασίας",
+"Πανοπλία του Κόσμου",
+"Λωρίκιο της Αποκάλυψης",
+"Αιώνια Πανοπλία",
+"Θώρακας του Πεπρωμένου",
+"Παντοδύναμος Κλιβάνιος",
+"Θεόσταλτη Πανοπλία",
+"Θώρακας του Απείρου",
+"Κοσμογενής Ζάβα",
+
+"Πανοπλία της Δημιουργίας",
+"Θώρακας του Πρωτογέννητου",
+"Θώρακας των Ουρανών",
+"Πανοπλία της Αιώνιας Φλόγας",
+"Θώρακας της Κοσμικής Αυγής",
+"Λωρίκιο των Θεών",
+"Θώρακας του Παντοκράτορα",
+"Αιώνιος Κλιβάνιος",
+"Θεϊκή Πανοπλία των Άστρων",
+"Απόλυτη Πανοπλία"
+];
+
+    const magicNames = [
+"Ξύλινο Φυλακτό",
+"Πέτρινο Μενταγιόν",
+"Κόκκαλο Αρουραίου",
+"Φυλακτό από Κοχύλι",
+"Χάλκινο Δαχτυλίδι",
+"Μικρό Φυλακτό Τύχης",
+"Σιδερένιο Μενταγιόν",
+"Κεχριμπάρι",
+"Μάτι Φιδιού",
+"Αχάτης",
+
+"Ορειχάλκινο Φυλακτό",
+"Δαχτυλίδι Υγείας",
+"Μενταγιόν Άμυνας",
+"Φυλακτό Ισχύος",
+"Μαγνητίτης",
+"Ασημένιο Δαχτυλίδι",
+"Τοπάζι",
+"Οπάλιος",
+"Αμέθυστος",
+"Νεφρίτης",
+
+"Χρυσό Δαχτυλίδι",
+"Ρουμπίνι",
+"Ζαφείρι",
+"Σμαράγδι",
+"Φυλακτό του Μάγου",
+"Δαχτυλίδι από Μιθρίλ",
+"Διαμάντι",
+"Μάτι του Δράκου",
+"Φυλακτό του Αβύσσου",
+"Ουράνιο Κειμήλιο",
+
+"Κρύσταλλος Μάνα",
+"Σφαίρα του Μάγου",
+"Φυλακτό της Φλόγας",
+"Δαχτυλίδι του Πάγου",
+"Μενταγιόν των Ανέμων",
+"Λίθος του Κεραυνού",
+"Αστέρι της Νύχτας",
+"Κρυστάλλινο Φυλακτό",
+"Ουράνιο Δαχτυλίδι",
+"Αιθερικό Μενταγιόν",
+
+"Μάτι του Φοίνικα",
+"Δάκρυ της Σελήνης",
+"Καρδιά του Δράκου",
+"Σφραγίδα των Αρχαίων",
+"Κειμήλιο του Μάγου",
+"Δαχτυλίδι της Σοφίας",
+"Φυλακτό της Ζωής",
+"Μενταγιόν του Κυνηγού",
+"Κρύσταλλος της Αυγής",
+"Σφαίρα της Σκιάς",
+
+"Δαχτυλίδι του Κενού",
+"Φυλακτό των Ψυχών",
+"Οπάλιο του Χάους",
+"Αστέρας του Βορρά",
+"Κρυστάλλινη Σφαίρα",
+"Μενταγιόν της Αυγής",
+"Δαχτυλίδι του Φωτός",
+"Φυλακτό της Σκιάς",
+"Αιθέριο Κειμήλιο",
+"Σφαίρα της Καταιγίδας",
+
+"Δάκρυ του Ωκεανού",
+"Μάτι του Τιτάνα",
+"Σφραγίδα του Αρχάγγελου",
+"Καρδιά του Ήλιου",
+"Αστρικό Φυλακτό",
+"Δαχτυλίδι της Αιωνιότητας",
+"Κειμήλιο των Άστρων",
+"Σφαίρα του Σύμπαντος",
+"Φυλακτό της Μοίρας",
+"Κρυστάλλινη Καρδιά",
+
+"Σφραγίδα της Δημιουργίας",
+"Μάτι του Κόσμου",
+"Θεϊκό Δαχτυλίδι",
+"Κοσμικό Μενταγιόν",
+"Αιώνιο Φυλακτό",
+"Λίθος της Αποκάλυψης",
+"Καρδιά του Απείρου",
+"Δαχτυλίδι του Δημιουργού",
+"Σφραγίδα της Αθανασίας",
+"Ουράνια Σφαίρα",
+
+"Φυλακτό του Πεπρωμένου",
+"Μενταγιόν του Ολύμπου",
+"Κοσμογενής Κρύσταλλος",
+"Κειμήλιο του Πρωτογέννητου",
+"Απόλυτο Φυλακτό",
+"Σφαίρα της Παντοδυναμίας",
+"Δάκρυ των Θεών",
+"Μάτι της Αλήθειας",
+"Σφραγίδα των Ουρανών",
+"Κρυστάλλινο Άστρο",
+
+"Φυλακτό της Αιώνιας Φλόγας",
+"Δαχτυλίδι του Παντοκράτορα",
+"Καρδιά της Δημιουργίας",
+"Μενταγιόν της Αιωνιότητας",
+"Κειμήλιο του Χρόνου",
+"Σφαίρα του Κενού",
+"Λίθος των Κόσμων",
+"Θεϊκή Σφραγίδα",
+"Αιώνιο Κειμήλιο",
+"Απόλυτο Κειμήλιο"
+];
+
+    function getMonsterName(lvl) { return monsterNames[Math.min(lvl - 1, monsterNames.length - 1)]; }
+    function getItemName(type, power) {
+        if (power === 0) return type === 'weapon' ? "Γυμνά Χέρια" : (type === 'armor' ? "Κουρέλια" : "Κανένα");
+        let arr = type === 'weapon' ? weaponNames : (type === 'armor' ? armorNames : magicNames);
+        let idx = Math.min(power - 1, arr.length - 1);
+        return `${arr[idx]} `;
+    }
+
+    let player = {
+        name: "Κάθαρμα",
+        level: 1,
+        baseAtk: 10,
+        baseDef: 10,
+        hp: 100, 
+        xp: 0,
+        nextXp: 50,
+        gold: 9999999,
+        weapon: { name: "Σπασμένο Κλαδί", power: 1 },
+        armor: { name: "Φθαρμένα Ρούχα", power: 1 },
+        magic: { name: "Ξύλινο Φυλακτό", power: 1 },
+        maxUnlockedLevel: 100
+    };
+
+    let monster = null;
+    let combatInterval = null;
+    let townRegenInterval = null; 
+    let inCombat = false;
+    let currentSelectedLevel = 1;
+    let isAttemptingRetreat = false; 
+    let isSkillQueued = false; 
+
+    const CD_DURATION = 10000;
+    
+    let potionCooldownActive = false;
+    let potionCdStart = 0;
+    let potionCdTimer = null;
+
+    let skillCooldownActive = false;
+    let skillCdStart = 0;
+    let skillCdTimer = null;
+
+   // function getPlayerAtk() { return player.baseAtk + (player.baseAtk * player.weapon.power * 0.1) + (player.baseAtk * player.magic.power * 0.1) ; }
+    function getPlayerAtk() { return  + ((10 + player.level * 2) * (1 + (player.weapon.power + player.magic.power) * 0.1)); }
+
+//                              (10 + lvl * 2) * (1 + lvl * 0.2)
+ // function getPlayerDef() { return player.baseDef + (player.baseDef * player.armor.power * 0.1) + (player.baseDef * player.magic.power * 0.1); }
+   function getPlayerDef() { return  + ((10 + player.level * 2) * (1 + (player.armor.power + player.magic.power) * 0.1)); }
+
+    function getPlayerMaxHp() { return Math.floor(player.level * 120); }
+    
+   // XP REQ FORULA - old and harder 
+    function calculateNextXpRequirement(lvl) { return Math.ceil(((5 * Math.pow(lvl, 3)) + (50 * lvl) + 45) / 2); }
+  //function calculateNextXpRequirement(lvl) { return Math.ceil(25 * Math.pow(1.0664, lvl - 1)); }
+  // function calculateNextXpRequirement(lvl) { return Math.ceil((((5 * Math.pow(lvl, 3)) + (50 * lvl) + 45) / 2) * (1 + (9 * (lvl - 1) / 99))); }
+    function getUpgradeCost(currentPower) { return (currentPower + 1) * 50 + 100; }
+    
+    function getMonsterXpReward(monsterLvl) { return Math.ceil(calculateNextXpRequirement(monsterLvl) * 1 / (monsterLvl + 4)); }
+
+    function createFloatingText(parentId, text, color) {
+        const parent = document.getElementById(parentId);
+        if (!parent) return;
+        
+        const fText = document.createElement('div');
+        fText.className = 'floating-text';
+        fText.innerText = text;
+        fText.style.color = color;
+        
+        const offset = Math.floor(Math.random() * 40) - 20; 
+        fText.style.left = `calc(50% + ${offset}px)`;
+        fText.style.top = `0px`;
+        
+        parent.appendChild(fText);
+        setTimeout(() => { fText.remove(); }, 2200);
+    }
+
+    function loadGame() {
+        const savedData = localStorage.getItem('minimal_rpg_save');
+        if (savedData) {
+            try {
+                player = { ...player, ...JSON.parse(savedData) };
+                if (!player.name) player.name = "Κάθαρμα";
+                player.maxUnlockedLevel = 100;
+
+                player.nextXp = calculateNextXpRequirement(player.level);
+                player.weapon.name = getItemName('weapon', player.weapon.power);
+                player.armor.name = getItemName('armor', player.armor.power);
+                player.magic.name = getItemName('magic', player.magic.power);
+                logMessage("Η πρόοδός σας φορτώθηκε αυτόματα.", 'system');
+            } catch (e) {
+                logMessage("Σφάλμα κατά τη φόρτωση του save.", 'system');
+            }
+        }
+    }
+
+    function saveGame() { localStorage.setItem('minimal_rpg_save', JSON.stringify(player)); }
+    function resetGame() { if (confirm("Διαγραφή χαρακτήρα;")) { localStorage.removeItem('minimal_rpg_save'); location.reload(); } }
+
+    function savePlayerName() {
+        const nameEl = document.getElementById('p-name');
+        let newName = nameEl.innerText.trim();
+        if (newName === "") newName = "Κάθαρμα";
+        player.name = newName;
+        nameEl.innerText = newName;
+        saveGame();
+    }
+
+    function handleNameKey(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            document.getElementById('p-name').blur();
+        }
+    }
+
+    loadGame();
+    updateAreaSelector();
+    updateUI();
+    startTownRegen(); 
+    updateCooldownBars(); 
+
+    function updateAreaSelector() {
+        const selector = document.getElementById('area-selector');
+        if (!selector) return;
+
+        if (selector.options.length === 100) return;
+
+        const currentSelected = selector.value;
+        selector.innerHTML = '';
+
+        for (let i = 1; i <= 100; i++) {
+            let opt = document.createElement('option');
+            opt.value = i;
+            opt.innerText = `[${i}] ${getMonsterName(i)}`;
+            selector.appendChild(opt);
+        }
+
+        if (currentSelected && parseInt(currentSelected) <= 100) {
+            selector.value = currentSelected;
+        } else {
+            selector.value = 1;
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('p-name').innerText = player.name;
+        document.getElementById('p-level').innerText = player.level;
+        document.getElementById('p-atk').innerText = getPlayerAtk().toFixed(0);
+        document.getElementById('p-wep-bonus').innerText = player.weapon.power > 0 ? `(T${player.weapon.power})` : '';
+        document.getElementById('p-def').innerText = getPlayerDef().toFixed(0);
+        document.getElementById('p-arm-bonus').innerText = player.armor.power > 0 ? `(T${player.armor.power})` : '';
+        document.getElementById('p-xp').innerText = player.xp;
+        document.getElementById('p-next-xp').innerText = player.nextXp;
+        document.getElementById('p-gold').innerText = player.gold;
+        
+        document.getElementById('eq-weapon').innerText = player.weapon.name;
+        document.getElementById('eq-armor').innerText = player.armor.name;
+        document.getElementById('eq-magic').innerText = player.magic.name;
+        document.getElementById('p-mag-bonus').innerText = player.magic.power > 0 ? `(T${player.magic.power})` : '';
+
+        let wCost = getUpgradeCost(player.weapon.power);
+        let aCost = getUpgradeCost(player.armor.power);
+        
+        const btnWep = document.getElementById('btn-upgrade-weapon');
+        const btnArm = document.getElementById('btn-upgrade-armor');
+        
+        btnWep.innerText = `Up (${wCost}g)`;
+        btnArm.innerText = `Up (${aCost}g)`;
+
+        btnWep.disabled = inCombat || player.gold < wCost;
+        btnArm.disabled = inCombat || player.gold < aCost;
+
+        const xpPct = Math.max(0, Math.min(100, (player.xp / player.nextXp) * 100));
+        document.getElementById('p-xp-bar').style.width = xpPct + '%';
+
+        const maxHp = getPlayerMaxHp();
+        const pPct = Math.max(0, (player.hp / maxHp) * 100);
+        document.getElementById('player-hp-bar').style.width = pPct + '%';
+        document.getElementById('player-hp-text').innerText = `${Math.ceil(player.hp)} / ${maxHp} HP`;
+
+        if (monster) {
+            let displayedName = monster.name;
+            if (monster.variant === 'weapon') displayedName = `<Άγριο> ${monster.name}`;
+            if (monster.variant === 'armor') displayedName = `<Κρατερό> ${monster.name}`;
+            if (monster.variant === 'magic') displayedName = `<Τρομερό> ${monster.name}`;
+
+            document.getElementById('m-name').innerText = displayedName;
+            document.getElementById('m-level').innerText = monster.level;
+            document.getElementById('m-atk').innerText = monster.atk.toFixed(0);
+            document.getElementById('m-def').innerText = monster.def.toFixed(0);
+
+            const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
+            document.getElementById('monster-hp-bar').style.width = mPct + '%';
+            document.getElementById('monster-hp-text').innerText = `${Math.ceil(monster.hp)} / ${monster.maxHp} HP`;
+        } else {
+            document.getElementById('m-name').innerText = "Αναμονή...";
+            document.getElementById('monster-hp-bar').style.width = '0%';
+            document.getElementById('monster-hp-text').innerText = '-';
+        }
+        
+        const skillHint = document.getElementById('skill-status-hint');
+        if (isSkillQueued) {
+            skillHint.innerText = "[Επόμενος Γύρος]";
+            skillHint.style.color = "var(--skill-blue)";
+        } else {
+            skillHint.innerText = "[Num4]";
+            skillHint.style.color = "var(--text-muted)";
+        }
+
+        if (isAttemptingRetreat) {
+            document.getElementById('retreat-status-text').innerText = "(Προετοιμασία Φυγής...)";
+        } else {
+            document.getElementById('retreat-status-text').innerText = "";
+        }
+
+        const contextLabel = document.getElementById('context-hotkey-label');
+        if (inCombat) {
+            contextLabel.innerText = "Υποχώρηση:";
+        } else {
+            contextLabel.innerText = "Έναρξη Κυνηγιού:";
+        }
+
+        updateAreaSelector();
+    }
+
+    function logMessage(text, type = 'system') {
+        const logDiv = document.getElementById('log');
+        const entry = document.createElement('div');
+        entry.className = `log-entry log-${type}`;
+        entry.innerText = text;
+        logDiv.appendChild(entry);
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function triggerSmoothTransition(colorHex) {
+        const container = document.getElementById('game-container');
+        container.style.transition = 'none';
+        container.style.backgroundColor = colorHex;
+        void container.offsetHeight;
+        container.style.transition = 'background-color 3s ease';
+        container.style.backgroundColor = 'var(--panel-bg)';
+    }
+
+    function startTownRegen() {
+        if (townRegenInterval) clearInterval(townRegenInterval);
+        townRegenInterval = setInterval(() => {
+            const maxHp = getPlayerMaxHp();
+            if (!inCombat && player.hp < maxHp) {
+                let regenAmount = Math.round(maxHp * 0.05);
+                player.hp = Math.min(maxHp, player.hp + regenAmount);
+                updateUI();
+            }
+        }, 2000);
+    }
+
+    function stopTownRegen() { if (townRegenInterval) { clearInterval(townRegenInterval); townRegenInterval = null; } }
+
+    function updateCooldownBars() {
+        const now = Date.now();
+
+        const potBar = document.getElementById('potion-cd-bar');
+        if (potionCooldownActive) {
+            let elapsed = now - potionCdStart;
+            let pct = Math.min(100, (elapsed / CD_DURATION) * 100);
+            potBar.style.width = pct + '%';
+            potBar.classList.add('active');
+        } else {
+            potBar.style.width = '100%';
+            potBar.classList.remove('active');
+        }
+
+        const skillBar = document.getElementById('skill-cd-bar');
+        if (skillCooldownActive) {
+            let elapsed = now - skillCdStart;
+            let pct = Math.min(100, (elapsed / CD_DURATION) * 100);
+            skillBar.style.width = pct + '%';
+            skillBar.classList.add('active');
+        } else {
+            skillBar.style.width = '100%';
+            skillBar.classList.remove('active');
+        }
+    }
+
+    function resetCooldowns() {
+        if (potionCdTimer) clearTimeout(potionCdTimer);
+        if (skillCdTimer) clearTimeout(skillCdTimer);
+        potionCooldownActive = false;
+        skillCooldownActive = false;
+        isSkillQueued = false;
+        updateCooldownBars();
+        updateUI();
+    }
+
+    function upgradeEquipment(type) {
+        if (inCombat) return;
+        let currentPower = player[type].power;
+        let cost = getUpgradeCost(currentPower);
+        if (player.gold >= cost) {
+            player.gold -= cost;
+            player[type].power++;
+            player[type].name = getItemName(type, player[type].power);
+            logMessage(`Επιτυχής αναβάθμιση! Αποκτήσατε το αντικείμενο: ${player[type].name}.`, 'victory');
+            
+            let targetBox = type === 'weapon' ? 'stat-atk-box' : 'stat-def-box';
+            createFloatingText(targetBox, "+1 Tier", "var(--accent-gold)");
+            createFloatingText('stat-gold-box', `-${cost}g`, "#e74c3c");
+
+            saveGame();
+            updateUI();
+        }
+    }
+
+    function enterCombatFromSelector() {
+        document.getElementById('p-name').blur();
+        stopTownRegen(); 
+        currentSelectedLevel = parseInt(document.getElementById('area-selector').value);
+        
+        inCombat = true;
+        isAttemptingRetreat = false;
+        isSkillQueued = false;
+        
+        spawnMonster();
+        
+        document.getElementById('town-interface').classList.add('hidden');
+        document.getElementById('combat-interface').classList.remove('hidden');
+        
+        updateUI();
+        
+        if (combatInterval) clearInterval(combatInterval);
+        combatInterval = setInterval(executeCombatRound, 2000);
+    }
+
+    function spawnMonster() {
+        let lvl = currentSelectedLevel;
+        let baseAtk = (10 + lvl * 2) * (1 + lvl * 0.1);
+        let baseDef = (10 + lvl * 2) * (1 + lvl * 0.1);
+        let baseHp = (lvl * 120)
+        let variant = 'normal';
+
+        if (Math.random() < 0.10) {
+            let roll = Math.random();
+            if (roll < 0.33) { variant = 'weapon'; baseAtk = baseAtk * 2; }
+            else if (roll < 0.66) { variant = 'armor'; baseDef = baseDef * 2; }
+            else { 
+                variant = 'magic'; 
+                baseHp = baseHp * 2;
+            }
+        }
+
+        monster = {
+            name: getMonsterName(lvl),
+            level: lvl,
+            atk: baseAtk,
+            def: baseDef,
+            hp: baseHp,      
+            maxHp: baseHp,   
+            variant: variant
+        };
+
+        let prefix = "";
+        if (variant === 'weapon') prefix = "<Άγριο> ";
+        if (variant === 'armor') prefix = "<Κρατερό> ";
+        if (variant === 'magic') prefix = "<Τρομερό> ";
+
+        logMessage(`Εμφανίστηκε: ${prefix}${monster.name} (Lvl ${monster.level})!`, 'system');
+    }
+
+    function toggleRetreat() {
+        if (!inCombat) return;
+        isAttemptingRetreat = !isAttemptingRetreat;
+        if (isAttemptingRetreat) {
+            logMessage("Προετοιμασία διαφυγής! Μάχεστε κανονικά και εκτελείται ζαριά φυγής (1 στα 3) ταυτόχρονα με την ανταλλαγή πληγμάτων.", 'retreat');
+        } else {
+            logMessage("Η προσπάθεια υποχώρησης ακυρώθηκε.", 'system');
+        }
+        updateUI();
+    }
+
+    function queueSpecialAttack() {
+        if (!inCombat || !monster || skillCooldownActive || isSkillQueued) return;
+        isSkillQueued = true;
+        logMessage("[QUEUE] Το Ισχυρό Πλήγμα προετοιμάστηκε για τον επόμενο γύρο.", 'system');
+        updateUI();
+    }
+
+    function executeCombatRound() {
+        if (!inCombat) return;
+
+        if (!monster || monster.hp <= 0) {
+            spawnMonster();
+            updateUI();
+        }
+
+        let playerDamageCalculated = 0;
+        let monsterDamageCalculated = 0;
+        let retreatSuccessful = false;
+
+        let playerActionLog = "";
+        let monsterActionLog = "";
+
+        if (isAttemptingRetreat) {
+            if (Math.random() < (2/5)) { retreatSuccessful = true; }
+            logMessage("Επιχειρείτε να διαφύγετε...", 'retreat');
+            playerDamageCalculated = 0;
+            isSkillQueued = false;
+        } 
+        else if (isSkillQueued) {
+            let d6 = Math.floor(Math.random() * 6) + 1;
+            let baseDmg = (getPlayerAtk() / monster.def) * d6 * 5 * player.level;
+            playerDamageCalculated = Math.max(1, Math.round(baseDmg * 3));
+            playerActionLog = `[SKILL] Ισχυρό Πλήγμα! Καταφέρατε πλήγμα x3 για ${playerDamageCalculated} ζημιά.`;
+            
+            isSkillQueued = false;
+            skillCooldownActive = true;
+            skillCdStart = Date.now();
+            skillCdTimer = setTimeout(() => { skillCooldownActive = false; updateUI(); }, CD_DURATION);
+        } else {
+            if (Math.random() < (1/6)) {
+                playerActionLog = "Αποτύχατε να χτυπήσετε!";
+                playerDamageCalculated = 0;
+            } else {
+                let d6 = Math.floor(Math.random() * 6) + 1;
+                let dmg = (getPlayerAtk() / monster.def) * d6 * 5 * player.level;
+                playerDamageCalculated = Math.max(1, Math.round(dmg));
+                playerActionLog = `Πλήξατε τον ${monster.name} για ${playerDamageCalculated} ζημιά.`;
+            }
+        }
+
+        if (Math.random() < (1/6)) {
+            monsterActionLog = `Ο ${monster.name} αστόχησε.`;
+            monsterDamageCalculated = 0;
+        } else {
+            let d6 = Math.floor(Math.random() * 6) + 1;
+            let dmg = (monster.atk / getPlayerDef()) * d6 * 5 * monster.level;
+            monsterDamageCalculated = Math.max(1, Math.round(dmg));
+            monsterActionLog = `Δεχτήκατε ${monsterDamageCalculated} ζημιά από τον ${monster.name}.`;
+        }
+
+        if (playerActionLog) logMessage(playerActionLog, 'player');
+        if (monsterActionLog) logMessage(monsterActionLog, 'monster');
+
+        if (playerDamageCalculated > 0) {
+            monster.hp = Math.max(0, monster.hp - playerDamageCalculated);
+            createFloatingText('monster-hp-parent', `-${playerDamageCalculated}`, "var(--hp-monster)");
+        }
+        if (monsterDamageCalculated > 0) {
+            player.hp = Math.max(0, player.hp - monsterDamageCalculated);
+            createFloatingText('player-hp-parent', `-${monsterDamageCalculated}`, "var(--hp-monster)");
+        }
+
+        updateUI();
+
+        if (player.hp <= 0 && monster.hp <= 0) {
+            logMessage("Αμοιβαία Εξόντωση! Εσείς και το τέρας πέσατε ταυτόχρονα.", 'system');
+            endCombat('mutual_death');
+            return;
+        }
+        if (player.hp <= 0) { endCombat('defeat'); return; }
+        if (monster.hp <= 0) { endCombat('victory'); return; }
+
+        if (isAttemptingRetreat) {
+            if (retreatSuccessful) {
+                logMessage("Επιτυχής υποχώρηση στην πόλη.", 'retreat');
+                endCombat('retreat');
+                return;
+            } else {
+                logMessage("Η προσπάθεια διαφυγής απέτυχε! Η μάχη συνεχίζεται.", 'retreat');
+            }
+        }
+    }
+
+    function handleEquipmentDrop(type, rolledTier) {
+        let itemName = getItemName(type, rolledTier);
+        logMessage(`[DROP] Ο εχθρός άφησε πίσω του: ${itemName}!`, 'victory');
+
+        if (rolledTier > player[type].power) {
+            player[type] = { name: itemName, power: rolledTier };
+            logMessage(`[EQUIP] Εξοπλιστική αναβάθμιση! Φέρετε πλέον το αντικείμενο αυτό.`, 'victory');
+            let targetBox = type === 'weapon' ? 'stat-atk-box' : 'stat-def-box';
+            if (type !== 'magic') {
+                createFloatingText(targetBox, "NEW EQUIP!", "var(--accent-gold)");
+            } else {
+                createFloatingText('player-hp-parent', "MAX HP UP!", "var(--hp-player)");
+            }
+        } else {
+            let goldReward = rolledTier * 5;
+            player.gold += goldReward;
+            logMessage(`Το αντικείμενο ήταν κατώτερο του εξοπλισμού σας και εκποιήθηκε αυτόματα για ${goldReward} χρυσά.`, 'system');
+            createFloatingText('stat-gold-box', `+${goldReward}g`, "var(--accent-gold)");
+        }
+    }
+
+   function endCombat(outcome) {
+        isAttemptingRetreat = false;
+        isSkillQueued = false;
+
+        if (outcome === 'victory' || outcome === 'mutual_death') {
+            document.getElementById('monster-hp-bar').classList.add('monster-death');
+            setTimeout(() => document.getElementById('monster-hp-bar').classList.remove('monster-death'), 500);
+            logMessage(`Ο ${monster.name} εξοντώθηκε.`, 'victory');
+
+            // Υπολογισμός χρυσού με bonus 5x για τα μη-normal τέρατα
+            let d6Gold = Math.floor(Math.random() * 6) + 1;
+            let goldMultiplier = (monster.variant !== 'normal') ? 3 : 1;
+            let gainedGold = d6Gold * monster.level * 2 * goldMultiplier;
+            
+            player.gold += gainedGold;
+            logMessage(`Βρέθηκαν ${gainedGold} χρυσά.`, 'victory');
+            createFloatingText('stat-gold-box', `+${gainedGold}g`, "var(--accent-gold)");
+
+            let gainedXp = getMonsterXpReward(monster.level);
+            player.xp += gainedXp;
+            logMessage(`[+${gainedXp} XP] Κερδίσατε πόντους εμπειρίας από την εξόντωση του εχθρού.`, 'victory');
+            createFloatingText('xp-parent', `+${gainedXp} XP`, "var(--accent-gold)");
+
+            let weaponChance = 0.025;
+            let armorChance  = 0.025;
+            // Αυξημένη πιθανότητα για μαγικά αντικείμενα στα "Τρομερά" (magic) τέρατα
+            let magicChance  = (monster.variant === 'magic') ? 0.025 * 3 : 0.025;
+            
+            let rolledPower = monster.level;
+            let droppedSomething = false;
+
+            if (Math.random() < weaponChance) { handleEquipmentDrop('weapon', rolledPower); droppedSomething = true; }
+            if (Math.random() < armorChance) { handleEquipmentDrop('armor', rolledPower); droppedSomething = true; }
+            if (Math.random() < magicChance) { handleEquipmentDrop('magic', rolledPower); droppedSomething = true; }
+
+            if (droppedSomething) { triggerSmoothTransition('#3e3200'); }
+
+            if (player.xp >= player.nextXp) {
+                player.level++;
+                player.xp -= player.nextXp;
+                player.nextXp = calculateNextXpRequirement(player.level);
+                player.baseAtk += 0;
+                player.baseDef += 0;
+                player.hp = getPlayerMaxHp(); 
+                logMessage(`*** ΑΝΕΒΑΣΜΑ ΕΠΙΠΕΔΟΥ: Level ${player.level}! ***`, 'victory');
+                triggerSmoothTransition('#113f11');
+            }
+
+            saveGame();
+            if (outcome === 'victory') { monster = null; spawnMonster(); }
+            updateUI();
+
+            if (outcome === 'mutual_death') {
+                if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+                inCombat = false;
+                applyDefeatPenalties();
+            }
+        } else {
+            if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+            inCombat = false;
+
+            if (outcome === 'defeat') {
+                applyDefeatPenalties();
+            } else if (outcome === 'retreat') {
+                startTownRegen();
+                saveGame();
+                document.getElementById('town-interface').classList.remove('hidden');
+                document.getElementById('combat-interface').classList.add('hidden');
+                updateUI();
+            }
+        }
+    }
+
+    function applyDefeatPenalties() {
+        let xpLoss = Math.floor(player.xp * 0.20);
+        let goldLoss = Math.floor(player.gold * 0.20);
+        
+        player.xp = Math.max(0, player.xp - xpLoss);
+        player.gold = Math.max(0, player.gold - goldLoss);
+        player.hp = 1; 
+        
+        logMessage(`ΠΕΣΑΤΕ ΣΤΗ ΜΑΧΗ! Μεταφερθήκατε στην πόλη με 1 HP. Απώλεια: -${goldLoss} χρυσά και -${xpLoss} XP.`, 'monster');
+        triggerSmoothTransition('#4a1515');
+
+        resetCooldowns();
+        startTownRegen();
+
+        saveGame();
+        document.getElementById('town-interface').classList.remove('hidden');
+        document.getElementById('combat-interface').classList.add('hidden');
+        updateUI();
+    }
+
+    function usePotion() {
+        if (potionCooldownActive) return;
+        
+        let maxHp = getPlayerMaxHp();
+        if (player.hp >= maxHp) {
+            logMessage("Η υγεία σας είναι ήδη πλήρης.", 'system');
+            return;
+        }
+
+        let pct = Math.floor(Math.random() * 41) + 10; 
+        let heal = Math.round(maxHp * (pct / 100));
+        player.hp = Math.min(maxHp, player.hp + heal);
+        logMessage(`Αναπληρώσατε +${heal} HP μέσω Φίλτρου (Αναπλήρωση: ${pct}%).`, 'player');
+
+        createFloatingText('player-hp-parent', `+${heal} HP`, "var(--hp-player)");
+
+        potionCooldownActive = true;
+        potionCdStart = Date.now();
+        potionCdTimer = setTimeout(() => { potionCooldownActive = false; updateUI(); }, CD_DURATION);
+
+        saveGame();
+        updateUI();
+    }
+
+    setInterval(updateCooldownBars, 100);
+
+    window.addEventListener('keydown', function(event) {
+        if (document.activeElement === document.getElementById('p-name')) return;
+
+        if (event.code === 'NumpadEnter' || event.key === 'Enter') {
+            event.preventDefault(); 
+            if (inCombat) {
+                toggleRetreat();
+            } else {
+                enterCombatFromSelector();
+            }
+            return;
+        }
+        if (event.code === 'Numpad4' || event.key === '4') {
+            event.preventDefault();
+            queueSpecialAttack();
+            return;
+        }
+        if (event.code === 'Numpad5' || event.key === '5') {
+            event.preventDefault();
+            usePotion();
+            return;
+        }
+    });
+</script>
+
+</body>
+</html>
