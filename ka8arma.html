@@ -793,7 +793,7 @@ const weaponNames = [
         hp: 100, 
         xp: 0,
         nextXp: 50,
-        gold: 10000,
+        gold: 0,
         weapon: { name: "Σπασμένο Κλαδί", power: 1 },
         armor: { name: "Φθαρμένα Ρούχα", power: 1 },
         magic: { name: "Ξύλινο Φυλακτό", power: 1 },
@@ -831,8 +831,8 @@ const weaponNames = [
     function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 1.8)); }
   //function calculateNextXpRequirement(lvl) { return Math.ceil(25 * Math.pow(1.0664, lvl - 1)); }
   // function calculateNextXpRequirement(lvl) { return Math.ceil((((5 * Math.pow(lvl, 3)) + (50 * lvl) + 45) / 2) * (1 + (9 * (lvl - 1) / 99))); }
-    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 100 + 0); }
-    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
+    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.5)) + 1) * 150 + 0); }
+    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.5)) + 1) * 75 + 0); }
     
     function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 1.5)); }
 
@@ -1304,7 +1304,7 @@ setInterval(updateRates,1000);
             // Υπολογισμός χρυσού με bonus για τα μη-normal τέρατα
             let d6Gold = Math.floor(Math.random() * 6) + 1;
             let goldMultiplier = (monster.variant !== 'normal') ? 3 : 1;
-            let gainedGold = Math.floor(d6Gold * (monster.level ** 1.3) * goldMultiplier);
+            let gainedGold = Math.floor(d6Gold * (monster.level ** 1.5) * goldMultiplier);
             
             player.gold += gainedGold;
             sessionGold += gainedGold;
