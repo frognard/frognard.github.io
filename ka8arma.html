@@ -810,7 +810,7 @@ const weaponNames = [
   // function calculateNextXpRequirement(lvl) { return Math.ceil((((5 * Math.pow(lvl, 3)) + (50 * lvl) + 45) / 2) * (1 + (9 * (lvl - 1) / 99))); }
     function getUpgradeCost(currentPower) { return (currentPower + 1) * 50 + 100; }
     
-    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(lvl, 1.25)); }
+    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 1.25)); }
 
     function createFloatingText(parentId, text, color) {
         const parent = document.getElementById(parentId);
@@ -1000,7 +1000,7 @@ const weaponNames = [
         townRegenInterval = setInterval(() => {
             const maxHp = getPlayerMaxHp();
             if (!inCombat && player.hp < maxHp) {
-                let regenAmount = Math.round(maxHp * 0.05);
+                let regenAmount = Math.round(maxHp * 0.1);
                 player.hp = Math.min(maxHp, player.hp + regenAmount);
                 updateUI();
             }
