@@ -828,12 +828,12 @@ const weaponNames = [
     function getPlayerMaxHp() { return Math.floor(player.level * 120); }
     
    // XP REQ FORMULA - old and harder AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 1.5)); }
+    function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 1.8)); }
   //function calculateNextXpRequirement(lvl) { return Math.ceil(25 * Math.pow(1.0664, lvl - 1)); }
   // function calculateNextXpRequirement(lvl) { return Math.ceil((((5 * Math.pow(lvl, 3)) + (50 * lvl) + 45) / 2) * (1 + (9 * (lvl - 1) / 99))); }
     function getUpgradeCost(currentPower) { return (currentPower + 1) * 50 + 100; }
     
-    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 1.25)); }
+    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 1.5)); }
 
     function createFloatingText(parentId, text, color) {
         const parent = document.getElementById(parentId);
