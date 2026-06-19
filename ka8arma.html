@@ -20,7 +20,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -421,7 +421,7 @@
     const monsterNames = [
         "Γιγάντιος Αρουραίος", "Σπαθοσκώληκας", "Σκίταλος", "Κόβαλος", "Τραμπούκος",
         "Βαθρακοδαίμονας", "Αγριάνθρωπος", "Μπασιμποζούκος", "Σκέλεθρο", "Σφήκα Δολοφόνος",
-        "Τελώνι", "Δερβίσης", "Επικλητής", "Απελάτης", "Σμερδοκόβαλος",
+        "Τελώνι", "Δερβίσης", "Λυκομπάμπουρας", "Απελάτης", "Σμερδοκόβαλος",
         "Γιγάντια Αράχνη", "Κυνοκέφαλος", "Σαρκοσκέλεθρο", "Οφίονας", "Σμερδόλυκος",
         "Ανδροβλάττη", "Νεκροφάγος", "Δρασκελιστής", "Μπούγαρος", "Γιγάντιο Ερπετό",
         "Γεκ", "Ποντικόμορφος", "Σφαγέας", "Καταχανάς", "Νεοσσός Δράκοντα",
@@ -777,7 +777,12 @@ const weaponNames = [
 "Απόλυτο Κειμήλιο"
 ];
 
-    function getMonsterName(lvl) { return monsterNames[Math.min(lvl - 1, monsterNames.length - 1)]; }
+    function getMonsterName(lvl) {
+    if (lvl === 0.5) return "Μπάμπουρας";
+
+    return monsterNames[Math.min(Math.floor(lvl) - 1, monsterNames.length - 1)];
+}
+
     function getItemName(type, power) {
         if (power === 0) return type === 'weapon' ? "Γυμνά Χέρια" : (type === 'armor' ? "Κουρέλια" : "Κανένα");
         let arr = type === 'weapon' ? weaponNames : (type === 'armor' ? armorNames : magicNames);
@@ -804,7 +809,7 @@ const weaponNames = [
     let combatInterval = null;
     let townRegenInterval = null; 
     let inCombat = false;
-    let currentSelectedLevel = 1;
+    let currentSelectedLevel = 0.5;
     let isAttemptingRetreat = false; 
     let isSkillQueued = false; 
 
@@ -928,6 +933,11 @@ setInterval(updateRates,1000);
         const currentSelected = selector.value;
         selector.innerHTML = '';
 
+        let optHalf = document.createElement('option');
+        optHalf.value = 0.5;
+        optHalf.innerText = "[½] Μπάμπουρας";
+        selector.appendChild(optHalf);
+
         for (let i = 1; i <= 100; i++) {
             let opt = document.createElement('option');
             opt.value = i;
@@ -935,11 +945,11 @@ setInterval(updateRates,1000);
             selector.appendChild(opt);
         }
 
-        if (currentSelected && parseInt(currentSelected) <= 100) {
-            selector.value = currentSelected;
-        } else {
-            selector.value = 1;
-        }
+if (currentSelected) {
+    selector.value = currentSelected;
+} else {
+    selector.value = "0.5";
+}
     }
 
     function updateUI() {
@@ -1124,7 +1134,7 @@ setInterval(updateRates,1000);
     function enterCombatFromSelector() {
         document.getElementById('p-name').blur();
         stopTownRegen(); 
-        currentSelectedLevel = parseInt(document.getElementById('area-selector').value);
+        currentSelectedLevel = parseFloat(document.getElementById('area-selector').value);
         
         inCombat = true;
         isAttemptingRetreat = false;
@@ -1324,13 +1334,13 @@ function executeCombatRound() {
             
             player.gold += gainedGold;
             sessionGold += gainedGold;
-            logMessage(`Βρέθηκαν ${gainedGold} χρυσά.`, 'victory');
+            logMessage(`+${gainedGold} GP`, 'victory');
             createFloatingText('stat-gold-box', `+${gainedGold}g`, "var(--accent-gold)");
 
             let gainedXp = getMonsterXpReward(monster.level);
             player.xp += gainedXp;
             sessionXp += gainedXp;
-            logMessage(`[+${gainedXp} XP] Κερδίσατε πόντους εμπειρίας από την εξόντωση του εχθρού.`, 'victory');
+            logMessage(`+${gainedXp} XP`, 'victory');
             createFloatingText('xp-parent', `+${gainedXp} XP`, "var(--accent-gold)");
 
             
@@ -1343,10 +1353,16 @@ function executeCombatRound() {
             let rolledPower = monster.level;
             let droppedSomething = false;
 
-            if (Math.random() < weaponChance) { handleEquipmentDrop('weapon', rolledPower); droppedSomething = true; }
-            if (Math.random() < armorChance) { handleEquipmentDrop('armor', rolledPower); droppedSomething = true; }
-            if (Math.random() < magicChance) { handleEquipmentDrop('magic', rolledPower); droppedSomething = true; }
+            if (monster.level === 0.5) {
+    // κανένα drop
+}
+else {
+    let rolledPower = monster.level;
 
+    if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower);
+    if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower);
+    if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower);
+}
             if (droppedSomething) { triggerSmoothTransition('#3e3200'); }
 
             if (player.xp >= player.nextXp) {
