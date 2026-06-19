@@ -334,11 +334,10 @@
     100% { background-color: #171717; }
 }
 
+
 .item-upgrade-flash {
-    animation: itemUpgradeFlash 0.35s ease-in-out 4;
+    animation: monsterDeathFlash 0.5s ease-out 2;
 }
-
-
 
 
     </style>
@@ -392,7 +391,7 @@
                 <div>Πανοπλία: <span id="eq-armor" style="color: #6b9fec;">Κουρέλια</span> <span id="p-arm-bonus" class="log-system"></span></div>
                 <button id="btn-upgrade-armor" class="inline-upgrade-btn" onclick="upgradeEquipment('armor')">Up</button>
             </div>
-            <div class="stat-row magic-row">
+            <div class="stat-row magic-row" id="stat-magic-box">
                 <div>Μαγικό: <span id="eq-magic" style="color: #c36ae9;">Κανένα</span> <span id="p-mag-bonus" class="log-system"></span></div>
             </div>
         </div>
@@ -843,16 +842,16 @@ const weaponNames = [
 
     let player = {
         name: "Κάθαρμα",
-        level: 10,
+        level: 1,
         baseAtk: 10,
         baseDef: 10,
         hp: 100, 
         xp: 0,
         nextXp: 50,
         gold: 0,
-        weapon: { name: "Σπασμένο Κλαδί", power: 8 },
-        armor: { name: "Φθαρμένα Ρούχα", power: 8 },
-        magic: { name: "Ξύλινο Φυλακτό", power: 8 },
+        weapon: { name: "Σπασμένο Κλαδί", power: 1 },
+        armor: { name: "Φθαρμένα Ρούχα", power: 1 },
+        magic: { name: "Ξύλινο Φυλακτό", power: 1 },
         maxUnlockedLevel: 100
     };
 
@@ -922,7 +921,7 @@ const weaponNames = [
                 player.weapon.name = getItemName('weapon', player.weapon.power);
                 player.armor.name = getItemName('armor', player.armor.power);
                 player.magic.name = getItemName('magic', player.magic.power);
-                logMessage("Η πρόοδός σας φορτώθηκε αυτόματα.", 'system');
+                logMessage("Η πρόοδός φορτώθηκε αυτόματα.", 'system');
             } catch (e) {
                 logMessage("Σφάλμα κατά τη φόρτωση του save.", 'system');
             }
@@ -1188,9 +1187,16 @@ if (currentSelected) {
             player.gold -= cost;
             player[type].power++;
             player[type].name = getItemName(type, player[type].power);
-            logMessage(`Επιτυχής αναβάθμιση! Αποκτήσατε το αντικείμενο: ${player[type].name}.`, 'victory');
+            logMessage(`Αναβάθμιση αντικειμένου: ${player[type].name}.`, 'victory');
             
             let targetBox = type === 'weapon' ? 'stat-atk-box' : 'stat-def-box';
+
+            const box = document.getElementById(targetBox);
+            box.classList.add('item-upgrade-flash');
+            setTimeout(() => {
+            box.classList.remove('item-upgrade-flash');
+            }, 400);
+
             createFloatingText(targetBox, "+1 Tier", "var(--accent-gold)");
             createFloatingText('stat-gold-box', `-${cost}g`, "#e74c3c");
 
@@ -1260,9 +1266,9 @@ if (currentSelected) {
         if (!inCombat) return;
         isAttemptingRetreat = !isAttemptingRetreat;
         if (isAttemptingRetreat) {
-            logMessage("Προετοιμασία διαφυγής! Μάχεστε κανονικά και εκτελείται ζαριά φυγής (1 στα 3) ταυτόχρονα με την ανταλλαγή πληγμάτων.", 'retreat');
+            logMessage("Προετοιμασία διαφυγής! Η διαφυγή θα ολοκληρωθεί μετά τη μάχη.", 'retreat');
         } else {
-            logMessage("Η προσπάθεια υποχώρησης ακυρώθηκε.", 'system');
+            logMessage("Η προσπάθεια διαφυγής ακυρώθηκε.", 'system');
         }
         updateUI();
     }
@@ -1306,7 +1312,7 @@ if (!monster || monster.hp <= 0) {
             let d6 = Math.floor(Math.random() * 6) + 1;
             let baseDmg = d6 * 5 * player.level;
             playerDamageCalculated = Math.max(1, Math.round(baseDmg * 3));
-            playerActionLog = `[SKILL] Ισχυρό Πλήγμα! Καταφέρατε πλήγμα x3 για ${playerDamageCalculated} ζημιά.`;
+            playerActionLog = `[SKILL] Ισχυρό Πλήγμα! Κατάφερες πλήγμα x3 για ${playerDamageCalculated} ζημιά.`;
             
             isSkillQueued = false;
             skillCooldownActive = true;
@@ -1314,13 +1320,13 @@ if (!monster || monster.hp <= 0) {
             skillCdTimer = setTimeout(() => { skillCooldownActive = false; updateUI(); }, CD_DURATION);
         } else {
             if (Math.floor(Math.random() * 100) >= playerHitChance) {
-                playerActionLog = "Αποτύχατε να χτυπήσετε!";
+                playerActionLog = "Αστόχηες!";
                 playerDamageCalculated = 0;
             } else {
                 let d6 = Math.floor(Math.random() * 6) + 1;
                 let dmg = d6 * 5 * player.level;
                 playerDamageCalculated = Math.max(1, Math.round(dmg));
-                playerActionLog = `Πλήξατε τον ${monster.name} για ${playerDamageCalculated} ζημιά.`;
+                playerActionLog = `Χτύπησες τον ${monster.name} για ${playerDamageCalculated} ζημιά.`;
             }
         }
 
@@ -1380,25 +1386,57 @@ if (!monster || monster.hp <= 0) {
     }
 
     function handleEquipmentDrop(type, rolledTier) {
-        let itemName = getItemName(type, rolledTier);
-        logMessage(`[DROP] Ο εχθρός άφησε πίσω του: ${itemName}!`, 'victory');
+    let itemName = getItemName(type, rolledTier);
+    logMessage(`[DROP] Στον εχθρό βρέθηκε: ${itemName}!`, 'victory');
 
-        if (rolledTier > player[type].power) {
-            player[type] = { name: itemName, power: rolledTier };
-            logMessage(`[EQUIP] Εξοπλιστική αναβάθμιση! Φέρετε πλέον το αντικείμενο αυτό.`, 'victory');
-            let targetBox = type === 'weapon' ? 'stat-atk-box' : 'stat-def-box';
-            if (type !== 'magic') {
-                createFloatingText(targetBox, "NEW EQUIP!", "var(--accent-gold)");
-            } else {
-                createFloatingText('player-hp-parent', "MAX HP UP!", "var(--hp-player)");
-            }
+    if (rolledTier > player[type].power) {
+
+        player[type] = { name: itemName, power: rolledTier };
+
+        logMessage(`[EQUIP] Αναβάθμιση εξοπλισμού!`, 'victory');
+
+        let targetBox =
+            type === 'weapon' ? 'stat-atk-box' :
+            type === 'armor' ? 'stat-def-box' :
+            'stat-magic-box';
+
+        const box = document.getElementById(targetBox);
+            box.classList.add('item-upgrade-flash');
+            setTimeout(() => {
+            box.classList.remove('item-upgrade-flash');
+            }, 400);
+
+        if (type !== 'magic') {
+            createFloatingText(targetBox, "NEW EQUIP!", "var(--accent-gold)");
         } else {
-            let goldReward = rolledTier * 5;
-            player.gold += goldReward;
-            logMessage(`Το αντικείμενο ήταν κατώτερο του εξοπλισμού σας και εκποιήθηκε αυτόματα για ${goldReward} χρυσά.`, 'system');
-            createFloatingText('stat-gold-box', `+${goldReward}g`, "var(--accent-gold)");
+            createFloatingText('player-hp-parent', "MAX HP UP!", "var(--hp-player)");
         }
+
+    } else {
+
+    let sellValue;
+
+    if (type === 'weapon') {
+        sellValue = Math.floor(getWeaponUpgradeCost(rolledTier - 1) / 10);
     }
+    else if (type === 'armor') {
+        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 10);
+    }
+    else {
+        // magic
+        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 10);
+    }
+
+    player.gold += sellValue;
+
+    logMessage(
+        `[DROP] Το αντικείμενο ήταν κατώτερο και εκποιήθηκε για ${sellValue} χρυσά.`,
+        'system'
+    );
+
+    createFloatingText('stat-gold-box', `+${sellValue}g`, "var(--accent-gold)");
+}
+}
 
    function endCombat(outcome) {
         if (outcome !== 'victory') {
@@ -1457,7 +1495,7 @@ else {
                 player.baseAtk += 0;
                 player.baseDef += 0;
                 player.hp = getPlayerMaxHp(); 
-                logMessage(`*** ΑΝΕΒΑΣΜΑ ΕΠΙΠΕΔΟΥ: Level ${player.level}! ***`, 'victory');
+                logMessage(`*** ΑΠΟΚΤΗΣΗ ΕΠΙΠΕΔΟΥ: Level ${player.level}! ***`, 'victory');
                 triggerSmoothTransition('#113f11');
             }
 
@@ -1471,7 +1509,7 @@ else {
                     startTownRegen();
                     document.getElementById('town-interface').classList.remove('hidden');
                     document.getElementById('combat-interface').classList.add('hidden');
-                    logMessage("Υποχώρηση στον Τεκέ. Ρίχνεις έναν υπνάκο.", 'retreat');
+                    logMessage("Υποχώρηση στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
                     player.hp = Math.round(getPlayerMaxHp() * 0.10);
                 } else {
     waitingForNextMonster = true;
@@ -1523,7 +1561,7 @@ else {
         player.gold = Math.max(0, player.gold - goldLoss);
         player.hp = 1; 
         
-        logMessage(`ΠΕΣΑΤΕ ΣΤΗ ΜΑΧΗ! Μεταφερθήκατε στην πόλη με 1 HP. Απώλεια: -${goldLoss} χρυσά και -${xpLoss} XP.`, 'monster');
+        logMessage(`Σκοτώθηκες! Μεταφερθήκες στην πόλη με 1 HP. Απώλεια: -${goldLoss} χρυσά και -${xpLoss} XP.`, 'monster');
         triggerSmoothTransition('#4a1515');
 
         resetCooldowns();
@@ -1540,14 +1578,14 @@ else {
         
         let maxHp = getPlayerMaxHp();
         if (player.hp >= maxHp) {
-            logMessage("Η υγεία σας είναι ήδη πλήρης.", 'system');
+            logMessage("Η υγεία είναι ήδη πλήρης.", 'system');
             return;
         }
 
         let pct = Math.floor(Math.random() * 41) + 10; 
         let heal = Math.round(maxHp * (pct / 100));
         player.hp = Math.min(maxHp, player.hp + heal);
-        logMessage(`Αναπληρώσατε +${heal} HP μέσω Φίλτρου (Αναπλήρωση: ${pct}%).`, 'player');
+        logMessage(`Αναπλήρωσες +${heal} HP μέσω Φίλτρου (Αναπλήρωση: ${pct}%).`, 'player');
 
         createFloatingText('player-hp-parent', `+${heal} HP`, "var(--hp-player)");
 
