@@ -1417,14 +1417,14 @@ if (!monster || monster.hp <= 0) {
     let sellValue;
 
     if (type === 'weapon') {
-        sellValue = Math.floor(getWeaponUpgradeCost(rolledTier - 1) / 10);
+        sellValue = Math.floor(getWeaponUpgradeCost(rolledTier - 1) / 5);
     }
     else if (type === 'armor') {
-        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 10);
+        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 5);
     }
     else {
         // magic
-        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 10);
+        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 2.5);
     }
 
     player.gold += sellValue;
