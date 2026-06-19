@@ -1244,7 +1244,7 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let playerDamageCalculated = 0;
         let playerActionLog = "";
-        let playerHitChance = 85 * ((getPlayerAtk() / monster.def)) ** 0.5 ;
+        let playerHitChance = 85 * ((getPlayerAtk() / monster.def)) ** 0.25 ;
         playerHitChance = Math.max(35, Math.min(95, playerHitChance));
 
         if (isSkillQueued) {
@@ -1289,7 +1289,7 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let monsterDamageCalculated = 0;
         let monsterActionLog = "";
-        let monsterHitChance = 85 * ((monster.atk / getPlayerDef()))  ** 0.5 ;
+        let monsterHitChance = 85 * ((monster.atk / getPlayerDef()))  ** 0.25 ;
         monsterHitChance = Math.max(35, Math.min(95, monsterHitChance));
 
         if (Math.floor(Math.random() * 100) >= monsterHitChance) {
