@@ -1146,7 +1146,7 @@ if (currentSelected) {
     }
 
     function enterCombatFromSelector() {
-       // resetRates(); // μηδενισμός XP/m και GP/m
+    //  resetRates(); // μηδενισμός XP/m και GP/m
         document.getElementById('p-name').blur();
         stopTownRegen(); 
         currentSelectedLevel = parseFloat(document.getElementById('area-selector').value);
@@ -1245,7 +1245,7 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let playerDamageCalculated = 0;
         let playerActionLog = "";
-        let playerHitChance = 85 * ((getPlayerAtk() / monster.def)) ** 0.25 ;
+        let playerHitChance = 80 * ((getPlayerAtk() / monster.def)) ** 0.225 ;
         playerHitChance = Math.max(35, Math.min(95, playerHitChance));
 
         if (isSkillQueued) {
@@ -1290,7 +1290,7 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let monsterDamageCalculated = 0;
         let monsterActionLog = "";
-        let monsterHitChance = 85 * ((monster.atk / getPlayerDef()))  ** 0.25 ;
+        let monsterHitChance = 80 * ((monster.atk / getPlayerDef()))  ** 0.225 ;
         monsterHitChance = Math.max(35, Math.min(95, monsterHitChance));
 
         if (Math.floor(Math.random() * 100) >= monsterHitChance) {
