@@ -401,8 +401,8 @@
         <h3>Μάχη: <span id="m-name">Τέρας</span> (Επίπεδο <span id="m-level">1</span>) <span id="retreat-status-text" style="color: #e67e22; font-size: 0.85rem; font-weight: normal; margin-left: 10px;"></span></h3>
         
         <div class="stats-grid" style="margin-bottom: 5px;">
-          <div class="stat-row">Επίθεση Εχθρού: <span id="m-atk" style="color: #f1948a; font-weight: bold;">0</span></div>
-            <div class="stat-row">Άμυνα Εχθρού: <span id="m-def" style="color: #5dade2; font-weight: bold;">0</span></div>
+          <div class="stat-row">Ευστοχία παίκτη: <span id="m-atk" style="color: #5aeb66; font-weight: bold;">0</span></div>
+            <div class="stat-row">Ευστοχία Εχθρού: <span id="m-def" style="color: #f15454; font-weight: bold;">0</span></div>
         </div>
 
         <div class="bar-container" id="monster-hp-parent">
@@ -813,7 +813,7 @@ const weaponNames = [
     let isAttemptingRetreat = false; 
     let isSkillQueued = false; 
     let waitingForNextMonster = false;
-
+ 
     const CD_DURATION = 10000;
     
     let potionCooldownActive = false;
@@ -997,8 +997,20 @@ if (currentSelected) {
 
             document.getElementById('m-name').innerText = displayedName;
             document.getElementById('m-level').innerText = monster.level;
-            document.getElementById('m-atk').innerText = monster.atk.toFixed(0);
-            document.getElementById('m-def').innerText = monster.def.toFixed(0);
+           // document.getElementById('m-atk').innerText = monster.atk.toFixed(0);
+           // document.getElementById('m-def').innerText = monster.def.toFixed(0);
+            let myHitChance = (85 * (getPlayerAtk() / monster.def));
+            myHitChance = Math.max(25, Math.min(95, myHitChance));
+
+            let monsterHitChance = 85 * (monster.atk / getPlayerDef());
+            monsterHitChance = Math.max(25, Math.min(85, monsterHitChance));
+
+            document.getElementById('m-def').innerText =
+                `${monsterHitChance.toFixed(0)}%`;
+
+            document.getElementById('m-atk').innerText =
+                `${myHitChance.toFixed(0)}%`;
+
 
             const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
             document.getElementById('monster-hp-bar').style.width = mPct + '%';
@@ -1155,8 +1167,8 @@ if (currentSelected) {
 
     function spawnMonster() {
         let lvl = currentSelectedLevel;
-        let baseAtk = (10 + lvl * 2) * (1 + lvl * 0.1);
-        let baseDef = (10 + lvl * 2) * (1 + lvl * 0.1);
+        let baseAtk = (10 + lvl * 2) * (1 + lvl * 0.2);
+        let baseDef = (10 + lvl * 2) * (1 + lvl * 0.2);
         let baseHp = (lvl * 120)
         let variant = 'normal';
 
@@ -1232,10 +1244,12 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let playerDamageCalculated = 0;
         let playerActionLog = "";
+        let playerHitChance = 85 * (getPlayerAtk() / monster.def);
+        playerHitChance = Math.max(25, Math.min(95, playerHitChance));
 
         if (isSkillQueued) {
             let d6 = Math.floor(Math.random() * 6) + 1;
-            let baseDmg = (getPlayerAtk() / monster.def) * d6 * 5 * player.level;
+            let baseDmg = d6 * 5 * player.level;
             playerDamageCalculated = Math.max(1, Math.round(baseDmg * 3));
             playerActionLog = `[SKILL] Ισχυρό Πλήγμα! Καταφέρατε πλήγμα x3 για ${playerDamageCalculated} ζημιά.`;
             
@@ -1244,12 +1258,12 @@ if (!monster || monster.hp <= 0) {
             skillCdStart = Date.now();
             skillCdTimer = setTimeout(() => { skillCooldownActive = false; updateUI(); }, CD_DURATION);
         } else {
-            if (Math.random() < (1/6)) {
+            if (Math.floor(Math.random() * 100) >= playerHitChance) {
                 playerActionLog = "Αποτύχατε να χτυπήσετε!";
                 playerDamageCalculated = 0;
             } else {
                 let d6 = Math.floor(Math.random() * 6) + 1;
-                let dmg = (getPlayerAtk() / monster.def) * d6 * 5 * player.level;
+                let dmg = d6 * 5 * player.level;
                 playerDamageCalculated = Math.max(1, Math.round(dmg));
                 playerActionLog = `Πλήξατε τον ${monster.name} για ${playerDamageCalculated} ζημιά.`;
             }
@@ -1275,13 +1289,15 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let monsterDamageCalculated = 0;
         let monsterActionLog = "";
+        let monsterHitChance = 85 * (monster.atk / getPlayerDef());
+        monsterHitChance = Math.max(25, Math.min(95, monsterHitChance));
 
-        if (Math.random() < (1/6)) {
+        if (Math.floor(Math.random() * 100) >= monsterHitChance) {
             monsterActionLog = `Ο ${monster.name} αστόχησε.`;
             monsterDamageCalculated = 0;
         } else {
             let d6 = Math.floor(Math.random() * 6) + 1;
-            let dmg = (monster.atk / getPlayerDef()) * d6 * 5 * monster.level;
+            let dmg = d6 * 5 * monster.level;
             monsterDamageCalculated = Math.max(1, Math.round(dmg));
             monsterActionLog = `Δεχτήκατε ${monsterDamageCalculated} ζημιά από τον ${monster.name}.`;
         }
