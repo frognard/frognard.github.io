@@ -1320,7 +1320,7 @@ if (!monster || monster.hp <= 0) {
             skillCdTimer = setTimeout(() => { skillCooldownActive = false; updateUI(); }, CD_DURATION);
         } else {
             if (Math.floor(Math.random() * 100) >= playerHitChance) {
-                playerActionLog = "Αστόχηες!";
+                playerActionLog = "Αστόχησες!";
                 playerDamageCalculated = 0;
             } else {
                 let d6 = Math.floor(Math.random() * 6) + 1;
