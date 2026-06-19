@@ -804,16 +804,16 @@ const weaponNames = [
 
     let player = {
         name: "Κάθαρμα",
-        level: 1,
+        level: 10,
         baseAtk: 10,
         baseDef: 10,
         hp: 100, 
         xp: 0,
         nextXp: 50,
         gold: 0,
-        weapon: { name: "Σπασμένο Κλαδί", power: 1 },
-        armor: { name: "Φθαρμένα Ρούχα", power: 1 },
-        magic: { name: "Ξύλινο Φυλακτό", power: 1 },
+        weapon: { name: "Σπασμένο Κλαδί", power: 8 },
+        armor: { name: "Φθαρμένα Ρούχα", power: 8 },
+        magic: { name: "Ξύλινο Φυλακτό", power: 8 },
         maxUnlockedLevel: 100
     };
 
@@ -1011,10 +1011,10 @@ if (currentSelected) {
             document.getElementById('m-level').innerText = monster.level;
            // document.getElementById('m-atk').innerText = monster.atk.toFixed(0);
            // document.getElementById('m-def').innerText = monster.def.toFixed(0);
-            let myHitChance = (85 * (getPlayerAtk() / monster.def));
+            let myHitChance = (80 * (getPlayerAtk() / monster.def)**0.3);
             myHitChance = Math.max(25, Math.min(95, myHitChance));
 
-            let monsterHitChance = 85 * (monster.atk / getPlayerDef());
+            let monsterHitChance = (80 * (monster.atk / getPlayerDef())**0.3);
             monsterHitChance = Math.max(25, Math.min(85, monsterHitChance));
 
             document.getElementById('m-def').innerText =
@@ -1183,8 +1183,8 @@ if (currentSelected) {
 
     function spawnMonster() {
         let lvl = currentSelectedLevel;
-        let baseAtk = (10 + lvl * 2) * (1 + lvl * 0.185);
-        let baseDef = (10 + lvl * 2) * (1 + lvl * 0.185);
+        let baseAtk = (10 + lvl * 2) * (1 + lvl * 0.16);
+        let baseDef = (10 + lvl * 2) * (1 + lvl * 0.16);
         let baseHp = (lvl * 120)
         let variant = 'normal';
 
@@ -1260,7 +1260,7 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let playerDamageCalculated = 0;
         let playerActionLog = "";
-        let playerHitChance = 80 * ((getPlayerAtk() / monster.def)) ** 0.225 ;
+        let playerHitChance = 80 * ((getPlayerAtk() / monster.def) ** 0.3) ;
         playerHitChance = Math.max(35, Math.min(95, playerHitChance));
 
         if (isSkillQueued) {
@@ -1305,7 +1305,7 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let monsterDamageCalculated = 0;
         let monsterActionLog = "";
-        let monsterHitChance = 80 * ((monster.atk / getPlayerDef()))  ** 0.225 ;
+        let monsterHitChance = 80 * ((monster.atk / getPlayerDef())  ** 0.3) ;
         monsterHitChance = Math.max(35, Math.min(95, monsterHitChance));
 
         if (Math.floor(Math.random() * 100) >= monsterHitChance) {
