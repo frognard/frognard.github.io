@@ -206,7 +206,7 @@
         }
 
         #log {
-            height: 220px;
+            height: 160px;
             border: 1px solid var(--border-color);
             background-color: #0a0a0a;
             padding: 10px;
@@ -812,6 +812,7 @@ const weaponNames = [
     let currentSelectedLevel = 0.5;
     let isAttemptingRetreat = false; 
     let isSkillQueued = false; 
+    let waitingForNextMonster = false;
 
     const CD_DURATION = 10000;
     
@@ -1047,10 +1048,11 @@ if (currentSelected) {
         const entry = document.createElement('div');
         entry.className = `log-entry log-${type}`;
         entry.innerText = text;
-        // Εισαγωγή του νέου μηνύματος στην κορυφή (αντί για το τέλος)
-        logDiv.prepend(entry);
-        // Διατήρηση της κύλισης στην κορυφή για άμεση ορατότητα
-        logDiv.scrollTop = 0;
+        // Εισαγωγή του νέου μηνύματος στο τέλος (κάτω μέρος)
+        logDiv.append(entry);
+        
+        // Αυτόματη κύλιση προς τα κάτω για να φαίνεται το πιο πρόσφατο μήνυμα
+        logDiv.scrollTop = logDiv.scrollHeight;
     }
 
     function triggerSmoothTransition(colorHex) {
@@ -1183,7 +1185,8 @@ if (currentSelected) {
         if (variant === 'armor') prefix = "<Κρατερό> ";
         if (variant === 'magic') prefix = "<Τρομερό> ";
 
-        logMessage(`Εμφανίστηκε: ${prefix}${monster.name} (Lvl ${monster.level})!`, 'system');
+       // logMessage("--------", 'system');
+       // logMessage(`Εμφανίστηκε: ${prefix}${monster.name} (Lvl ${monster.level})!`, 'system');
     }
 
     function toggleRetreat() {
@@ -1213,12 +1216,16 @@ if (currentSelected) {
     }
 
 function executeCombatRound() {
+    logMessage("--------", 'system');
         if (!inCombat) return;
+        
 
-        if (!monster || monster.hp <= 0) {
-            spawnMonster();
-            updateUI();
-        }
+        if (waitingForNextMonster) return;
+
+if (!monster || monster.hp <= 0) {
+    spawnMonster();
+    updateUI();
+}
 
         // ==========================================
         // ΦΑΣΗ 1: ΕΠΙΘΕΣΗ ΠΑΙΚΤΗ
@@ -1344,6 +1351,7 @@ function executeCombatRound() {
             createFloatingText('xp-parent', `+${gainedXp} XP`, "var(--accent-gold)");
 
             
+            
             // weaponchances
             let weaponChance  = (monster.variant === 'weapon') ? 0.025 * 3 : 0.025;
             let armorChance  = (monster.variant === 'armor') ? 0.025 * 3 : 0.025;
@@ -1389,9 +1397,22 @@ else {
                     logMessage("Υποχώρηση στον Τεκέ. Ρίχνεις έναν υπνάκο.", 'retreat');
                     player.hp = Math.round(getPlayerMaxHp() * 0.10);
                 } else {
-                    monster = null;
-                    spawnMonster();
-                }
+    waitingForNextMonster = true;
+    monster = null;
+
+    logMessage("Ψάχνεις για νέο εχθρό...", "system");
+    updateUI();
+
+    setTimeout(() => {
+        waitingForNextMonster = false;
+
+        if (inCombat) {
+            spawnMonster();
+            logMessage(`Εμφανίστηκε ο ${monster.name}!`, "system");
+            updateUI();
+        }
+    }, 2000);
+}
             }
             updateUI();
 
