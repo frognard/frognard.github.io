@@ -137,7 +137,7 @@
 
         .cooldown-grid {
             display: grid;
-            grid-template-columns: 140px 1fr;
+            grid-template-columns: 120px 1fr;
             gap: 10px;
             align-items: center;
             margin-top: 10px;
@@ -320,6 +320,26 @@
     animation: monsterDeathFlash 0.5s ease-out forwards;
 }
 
+.magic-row{
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+@keyframes itemUpgradeFlash {
+    0%   { background-color: #171717; }
+    50%  {
+        background-color: #3a2157;
+        box-shadow: 0 0 15px #bb66ff;
+    }
+    100% { background-color: #171717; }
+}
+
+.item-upgrade-flash {
+    animation: itemUpgradeFlash 0.35s ease-in-out 4;
+}
+
+
+
 
     </style>
 </head>
@@ -372,24 +392,25 @@
                 <div>Πανοπλία: <span id="eq-armor" style="color: #6b9fec;">Κουρέλια</span> <span id="p-arm-bonus" class="log-system"></span></div>
                 <button id="btn-upgrade-armor" class="inline-upgrade-btn" onclick="upgradeEquipment('armor')">Up</button>
             </div>
-            <div class="stat-row">
+            <div class="stat-row magic-row">
                 <div>Μαγικό: <span id="eq-magic" style="color: #c36ae9;">Κανένα</span> <span id="p-mag-bonus" class="log-system"></span></div>
             </div>
         </div>
+        
 
         <div class="cooldown-grid">
     <div>Ισχυρό πλήγμα:</div>
     <div class="cd-action-cell">
         <div class="cd-wrapper"><div id="skill-cd-bar" class="cd-inner"></div></div>
         <button id="btn-skill" class="inline-upgrade-btn" onclick="queueSpecialAttack()">Πλήγμα</button>
-        <span class="hotkey-hint" id="skill-status-hint">[Num4]</span>
+        <span class="hotkey-hint" id="skill-status-hint">[4]</span>
     </div>
 
     <div>Φίλτρο Υγείας:</div>
     <div class="cd-action-cell">
         <div class="cd-wrapper"><div id="potion-cd-bar" class="cd-inner"></div></div>
         <button id="btn-potion" class="inline-upgrade-btn" onclick="usePotion()">Φίλτρο</button>
-        <span class="hotkey-hint">[Num5]</span>
+        <span class="hotkey-hint">[5]</span>
     </div>
     
     <div id="context-hotkey-label">Σκότωσε</div>
@@ -444,6 +465,8 @@
         <div id="log"></div>
     </main>
 </div>
+
+
 
 <script>
     const monsterNames = [
@@ -1054,10 +1077,10 @@ if (currentSelected) {
         
         const skillHint = document.getElementById('skill-status-hint');
         if (isSkillQueued) {
-            skillHint.innerText = "[Επόμενος Γύρος]";
+            skillHint.innerText = "[Πλήγμα...]";
             skillHint.style.color = "var(--skill-blue)";
         } else {
-            skillHint.innerText = "[Num4]";
+            skillHint.innerText = "[4]";
             skillHint.style.color = "var(--text-muted)";
         }
 
@@ -1398,18 +1421,18 @@ if (!monster || monster.hp <= 0) {
             logMessage(`+${gainedGold} GP`, 'victory');
             createFloatingText('stat-gold-box', `+${gainedGold}g`, "var(--accent-gold)");
 
-            let gainedXp = getMonsterXpReward(monster.level);
+            let gainedXp = getMonsterXpReward(monster.level) *
+               (monster.variant !== 'normal' ? 3 : 1);
             player.xp += gainedXp;
             sessionXp += gainedXp;
             logMessage(`+${gainedXp} XP`, 'victory');
             createFloatingText('xp-parent', `+${gainedXp} XP`, "var(--accent-gold)");
 
             
-            
             // weaponchances
             let weaponChance  = (monster.variant === 'weapon') ? 0.020 * 3 : 0.020;
             let armorChance  = (monster.variant === 'armor') ? 0.020 * 3 : 0.020;
-            let magicChance  = (monster.variant === 'magic') ? 0.020 * 3 : 0.020;
+            let magicChance  = (monster.variant === 'magic') ? 0.010 * 3 : 0.010;
 
             
             let rolledPower = monster.level;
