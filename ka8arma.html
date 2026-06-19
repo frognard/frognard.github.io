@@ -1386,7 +1386,7 @@ else {
                     startTownRegen();
                     document.getElementById('town-interface').classList.remove('hidden');
                     document.getElementById('combat-interface').classList.add('hidden');
-                    logMessage("Υποχώρηση στον Τεκέ!", 'retreat');
+                    logMessage("Υποχώρηση στον Τεκέ. Ρίχνεις έναν υπνάκο.", 'retreat');
                     player.hp = Math.round(getPlayerMaxHp() * 0.10);
                 } else {
                     monster = null;
