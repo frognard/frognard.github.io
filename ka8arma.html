@@ -1146,7 +1146,7 @@ if (currentSelected) {
     }
 
     function enterCombatFromSelector() {
-        resetRates(); // μηδενισμός XP/m και GP/m
+       // resetRates(); // μηδενισμός XP/m και GP/m
         document.getElementById('p-name').blur();
         stopTownRegen(); 
         currentSelectedLevel = parseFloat(document.getElementById('area-selector').value);
