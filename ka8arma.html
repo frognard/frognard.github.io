@@ -400,10 +400,22 @@
     <div id="combat-interface" class="hidden">
         <h3>Μάχη: <span id="m-name">Τέρας</span> (Επίπεδο <span id="m-level">1</span>) <span id="retreat-status-text" style="color: #e67e22; font-size: 0.85rem; font-weight: normal; margin-left: 10px;"></span></h3>
         
-        <div class="stats-grid" style="margin-bottom: 5px;">
-          <div class="stat-row">Ευστοχία παίκτη: <span id="m-atk" style="color: #5aeb66; font-weight: bold;">0</span></div>
-            <div class="stat-row">Ευστοχία Εχθρού: <span id="m-def" style="color: #f15454; font-weight: bold;">0</span></div>
-        </div>
+        <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr; margin-bottom:5px;">
+    <div class="stat-row">
+        Ευστοχία παίκτη:
+        <span id="m-atk" style="color:#5aeb66;font-weight:bold;">0</span>
+    </div>
+
+    <div class="stat-row">
+        Ευστοχία Εχθρού:
+        <span id="m-def" style="color:#f15454;font-weight:bold;">0</span>
+    </div>
+
+    <div class="stat-row">
+        Atk/Def:
+        <span id="m-ratio" style="color:#ffd700;font-weight:bold;">1.00</span>
+    </div>
+</div>
 
         <div class="bar-container" id="monster-hp-parent">
             <div id="monster-hp-bar" class="bar"></div>
@@ -1010,6 +1022,9 @@ if (currentSelected) {
 
             document.getElementById('m-atk').innerText =
                 `${myHitChance.toFixed(0)}%`;
+
+            document.getElementById('m-ratio').innerText =
+             `${monster.atk.toFixed(0)} / ${monster.def.toFixed(0)}`;
 
 
             const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
