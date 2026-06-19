@@ -792,16 +792,16 @@ const weaponNames = [
 
     let player = {
         name: "Κάθαρμα",
-        level: 1,
+        level: 80,
         baseAtk: 10,
         baseDef: 10,
         hp: 100, 
         xp: 0,
         nextXp: 50,
         gold: 0,
-        weapon: { name: "Σπασμένο Κλαδί", power: 1 },
-        armor: { name: "Φθαρμένα Ρούχα", power: 1 },
-        magic: { name: "Ξύλινο Φυλακτό", power: 1 },
+        weapon: { name: "Σπασμένο Κλαδί", power: 60 },
+        armor: { name: "Φθαρμένα Ρούχα", power: 60 },
+        magic: { name: "Ξύλινο Φυλακτό", power: 60 },
         maxUnlockedLevel: 100
     };
 
@@ -834,7 +834,7 @@ const weaponNames = [
     function getPlayerMaxHp() { return Math.floor(player.level * 120); }
     
    // XP REQ FORMULA - old and harder AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 1.8)); }
+    function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 1.9)); }
   //function calculateNextXpRequirement(lvl) { return Math.ceil(25 * Math.pow(1.0664, lvl - 1)); }
   // function calculateNextXpRequirement(lvl) { return Math.ceil((((5 * Math.pow(lvl, 3)) + (50 * lvl) + 45) / 2) * (1 + (9 * (lvl - 1) / 99))); }
     function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.5)) + 1) * 100 + 0); }
@@ -1244,7 +1244,7 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let playerDamageCalculated = 0;
         let playerActionLog = "";
-        let playerHitChance = 85 * (getPlayerAtk() / monster.def);
+        let playerHitChance = 85 * ((getPlayerAtk() / monster.def)) ** 0.5 ;
         playerHitChance = Math.max(35, Math.min(95, playerHitChance));
 
         if (isSkillQueued) {
@@ -1289,7 +1289,7 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let monsterDamageCalculated = 0;
         let monsterActionLog = "";
-        let monsterHitChance = 85 * (monster.atk / getPlayerDef());
+        let monsterHitChance = 85 * ((monster.atk / getPlayerDef()))  ** 0.5 ;
         monsterHitChance = Math.max(35, Math.min(95, monsterHitChance));
 
         if (Math.floor(Math.random() * 100) >= monsterHitChance) {
