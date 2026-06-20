@@ -1219,6 +1219,16 @@ const weaponNames = [
         return `${arr[idx]} `;
     }
 
+    function rollItemTier(monsterLevel) {
+    let d6a = Math.floor(Math.random() * 6) + 1;
+    let d6b = Math.floor(Math.random() * 6) + 1;
+    let modifier = d6a - d6b; // -5 έως +5
+    let tier = monsterLevel + modifier;
+    tier = Math.max(1, Math.min(100, tier));
+    return tier;
+}
+
+
     let player = {
         name: "Κάθαρμα",
         level: 1,
@@ -1931,7 +1941,7 @@ if (!monster || monster.hp <= 0) {
     // κανένα drop
 }
 else {
-    let rolledPower = monster.level;
+    let rolledPower = rollItemTier(monster.level);
 
     if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower);
     if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower);
