@@ -1931,9 +1931,9 @@ if (!monster || monster.hp <= 0) {
 
             
             // weaponchances
-            let weaponChance  = (monster.variant === 'weapon') ? 0.50 * 3 : 0.000;
-            let armorChance  = (monster.variant === 'armor') ? 0.50 * 3 : 0.000;
-            let magicChance  = (monster.variant === 'magic') ? 0.50 * 3 : 0.000;
+            let weaponChance  = (monster.variant === 'weapon') ? 0.50 : 0.000;
+            let armorChance  = (monster.variant === 'armor') ? 0.50 : 0.000;
+            let magicChance  = (monster.variant === 'magic') ? 0.50 : 0.000;
 
             
             let rolledPower = monster.level;
