@@ -1442,14 +1442,14 @@ if (currentSelected) {
             
             document.getElementById('m-level').innerText = monster.level;
  
-    /// HIT CHANCE CALCULATION
+    /// UI ONLY HIT CHANCE CALCULATION UPDATE για να ειναι ιδια με τις αξουαλ φορμουλες
         //  let myHitChance = (80 * (getPlayerAtk() / monster.def) ** 0.4);
             let myHitChance = 80 + (getPlayerAtk() - monster.def);
             myHitChance = Math.max(25, Math.min(95, myHitChance));
 
         //  let monsterHitChance = (80 * (monster.atk / getPlayerDef()) ** 0.4);
             let monsterHitChance = 80 + (monster.atk - getPlayerDef());
-            monsterHitChance = Math.max(25, Math.min(85, monsterHitChance));
+            monsterHitChance = Math.max(25, Math.min(95, monsterHitChance));
 
             document.getElementById('m-def').innerText =
                 `${monsterHitChance.toFixed(0)}%`;
@@ -1752,7 +1752,7 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let playerDamageCalculated = 0;
         let playerActionLog = "";
-        let playerHitChance = 80 * ((getPlayerAtk() / monster.def) ** 0.4) ;
+        let playerHitChance = 880 + (getPlayerAtk() - monster.def);
         playerHitChance = Math.max(35, Math.min(95, playerHitChance));
 
         if (isSkillQueued) {
@@ -1813,7 +1813,7 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let monsterDamageCalculated = 0;
         let monsterActionLog = "";
-        let monsterHitChance = 80 * ((monster.atk / getPlayerDef())  ** 0.4) ;
+        let monsterHitChance = 80 + (monster.atk - getPlayerDef());
         monsterHitChance = Math.max(35, Math.min(95, monsterHitChance));
 
         if (Math.floor(Math.random() * 100) >= monsterHitChance) {
