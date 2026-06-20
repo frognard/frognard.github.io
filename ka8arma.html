@@ -462,14 +462,14 @@
         
 
         <div class="cooldown-grid">
-    <div>Ισχυρό πλήγμα:</div>
+    <div>Ισχυρό Πλήγμα:</div>
     <div class="cd-action-cell">
         <div class="cd-wrapper"><div id="skill-cd-bar" class="cd-inner"></div></div>
         <button id="btn-skill" class="inline-upgrade-btn" onclick="queueSpecialAttack()">Πλήγμα</button>
         <span class="hotkey-hint" id="skill-status-hint"></span>
     </div>
 
-    <div>Φίλτρο Υγείας:</div>
+    <div>Φίλτρο Ίασης:</div>
     <div class="cd-action-cell">
         <div class="cd-wrapper"><div id="potion-cd-bar" class="cd-inner"></div></div>
         <button id="btn-potion" class="inline-upgrade-btn" onclick="usePotion()">Φίλτρο</button>
@@ -1465,7 +1465,7 @@ if (currentSelected) {
             document.getElementById('monster-hp-bar').style.width = mPct + '%';
             document.getElementById('monster-hp-text').innerText = `${Math.ceil(monster.hp)} / ${monster.maxHp} HP`;
         } else {
-            document.getElementById('m-name').innerText = "Αναμονή...";
+            document.getElementById('m-name').innerText = "Αναζήτηση τέρατος...";
             document.getElementById('monster-hp-bar').style.width = '0%';
             document.getElementById('monster-hp-text').innerText = '-';
         }
@@ -1559,7 +1559,7 @@ if (currentSelected) {
 
     logMessage("• Num4 : Προετοιμασία Ισχυρού Πλήγματος.", "system");
 
-    logMessage("• Num5 : Χρήση Φίλτρου Υγείας.", "system");
+    logMessage("• Num5 : Χρήση Φίλτρου Ίασης.", "system");
 
     logMessage("==============================", "system");
 }
@@ -1674,8 +1674,8 @@ if (currentSelected) {
 
     function spawnMonster() {
         let lvl = currentSelectedLevel;
-        let baseAtk = 10 + lvl + lvl * 1 ;
-        let baseDef = 10 + lvl + lvl * 1 ;
+        let baseAtk = 10 + lvl + lvl * 0.7 ;
+        let baseDef = 10 + lvl + lvl * 0.7 ;
         let baseHp = (lvl * 120)
         let variant = 'normal';
 
@@ -1768,13 +1768,13 @@ if (!monster || monster.hp <= 0) {
             skillCdTimer = setTimeout(() => { skillCooldownActive = false; updateUI(); }, CD_DURATION);
         } else {
             if (Math.floor(Math.random() * 100) >= playerHitChance) {
-                playerActionLog = "Αστόχησες!";
+                playerActionLog = "Αστόχησες.";
                 playerDamageCalculated = 0;
             } else {
                 let d6 = Math.floor(Math.random() * 6) + 1;
                 let dmg = d6 * 5 * player.level;
                 playerDamageCalculated = Math.max(1, Math.round(dmg));
-                playerActionLog = `Χτύπησες τον ${monster.name} για ${playerDamageCalculated} ζημιά.`;
+                playerActionLog = `Χτύπησες: ${playerDamageCalculated} ζημιά σε ${monster.name}.`;
             }
         }
 
@@ -1817,13 +1817,13 @@ if (!monster || monster.hp <= 0) {
         monsterHitChance = Math.max(35, Math.min(95, monsterHitChance));
 
         if (Math.floor(Math.random() * 100) >= monsterHitChance) {
-            monsterActionLog = `Ο ${monster.name} αστόχησε.`;
+            monsterActionLog = `${monster.name}: αστόχησε.`;
             monsterDamageCalculated = 0;
         } else {
             let d6 = Math.floor(Math.random() * 6) + 1;
             let dmg = d6 * 5 * monster.level;
             monsterDamageCalculated = Math.max(1, Math.round(dmg));
-            monsterActionLog = `Δεχτήκατε ${monsterDamageCalculated} ζημιά από τον ${monster.name}.`;
+            monsterActionLog = `${monster.name}: σου έκανε ${monsterDamageCalculated} ζημιά.`;
         }
 
         // Εφαρμογή ζημιάς στον παίκτη
@@ -1908,7 +1908,7 @@ if (!monster || monster.hp <= 0) {
         if (outcome === 'victory' || outcome === 'mutual_death') {
             document.getElementById('monster-hp-bar').classList.add('monster-death');
             setTimeout(() => document.getElementById('monster-hp-bar').classList.remove('monster-death'), 500);
-            logMessage(`Ο ${monster.name} εξοντώθηκε.`, 'victory');
+            logMessage(`${monster.name}: εξοντώθηκε.`, 'victory');
             monsterDeathSound();
             
           
@@ -2003,7 +2003,7 @@ else {
 
         if (inCombat) {
             spawnMonster();
-            logMessage(`Εμφανίστηκε ο ${monster.name}!`, "system");
+            logMessage(`Εμφανίζεται: ο ${monster.name}!`, "system");
             updateUI();
         }
     }, 2000);
