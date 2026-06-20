@@ -402,14 +402,14 @@
     <div class="cd-action-cell">
         <div class="cd-wrapper"><div id="skill-cd-bar" class="cd-inner"></div></div>
         <button id="btn-skill" class="inline-upgrade-btn" onclick="queueSpecialAttack()">Πλήγμα</button>
-        <span class="hotkey-hint" id="skill-status-hint">[4]</span>
+        <span class="hotkey-hint" id="skill-status-hint"></span>
     </div>
 
     <div>Φίλτρο Υγείας:</div>
     <div class="cd-action-cell">
         <div class="cd-wrapper"><div id="potion-cd-bar" class="cd-inner"></div></div>
         <button id="btn-potion" class="inline-upgrade-btn" onclick="usePotion()">Φίλτρο</button>
-        <span class="hotkey-hint">[5]</span>
+        <span class="hotkey-hint"></span>
     </div>
     
     <div id="context-hotkey-label">Σκότωσε</div>
@@ -1079,7 +1079,7 @@ if (currentSelected) {
             skillHint.innerText = "[Πλήγμα...]";
             skillHint.style.color = "var(--skill-blue)";
         } else {
-            skillHint.innerText = "[4]";
+            skillHint.innerText = "";
             skillHint.style.color = "var(--text-muted)";
         }
 
