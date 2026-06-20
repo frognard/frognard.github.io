@@ -109,7 +109,7 @@
         .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 3px;
             margin-bottom: 15px;
             font-size: 0.95rem;
             align-items: center;
@@ -391,9 +391,20 @@
             Επίπεδο <span id="p-level">1</span>
         </h3>
         
-    <div style="display:flex;align-items:center;gap:4px;">
-        <button class="btn-delete-save" onclick="resetGame()">Διαγραφή Save</button>
-    </div>
+<div style="display:flex;align-items:center;gap:4px;">
+
+    <button
+        style="background:#1e7d32;color:white;border:1px solid #2ecc71;
+               width:32px;height:32px;padding:0;font-weight:bold;"
+        onclick="showRules()">
+        ?
+    </button>
+
+    <button class="btn-delete-save" onclick="resetGame()">
+        Διαγραφή Save
+    </button>
+
+</div>
 
     </div>
     
@@ -1175,6 +1186,48 @@ if (currentSelected) {
         // Αυτόματη κύλιση προς τα κάτω για να φαίνεται το πιο πρόσφατο μήνυμα
         logDiv.scrollTop = logDiv.scrollHeight;
     }
+
+    function showRules() {
+
+    logMessage("===== ΚΑΝΟΝΕΣ ΠΑΙΧΝΙΔΙΟΥ =====", "system");
+        
+    logMessage("ΕΙΣΑΙ ΚΑΘΑΡΜΑ. ΣΚΟΤΩΣΕ. ΓΙΝΕ ΠΑΝΙΣΧΥΡΟΣ. ΣΚΟΤΩΣΕ ΚΙ ΑΛΛΟ.", "system");
+
+    logMessage("...");
+
+    logMessage("Τα τέρατα δίνουν XP και χρυσό.", "system");
+
+    logMessage("Τα <σπάνια> τέρατα ρίχνουν (πιθ. 50%) εξοπλισμό του επιπέδου τους:", "system");
+
+    logMessage("• Άγρια τέρατα (1 στα 25) ρίχνουν όπλα.", "system");
+
+    logMessage("• Θωρακισμένα τέρατα (1 στα 25) ρίχνουν πανοπλίες.", "system");
+
+    logMessage("• Μαγικά τέρατα (1 στα 50) ρίχνουν μαγικά αντικείμενα.", "system");
+        
+    logMessage("...");
+
+    logMessage("Όπλα και πανοπλίες μπορούν να αγοραστούν στην πόλη. Μαγικά αντικείμενα όχι.", "system");
+
+    logMessage("...");
+
+    logMessage("Αν πεθάνεις χάνεις 20% XP και 20% χρυσό.", "system");
+
+    logMessage("Στην πόλη αναπληρώνεις ζωή σταδιακά.", "system");
+
+    logMessage("...");
+    
+    logMessage("Συντομεύσεις πληκτρολογίου", "system");
+    
+    logMessage("• NumEnter : Έναρξη κυνηγιού / Υποχώρηση.", "system");
+
+    logMessage("• Num4 : Προετοιμασία Ισχυρού Πλήγματος.", "system");
+
+    logMessage("• Num5 : Χρήση Φίλτρου Υγείας.", "system");
+
+    logMessage("==============================", "system");
+}
+
 
     function triggerSmoothTransition(colorHex) {
         const container = document.getElementById('game-container');
