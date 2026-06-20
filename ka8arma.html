@@ -887,10 +887,10 @@ const weaponNames = [
     function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 1.9)); }
   //function calculateNextXpRequirement(lvl) { return Math.ceil(25 * Math.pow(1.0664, lvl - 1)); }
   // function calculateNextXpRequirement(lvl) { return Math.ceil((((5 * Math.pow(lvl, 3)) + (50 * lvl) + 45) / 2) * (1 + (9 * (lvl - 1) / 99))); }
-    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.5)) + 1) * 50 + 0); }
-    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.5)) + 1) * 50 + 0); }
+    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.65)) + 1) * 50 + 0); }
+    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.65)) + 1) * 50 + 0); }
     
-    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 1.5)); }
+    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 1.65)); }
 
     function createFloatingText(parentId, text, color) {
         const parent = document.getElementById(parentId);
