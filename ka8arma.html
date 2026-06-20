@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Κάθαρμα v44</title>
+    <title>Κάθαρμα v51</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -388,7 +388,7 @@
     <div class="header-row">
         <h3>
             <span id="p-name" class="editable-name" contenteditable="true" onblur="savePlayerName()" onkeydown="handleNameKey(event)">Κάθαρμα</span>: 
-            Επίπεδο <span id="p-level">1</span>
+            Επ. <span id="p-level">1</span>
         </h3>
         
 <div style="display:flex;align-items:center;gap:4px;">
@@ -424,27 +424,16 @@
             </div>
         </div>
 
-        <div class="rates-row">
-            <input id="xpmin" readonly value="0 XP/m">
-            <input id="gpmin" readonly value="0 GP/m">
-            <button class="btn-delete-save reset-rates-btn"
-                    onclick="resetRates()">↺</button>
-        </div>
 
-        <div class="stats-grid">
-            <div class="stat-row">
-                <div><b>Επίθεση:</b> <span id="p-atk">10</span></div>
-            </div>
-            <div class="stat-row">
-                <div><b>XP:</b> <span id="p-xp">0</span> / <span id="p-next-xp">50</span></div>
-            </div>
-            <div class="stat-row">
-                <div><b>Άμυνα:</b> <span id="p-def">10</span></div>
-            </div>
-            <div class="stat-row" id="stat-gold-box">
-                <div><b>Χρυσός:</b> <span id="p-gold" class="gold">0</span></div>
-            </div>
+
+<div class="stats-grid">
+    <div class="stat-row">
+        <div><b>XP:</b> <span id="p-xp">0</span> / <span id="p-next-xp">50</span></div>
+    </div>
+        <div class="stat-row" id="stat-gold-box" style="display:flex;justify-content:flex-end;">
+            <div><b>Χρυσός:</b> <span id="p-gold" class="gold">0</span></div>
         </div>
+</div>
 
         <div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
             <div class="stat-row" id="stat-atk-box">
@@ -498,24 +487,34 @@
     </div>
 
     <div id="combat-interface" class="hidden">
-        <h3>Μάχη: <span id="m-name">Τέρας</span> (Επίπεδο <span id="m-level">1</span>) <span id="retreat-status-text" style="color: #e67e22; font-size: 0.85rem; font-weight: normal; margin-left: 10px;"></span></h3>
-        
-        <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr; margin-bottom:5px;">
-    <div class="stat-row">
-        Ευστοχία:
-        <span id="m-atk" style="color:#5aeb66;font-weight:bold;">0</span>
-    </div>
+        <h3>Μάχη: <span id="m-name">Τέρας</span> (Επ. <span id="m-level">1</span>) <span id="retreat-status-text" style="color: #e67e22; font-size: 0.85rem; font-weight: normal; margin-left: 10px;"></span></h3>
 
-    <div class="stat-row">
-        Τέρατος:
-        <span id="m-def" style="color:#f15454;font-weight:bold;">0</span>
-    </div>
+        <!--
+<div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr; margin-bottom:5px;">
+<div class="stat-row">
+    Ευστοχία:
+    <span id="m-atk" style="color:#5aeb66;font-weight:bold;">0</span>
+    <br>
+    <span id="p-dmg-bonus" style="color:#5aeb66;font-weight:bold;font-size:0.9em;">
+        +0%
+    </span>
+</div>
+
+<div class="stat-row">
+    Τέρατος:
+    <span id="m-def" style="color:#f15454;font-weight:bold;">0</span>
+    <br>
+    <span id="m-dmg-bonus" style="color:#f15454;font-weight:bold;font-size:0.9em;">
+        +0%
+    </span>
+</div>
 
     <div class="stat-row">
         Επ/Αμ:
         <span id="m-ratio" style="color:#ffd700;font-weight:bold;">1.00</span>
     </div>
 </div>
+-->
 
         <div class="bar-container" id="monster-hp-parent">
             <div id="monster-hp-bar" class="bar"></div>
@@ -526,6 +525,14 @@
     <main style="margin-top: 20px;">
         <h3>Καταγραφή Δραστηριότητας</h3>
         <div id="log"></div>
+        
+        <div class="rates-row">
+            <input id="xpmin" readonly value="0 XP/m">
+            <input id="gpmin" readonly value="0 GP/m">
+            <button class="btn-delete-save reset-rates-btn"
+                    onclick="resetRates()">↺</button>
+        
+                </div>
     </main>
 </div>
 
@@ -533,6 +540,13 @@
 
 <script>
 
+
+function getPlayerDamageBonus() {
+    return (getPlayerAtk() - monster.def) * 0.05;
+}
+function getMonsterDamageBonus() {
+    return (monster.atk - getPlayerDef()) * 0.05;
+}
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let soundEnabled = true;
@@ -1231,16 +1245,16 @@ const weaponNames = [
 
     let player = {
         name: "Κάθαρμα",
-        level: 1,
+        level: 42,
         baseAtk: 10,
         baseDef: 10,
         hp: 100, 
         xp: 0,
         nextXp: 50,
         gold: 0,
-        weapon: { name: "Σπασμένο Κλαδί", power: 1 },
-        armor: { name: "Φθαρμένα Ρούχα", power: 1 },
-        magic: { name: "Ξύλινο Φυλακτό", power: 1 },
+        weapon: { name: "Σπασμένο Κλαδί", power: 30 },
+        armor: { name: "Φθαρμένα Ρούχα", power: 30 },
+        magic: { name: "Ξύλινο Φυλακτό", power: 30 },
         maxUnlockedLevel: 100
     };
 
@@ -1262,6 +1276,7 @@ const weaponNames = [
     let skillCooldownActive = false;
     let skillCdStart = 0;
     let skillCdTimer = null;
+    
 
    // function getPlayerAtk() { return player.baseAtk + (player.baseAtk * player.weapon.power * 0.1) + (player.baseAtk * player.magic.power * 0.1) ; }
     function getPlayerAtk() { return 10 + player.weapon.power + player.magic.power; }
@@ -1270,13 +1285,13 @@ const weaponNames = [
     function getPlayerMaxHp() { return Math.floor(player.level * 120); }
     
    // XP REQ FORMULA - old and harder AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 1.9)); }
-  //function calculateNextXpRequirement(lvl) { return Math.ceil(25 * Math.pow(1.0664, lvl - 1)); }
-  // function calculateNextXpRequirement(lvl) { return Math.ceil((((5 * Math.pow(lvl, 3)) + (50 * lvl) + 45) / 2) * (1 + (9 * (lvl - 1) / 99))); }
-    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.65)) + 1) * 50 + 0); }
-    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.65)) + 1) * 50 + 0); }
+    function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 2.4)); }
+  
+    // cost armor kai weapon: ligo pio megalos ek8eths apo to gold gain, giati ta levels megalwnoun se xrono
+    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.9)) + 1) * 50 + 0); }
+    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.9)) + 1) * 50 + 0); }
     
-    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 1.65)); }
+    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 2)); }
 
     function createFloatingText(parentId, text, color) {
         const parent = document.getElementById(parentId);
@@ -1392,9 +1407,9 @@ if (currentSelected) {
     function updateUI() {
         document.getElementById('p-name').innerText = player.name;
         document.getElementById('p-level').innerText = player.level;
-        document.getElementById('p-atk').innerText = getPlayerAtk().toFixed(0);
+      //  document.getElementById('p-atk').innerText = getPlayerAtk().toFixed(0);
         document.getElementById('p-wep-bonus').innerText = player.weapon.power > 0 ? `(T${player.weapon.power})` : '';
-        document.getElementById('p-def').innerText = getPlayerDef().toFixed(0);
+      //  document.getElementById('p-def').innerText = getPlayerDef().toFixed(0);
         document.getElementById('p-arm-bonus').innerText = player.armor.power > 0 ? `(T${player.armor.power})` : '';
         document.getElementById('p-xp').innerText = player.xp;
         document.getElementById('p-next-xp').innerText = player.nextXp;
@@ -1443,22 +1458,32 @@ if (currentSelected) {
             document.getElementById('m-level').innerText = monster.level;
  
     /// UI ONLY HIT CHANCE CALCULATION UPDATE για να ειναι ιδια με τις αξουαλ φορμουλες
-        //  let myHitChance = (80 * (getPlayerAtk() / monster.def) ** 0.4);
-            let myHitChance = 80 + (getPlayerAtk() - monster.def);
-            myHitChance = Math.max(35, Math.min(95, myHitChance));
+        
+        //    let myHitChance = 80 + (player.level - monster.level);
+      //      myHitChance = Math.max(35, Math.min(95, myHitChance));
 
-        //  let monsterHitChance = (80 * (monster.atk / getPlayerDef()) ** 0.4);
-            let monsterHitChance = 80 + (monster.atk - getPlayerDef());
-            monsterHitChance = Math.max(35, Math.min(95, monsterHitChance));
+        
+       //     let monsterHitChance = 80 + (monster.level - player.level);
+       //     monsterHitChance = Math.max(35, Math.min(95, monsterHitChance));
 
-            document.getElementById('m-def').innerText =
-                `${monsterHitChance.toFixed(0)}%`;
+       //     document.getElementById('m-def').innerText =
+       //         `${monsterHitChance.toFixed(0)}%`;
 
-            document.getElementById('m-atk').innerText =
-                `${myHitChance.toFixed(0)}%`;
+        //    document.getElementById('m-atk').innerText =
+        //        `${myHitChance.toFixed(0)}%`;
 
-            document.getElementById('m-ratio').innerText =
-             `${monster.atk.toFixed(0)} / ${monster.def.toFixed(0)}`;
+        //    document.getElementById('m-ratio').innerText =
+        //     `${monster.atk.toFixed(0)} / ${monster.def.toFixed(0)}`;
+
+
+          //   let pBonus = getPlayerDamageBonus() * 100;
+           // let mBonus = getMonsterDamageBonus() * 100;
+
+       //     document.getElementById('p-dmg-bonus').innerText =
+        //        `${pBonus >= 0 ? '+' : ''}${pBonus.toFixed(0)}%`;
+
+        //    document.getElementById('m-dmg-bonus').innerText =
+         //       `${mBonus >= 0 ? '+' : ''}${mBonus.toFixed(0)}%`;
 
 
             const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
@@ -1533,6 +1558,8 @@ if (currentSelected) {
 
     logMessage("Τα τέρατα δίνουν XP και χρυσό.", "system");
 
+    logMessage("...");
+
     logMessage("Τα <σπάνια> τέρατα ρίχνουν εξοπλισμό.", "system");
 
     logMessage("• Τα <Άγρια> τέρατα ρίχνουν όπλα.", "system");
@@ -1540,6 +1567,8 @@ if (currentSelected) {
     logMessage("• Τα <Θωρακισμένα> τέρατα ρίχνουν πανοπλίες.", "system");
 
     logMessage("• Τα (σπάνια) <Μαγικά> τέρατα ρίχνουν μαγικά αντικείμενα.", "system");
+      
+    logMessage("Κάθε επίπεδο οπλου ή πανοπλίας δίνει 5% καλύτερη ζημιά ή προστασία. Τα μαγικά αντικείμενα δίνουν και τα δυο!", "system");
         
     logMessage("...");
 
@@ -1674,19 +1703,19 @@ if (currentSelected) {
 
     function spawnMonster() {
         let lvl = currentSelectedLevel;
-        let baseAtk = 10 + lvl + lvl * 0.7 ;
-        let baseDef = 10 + lvl + lvl * 0.7 ;
+        let baseAtk = 10 + lvl + lvl * 1 ;
+        let baseDef = 10 + lvl + lvl * 1 ;
         let baseHp = (lvl * 120)
         let variant = 'normal';
 
         if (Math.random() < 0.20) {
             let roll = Math.random();
-            if (roll < 0.40) { variant = 'weapon'; baseAtk = baseAtk + 20; }
-            else if (roll < 0.80) { variant = 'armor'; baseDef = baseDef + 20; }
+            if (roll < 0.40) { variant = 'weapon'; baseAtk = baseAtk + 10; }
+            else if (roll < 0.80) { variant = 'armor'; baseDef = baseDef + 10; }
             else { 
                 variant = 'magic'; {
-                baseAtk = baseAtk + 20;
-                baseDef = baseDef + 20; }
+                baseAtk = baseAtk + 10;
+                baseDef = baseDef + 10; }
             }
         }
 
@@ -1752,12 +1781,14 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let playerDamageCalculated = 0;
         let playerActionLog = "";
-        let playerHitChance = 80 + (getPlayerAtk() - monster.def);
-        playerHitChance = Math.max(35, Math.min(95, playerHitChance));
+        let playerHitChance = 80 + (player.level - monster.level);
+        playerHitChance = Math.max(50, Math.min(95, playerHitChance));
 
         if (isSkillQueued) {
             let d6 = Math.floor(Math.random() * 6) + 1;
-            let baseDmg = d6 * 5 * player.level;
+            let dmgModifier = 1 + (getPlayerAtk() - monster.def) * 0.05;
+            dmgModifier = Math.max(0.3, Math.min(2.0, dmgModifier));
+            let baseDmg = d6 * 5 * player.level * dmgModifier;
             playerDamageCalculated = Math.max(1, Math.round(baseDmg * 3));
             playerActionLog = `[SKILL] Ισχυρό Πλήγμα! Κατάφερες πλήγμα x3 για ${playerDamageCalculated} ζημιά.`;
             specialHitSound();
@@ -1813,15 +1844,17 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let monsterDamageCalculated = 0;
         let monsterActionLog = "";
-        let monsterHitChance = 80 + (monster.atk - getPlayerDef());
-        monsterHitChance = Math.max(35, Math.min(95, monsterHitChance));
+        let monsterHitChance = 80 + (monster.level - player.level);
+        monsterHitChance = Math.max(50, Math.min(95, monsterHitChance));
 
         if (Math.floor(Math.random() * 100) >= monsterHitChance) {
             monsterActionLog = `${monster.name}: αστόχησε.`;
             monsterDamageCalculated = 0;
         } else {
             let d6 = Math.floor(Math.random() * 6) + 1;
-            let dmg = d6 * 5 * monster.level;
+            let dmgModifier = 1 + (monster.atk - getPlayerDef()) * 0.05;
+            dmgModifier = Math.max(0.3, Math.min(2.0, dmgModifier));
+            let dmg = d6 * 5 * monster.level * dmgModifier;
             monsterDamageCalculated = Math.max(1, Math.round(dmg));
             monsterActionLog = `${monster.name}: σου έκανε ${monsterDamageCalculated} ζημιά.`;
         }
@@ -1914,8 +1947,8 @@ if (!monster || monster.hp <= 0) {
           
             // Υπολογισμός χρυσού με bonus για τα μη-normal τέρατα
             let d6Gold = Math.floor(Math.random() * 6) + 1;
-            let goldMultiplier = (monster.variant !== 'normal') ? 3 : 1;
-            let gainedGold = Math.floor(d6Gold * (monster.level ** 1.5) * goldMultiplier);
+            let goldMultiplier = (monster.variant !== 'normal') ? 2 : 1;
+            let gainedGold = Math.floor(d6Gold * (monster.level ** 1.8) * goldMultiplier);
             
             player.gold += gainedGold;
             sessionGold += gainedGold;
@@ -1923,7 +1956,7 @@ if (!monster || monster.hp <= 0) {
             createFloatingText('stat-gold-box', `+${gainedGold}g`, "var(--accent-gold)");
 
             let gainedXp = getMonsterXpReward(monster.level) *
-               (monster.variant !== 'normal' ? 3 : 1);
+               (monster.variant !== 'normal' ? 2 : 1);
             player.xp += gainedXp;
             sessionXp += gainedXp;
             logMessage(`+${gainedXp} XP`, 'victory');
