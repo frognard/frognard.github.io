@@ -1264,8 +1264,8 @@ const weaponNames = [
     let skillCdTimer = null;
 
    // function getPlayerAtk() { return player.baseAtk + (player.baseAtk * player.weapon.power * 0.1) + (player.baseAtk * player.magic.power * 0.1) ; }
-    function getPlayerAtk() { return 10 + player.weapon.power * 2  + player.magic.power * 2; }
-    function getPlayerDef() { return 10 + player.armor.power * 2 + player.magic.power * 2; }
+    function getPlayerAtk() { return 10 + player.weapon.power + player.magic.power; }
+    function getPlayerDef() { return 10 + player.armor.power + player.magic.power; }
 
     function getPlayerMaxHp() { return Math.floor(player.level * 120); }
     
@@ -1441,12 +1441,14 @@ if (currentSelected) {
             document.getElementById('m-name').innerHTML = displayedName;
             
             document.getElementById('m-level').innerText = monster.level;
-           // document.getElementById('m-atk').innerText = monster.atk.toFixed(0);
-           // document.getElementById('m-def').innerText = monster.def.toFixed(0);
-            let myHitChance = (80 * (getPlayerAtk() / monster.def) ** 0.4);
+ 
+    /// HIT CHANCE CALCULATION
+        //  let myHitChance = (80 * (getPlayerAtk() / monster.def) ** 0.4);
+            let myHitChance = 80 + (getPlayerAtk() - monster.def);
             myHitChance = Math.max(25, Math.min(95, myHitChance));
 
-            let monsterHitChance = (80 * (monster.atk / getPlayerDef()) ** 0.4);
+        //  let monsterHitChance = (80 * (monster.atk / getPlayerDef()) ** 0.4);
+            let monsterHitChance = 80 + (monster.atk - getPlayerDef());
             monsterHitChance = Math.max(25, Math.min(85, monsterHitChance));
 
             document.getElementById('m-def').innerText =
@@ -1672,8 +1674,8 @@ if (currentSelected) {
 
     function spawnMonster() {
         let lvl = currentSelectedLevel;
-        let baseAtk = 10 + lvl * 2 + lvl * 1.6;
-        let baseDef = 10 + lvl * 2 + lvl * 1.6;
+        let baseAtk = 10 + lvl + lvl * 0.6;
+        let baseDef = 10 + lvl + lvl * 0.6;
         let baseHp = (lvl * 120)
         let variant = 'normal';
 
