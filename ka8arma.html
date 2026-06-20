@@ -74,6 +74,23 @@
             margin: -2px 0 15px 0;
         }
 
+        .rates-row{
+            display:flex;
+            justify-content:flex-end;
+            gap:4px;
+            margin-top:-10px;
+            margin-bottom:12px;
+        }
+
+        .rates-row input{
+            width:70px;
+            font-size:11px;
+        }
+
+        .reset-rates-btn{
+            padding:2px 6px;
+        }
+
         .xp-bar-container {
             background-color: #333;
             width: 100%;
@@ -346,6 +363,22 @@
     color: white !important;
 }
 
+.label-atk {
+    color: #ec6868; /* κόκκινο */
+}
+
+.label-def {
+    color: #6b9fec; /* γαλάζιο */
+}
+
+.label-xp {
+    color: #c36ae9; /* μωβ */
+}
+
+.label-gold {
+    color: #f5d142; /* χρυσό */
+}
+
 
     </style>
 </head>
@@ -359,9 +392,6 @@
         </h3>
         
     <div style="display:flex;align-items:center;gap:4px;">
-        <input id="xpmin" style="width:70px;font-size:11px;" readonly value="0 XP/m">
-        <input id="gpmin" style="width:70px;font-size:11px;" readonly value="0 GP/m">
-        <button class="btn-delete-save" style="padding:2px 6px;" onclick="resetRates()">↺</button>
         <button class="btn-delete-save" onclick="resetGame()">Διαγραφή Save</button>
     </div>
 
@@ -374,18 +404,25 @@
             </div>
         </div>
 
+        <div class="rates-row">
+            <input id="xpmin" readonly value="0 XP/m">
+            <input id="gpmin" readonly value="0 GP/m">
+            <button class="btn-delete-save reset-rates-btn"
+                    onclick="resetRates()">↺</button>
+        </div>
+
         <div class="stats-grid">
             <div class="stat-row">
-                <div>Επίθεση: <span id="p-atk">10</span></div>
+                <div><b>Επίθεση:</b> <span id="p-atk">10</span></div>
             </div>
             <div class="stat-row">
-                <div>Άμυνα: <span id="p-def">10</span></div>
+                <div><b>XP:</b> <span id="p-xp">0</span> / <span id="p-next-xp">50</span></div>
             </div>
             <div class="stat-row">
-                <div>XP: <span id="p-xp">0</span> / <span id="p-next-xp">50</span></div>
+                <div><b>Άμυνα:</b> <span id="p-def">10</span></div>
             </div>
             <div class="stat-row" id="stat-gold-box">
-                <div>Χρυσός: <span id="p-gold" class="gold">0</span></div>
+                <div><b>Χρυσός:</b> <span id="p-gold" class="gold">0</span></div>
             </div>
         </div>
 
@@ -455,7 +492,7 @@
     </div>
 
     <div class="stat-row">
-        Atk/Def:
+        Επ/Αμ:
         <span id="m-ratio" style="color:#ffd700;font-weight:bold;">1.00</span>
     </div>
 </div>
@@ -1133,6 +1170,10 @@ if (currentSelected) {
         entry.innerText = text;
         // Εισαγωγή του νέου μηνύματος στο τέλος (κάτω μέρος)
         logDiv.append(entry);
+
+        while (logDiv.children.length > 1000) {
+       logDiv.removeChild(logDiv.firstChild);
+}
         
         // Αυτόματη κύλιση προς τα κάτω για να φαίνεται το πιο πρόσφατο μήνυμα
         logDiv.scrollTop = logDiv.scrollHeight;
