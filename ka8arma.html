@@ -919,11 +919,8 @@ const weaponNames = [
     let skillCdTimer = null;
 
    // function getPlayerAtk() { return player.baseAtk + (player.baseAtk * player.weapon.power * 0.1) + (player.baseAtk * player.magic.power * 0.1) ; }
-    function getPlayerAtk() { return  + ((10 + player.level * 2) * (1 + (player.weapon.power + player.magic.power) * 0.1)); }
-
-//                              (10 + lvl * 2) * (1 + lvl * 0.2)
- // function getPlayerDef() { return player.baseDef + (player.baseDef * player.armor.power * 0.1) + (player.baseDef * player.magic.power * 0.1); }
-   function getPlayerDef() { return  + ((10 + player.level * 2) * (1 + (player.armor.power + player.magic.power) * 0.1)); }
+    function getPlayerAtk() { return 10 + player.weapon.power * 2  + player.magic.power * 2; }
+    function getPlayerDef() { return 10 + player.armor.power * 2 + player.magic.power * 2; }
 
     function getPlayerMaxHp() { return Math.floor(player.level * 120); }
     
@@ -1287,8 +1284,8 @@ if (currentSelected) {
 
     function spawnMonster() {
         let lvl = currentSelectedLevel;
-        let baseAtk = (10 + lvl * 2) * (1 + lvl * 0.17);
-        let baseDef = (10 + lvl * 2) * (1 + lvl * 0.17);
+        let baseAtk = 10 + lvl * 2 + lvl * 1.7;
+        let baseDef = 10 + lvl * 2 + lvl * 1.7;
         let baseHp = (lvl * 120)
         let variant = 'normal';
 
