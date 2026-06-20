@@ -198,9 +198,9 @@
         .cd-inner {
             height: 100%;
             width: 100%;
-            background-color: var(--hp-player);
+            background-color: #6ec6ff;
             transition: width 0.1s linear;
-        }
+}
         .cd-inner.active {
             background-color: var(--hp-monster);
         }
@@ -340,6 +340,13 @@
 }
 
 
+.skill-queued {
+    background-color: #e67e22 !important;
+    border-color: #ffb347 !important;
+    color: white !important;
+}
+
+
     </style>
 </head>
 <body>
@@ -415,7 +422,7 @@
     <div id="context-hotkey-label">Σκότωσε</div>
     <div class="cd-action-cell">
         <button id="btn-hunt-retreat" class="inline-upgrade-btn" onclick="handleHuntRetreatClick()">Σκότωσε</button>
-        <span class="hotkey-hint" style="color: #e67e22; font-weight: bold;">[Enter]</span>
+        <span class="hotkey-hint" style="color: #e67e22; font-weight: bold;"></span>
     </div>
 </div>
 
@@ -1041,11 +1048,19 @@ if (currentSelected) {
 
         if (monster) {
             let displayedName = monster.name;
-            if (monster.variant === 'weapon') displayedName = `<Άγριο> ${monster.name}`;
-            if (monster.variant === 'armor') displayedName = `<Κρατερό> ${monster.name}`;
-            if (monster.variant === 'magic') displayedName = `<Τρομερό> ${monster.name}`;
 
-            document.getElementById('m-name').innerText = displayedName;
+                if (monster.variant === 'weapon') 
+                {
+                    displayedName = `<span style="color:#ff4444;"><Άγριο> ${monster.name}</span>`;
+                }
+                else if (monster.variant === 'armor') {
+                    displayedName = `<span style="color:#66ccff;"><Θωρακισμένο> ${monster.name}</span>`;
+                }
+                else if (monster.variant === 'magic') {
+                    displayedName = `<span style="color:#cc66ff;"><Μαγικό> ${monster.name}</span>`;
+                }
+            document.getElementById('m-name').innerHTML = displayedName;
+            
             document.getElementById('m-level').innerText = monster.level;
            // document.getElementById('m-atk').innerText = monster.atk.toFixed(0);
            // document.getElementById('m-def').innerText = monster.def.toFixed(0);
@@ -1074,33 +1089,36 @@ if (currentSelected) {
             document.getElementById('monster-hp-text').innerText = '-';
         }
         
-        const skillHint = document.getElementById('skill-status-hint');
-        if (isSkillQueued) {
-            skillHint.innerText = "[Πλήγμα...]";
-            skillHint.style.color = "var(--skill-blue)";
-        } else {
-            skillHint.innerText = "";
-            skillHint.style.color = "var(--text-muted)";
-        }
+    
+            const contextLabel = document.getElementById('context-hotkey-label');
+            const btnHuntRetreat = document.getElementById('btn-hunt-retreat');
 
-        if (isAttemptingRetreat) {
-            document.getElementById('retreat-status-text').innerText = "(Υποχώρηση...)";
-        } else {
-            document.getElementById('retreat-status-text').innerText = "";
-        }
+            if (inCombat) {
+                contextLabel.innerText = "Υποχώρηση:";
 
-        const contextLabel = document.getElementById('context-hotkey-label');
-        const btnHuntRetreat = document.getElementById('btn-hunt-retreat');
-        if (inCombat) {
-            contextLabel.innerText = "Υποχώρηση:";
-            btnHuntRetreat.innerText = "Υποχώρηση";
-        } else {
-            contextLabel.innerText = "Έναρξη Κυνηγιού";
-            btnHuntRetreat.innerText = "Σκότωσε!";
-        }
+                if (isAttemptingRetreat) {
+                    btnHuntRetreat.innerText = "Υποχώρηση!";
+                    btnHuntRetreat.classList.add('skill-queued');
+                } else {
+                    btnHuntRetreat.innerText = "Υποχώρηση";
+                    btnHuntRetreat.classList.remove('skill-queued');
+                }
+
+            } else {
+                contextLabel.innerText = "Έναρξη Κυνηγιού";
+                btnHuntRetreat.innerText = "Σκότωσε!";
+                btnHuntRetreat.classList.remove('skill-queued');
+            }
 
         const btnSkill = document.getElementById('btn-skill');
-        btnSkill.disabled = !inCombat || !monster || skillCooldownActive || isSkillQueued;
+            btnSkill.disabled = !inCombat || !monster || skillCooldownActive || isSkillQueued;
+            if (isSkillQueued) {
+        btnSkill.classList.add('skill-queued');
+        btnSkill.innerText = "Έτοιμο!";
+             } else {
+        btnSkill.classList.remove('skill-queued');
+        btnSkill.innerText = "Πλήγμα";
+}
 
         const btnPotion = document.getElementById('btn-potion');
         btnPotion.disabled = potionCooldownActive;
@@ -1235,11 +1253,12 @@ if (currentSelected) {
 
         if (Math.random() < 0.10) {
             let roll = Math.random();
-            if (roll < 0.33) { variant = 'weapon'; baseAtk = baseAtk * 2; }
-            else if (roll < 0.66) { variant = 'armor'; baseDef = baseDef * 2; }
+            if (roll < 0.40) { variant = 'weapon'; baseAtk = baseAtk * 2; }
+            else if (roll < 0.80) { variant = 'armor'; baseDef = baseDef * 2; }
             else { 
-                variant = 'magic'; 
-                baseHp = baseHp * 2;
+                variant = 'magic'; {
+                baseAtk = baseAtk * 2;
+                baseDef = baseDef * 2; }
             }
         }
 
@@ -1255,8 +1274,8 @@ if (currentSelected) {
 
         let prefix = "";
         if (variant === 'weapon') prefix = "<Άγριο> ";
-        if (variant === 'armor') prefix = "<Κρατερό> ";
-        if (variant === 'magic') prefix = "<Τρομερό> ";
+        if (variant === 'armor') prefix = "<Θωρακισμένο> ";
+        if (variant === 'magic') prefix = "<Μαγικό> ";
 
        // logMessage("--------", 'system');
        // logMessage(`Εμφανίστηκε: ${prefix}${monster.name} (Lvl ${monster.level})!`, 'system');
@@ -1468,9 +1487,9 @@ if (!monster || monster.hp <= 0) {
 
             
             // weaponchances
-            let weaponChance  = (monster.variant === 'weapon') ? 0.020 * 3 : 0.020;
-            let armorChance  = (monster.variant === 'armor') ? 0.020 * 3 : 0.020;
-            let magicChance  = (monster.variant === 'magic') ? 0.010 * 3 : 0.010;
+            let weaponChance  = (monster.variant === 'weapon') ? 0.50 * 3 : 0.000;
+            let armorChance  = (monster.variant === 'armor') ? 0.50 * 3 : 0.000;
+            let magicChance  = (monster.variant === 'magic') ? 0.50 * 3 : 0.000;
 
             
             let rolledPower = monster.level;
@@ -1502,16 +1521,31 @@ else {
             saveGame();
             if (outcome === 'victory') {
                 if (isAttemptingRetreat) {
-                    if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
-                    inCombat = false;
-                    monster = null;
-                    isAttemptingRetreat = false;
-                    startTownRegen();
-                    document.getElementById('town-interface').classList.remove('hidden');
-                    document.getElementById('combat-interface').classList.add('hidden');
-                    logMessage("Υποχώρηση στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
-                    player.hp = Math.round(getPlayerMaxHp() * 0.10);
-                } else {
+
+    document.getElementById('monster-hp-bar').classList.add('monster-death');
+
+    setTimeout(() => {
+
+        document.getElementById('monster-hp-bar').classList.remove('monster-death');
+
+        if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+        inCombat = false;
+        monster = null;
+        isAttemptingRetreat = false;
+
+        startTownRegen();
+        document.getElementById('town-interface').classList.remove('hidden');
+        document.getElementById('combat-interface').classList.add('hidden');
+        logMessage("Υποχώρηση στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
+        player.hp = Math.round(getPlayerMaxHp() * 0.10);
+
+        updateUI();
+
+    }, 500);
+
+    return;
+}
+ else {
     waitingForNextMonster = true;
     monster = null;
 
