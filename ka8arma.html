@@ -449,14 +449,27 @@
             </div>
         </div>
         
-
         <div class="cooldown-grid">
     <div>Ισχυρό Πλήγμα:</div>
     <div class="cd-action-cell">
         <div class="cd-wrapper"><div id="skill-cd-bar" class="cd-inner"></div></div>
-        <button id="btn-skill" class="inline-upgrade-btn" onclick="queueSpecialAttack()">Πλήγμα</button>
+        <button id="btn-skill" class="inline-upgrade-btn" onclick="queueSpecialAttack()">Ισχυρό</button>
         <span class="hotkey-hint" id="skill-status-hint"></span>
     </div>
+
+<div>Ακριβές Πλήγμα:</div>
+<div class="cd-action-cell">
+    <div class="cd-wrapper">
+        <div id="precise-cd-bar" class="cd-inner"></div>
+    </div>
+    <button
+        id="btn-precise"
+        class="inline-upgrade-btn"
+        onclick="queuePreciseStrike()">
+        Σίγουρο
+    </button>
+    <span class="hotkey-hint" id="skill-status-hint-2"></span>
+</div>
 
     <div>Φίλτρο Ίασης:</div>
     <div class="cd-action-cell">
@@ -1265,6 +1278,7 @@ const weaponNames = [
     let currentSelectedLevel = 0.5;
     let isAttemptingRetreat = false; 
     let isSkillQueued = false; 
+    let queuedSkill = null;
     let waitingForNextMonster = false;
  
     const CD_DURATION = 10000;
@@ -1276,7 +1290,24 @@ const weaponNames = [
     let skillCooldownActive = false;
     let skillCdStart = 0;
     let skillCdTimer = null;
+
+    let preciseCooldownActive = false;
+    let preciseCdStart = 0;
+    let preciseCdTimer = null;
     
+
+    const skills = {
+    heavyStrike: {
+        name: "Ισχυρό Πλήγμα",
+        multiplier: 2,
+        hitChance: 80
+    },
+    preciseStrike: {
+        name: "Σίγουρο Πλήγμα",
+        multiplier: 1.0,
+        hitChance: 100
+    }
+};
 
    // function getPlayerAtk() { return player.baseAtk + (player.baseAtk * player.weapon.power * 0.1) + (player.baseAtk * player.magic.power * 0.1) ; }
     function getPlayerAtk() { return 10 + player.weapon.power + player.magic.power; }
@@ -1516,15 +1547,32 @@ if (currentSelected) {
                 btnHuntRetreat.classList.remove('skill-queued');
             }
 
-        const btnSkill = document.getElementById('btn-skill');
+            const btnSkill = document.getElementById('btn-skill');
+
             btnSkill.disabled = !inCombat || !monster || skillCooldownActive || isSkillQueued;
-            if (isSkillQueued) {
-        btnSkill.classList.add('skill-queued');
-        btnSkill.innerText = "Έτοιμο!";
-             } else {
-        btnSkill.classList.remove('skill-queued');
-        btnSkill.innerText = "Πλήγμα";
-}
+
+            if (isSkillQueued && queuedSkill === skills.heavyStrike) {
+                btnSkill.classList.add('skill-queued');
+                btnSkill.innerText = "Έτοιμο!";
+            }
+            else {
+                btnSkill.classList.remove('skill-queued');
+                btnSkill.innerText = "Χτύπα";
+            }
+
+
+            const btnPrecise = document.getElementById('btn-precise');
+
+            btnPrecise.disabled = !inCombat || !monster || preciseCooldownActive || isSkillQueued;
+
+            if (isSkillQueued && queuedSkill === skills.preciseStrike) {
+                btnPrecise.classList.add('skill-queued');
+                btnPrecise.innerText = "Έτοιμο!";
+            }
+            else {
+                btnPrecise.classList.remove('skill-queued');
+                btnPrecise.innerText = "Χτύπα";
+            }
 
         const btnPotion = document.getElementById('btn-potion');
         btnPotion.disabled = potionCooldownActive;
@@ -1566,7 +1614,7 @@ if (currentSelected) {
 
     logMessage("• Τα <Θωρακισμένα> τέρατα ρίχνουν πανοπλίες.", "system");
 
-    logMessage("• Τα (σπάνια) <Μαγικά> τέρατα ρίχνουν μαγικά αντικείμενα.", "system");
+    logMessage("• Τα <Μαγικά> τέρατα ρίχνουν μαγικά αντικείμενα.", "system");
       
     logMessage("Κάθε επίπεδο οπλου ή πανοπλίας βελτιώνει τη ζημιά ή την προστασία. Τα μαγικά αντικείμενα βελτιώνουν και τα δυο!", "system");
         
@@ -1588,7 +1636,9 @@ if (currentSelected) {
 
     logMessage("• Num4 : Προετοιμασία Ισχυρού Πλήγματος.", "system");
 
-    logMessage("• Num5 : Χρήση Φίλτρου Ίασης.", "system");
+    logMessage("• Num5 : Προετοιμασία Σίγουρου Πλήγματος.", "system");
+
+    logMessage("• Num6 : Χρήση Φίλτρου Ίασης.", "system");
 
     logMessage("==============================", "system");
 }
@@ -1641,11 +1691,26 @@ if (currentSelected) {
             skillBar.style.width = '100%';
             skillBar.classList.remove('active');
         }
+
+        const preciseBar = document.getElementById('precise-cd-bar');
+
+        if (preciseCooldownActive) {
+            let elapsed = now - preciseCdStart;
+            let pct = Math.min(100, (elapsed / CD_DURATION) * 100);
+            preciseBar.style.width = pct + '%';
+            preciseBar.classList.add('active');
+        } else {
+            preciseBar.style.width = '100%';
+            preciseBar.classList.remove('active');
+        }
+
     }
 
     function resetCooldowns() {
         if (potionCdTimer) clearTimeout(potionCdTimer);
         if (skillCdTimer) clearTimeout(skillCdTimer);
+        if (preciseCdTimer) clearTimeout(preciseCdTimer);
+        preciseCooldownActive = false;
         potionCooldownActive = false;
         skillCooldownActive = false;
         isSkillQueued = false;
@@ -1708,10 +1773,10 @@ if (currentSelected) {
         let baseHp = (lvl * 120)
         let variant = 'normal';
 
-        if (Math.random() < 0.10) {
+        if (Math.random() < 0.15) {
             let roll = Math.random();
-            if (roll < 0.40) { variant = 'weapon'; baseAtk = baseAtk + 10; }
-            else if (roll < 0.80) { variant = 'armor'; baseDef = baseDef + 10; }
+            if (roll < 0.33) { variant = 'weapon'; baseAtk = baseAtk + 10; }
+            else if (roll < 0.66) { variant = 'armor'; baseDef = baseDef + 10; }
             else { 
                 variant = 'magic'; {
                 baseAtk = baseAtk + 10;
@@ -1757,12 +1822,76 @@ if (currentSelected) {
         }
     }
 
+    function calcDmgModifier(diff) {
+    return diff >= 0
+        ? 2 - Math.exp(-0.04 * diff)
+        : 0.5 + 0.5 * Math.exp(0.08 * diff);
+    }
+
+    function rollBaseDamage() {
+        let d6 = Math.floor(Math.random() * 6) + 1;
+        let diff = getPlayerAtk() - monster.def;
+        let dmgModifier = calcDmgModifier(diff);
+        let dmg = d6 * 5 * player.level * dmgModifier;
+        return Math.max(1, Math.round(dmg));
+    }
+
+       function performPlayerAttack(skill = null) {
+
+            let hitChance = skill?.hitChance ?? 80;
+            hitChance = Math.max(10, Math.min(100, hitChance));
+
+            if (Math.floor(Math.random() * 100) >= hitChance) {
+
+                return {
+                    damage: 0,
+                    log: skill
+                        ? `[SKILL] ${skill.name}: Αστόχησε.`
+                        : "Αστόχησες."
+                };
+            }
+
+            // βασικό damage
+            let damage = rollBaseDamage();
+
+            // skill modifier
+            if (skill) {
+
+                damage = Math.round(damage * skill.multiplier);
+
+                if (skill.sound)
+                    skill.sound();
+
+                return {
+                    damage,
+                    log: `[SKILL] ${skill.name}! Προκάλεσες ${damage} ζημιά.`
+                };
+            }
+
+            return {
+                damage,
+                log: `Χτύπησες: ${damage} ζημιά σε ${monster.name}.`
+            };
+        }
+
+
     function queueSpecialAttack() {
         if (!inCombat || !monster || skillCooldownActive || isSkillQueued) return;
         isSkillQueued = true;
+        queuedSkill = skills.heavyStrike;
         logMessage("[QUEUE] Το Ισχυρό Πλήγμα προετοιμάστηκε για τον επόμενο γύρο.", 'system');
         updateUI();
     }
+
+    function queuePreciseStrike() {
+        if (!inCombat || !monster || preciseCooldownActive || isSkillQueued) return;
+        isSkillQueued = true;
+        queuedSkill = skills.preciseStrike;
+        logMessage("[QUEUE] Το Ακριβές Πλήγμα προετοιμάστηκε για τον επόμενο γύρο.", 'system');
+        updateUI();
+    }
+
+
 
 function executeCombatRound() {
     logMessage("--------", 'system');
@@ -1781,36 +1910,52 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let playerDamageCalculated = 0;
         let playerActionLog = "";
-        let playerHitChance = 80
-        playerHitChance = Math.max(50, Math.min(95, playerHitChance));
+
+
+        let result;
 
         if (isSkillQueued) {
-            let d6 = Math.floor(Math.random() * 6) + 1;
-            let dmgModifier = 1 + (getPlayerAtk() - monster.def) * 0.03;
-            dmgModifier = Math.max(0.5, Math.min(2.0, dmgModifier));
-            let baseDmg = d6 * 5 * player.level * dmgModifier;
-            playerDamageCalculated = Math.max(1, Math.round(baseDmg * 3));
-            playerActionLog = `[SKILL] Ισχυρό Πλήγμα! Κατάφερες πλήγμα x3 για ${playerDamageCalculated} ζημιά.`;
-            specialHitSound();
-
+            console.log("queuedSkill πριν attack:", queuedSkill);
             isSkillQueued = false;
-            skillCooldownActive = true;
-            skillCdStart = Date.now();
-            skillCdTimer = setTimeout(() => { skillCooldownActive = false; updateUI(); }, CD_DURATION);
-        } else {
-            if (Math.floor(Math.random() * 100) >= playerHitChance) {
-                playerActionLog = "Αστόχησες.";
-                playerDamageCalculated = 0;
-            } else {
-                let d6 = Math.floor(Math.random() * 6) + 1;
-                let dmgModifier = 1 + (getPlayerAtk() - monster.def) * 0.03;
-                dmgModifier = Math.max(0.5, Math.min(2.0, dmgModifier));
-                let dmg = d6 * 5 * player.level * dmgModifier;
-                playerDamageCalculated = Math.max(1, Math.round(dmg));
-                playerActionLog = `Χτύπησες: ${playerDamageCalculated} ζημιά σε ${monster.name}.`;
+            result = performPlayerAttack(queuedSkill);
+            console.log("queuedSkill μετά attack:", queuedSkill);
+            isSkillQueued = false;    
+            if (queuedSkill === skills.heavyStrike) {
+
+                skillCooldownActive = true;
+                skillCdStart = Date.now();
+
+                skillCdTimer = setTimeout(() => {
+                    skillCooldownActive = false;
+                    updateUI();
+                }, CD_DURATION);
+
             }
+
+            if (queuedSkill === skills.preciseStrike) {
+                console.log("precise cooldown");    
+                preciseCooldownActive = true;
+                preciseCdStart = Date.now();
+
+                preciseCdTimer = setTimeout(() => {
+                    preciseCooldownActive = false;
+                    updateUI();
+                }, CD_DURATION);
+
+            }
+
+            queuedSkill = null;
+        }
+        else {
+
+            result = performPlayerAttack();
+
         }
 
+        playerDamageCalculated = result.damage;
+        playerActionLog = result.log;
+
+      
         // Εφαρμογή ζημιάς στο τέρας
         if (playerActionLog) logMessage(playerActionLog, 'player');
             if (playerDamageCalculated > 0) {
@@ -1847,15 +1992,15 @@ if (!monster || monster.hp <= 0) {
         let monsterDamageCalculated = 0;
         let monsterActionLog = "";
         let monsterHitChance = 80
-        monsterHitChance = Math.max(50, Math.min(95, monsterHitChance));
+        monsterHitChance = Math.max(10, Math.min(100, monsterHitChance));
 
         if (Math.floor(Math.random() * 100) >= monsterHitChance) {
             monsterActionLog = `${monster.name}: αστόχησε.`;
             monsterDamageCalculated = 0;
         } else {
             let d6 = Math.floor(Math.random() * 6) + 1;
-            let dmgModifier = 1 + (monster.atk - getPlayerDef()) * 0.03;
-            dmgModifier = Math.max(0.5, Math.min(2.0, dmgModifier));
+            let diff = monster.atk - getPlayerDef();
+            let dmgModifier = calcDmgModifier(diff);
             let dmg = d6 * 5 * monster.level * dmgModifier;
             monsterDamageCalculated = Math.max(1, Math.round(dmg));
             monsterActionLog = `${monster.name}: σου έκανε ${monsterDamageCalculated} ζημιά.`;
@@ -2132,7 +2277,12 @@ else {
             queueSpecialAttack();
             return;
         }
-        if (event.code === 'Numpad5' || event.key === '5') {
+                if (event.code === 'Numpad5' || event.key === '6') {
+            event.preventDefault();
+            queuePreciseStrike();
+            return;
+        }
+        if (event.code === 'Numpad6' || event.key === '5') {
             event.preventDefault();
             usePotion();
             return;
