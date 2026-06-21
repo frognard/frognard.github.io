@@ -1357,8 +1357,8 @@ function getPlayerTitle(level) {
     function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 2.4)); }
   
     // cost armor kai weapon: ligo pio megalos ek8eths apo to gold gain, giati ta levels megalwnoun se xrono
-    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.9)) + 1) * 50 + 0); }
-    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.9)) + 1) * 50 + 0); }
+    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.9)) + 1) * 75 + 0); }
+    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.9)) + 1) * 75 + 0); }
     
     function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 2)); }
 
@@ -2112,14 +2112,14 @@ if (!monster || monster.hp <= 0) {
     let sellValue;
 
     if (type === 'weapon') {
-        sellValue = Math.floor(getWeaponUpgradeCost(rolledTier - 1) / 5);
+        sellValue = Math.floor(getWeaponUpgradeCost(rolledTier - 1) / 8);
     }
     else if (type === 'armor') {
-        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 5);
+        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 8);
     }
     else {
         // magic
-        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 2.5);
+        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 8);
     }
 
     player.gold += sellValue;
