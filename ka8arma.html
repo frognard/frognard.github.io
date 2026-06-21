@@ -2053,18 +2053,15 @@ function executeCombatRound() {
         createFloatingText('monster-hp-parent', 'MISS', '#ffffff');
     }
 
-// Αν το τέρας πέθανε από το χτύπημα του παίκτη,
-// δεν προλαβαίνει να εκτελέσει την επίθεσή του.
-if (monster.hp <= 0) {
-    document.getElementById('monster-hp-parent').classList.add('monster-death');
-    setTimeout(() => {
-        document.getElementById('monster-hp-parent').classList.remove('monster-death');
-    }, 500);
-
-    updateUI();
-    endCombat('victory');
-    return;
-}
+    // ΣΥΓΚΕΚΡΙΜΕΝΟΣ ΕΛΕΓΧΟΣ: Αν χρησιμοποιήθηκε το Άμεσο Πλήγμα και το τέρας πέθανε,
+    // η μάχη τελειώνει ΕΔΩ, κόβοντας την επίθεση του τέρατος.
+    if (usedPreciseStrikeThisRound && monster.hp <= 0) {
+        document.getElementById('monster-hp-parent').classList.add('monster-death');
+        setTimeout(() => document.getElementById('monster-hp-parent').classList.remove('monster-death'), 500);
+        updateUI();
+        endCombat('victory');
+        return;
+    }
 
     // Εφαρμογή ζημιάς του Τέρατος (εκτελείται κανονικά αν δεν ίσχυε το παραπάνω)
     if (monsterActionLog) logMessage(monsterActionLog, 'monster');
@@ -2231,14 +2228,17 @@ else {
 
     document.getElementById('monster-hp-bar').classList.add('monster-death');
 
-    setTimeout(() => {
-
-        document.getElementById('monster-hp-bar').classList.remove('monster-death');
-
         if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
         inCombat = false;
         monster = null;
         isAttemptingRetreat = false;
+
+
+    setTimeout(() => {
+
+        document.getElementById('monster-hp-bar').classList.remove('monster-death');
+
+
 
         startTownRegen();
         document.getElementById('town-interface').classList.remove('hidden');
