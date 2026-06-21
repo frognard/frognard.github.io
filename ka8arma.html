@@ -1787,7 +1787,7 @@ if (!monster || monster.hp <= 0) {
         if (isSkillQueued) {
             let d6 = Math.floor(Math.random() * 6) + 1;
             let dmgModifier = 1 + (getPlayerAtk() - monster.def) * 0.05;
-            dmgModifier = Math.max(0.3, Math.min(2.0, dmgModifier));
+            dmgModifier = Math.max(0.5, Math.min(2.0, dmgModifier));
             let baseDmg = d6 * 5 * player.level * dmgModifier;
             playerDamageCalculated = Math.max(1, Math.round(baseDmg * 3));
             playerActionLog = `[SKILL] Ισχυρό Πλήγμα! Κατάφερες πλήγμα x3 για ${playerDamageCalculated} ζημιά.`;
@@ -1804,7 +1804,7 @@ if (!monster || monster.hp <= 0) {
             } else {
                 let d6 = Math.floor(Math.random() * 6) + 1;
                 let dmgModifier = 1 + (getPlayerAtk() - monster.def) * 0.05;
-                dmgModifier = Math.max(0.3, Math.min(2.0, dmgModifier));
+                dmgModifier = Math.max(0.5, Math.min(2.0, dmgModifier));
                 let dmg = d6 * 5 * player.level * dmgModifier;
                 playerDamageCalculated = Math.max(1, Math.round(dmg));
                 playerActionLog = `Χτύπησες: ${playerDamageCalculated} ζημιά σε ${monster.name}.`;
@@ -1855,7 +1855,7 @@ if (!monster || monster.hp <= 0) {
         } else {
             let d6 = Math.floor(Math.random() * 6) + 1;
             let dmgModifier = 1 + (monster.atk - getPlayerDef()) * 0.05;
-            dmgModifier = Math.max(0.3, Math.min(2.0, dmgModifier));
+            dmgModifier = Math.max(0.5, Math.min(2.0, dmgModifier));
             let dmg = d6 * 5 * monster.level * dmgModifier;
             monsterDamageCalculated = Math.max(1, Math.round(dmg));
             monsterActionLog = `${monster.name}: σου έκανε ${monsterDamageCalculated} ζημιά.`;
