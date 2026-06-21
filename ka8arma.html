@@ -1965,118 +1965,129 @@ function resolvePlayerAttack(result) {
 
 function executeCombatRound() {
     logMessage("--------", 'system');
-        if (!inCombat) return;
-        
+    if (!inCombat) return;
+    if (waitingForNextMonster) return;
 
-        if (waitingForNextMonster) return;
-
-if (!monster || monster.hp <= 0) {
-    spawnMonster();
-    updateUI();
-}
-
-        // ==========================================
-        // ΦΑΣΗ 1: ΥΠΟΛΟΓΙΣΜΟΣ ΕΠΙΘΕΣΕΩΝ (ταυτόχρονα)
-        // ==========================================
-
-        // --- Επίθεση Παίκτη ---
-        let result;
-
-        if (isSkillQueued) {
-            isSkillQueued = false;
-            result = performPlayerAttack(queuedSkill);
-            if (queuedSkill === skills.heavyStrike) {
-                skillCooldownActive = true;
-                skillCdStart = Date.now();
-                skillCdTimer = setTimeout(() => {
-                    skillCooldownActive = false;
-                    updateUI();
-                }, CD_DURATION);
-            }
-            if (queuedSkill === skills.preciseStrike) {
-                preciseCooldownActive = true;
-                preciseCdStart = Date.now();
-                preciseCdTimer = setTimeout(() => {
-                    preciseCooldownActive = false;
-                    updateUI();
-                }, CD_DURATION);
-            }
-            queuedSkill = null;
-        } else {
-            result = performPlayerAttack();
-        }
-
-        // --- Επίθεση Τέρατος ---
-        let monsterDamageCalculated = 0;
-        let monsterActionLog = "";
-        let monsterHitChance = 80;
-        monsterHitChance = Math.max(10, Math.min(100, monsterHitChance));
-
-        if (Math.floor(Math.random() * 100) >= monsterHitChance) {
-            monsterActionLog = `${monster.name}: αστόχησε.`;
-            monsterDamageCalculated = 0;
-        } else {
-            let d6 = Math.floor(Math.random() * 6) + 1;
-            let diff = monster.atk - getPlayerDef();
-            let dmgModifier = calcDmgModifier(diff);
-            let dmg = d6 * 5 * monster.level * dmgModifier;
-            monsterDamageCalculated = Math.max(1, Math.round(dmg));
-            monsterActionLog = `${monster.name}: σου έκανε ${monsterDamageCalculated} ζημιά.`;
-        }
-
-        // ==========================================
-        // ΦΑΣΗ 2: ΕΦΑΡΜΟΓΗ ΖΗΜΙΩΝ (ταυτόχρονα)
-        // ==========================================
-
-        // Καταγραφή επίθεσης παίκτη
-        if (result.log) logMessage(result.log, 'player');
-        if (result.damage > 0) {
-            monster.hp = Math.max(0, monster.hp - result.damage);
-            if (monster.hp > 0) hitSound();
-            createFloatingText('monster-hp-parent', `-${result.damage}`, "var(--hp-monster)");
-        } else {
-            createFloatingText('monster-hp-parent', 'MISS', '#ffffff');
-        }
-
-        // Καταγραφή επίθεσης τέρατος
-        if (monsterActionLog) logMessage(monsterActionLog, 'monster');
-        if (monsterDamageCalculated > 0) {
-            player.hp = Math.max(0, player.hp - monsterDamageCalculated);
-            createFloatingText('player-hp-parent', `-${monsterDamageCalculated}`, "var(--hp-monster)");
-        } else {
-            createFloatingText('player-hp-parent', 'DODGED', "var(--hp-player)");
-        }
-
+    if (!monster || monster.hp <= 0) {
+        spawnMonster();
         updateUI();
-
-        // ==========================================
-        // ΦΑΣΗ 3: ΕΛΕΓΧΟΣ ΑΠΟΤΕΛΕΣΜΑΤΟΣ
-        // ==========================================
-        let playerDied = player.hp <= 0;
-        let monsterDied = monster.hp <= 0;
-
-        if (monsterDied && playerDied) {
-            // Και οι δύο πέθαναν ταυτόχρονα
-            document.getElementById('monster-hp-bar').classList.add('monster-death');
-            setTimeout(() => document.getElementById('monster-hp-bar').classList.remove('monster-death'), 500);
-            playerDeathSound();
-            endCombat('mutual_death');
-            return;
-        }
-
-        if (monsterDied) {
-            document.getElementById('monster-hp-parent').classList.add('monster-death');
-            setTimeout(() => document.getElementById('monster-hp-parent').classList.remove('monster-death'), 500);
-            endCombat('victory');
-            return;
-        }
-
-        if (playerDied) {
-            endCombat('defeat');
-            playerDeathSound();
-            return;
-        }
     }
+
+    // ==========================================
+    // ΦΑΣΗ 1: ΥΠΟΛΟΓΙΣΜΟΣ ΕΠΙΘΕΣΕΩΝ (ταυτόχρονα)
+    // ==========================================
+
+    // Κρατάμε σε μια μεταβλητή αν χρησιμοποιήθηκε το Άμεσο Πλήγμα σε αυτόν τον γύρο
+    let usedPreciseStrikeThisRound = false;
+
+    // --- Επίθεση Παίκτη ---
+    let result;
+
+    if (isSkillQueued) {
+        isSkillQueued = false;
+        result = performPlayerAttack(queuedSkill);
+        if (queuedSkill === skills.heavyStrike) {
+            skillCooldownActive = true;
+            skillCdStart = Date.now();
+            skillCdTimer = setTimeout(() => {
+                skillCooldownActive = false;
+                updateUI();
+            }, CD_DURATION);
+        }
+        if (queuedSkill === skills.preciseStrike) {
+            usedPreciseStrikeThisRound = true; // Ενεργοποιείται η ιδιότητα του skill
+            preciseCooldownActive = true;
+            preciseCdStart = Date.now();
+            preciseCdTimer = setTimeout(() => {
+                preciseCooldownActive = false;
+                updateUI();
+            }, CD_DURATION);
+        }
+        queuedSkill = null;
+    } else {
+        result = performPlayerAttack();
+    }
+
+    // --- Επίθεση Τέρατος ---
+    let monsterDamageCalculated = 0;
+    let monsterActionLog = "";
+    let monsterHitChance = 80;
+    monsterHitChance = Math.max(10, Math.min(100, monsterHitChance));
+
+    if (Math.floor(Math.random() * 100) >= monsterHitChance) {
+        monsterActionLog = `${monster.name}: αστόχησε.`;
+        monsterDamageCalculated = 0;
+    } else {
+        let d6 = Math.floor(Math.random() * 6) + 1;
+        let diff = monster.atk - getPlayerDef();
+        let dmgModifier = calcDmgModifier(diff);
+        let dmg = d6 * 5 * monster.level * dmgModifier;
+        monsterDamageCalculated = Math.max(1, Math.round(dmg));
+        monsterActionLog = `${monster.name}: σου έκανε ${monsterDamageCalculated} ζημιά.`;
+    }
+
+    // ==========================================
+    // ΦΑΣΗ 2: ΕΦΑΡΜΟΓΗ ΖΗΜΙΩΝ
+    // ==========================================
+
+    // Εφαρμογή ζημιάς του Παίκτη
+    if (result.log) logMessage(result.log, 'player');
+    if (result.damage > 0) {
+        monster.hp = Math.max(0, monster.hp - result.damage);
+        if (monster.hp > 0) hitSound();
+        createFloatingText('monster-hp-parent', `-${result.damage}`, "var(--hp-monster)");
+    } else {
+        createFloatingText('monster-hp-parent', 'MISS', '#ffffff');
+    }
+
+    // ΣΥΓΚΕΚΡΙΜΕΝΟΣ ΕΛΕΓΧΟΣ: Αν χρησιμοποιήθηκε το Άμεσο Πλήγμα και το τέρας πέθανε,
+    // η μάχη τελειώνει ΕΔΩ, κόβοντας την επίθεση του τέρατος.
+    if (usedPreciseStrikeThisRound && monster.hp <= 0) {
+        document.getElementById('monster-hp-parent').classList.add('monster-death');
+        setTimeout(() => document.getElementById('monster-hp-parent').classList.remove('monster-death'), 500);
+        updateUI();
+        endCombat('victory');
+        return;
+    }
+
+    // Εφαρμογή ζημιάς του Τέρατος (εκτελείται κανονικά αν δεν ίσχυε το παραπάνω)
+    if (monsterActionLog) logMessage(monsterActionLog, 'monster');
+    if (monsterDamageCalculated > 0) {
+        player.hp = Math.max(0, player.hp - monsterDamageCalculated);
+        createFloatingText('player-hp-parent', `-${monsterDamageCalculated}`, "var(--hp-monster)");
+    } else {
+        createFloatingText('player-hp-parent', 'DODGED', "var(--hp-player)");
+    }
+
+    updateUI();
+
+    // ==========================================
+    // ΦΑΣΗ 3: ΕΛΕΓΧΟΣ ΑΠΟΤΕΛΕΣΜΑΤΟΣ (Κλασικός ταυτόχρονος έλεγχος)
+    // ==========================================
+    let playerDied = player.hp <= 0;
+    let monsterDied = monster.hp <= 0;
+
+    if (monsterDied && playerDied) {
+        document.getElementById('monster-hp-bar').classList.add('monster-death');
+        setTimeout(() => document.getElementById('monster-hp-bar').classList.remove('monster-death'), 500);
+        playerDeathSound();
+        endCombat('mutual_death');
+        return;
+    }
+
+    if (monsterDied) {
+        document.getElementById('monster-hp-parent').classList.add('monster-death');
+        setTimeout(() => document.getElementById('monster-hp-parent').classList.remove('monster-death'), 500);
+        endCombat('victory');
+        return;
+    }
+
+    if (playerDied) {
+        endCombat('defeat');
+        playerDeathSound();
+        return;
+    }
+}
 
     function handleEquipmentDrop(type, rolledTier) {
     let itemName = getItemName(type, rolledTier);
