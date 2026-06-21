@@ -872,7 +872,7 @@ function buyItemSound() {
         "Καπρόμορφος", "Ογρίονας", "Ξωτικό", "Λυκάνθρωπος", "Νοσοφόρος",
         "Σαλαχίτης", "Φένακας", "Σιδερένιο Γκόλεμ", "Στυγικός Σκύλος", "Μέδουσα",
         "Σπηλαιολέοντας", "Μικρός Δράκοντας", "Αραχναίος", "Στοιχειό", "Οξειδωτής",
-        "Αρκόγλαυκος", "Αραχνοθήριος", "Γιγάντιος Κάπρος", "Ύδρα", "Πέτρινο Άγαλμα",
+        "Αρκόγλαυκος", "Αραχνοθήριο", "Γιγάντιος Κάπρος", "Ύδρα", "Πέτρινο Άγαλμα",
         "Λιθόρνιθα", "Μινώταυρος", "Γιγάντιος Σκορπιός", "Νεκροκένταρχος", "Ψευδαίλουρος",
         "Τερατώδης Νυχτερίδα", "Νεαρός Δράκοντας", "Σμερδαλέος", "Μούμια", "Βασιλίσκος",
         "Σικάριος", "Μαρτιχώρας", "Φάσμα", "Γιγάντιο Σαλιγκάρι", "Τυμβολίκτωρ",
@@ -1568,7 +1568,7 @@ if (currentSelected) {
 
     logMessage("• Τα (σπάνια) <Μαγικά> τέρατα ρίχνουν μαγικά αντικείμενα.", "system");
       
-    logMessage("Κάθε επίπεδο οπλου ή πανοπλίας δίνει 5% καλύτερη ζημιά ή προστασία. Τα μαγικά αντικείμενα δίνουν και τα δυο!", "system");
+    logMessage("Κάθε επίπεδο οπλου ή πανοπλίας βελτιώνει τη ζημιά ή την προστασία. Τα μαγικά αντικείμενα βελτιώνουν και τα δυο!", "system");
         
     logMessage("...");
 
@@ -1703,8 +1703,8 @@ if (currentSelected) {
 
     function spawnMonster() {
         let lvl = currentSelectedLevel;
-        let baseAtk = 10 + lvl + lvl * 1 ;
-        let baseDef = 10 + lvl + lvl * 1 ;
+        let baseAtk = 10 + lvl + lvl * 0.7 ;
+        let baseDef = 10 + lvl + lvl * 0.7 ;
         let baseHp = (lvl * 120)
         let variant = 'normal';
 
@@ -1781,12 +1781,12 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let playerDamageCalculated = 0;
         let playerActionLog = "";
-        let playerHitChance = 80 + (player.level - monster.level);
+        let playerHitChance = 80
         playerHitChance = Math.max(50, Math.min(95, playerHitChance));
 
         if (isSkillQueued) {
             let d6 = Math.floor(Math.random() * 6) + 1;
-            let dmgModifier = 1 + (getPlayerAtk() - monster.def) * 0.05;
+            let dmgModifier = 1 + (getPlayerAtk() - monster.def) * 0.03;
             dmgModifier = Math.max(0.5, Math.min(2.0, dmgModifier));
             let baseDmg = d6 * 5 * player.level * dmgModifier;
             playerDamageCalculated = Math.max(1, Math.round(baseDmg * 3));
@@ -1803,7 +1803,7 @@ if (!monster || monster.hp <= 0) {
                 playerDamageCalculated = 0;
             } else {
                 let d6 = Math.floor(Math.random() * 6) + 1;
-                let dmgModifier = 1 + (getPlayerAtk() - monster.def) * 0.05;
+                let dmgModifier = 1 + (getPlayerAtk() - monster.def) * 0.03;
                 dmgModifier = Math.max(0.5, Math.min(2.0, dmgModifier));
                 let dmg = d6 * 5 * player.level * dmgModifier;
                 playerDamageCalculated = Math.max(1, Math.round(dmg));
@@ -1846,7 +1846,7 @@ if (!monster || monster.hp <= 0) {
         // ==========================================
         let monsterDamageCalculated = 0;
         let monsterActionLog = "";
-        let monsterHitChance = 80 + (monster.level - player.level);
+        let monsterHitChance = 80
         monsterHitChance = Math.max(50, Math.min(95, monsterHitChance));
 
         if (Math.floor(Math.random() * 100) >= monsterHitChance) {
@@ -1854,7 +1854,7 @@ if (!monster || monster.hp <= 0) {
             monsterDamageCalculated = 0;
         } else {
             let d6 = Math.floor(Math.random() * 6) + 1;
-            let dmgModifier = 1 + (monster.atk - getPlayerDef()) * 0.05;
+            let dmgModifier = 1 + (monster.atk - getPlayerDef()) * 0.03;
             dmgModifier = Math.max(0.5, Math.min(2.0, dmgModifier));
             let dmg = d6 * 5 * monster.level * dmgModifier;
             monsterDamageCalculated = Math.max(1, Math.round(dmg));
