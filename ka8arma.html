@@ -1560,35 +1560,6 @@ if (currentSelected) {
             
             document.getElementById('m-level').innerText = monster.level;
  
-    /// UI ONLY HIT CHANCE CALCULATION UPDATE για να ειναι ιδια με τις αξουαλ φορμουλες
-        
-        //    let myHitChance = 80 + (player.level - monster.level);
-      //      myHitChance = Math.max(35, Math.min(95, myHitChance));
-
-        
-       //     let monsterHitChance = 80 + (monster.level - player.level);
-       //     monsterHitChance = Math.max(35, Math.min(95, monsterHitChance));
-
-       //     document.getElementById('m-def').innerText =
-       //         `${monsterHitChance.toFixed(0)}%`;
-
-        //    document.getElementById('m-atk').innerText =
-        //        `${myHitChance.toFixed(0)}%`;
-
-        //    document.getElementById('m-ratio').innerText =
-        //     `${monster.atk.toFixed(0)} / ${monster.def.toFixed(0)}`;
-
-
-          //   let pBonus = getPlayerDamageBonus() * 100;
-           // let mBonus = getMonsterDamageBonus() * 100;
-
-       //     document.getElementById('p-dmg-bonus').innerText =
-        //        `${pBonus >= 0 ? '+' : ''}${pBonus.toFixed(0)}%`;
-
-        //    document.getElementById('m-dmg-bonus').innerText =
-         //       `${mBonus >= 0 ? '+' : ''}${mBonus.toFixed(0)}%`;
-
-
             const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
             document.getElementById('monster-hp-bar').style.width = mPct + '%';
             document.getElementById('monster-hp-text').innerText = `${Math.ceil(monster.hp)} / ${monster.maxHp} HP`;
@@ -1651,7 +1622,7 @@ if (currentSelected) {
         const btnPotion = document.getElementById('btn-potion');
         btnPotion.disabled = potionCooldownActive;
 
-        updateAreaSelector();
+     //   updateAreaSelector();
     }
 
     function logMessage(text, type = 'system') {
