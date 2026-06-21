@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Κάθαρμα v51</title>
+    <title>Κάθαρμα v62</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -309,7 +309,7 @@
         @keyframes floatUp {
             0% { opacity: 1; transform: translateY(0) scale(1); }
             20% { transform: translateY(-12px) scale(1.2); }
-            100% { opacity: 0; transform: translateY(-55px) scale(0.85); }
+            100% { opacity: 1; transform: translateY(-55px) scale(0.85); }
         }
 
 @keyframes monsterDeathFlash {
@@ -457,7 +457,7 @@
         <span class="hotkey-hint" id="skill-status-hint"></span>
     </div>
 
-<div>Ακριβές Πλήγμα:</div>
+<div>Γρήγορο Πλήγμα:</div>
 <div class="cd-action-cell">
     <div class="cd-wrapper">
         <div id="precise-cd-bar" class="cd-inner"></div>
@@ -466,7 +466,7 @@
         id="btn-precise"
         class="inline-upgrade-btn"
         onclick="queuePreciseStrike()">
-        Σίγουρο
+        Γρήγορο
     </button>
     <span class="hotkey-hint" id="skill-status-hint-2"></span>
 </div>
@@ -1338,7 +1338,7 @@ const weaponNames = [
         fText.style.top = `0px`;
         
         parent.appendChild(fText);
-        setTimeout(() => { fText.remove(); }, 2200);
+        setTimeout(() => { fText.remove(); }, 1400);
     }
 
     function loadGame() {
@@ -1433,7 +1433,7 @@ if (currentSelected) {
 } else {
     selector.value = "0.5";
 }
-    }
+}
 
     function updateUI() {
         document.getElementById('p-name').innerText = player.name;
@@ -1520,8 +1520,10 @@ if (currentSelected) {
             const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
             document.getElementById('monster-hp-bar').style.width = mPct + '%';
             document.getElementById('monster-hp-text').innerText = `${Math.ceil(monster.hp)} / ${monster.maxHp} HP`;
+            document.getElementById('m-name').style.color = "#fff";
         } else {
             document.getElementById('m-name').innerText = "Αναζήτηση τέρατος...";
+            document.getElementById('m-name').style.color = "#888";
             document.getElementById('monster-hp-bar').style.width = '0%';
             document.getElementById('monster-hp-text').innerText = '-';
         }
@@ -1884,14 +1886,43 @@ if (currentSelected) {
     }
 
     function queuePreciseStrike() {
-        if (!inCombat || !monster || preciseCooldownActive || isSkillQueued) return;
-        isSkillQueued = true;
-        queuedSkill = skills.preciseStrike;
-        logMessage("[QUEUE] Το Ακριβές Πλήγμα προετοιμάστηκε για τον επόμενο γύρο.", 'system');
+    if (!inCombat || !monster || preciseCooldownActive) return;
+
+    let result = performPlayerAttack(skills.preciseStrike);
+
+    preciseCooldownActive = true;
+    preciseCdStart = Date.now();
+    preciseCdTimer = setTimeout(() => {
+        preciseCooldownActive = false;
         updateUI();
+    }, CD_DURATION);
+
+    resolvePlayerAttack(result);
+}
+
+function resolvePlayerAttack(result) {
+    if (result.log) logMessage(result.log, 'player');
+    if (result.damage > 0) {
+        monster.hp = Math.max(0, monster.hp - result.damage);
+        if (monster.hp > 0) hitSound();
+        createFloatingText('monster-hp-parent', `-${result.damage}`, "var(--hp-monster)");
     }
+    else {
+    createFloatingText('monster-hp-parent', 'MISS', '#ffffff');
+        }
+        
+    updateUI();
 
-
+    if (monster.hp <= 0) {
+        document.getElementById('monster-hp-parent').classList.add('monster-death');
+        setTimeout(() => {
+            document.getElementById('monster-hp-parent').classList.remove('monster-death');
+        }, 500);
+        endCombat('victory');
+        return true;
+    }
+    return false;
+}
 
 function executeCombatRound() {
     logMessage("--------", 'system');
@@ -1951,40 +1982,13 @@ if (!monster || monster.hp <= 0) {
             result = performPlayerAttack();
 
         }
-
+     
+        // Εφαρμογή ζημιάς στο τέρας
         playerDamageCalculated = result.damage;
         playerActionLog = result.log;
 
-      
-        // Εφαρμογή ζημιάς στο τέρας
-        if (playerActionLog) logMessage(playerActionLog, 'player');
-            if (playerDamageCalculated > 0) {
-                monster.hp = Math.max(0, monster.hp - playerDamageCalculated);
-
-                if (monster.hp > 0) {
-                    hitSound();
-                }
-
-                createFloatingText(
-                    'monster-hp-parent',
-                    `-${playerDamageCalculated}`,
-                    "var(--hp-monster)"
-                );
-            }
-
-        updateUI();
-
-        // ΕΛΕΓΧΟΣ: Πέθανε το τέρας; Αν ναι, η μάχη τελειώνει εδώ.
-        if (monster.hp <= 0) {
-            document.getElementById('monster-hp-parent')
-            .classList.add('monster-death');
-            setTimeout(() => {
-    document.getElementById('monster-hp-parent')
-        .classList.remove('monster-death');
-        }, 500);
-            endCombat('victory'); 
-            return; 
-        }
+        if (resolvePlayerAttack(result)) return; 
+        
 
         // ==========================================
         // ΦΑΣΗ 2: ΕΠΙΘΕΣΗ ΤΕΡΑΤΟΣ (Εκτελείται μόνο αν επέζησε)
@@ -2277,12 +2281,12 @@ else {
             queueSpecialAttack();
             return;
         }
-                if (event.code === 'Numpad5' || event.key === '6') {
+                if (event.code === 'Numpad5' || event.key === '5') {
             event.preventDefault();
             queuePreciseStrike();
             return;
         }
-        if (event.code === 'Numpad6' || event.key === '5') {
+        if (event.code === 'Numpad6' || event.key === '6') {
             event.preventDefault();
             usePotion();
             return;
