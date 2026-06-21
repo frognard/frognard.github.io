@@ -387,6 +387,13 @@
     color: #f5d142; /* χρυσό */
 }
 
+/* Ομαλή μετάβαση για το φόντο */
+body {
+    transition: background-color 0.8s ease-in-out;
+}
+
+
+
 
     </style>
 </head>
@@ -490,7 +497,7 @@
     <div>Φίλτρο Ίασης:</div>
     <div class="cd-action-cell">
         <div class="cd-wrapper"><div id="potion-cd-bar" class="cd-inner"></div></div>
-        <button id="btn-potion" class="inline-upgrade-btn" onclick="usePotion()">Πιές</button>
+        <button id="btn-potion" class="inline-upgrade-btn" onclick="usePotion()">Πιές [6]</button>
         <span class="hotkey-hint"></span>
     </div>
     
@@ -580,37 +587,33 @@ function getMonsterDamageBonus() {
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let soundEnabled = true;
 
+//  const now = audioCtx.currentTime;
 
 function monsterDeathSound() {
-
     if (!soundEnabled) return;
-
-
     const now = audioCtx.currentTime;
 
-    [1100, 1650].forEach((freq, i) => {
-
+    // Η πρώτη νότα είναι πιο αιχμηρή, η δεύτερη είναι το μπάσο βάθος
+    [400, 200].forEach((freq, i) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
 
-        osc.type = "triangle";
+        osc.type = "sine"; 
+        const startTime = now + i * 0.06; // Αισθητό κενό ανάμεσα στα δύο σκασίματα
+        const duration = 0.14; 
 
-        osc.frequency.setValueAtTime(freq, now + i * 0.025);
+        osc.frequency.setValueAtTime(freq, startTime);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.4, startTime + duration);
 
-        gain.gain.setValueAtTime(0.5, now + i * 0.025);
-        gain.gain.exponentialRampToValueAtTime(
-            0.0001,
-            now + i * 0.025 + 0.10
-        );
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.3, startTime + 0.005); 
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-
-        osc.start(now + i * 0.025);
-        osc.stop(now + i * 0.025 + 0.10);
-
+        osc.start(startTime);
+        osc.stop(startTime + duration);
     });
-
 }
 
 function playerDeathSound() {
@@ -1591,13 +1594,13 @@ if (currentSelected) {
                     btnHuntRetreat.innerText = "Υποχώρηση!";
                     btnHuntRetreat.classList.add('skill-queued');
                 } else {
-                    btnHuntRetreat.innerText = "Υποχώρηση";
+                    btnHuntRetreat.innerText = "Υποχώρηση [↵]";
                     btnHuntRetreat.classList.remove('skill-queued');
                 }
 
             } else {
                 contextLabel.innerText = "Έναρξη Κυνηγιού";
-                btnHuntRetreat.innerText = "Σκότωσε!";
+                btnHuntRetreat.innerText = "Σκότωσε! [↵]";
                 btnHuntRetreat.classList.remove('skill-queued');
             }
 
@@ -1611,7 +1614,7 @@ if (currentSelected) {
             }
             else {
                 btnSkill.classList.remove('skill-queued');
-                btnSkill.innerText = "Χτύπα";
+                btnSkill.innerText = "Χτύπα [4]";
             }
 
 
@@ -1625,7 +1628,7 @@ if (currentSelected) {
             }
             else {
                 btnPrecise.classList.remove('skill-queued');
-                btnPrecise.innerText = "Χτύπα";
+                btnPrecise.innerText = "Χτύπα [5]";
             }
 
         const btnPotion = document.getElementById('btn-potion');
@@ -1674,26 +1677,14 @@ if (currentSelected) {
         
     logMessage("...");
 
-    logMessage("Όπλα και πανοπλίες μπορούν να αγοραστούν στην πόλη. Μαγικά αντικείμενα όχι.", "system");
+    logMessage("Όπλα και πανοπλίες μπορούν να αγοραστούν στον τεκέ. Μαγικά αντικείμενα όχι.", "system");
 
     logMessage("...");
 
     logMessage("Αν πεθάνεις χάνεις 20% XP και 20% χρυσό.", "system");
 
-    logMessage("Στην πόλη αναπληρώνεις ζωή σταδιακά.", "system");
-
-    logMessage("...");
+    logMessage("Στον τεκέ αναπληρώνεις ζωή σταδιακά.", "system");
     
-    logMessage("Συντομεύσεις πληκτρολογίου", "system");
-    
-    logMessage("• NumEnter : Έναρξη κυνηγιού / Υποχώρηση.", "system");
-
-    logMessage("• Num4 : Προετοιμασία Ισχυρού Πλήγματος.", "system");
-
-    logMessage("• Num5 : Άμεσο Πλήγμα.", "system");
-
-    logMessage("• Num6 : Χρήση Φίλτρου Ίασης.", "system");
-
     logMessage("==============================", "system");
 }
 
@@ -1804,7 +1795,11 @@ if (currentSelected) {
         document.getElementById('p-name').blur();
         stopTownRegen(); 
         currentSelectedLevel = parseFloat(document.getElementById('area-selector').value);
-        
+
+    
+    saveGame();
+    updateUI();
+
         inCombat = true;
         isAttemptingRetreat = false;
         isSkillQueued = false;
@@ -1960,7 +1955,7 @@ function resolvePlayerAttack(result) {
         createFloatingText('monster-hp-parent', `-${result.damage}`, "var(--hp-monster)");
     }
     else {
-    createFloatingText('monster-hp-parent', 'MISS', '#ffffff');
+    createFloatingText('monster-hp-parent', 'ΑΠΕΦΥΓΕ', '#ffffff');
         }
         
     updateUI();
@@ -2050,7 +2045,7 @@ function executeCombatRound() {
         if (monster.hp > 0) hitSound();
         createFloatingText('monster-hp-parent', `-${result.damage}`, "var(--hp-monster)");
     } else {
-        createFloatingText('monster-hp-parent', 'MISS', '#ffffff');
+        createFloatingText('monster-hp-parent', 'ΑΠΕΦΥΓΕ', '#ffffff');
     }
 
     // ΣΥΓΚΕΚΡΙΜΕΝΟΣ ΕΛΕΓΧΟΣ: Αν χρησιμοποιήθηκε το Άμεσο Πλήγμα και το τέρας πέθανε,
@@ -2069,7 +2064,7 @@ function executeCombatRound() {
         player.hp = Math.max(0, player.hp - monsterDamageCalculated);
         createFloatingText('player-hp-parent', `-${monsterDamageCalculated}`, "var(--hp-monster)");
     } else {
-        createFloatingText('player-hp-parent', 'DODGED', "var(--hp-player)");
+        createFloatingText('player-hp-parent', 'ΑΠΕΦΥΓΕΣ', "var(--hp-player)");
     }
 
     updateUI();
@@ -2245,6 +2240,9 @@ else {
         document.getElementById('combat-interface').classList.add('hidden');
         logMessage("Υποχώρηση στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
         player.hp = Math.round(getPlayerMaxHp() * 0.10);
+        // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
+        createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
+        
         
         updateUI();
 
