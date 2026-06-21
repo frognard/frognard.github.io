@@ -29,7 +29,7 @@
 
         #game-container {
             width: 100%;
-            max-width: 650px;
+            max-width: 500px;
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
             padding: 20px;
@@ -345,9 +345,26 @@
     animation: monsterDeathFlash 0.5s ease-out forwards;
 }
 
-.magic-row{
-    padding-top: 12px;
-    padding-bottom: 12px;
+.equipment-row{
+    display:grid;
+    grid-template-columns: 100px 1fr 100px;
+    align-items:center;
+}
+
+.equip-label{
+    text-align:center;
+  /*  border-right: 1px solid #555; */
+}
+
+.equip-name{
+    text-align:center;
+  /*     border-right: 1px solid #555; */
+}
+
+.equip-tier{
+    text-align:center;
+    font-weight:bold;
+    color:var(--text-main);
 }
 
 @keyframes itemUpgradeFlash {
@@ -459,28 +476,43 @@ body {
 </div>
 
         <div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
-            <div class="stat-row" id="stat-atk-box">
-                <div>Όπλο: <span id="eq-weapon" style="color: #ec6868;">Γυμνά Χέρια</span> <span id="p-wep-bonus" class="log-system"></span></div>
-                <button id="btn-upgrade-weapon" class="inline-upgrade-btn" onclick="upgradeEquipment('weapon')">Up</button>
+            <div class="stat-row equipment-row" id="stat-atk-box">
+                <div class="equip-label" style="font-weight:bold;">Όπλο</div>
+                <div class="equip-name">
+                    <span id="eq-weapon" style="color: #ec6868;">Γυμνά Χέρια</span>
+                </div>
+                <div class="equip-tier">
+                    <span id="p-wep-bonus" style="color: #ec6868;"></span>
+                </div>
             </div>
-            <div class="stat-row" id="stat-def-box">
-                <div>Πανοπλία: <span id="eq-armor" style="color: #6b9fec;">Κουρέλια</span> <span id="p-arm-bonus" class="log-system"></span></div>
-                <button id="btn-upgrade-armor" class="inline-upgrade-btn" onclick="upgradeEquipment('armor')">Up</button>
+            <div class="stat-row equipment-row" id="stat-def-box">
+        <div class="equip-label" style="font-weight:bold;">Πανοπλία</div>
+            <div class="equip-name">
+                <span id="eq-armor" style="color: #6b9fec;">Κουρέλια</span>
             </div>
-            <div class="stat-row magic-row" id="stat-magic-box">
-                <div>Μαγικό: <span id="eq-magic" style="color: #c36ae9;">Κανένα</span> <span id="p-mag-bonus" class="log-system"></span></div>
+            <div class="equip-tier">
+                <span id="p-arm-bonus" style="color: #6b9fec;"></span>
             </div>
         </div>
+            <div class="stat-row equipment-row" id="stat-magic-box">
+                <div class="equip-label" style="font-weight:bold;">Μαγικό</div>
+                <div class="equip-name">
+                    <span id="eq-magic" style="color: #b57edc;">Χωρίς Φυλαχτό</span>
+                </div>
+                <div class="equip-tier">
+                    <span id="p-mag-bonus" style="color: #b57edc;"></span>
+                </div>
+            </div>
         
         <div class="cooldown-grid">
-    <div>Ισχυρό Πλήγμα:</div>
+    <div>Κατραπακιά:</div>
     <div class="cd-action-cell">
         <div class="cd-wrapper"><div id="skill-cd-bar" class="cd-inner"></div></div>
         <button id="btn-skill" class="inline-upgrade-btn" onclick="queueSpecialAttack()">Ισχυρό</button>
         <span class="hotkey-hint" id="skill-status-hint"></span>
     </div>
 
-<div>Άμεσο Πλήγμα:</div>
+<div>Εκτέλεση:</div>
 <div class="cd-action-cell">
     <div class="cd-wrapper">
         <div id="precise-cd-bar" class="cd-inner"></div>
@@ -494,7 +526,7 @@ body {
     <span class="hotkey-hint" id="skill-status-hint-2"></span>
 </div>
 
-    <div>Φίλτρο Ίασης:</div>
+    <div>Μπύρα:</div>
     <div class="cd-action-cell">
         <div class="cd-wrapper"><div id="potion-cd-bar" class="cd-inner"></div></div>
         <button id="btn-potion" class="inline-upgrade-btn" onclick="usePotion()">Πιές [6]</button>
@@ -575,6 +607,11 @@ body {
 
 
 <script>
+
+
+
+
+
 
 
 function getPlayerDamageBonus() {
@@ -1327,14 +1364,16 @@ function getPlayerTitle(level) {
 
     const skills = {
     heavyStrike: {
-        name: "Ισχυρό Πλήγμα",
+        name: "Κατραπακιά",
         multiplier: 2,
         hitChance: 80
     },
     preciseStrike: {
-        name: "Άμεσο Πλήγμα",
+        name: "Εκτέλεση",
         multiplier: 1.0,
-        hitChance: 100
+        hitChance: 80,
+        fixedDice: 4,
+        executeThreshold: 0.20
     }
 };
 
@@ -1348,8 +1387,8 @@ function getPlayerTitle(level) {
     function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 2.4)); }
   
     // cost armor kai weapon: ligo pio megalos ek8eths apo to gold gain, giati ta levels megalwnoun se xrono
-    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.9)) + 1) * 75 + 0); }
-    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.9)) + 1) * 75 + 0); }
+    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
+    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
     
     function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 2)); }
 
@@ -1469,9 +1508,12 @@ if (currentSelected) {
         document.getElementById('p-level').innerText = player.level;
         document.getElementById('p-title').innerText = getPlayerTitle(player.level);
       //  document.getElementById('p-atk').innerText = getPlayerAtk().toFixed(0);
-        document.getElementById('p-wep-bonus').innerText = player.weapon.power > 0 ? `(T${player.weapon.power})` : '';
-      //  document.getElementById('p-def').innerText = getPlayerDef().toFixed(0);
-        document.getElementById('p-arm-bonus').innerText = player.armor.power > 0 ? `(T${player.armor.power})` : '';
+        document.getElementById('p-wep-bonus').innerText =
+            `T${player.weapon.power}`;
+        document.getElementById('p-arm-bonus').innerText =
+            `T${player.armor.power}`;
+        document.getElementById('p-mag-bonus').innerText =
+            `T${player.magic.power}`;
         document.getElementById('p-xp').innerText = player.xp;
         document.getElementById('p-next-xp').innerText = player.nextXp;
         document.getElementById('p-gold').innerText = player.gold;
@@ -1479,19 +1521,19 @@ if (currentSelected) {
         document.getElementById('eq-weapon').innerText = player.weapon.name;
         document.getElementById('eq-armor').innerText = player.armor.name;
         document.getElementById('eq-magic').innerText = player.magic.name;
-        document.getElementById('p-mag-bonus').innerText = player.magic.power > 0 ? `(T${player.magic.power})` : '';
+
 
         let wCost = getWeaponUpgradeCost(player.weapon.power);
         let aCost = getArmorUpgradeCost(player.armor.power);  
         
-        const btnWep = document.getElementById('btn-upgrade-weapon');
-        const btnArm = document.getElementById('btn-upgrade-armor');
+      //  const btnWep = document.getElementById('btn-upgrade-weapon');
+      //  const btnArm = document.getElementById('btn-upgrade-armor');
         
-        btnWep.innerText = `Up (${wCost}g)`;
-        btnArm.innerText = `Up (${aCost}g)`;
+     //   btnWep.innerText = `Up (${wCost}g)`;
+     //   btnArm.innerText = `Up (${aCost}g)`;
 
-        btnWep.disabled = inCombat || player.gold < wCost;
-        btnArm.disabled = inCombat || player.gold < aCost;
+     //   btnWep.disabled = inCombat || player.gold < wCost;
+      //  btnArm.disabled = inCombat || player.gold < aCost;
 
         const xpPct = Math.max(0, Math.min(100, (player.xp / player.nextXp) * 100));
         document.getElementById('p-xp-bar').style.width = xpPct + '%';
@@ -1574,7 +1616,7 @@ if (currentSelected) {
                 }
 
             } else {
-                contextLabel.innerText = "Έναρξη Κυνηγιού";
+                contextLabel.innerText = "Βγες παγανιά:";
                 btnHuntRetreat.innerText = "Σκότωσε! [↵]";
                 btnHuntRetreat.classList.remove('skill-queued');
             }
@@ -1589,13 +1631,13 @@ if (currentSelected) {
             }
             else {
                 btnSkill.classList.remove('skill-queued');
-                btnSkill.innerText = "Χτύπα [4]";
+                btnSkill.innerText = "Βάρα [4]";
             }
 
 
             const btnPrecise = document.getElementById('btn-precise');
 
-            btnPrecise.disabled = !inCombat || !monster || preciseCooldownActive;
+            btnPrecise.disabled = !inCombat || !monster || monster.hp > monster.maxHp * skills.preciseStrike.executeThreshold || preciseCooldownActive; 
 
             if (isSkillQueued && queuedSkill === skills.preciseStrike) {
                 btnPrecise.classList.add('skill-queued');
@@ -1603,7 +1645,7 @@ if (currentSelected) {
             }
             else {
                 btnPrecise.classList.remove('skill-queued');
-                btnPrecise.innerText = "Χτύπα [5]";
+                btnPrecise.innerText = "Χώσε [5]";
             }
 
         const btnPotion = document.getElementById('btn-potion');
@@ -1656,7 +1698,7 @@ if (currentSelected) {
 
     logMessage("...");
 
-    logMessage("Αν πεθάνεις χάνεις 20% XP και 20% χρυσό.", "system");
+    logMessage("Αν πεθάνεις χάνεις 10% XP και 10% χρυσό.", "system");
 
     logMessage("Στον τεκέ αναπληρώνεις ζωή σταδιακά.", "system");
     
@@ -1737,7 +1779,7 @@ if (currentSelected) {
         updateCooldownBars();
         updateUI();
     }
-
+//
     function upgradeEquipment(type) {
         if (inCombat) return;
         let currentPower = player[type].power;
@@ -1794,7 +1836,7 @@ if (currentSelected) {
         let lvl = currentSelectedLevel;
         let baseAtk = 10 + lvl + lvl * 1 ;
         let baseDef = 10 + lvl + lvl * 1 ;
-        let baseHp = (lvl * 120)
+        let baseHp = (lvl * 90)
         let variant = 'normal';
 
         if (Math.random() < 0.15) {
@@ -1852,8 +1894,13 @@ if (currentSelected) {
         : 0.5 + 0.5 * Math.exp(0.08 * diff);
     }
 
-    function rollBaseDamage() {
-        let d6 = Math.floor(Math.random() * 6) + 1;
+    function rollBaseDamage(fixedDice = null) {
+        let d6;
+        if (fixedDice !== null) {
+            d6 = fixedDice;
+        } else {
+            d6 = Math.floor(Math.random() * 6) + 1;
+        }
         let diff = getPlayerAtk() - monster.def;
         let dmgModifier = calcDmgModifier(diff);
         let dmg = d6 * 5 * player.level * dmgModifier;
@@ -1876,11 +1923,12 @@ if (currentSelected) {
             }
 
             // βασικό damage
-            let damage = rollBaseDamage();
+            let damage = rollBaseDamage(skill?.fixedDice);
 
             // skill modifier
+            
             if (skill) {
-
+               
                 damage = Math.round(damage * skill.multiplier);
 
                 if (skill.sound)
@@ -1903,12 +1951,13 @@ if (currentSelected) {
         if (!inCombat || !monster || skillCooldownActive || isSkillQueued) return;
         isSkillQueued = true;
         queuedSkill = skills.heavyStrike;
-        logMessage("[QUEUE] Το Ισχυρό Πλήγμα προετοιμάστηκε για τον επόμενο γύρο.", 'system');
+        logMessage("[QUEUE] Η Κατραπακιά προετοιμάστηκε για τον επόμενο γύρο.", 'system');
         updateUI();
     }
 
     function queuePreciseStrike() {
     if (!inCombat || !monster || preciseCooldownActive) return;
+    if (monster.hp > monster.maxHp * skills.preciseStrike.executeThreshold) return;
 
     let result = performPlayerAttack(skills.preciseStrike);
 
@@ -2080,10 +2129,13 @@ function executeCombatRound() {
    
 
     if (rolledTier > player[type].power) {
-
+        let oldTier = player[type].power;
         player[type] = { name: itemName, power: rolledTier };
 
-        logMessage(`[EQUIP] Αναβάθμιση εξοπλισμού!`, 'victory');
+        logMessage(
+         `[EQUIP] Αναβάθμιση εξοπλισμού! (T${oldTier} → T${rolledTier})`,
+         'victory'
+                 );
 
         let targetBox =
             type === 'weapon' ? 'stat-atk-box' :
@@ -2144,7 +2196,7 @@ function executeCombatRound() {
             // Υπολογισμός χρυσού με bonus για τα μη-normal τέρατα
             let d6Gold = Math.floor(Math.random() * 6) + 1;
             let goldMultiplier = (monster.variant !== 'normal') ? 2 : 1;
-            let gainedGold = Math.floor(d6Gold * (monster.level ** 1.8) * goldMultiplier);
+            let gainedGold = Math.floor(d6Gold * (monster.level ** 1.3) * goldMultiplier);
             
             player.gold += gainedGold;
             sessionGold += gainedGold;
@@ -2269,8 +2321,8 @@ else {
     }
 
     function applyDefeatPenalties() {
-        let xpLoss = Math.floor(player.xp * 0.20);
-        let goldLoss = Math.floor(player.gold * 0.20);
+        let xpLoss = Math.floor(player.xp * 0.10);
+        let goldLoss = Math.floor(player.gold * 0.10);
         
         player.xp = Math.max(0, player.xp - xpLoss);
         player.gold = Math.max(0, player.gold - goldLoss);
