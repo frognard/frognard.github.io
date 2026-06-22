@@ -1365,14 +1365,14 @@ function getPlayerTitle(level) {
     const skills = {
     heavyStrike: {
         name: "Κατραπακιά",
-        multiplier: 2,
+        multiplier: 2.5,
         hitChance: 80
     },
     preciseStrike: {
         name: "Εκτέλεση",
         multiplier: 1.0,
         hitChance: 80,
-        fixedDice: 4,
+        fixedDice: 5,
         executeThreshold: 0.20
     }
 };
@@ -1579,10 +1579,10 @@ if (currentSelected) {
                 contextLabel.innerText = "Υποχώρηση:";
 
                 if (isAttemptingRetreat) {
-                    btnHuntRetreat.innerText = "Υποχώρηση!";
+                    btnHuntRetreat.innerText = "Τρέξε!";
                     btnHuntRetreat.classList.add('skill-queued');
                 } else {
-                    btnHuntRetreat.innerText = "Υποχώρηση [↵]";
+                    btnHuntRetreat.innerText = "Τρέξε! [↵]";
                     btnHuntRetreat.classList.remove('skill-queued');
                 }
 
@@ -1805,8 +1805,8 @@ if (currentSelected) {
 
     function spawnMonster() {
         let lvl = currentSelectedLevel;
-        let baseAtk = 10 + lvl + lvl * 1 ;
-        let baseDef = 10 + lvl + lvl * 1 ;
+        let baseAtk = 10 + (lvl-2) + (lvl-2);
+        let baseDef = 10 + (lvl-2) + (lvl-2) ;
         let baseHp = (lvl * 90)
         let variant = 'normal';
 
@@ -2237,7 +2237,7 @@ else {
         startTownRegen();
         document.getElementById('town-interface').classList.remove('hidden');
         document.getElementById('combat-interface').classList.add('hidden');
-        logMessage("Υποχώρηση στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
+        logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
         player.hp = Math.round(getPlayerMaxHp() * 0.10);
         // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
         createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
@@ -2323,7 +2323,7 @@ else {
         let pct = Math.floor(Math.random() * 41) + 10; 
         let heal = Math.round(maxHp * (pct / 100));
         player.hp = Math.min(maxHp, player.hp + heal);
-        logMessage(`Αναπλήρωσες +${heal} HP μέσω Φίλτρου (Αναπλήρωση: ${pct}%).`, 'player');
+        logMessage(`Έσφιξες μια μπύρα για +${heal} HP! (Αναπλήρωση: ${pct}%).`, 'player');
         potionSound();
 
         createFloatingText('player-hp-parent', `+${heal} HP`, "var(--hp-player)");
