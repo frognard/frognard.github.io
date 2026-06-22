@@ -1435,7 +1435,7 @@ function getPlayerTitle(level) {
     preciseStrike: {
         name: "Εκτέλεση",
         multiplier: 1.0,
-        hitChance: 80,
+        hitChance: 100,
         fixedDice: 5,
         executeThreshold: 0.20
     }
@@ -1445,7 +1445,7 @@ function getPlayerTitle(level) {
     function getPlayerAtk() { return 10 + player.weapon.power + player.magic.power; }
     function getPlayerDef() { return 10 + player.armor.power + player.magic.power; }
 
-    function getPlayerMaxHp() { return Math.floor(player.level * 120); }
+    function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
    // XP REQ FORMULA - old and harder AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
     function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 2.4)); }
@@ -1892,7 +1892,7 @@ function updateCooldownBars() {
         let lvl = currentSelectedLevel;
         let baseAtk = 10 + (lvl-1) + (lvl-1);
         let baseDef = 10 + (lvl-1) + (lvl-1) ;
-        let baseHp = (lvl * 90)
+        let baseHp = (lvl * 100)
         let variant = 'normal';
 
         if (Math.random() < 0.15) {
