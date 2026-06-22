@@ -447,6 +447,19 @@
     100% { background-color: #171717; }
 }
 
+@keyframes xpLevelFlash {
+    0%   { background-color: #ffffff; }
+    50%  {
+        background-color: #ffffff;
+        box-shadow: 0 0 15px #ffffff;
+    }
+    100% { background-color: #ffffff; }
+}
+
+.xp-level-flash {
+    animation: xpLevelFlash 0.7s ease-out 2;
+}
+
 
 .item-upgrade-flash {
     animation: monsterDeathFlash 0.5s ease-out 2;
@@ -1424,7 +1437,7 @@ function getPlayerTitle(level) {
         baseDef: 10,
         hp: 100, 
         xp: 0,
-        nextXp: 50,
+        nextXp: 5,
         gold: 0,
         weapon: { name: "Σπασμένο Κλαδί", power: 1 },
         armor: { name: "Φθαρμένα Ρούχα", power: 1 },
@@ -1479,7 +1492,7 @@ function getPlayerTitle(level) {
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
    // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to eqpment
-    function calculateNextXpRequirement(lvl) { return Math.round(75* Math.pow(lvl, 2.4)); }
+    function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 2.4)); }
   
     // cost armor kai weapon: ligo pio megalos ek8eths apo to gold gain, giati ta levels megalwnoun se xrono
     function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
@@ -1520,6 +1533,15 @@ function getPlayerTitle(level) {
                 player.weapon.name = getItemName('weapon', player.weapon.power);
                 player.armor.name = getItemName('armor', player.armor.power);
                 player.magic.name = getItemName('magic', player.magic.power);
+                const savedMonsterLevel =
+    localStorage.getItem('selectedMonsterLevel');
+
+if (savedMonsterLevel) {
+    currentSelectedLevel = parseFloat(savedMonsterLevel);
+
+    document.getElementById('area-selector').value =
+        savedMonsterLevel;
+}
                 logMessage("Η πρόοδός φορτώθηκε αυτόματα.", 'system');
             } catch (e) {
                 logMessage("Σφάλμα κατά τη φόρτωση του save.", 'system');
@@ -1527,8 +1549,21 @@ function getPlayerTitle(level) {
         }
     }
 
-    function saveGame() { localStorage.setItem('minimal_rpg_save', JSON.stringify(player)); }
-    function resetGame() { if (confirm("Διαγραφή χαρακτήρα;")) { localStorage.removeItem('minimal_rpg_save'); location.reload(); } }
+    function saveGame() {
+    localStorage.setItem('minimal_rpg_save', JSON.stringify(player));
+
+    const selector = document.getElementById('area-selector');
+    if (selector) {
+        localStorage.setItem('selectedMonsterLevel', selector.value);
+    }
+}
+    function resetGame() {
+    if (confirm("Διαγραφή χαρακτήρα;")) {
+        localStorage.removeItem('minimal_rpg_save');
+        localStorage.removeItem('selectedMonsterLevel');
+        location.reload();
+    }
+}
 
     function savePlayerName() {
         const nameEl = document.getElementById('p-name');
@@ -1569,10 +1604,20 @@ function resetRates(){
 
 setInterval(updateRates,1000);
 
-    updateAreaSelector();
-    updateUI();
-    startTownRegen(); 
-    updateCooldownBars(); 
+setInterval(updateRates,1000);
+
+updateAreaSelector();
+
+const savedMonsterLevel = localStorage.getItem('selectedMonsterLevel');
+
+if (savedMonsterLevel) {
+    document.getElementById('area-selector').value = savedMonsterLevel;
+    currentSelectedLevel = parseFloat(savedMonsterLevel);
+}
+
+updateUI();
+startTownRegen();
+updateCooldownBars();
 
     function updateAreaSelector() {
         const selector = document.getElementById('area-selector');
@@ -1583,10 +1628,10 @@ setInterval(updateRates,1000);
         const currentSelected = selector.value;
         selector.innerHTML = '';
 
-        let optHalf = document.createElement('option');
-        optHalf.value = 0.5;
-        optHalf.innerText = "[½] Μπάμπουρας";
-        selector.appendChild(optHalf);
+  //      let optHalf = document.createElement('option');
+   //     optHalf.value = 0.5;
+    //    optHalf.innerText = "[½] Μπάμπουρας";
+     //   selector.appendChild(optHalf);
 
         for (let i = 1; i <= 100; i++) {
             let opt = document.createElement('option');
@@ -1598,7 +1643,7 @@ setInterval(updateRates,1000);
 if (currentSelected) {
     selector.value = currentSelected;
 } else {
-    selector.value = "0.5";
+    selector.value = "1";
 }
 }
 
@@ -1774,7 +1819,7 @@ const btnSkill = document.getElementById('btn-skill');
     logMessage("Η ΚΑΤΡΑΠΑΚΙΑ κάνει διπλάσια ζημιά.", "system");
     logMessage("Η ΕΚΤΕΛΕΣΗ κάνει ένα άμεσο χτύπημα σε έναν ετοιμοθάνατο εχθρό.", "system");
     logMessage("Η ΜΠΥΡΑ δινει ζωή! (10-50%).", "system");
-    logMessage("Το ΤΡΕΞΙΜΟ δίνει 30% πιθ. διαφυγής κάθε γύρο, μέχρι να σκοτωθεί ο εχθρός. Σε επιστρέφει στον τεκέ.", "system");
+    logMessage("Το ΤΡΕΞΙΜΟ δίνει μια πιθανότητα διαφυγής κάθε γύρο, μέχρι να σκοτωθεί ο εχθρός. Σε επιστρέφει στον τεκέ.", "system");
 
     logMessage("...");
 
@@ -1791,7 +1836,7 @@ const btnSkill = document.getElementById('btn-skill');
         container.style.transition = 'none';
         container.style.backgroundColor = colorHex;
         void container.offsetHeight;
-        container.style.transition = 'background-color 3s ease';
+        container.style.transition = 'background-color 1.5s ease';
         container.style.backgroundColor = 'var(--panel-bg)';
     }
 
@@ -2121,7 +2166,7 @@ function executeCombatRound() {
 
 // Προσθήκη για την πιθανότητα υποχώρησης
 if (isAttemptingRetreat) {
-    if (Math.random() < 0.30) {
+    if (Math.random() < 0.25) {
        // logMessage("Ξέφυγες! Γυρίζεις εξουθενωμένος στον Τεκέ.", 'retreat');
         // Προσομοίωση νίκης για να γίνει η διαφυγή με ασφάλεια
       forceRetreat();
@@ -2372,6 +2417,8 @@ else {
             }
             player.hp = getPlayerMaxHp();
             logMessage(`*** ΑΠΟΚΤΗΣΗ ΕΠΙΠΕΔΟΥ ${player.level}! ***`, 'victory');
+            levelUpSound();
+            triggerSmoothTransition('#113f11');
         }
 
             saveGame();
