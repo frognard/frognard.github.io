@@ -2098,6 +2098,8 @@ function forceRetreat() {
     // 3. Επαναφορά μεταβλητών κατάστασης
     inCombat = false;
     isAttemptingRetreat = false;
+    isSkillQueued = false;
+    queuedSkill = null;
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
     logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
