@@ -1324,16 +1324,16 @@ function getPlayerTitle(level) {
 
     let player = {
         name: "Κάθαρμα",
-        level: 1,
+        level: 30,
         baseAtk: 10,
         baseDef: 10,
         hp: 100, 
         xp: 0,
         nextXp: 50,
         gold: 0,
-        weapon: { name: "Σπασμένο Κλαδί", power: 1 },
-        armor: { name: "Φθαρμένα Ρούχα", power: 1 },
-        magic: { name: "Ξύλινο Φυλακτό", power: 1 },
+        weapon: { name: "Σπασμένο Κλαδί", power: 30 },
+        armor: { name: "Φθαρμένα Ρούχα", power: 30 },
+        magic: { name: "Ξύλινο Φυλακτό", power: 30 },
         maxUnlockedLevel: 100
     };
 
@@ -1365,7 +1365,7 @@ function getPlayerTitle(level) {
     const skills = {
     heavyStrike: {
         name: "Κατραπακιά",
-        multiplier: 2.5,
+        multiplier: 2,
         hitChance: 80
     },
     preciseStrike: {
@@ -1805,8 +1805,8 @@ if (currentSelected) {
 
     function spawnMonster() {
         let lvl = currentSelectedLevel;
-        let baseAtk = 10 + (lvl-2) + (lvl-2);
-        let baseDef = 10 + (lvl-2) + (lvl-2) ;
+        let baseAtk = 10 + (lvl-1) + (lvl-1);
+        let baseDef = 10 + (lvl-1) + (lvl-1) ;
         let baseHp = (lvl * 90)
         let variant = 'normal';
 
