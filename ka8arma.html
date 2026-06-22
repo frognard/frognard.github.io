@@ -2383,7 +2383,25 @@ else {
         
         player.xp = Math.max(0, player.xp - xpLoss);
         player.gold = Math.max(0, player.gold - goldLoss);
-        player.hp = 1; 
+        player.hp = 1;
+
+        //xasimo eksoplismou
+        const slots = ['weapon', 'armor', 'magic'];
+        const lostSlot = slots[Math.floor(Math.random() * slots.length)];
+        if (player[lostSlot].power > 1) {
+            player[lostSlot].power--;
+            player[lostSlot].name =
+       getItemName(lostSlot, player[lostSlot].power);
+        }
+        const slotNames = {
+            weapon: "To όπλο",
+            armor: "H πανοπλία",
+            magic: "To φυλαχτό"
+        };
+        logMessage(
+            `${slotNames[lostSlot]} υπέστη φθορά και έπεσε σε T${player[lostSlot].power}.`,
+            'monster'
+        );
         
         logMessage(`Σκοτώθηκες! Μεταφερθήκες στην πόλη με 1 HP. Απώλεια: -${goldLoss} χρυσά και -${xpLoss} XP.`, 'monster');
         triggerSmoothTransition('#4a1515');
