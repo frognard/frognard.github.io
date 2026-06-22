@@ -1437,7 +1437,7 @@ function getPlayerTitle(level) {
         baseDef: 10,
         hp: 100, 
         xp: 0,
-        nextXp: 5,
+        nextXp: 60,
         gold: 0,
         weapon: { name: "Σπασμένο Κλαδί", power: 1 },
         armor: { name: "Φθαρμένα Ρούχα", power: 1 },
@@ -1492,7 +1492,7 @@ function getPlayerTitle(level) {
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
    // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to eqpment
-    function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 2.4)); }
+    function calculateNextXpRequirement(lvl) { return Math.round(60* Math.pow(lvl, 2.4)); }
   
     // cost armor kai weapon: ligo pio megalos ek8eths apo to gold gain, giati ta levels megalwnoun se xrono
     function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
