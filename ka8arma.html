@@ -2100,13 +2100,13 @@ function executeCombatRound() {
     function handleEquipmentDrop(type, rolledTier) {
     let itemName = getItemName(type, rolledTier);
     logMessage(`[DROP] Στον εχθρό βρέθηκε: ${itemName}!`, 'victory');
-    itemDropSound();
+    
    
 
     if (rolledTier > player[type].power) {
         let oldTier = player[type].power;
         player[type] = { name: itemName, power: rolledTier };
-
+        itemDropSound();
         logMessage(
          `[EQUIP] Αναβάθμιση εξοπλισμού! (T${oldTier} → T${rolledTier})`,
          'victory'
