@@ -102,7 +102,7 @@
         #p-xp-bar {
             height: 100%;
             width: 0%;
-            background-color: var(--accent-gold);
+            background-color: #40a8ee;
             transition: width 0.2s ease;
         }
 
@@ -245,7 +245,7 @@
     cursor:pointer;
 
     --fill:100%;
-    --ready-color:#2d3466;
+    --ready-color:#2c3e50;
 }
 
 .skill-btn::before{
@@ -287,14 +287,12 @@
 .skill-btn:disabled{
     opacity:1;
 }      
-
-
         .cd-inner.active {
             background-color: var(--hp-monster);
         }
 
         #log {
-            height: 160px;
+            height: 200px;
             border: 1px solid var(--border-color);
             background-color: #0a0a0a;
             padding: 10px;
@@ -385,6 +383,8 @@
             text-shadow: 1px 1px 3px #000, -1px -1px 3px #000;
         }
 
+
+
         @keyframes floatUp {
             0% { opacity: 1; transform: translateY(0) scale(1); }
             20% { transform: translateY(-12px) scale(1.2); }
@@ -467,8 +467,11 @@
     color: #6b9fec; /* γαλάζιο */
 }
 
-.label-xp {
-    color: #c36ae9; /* μωβ */
+
+
+.xp-value {
+    color: #40a8ee; /* Το γαλάζιο χρώμα της επιλογής σας */
+    font-weight: bold; /* Προαιρετικό, για να ξεχωρίζουν οι αριθμοί */
 }
 
 .label-gold {
@@ -509,29 +512,7 @@ body {
         </h3>
 </h3>
         
-<div style="display:flex;align-items:center;gap:4px;">
 
-    <label style="display:flex;align-items:center;gap:4px;">
-    <input
-        type="checkbox"
-        id="sound-toggle"
-        checked
-        onchange="soundEnabled=this.checked">
-    🔊
-</label>
-
-    <button
-        style="background:#1e7d32;color:white;border:1px solid #2ecc71;
-               width:32px;height:32px;padding:0;font-weight:bold;"
-        onclick="showRules()">
-        ?
-    </button>
-
-    <button class="btn-delete-save" onclick="resetGame()">
-        Διαγραφή Save
-    </button>
-
-</div>
 
     </div>
     
@@ -546,11 +527,11 @@ body {
 
 <div class="stats-grid">
     <div class="stat-row">
-        <div><b>XP:</b> <span id="p-xp">0</span> / <span id="p-next-xp">50</span></div>
+        <div><b>XP:</b> <span id="p-xp" class="xp-value">0</span> / <span id="p-next-xp" class="xp-value">50</span></div>
     </div>
-        <div class="stat-row" id="stat-gold-box" style="display:flex;justify-content:flex-end;">
-            <div><b>Χρυσός:</b> <span id="p-gold" class="gold">0</span></div>
-        </div>
+    <div class="stat-row" id="stat-gold-box" style="display:flex;justify-content:flex-end;">
+        <div><b>Χρυσός:</b> <span id="p-gold" class="gold">0</span></div>
+    </div>
 </div>
 
         <div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
@@ -566,10 +547,10 @@ body {
             <div class="stat-row equipment-row" id="stat-def-box">
         <div class="equip-label" style="font-weight:bold;">Πανοπλία</div>
             <div class="equip-name">
-                <span id="eq-armor" style="color: #6b9fec;">Κουρέλια</span>
+                <span id="eq-armor" style="color: #66ccff;">Κουρέλια</span>
             </div>
             <div class="equip-tier">
-                <span id="p-arm-bonus" style="color: #6b9fec;"></span>
+                <span id="p-arm-bonus" style="color: #66ccff;"></span>
             </div>
         </div>
             <div class="stat-row equipment-row" id="stat-magic-box">
@@ -611,7 +592,7 @@ body {
     </div>
 
 <div id="town-interface">
-        <h3 style="color: #ee8916;">Τεκές του Ζαλαδούρα</h3>
+        <h3 style="color: #c68642;">Τεκές του Ζαλαδούρα</h3>
         <div class="area-select-container">
             <label for="area-selector">Κυνηγότοπος:</label>
             <select id="area-selector"></select>
@@ -657,14 +638,36 @@ body {
     <main style="margin-top: 20px;">
         
         <div id="log"></div>
-        
-        <div class="rates-row">
+<div style="display:flex; align-items:center; gap:8px; justify-content:flex-end;">
+
+    <label style="display:flex; align-items:center; gap:4px; cursor:pointer;">
+        <input 
+            type="checkbox" 
+            id="sound-toggle" 
+            checked 
+            onchange="soundEnabled=this.checked">
+        🔊
+    </label>
+
+    <button 
+        style="background:#1e7d32; color:white; border:1px solid #2ecc71; 
+               width:32px; height:32px; padding:0; font-weight:bold; cursor:pointer;" 
+        onclick="showRules()">
+        ?
+    </button>
+
+    <button class="btn-delete-save" onclick="resetGame()">
+        Διαγραφή Save
+    </button>
+
+</div>
+ <!--       <div class="rates-row">
             <input id="xpmin" readonly value="0 XP/m">
             <input id="gpmin" readonly value="0 GP/m">
             <button class="btn-delete-save reset-rates-btn"
                     onclick="resetRates()">↺</button>
         
-                </div>
+                </div> -->
     </main>
 </div>
 
@@ -968,6 +971,34 @@ function playerHitSound() {
     osc.start(now);
     osc.stop(now + 0.04);
 }
+
+function retreatSound() {
+    if (!soundEnabled) return;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    // Το 'sine' κύμα είναι το πιο απαλό και καθαρό, ιδανικό για "καλμ" ήχους
+    osc.type = "sine"; 
+    const now = audioCtx.currentTime;
+
+    // Ξεκινάμε από μια πιο υψηλή συχνότητα και πέφτουμε αργά, 
+    // δίνοντας μια αίσθηση "αναστεναγμού" ή απομάκρυνσης
+    osc.frequency.setValueAtTime(300, now);
+    osc.frequency.exponentialRampToValueAtTime(100, now + 0.6);
+
+    // Το gain πέφτει πολύ ομαλά για να μην ακουστεί "κλικ" ή "ποπ"
+    gain.gain.setValueAtTime(0.15, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.6);
+}
+
+
 
     const monsterNames = [
         "Γιγάντιος Αρουραίος", "Σπαθοσκώληκας", "Σκίταλος", "Κόβαλος", "Ληστής",
@@ -1633,7 +1664,7 @@ if (currentSelected) {
             document.getElementById('monster-hp-text').innerText = `${Math.ceil(monster.hp)} / ${monster.maxHp} HP`;
             document.getElementById('m-name').style.color = "#fff";
         } else {
-            document.getElementById('m-name').innerText = "Αναζήτηση τέρατος...";
+            document.getElementById('m-name').innerText = "Περιπλάνηση...";
             document.getElementById('m-name').style.color = "#888";
             document.getElementById('monster-hp-bar').style.width = '0%';
             document.getElementById('monster-hp-text').innerText = '-';
@@ -1743,7 +1774,7 @@ const btnSkill = document.getElementById('btn-skill');
     logMessage("Η ΚΑΤΡΑΠΑΚΙΑ κάνει διπλάσια ζημιά.", "system");
     logMessage("Η ΕΚΤΕΛΕΣΗ κάνει ένα άμεσο χτύπημα σε έναν ετοιμοθάνατο εχθρό.", "system");
     logMessage("Η ΜΠΥΡΑ δινει ζωή! (10-50%).", "system");
-    logMessage("Το ΤΡΕΞΙΜΟ από τη μάχη, αν ενεργοποιηθεί, γίνεται μετά το θάνατο του επόμενου εχθρού.", "system");
+    logMessage("Το ΤΡΕΞΙΜΟ δίνει 30% πιθ. διαφυγής κάθε γύρο, μέχρι να σκοτωθεί ο εχθρός. Σε επιστρέφει στον τεκέ.", "system");
 
     logMessage("...");
 
@@ -2070,6 +2101,7 @@ function forceRetreat() {
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
     logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
+    retreatSound();
     
     updateUI();
     saveGame();
@@ -2365,6 +2397,7 @@ else {
         player.hp = Math.round(getPlayerMaxHp() * 0.10);
         // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
         createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
+        retreatSound();
         
         
         updateUI();
