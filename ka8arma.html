@@ -1437,7 +1437,7 @@ function getPlayerTitle(level) {
         multiplier: 1.0,
         hitChance: 100,
         fixedDice: 5,
-        executeThreshold: 0.20
+        executeThreshold: 0.25
     }
 };
 
@@ -1447,8 +1447,8 @@ function getPlayerTitle(level) {
 
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
-   // XP REQ FORMULA - old and harder AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 2.4)); }
+   // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to eqpment
+    function calculateNextXpRequirement(lvl) { return Math.round(75* Math.pow(lvl, 2.4)); }
   
     // cost armor kai weapon: ligo pio megalos ek8eths apo to gold gain, giati ta levels megalwnoun se xrono
     function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
@@ -1682,7 +1682,7 @@ const btnSkill = document.getElementById('btn-skill');
 
             const btnPrecise = document.getElementById('btn-precise');
 
-            btnPrecise.disabled = !inCombat || !monster || monster.hp > monster.maxHp * skills.preciseStrike.executeThreshold || preciseCooldownActive; 
+            btnPrecise.disabled = !inCombat || !monster || monster.hp > monster.maxHp * skills.preciseStrike.executeThreshold || monster.hp < 1 || preciseCooldownActive; 
 
             if (isSkillQueued && queuedSkill === skills.preciseStrike) {
                 btnPrecise.classList.add('skill-queued');
@@ -1743,11 +1743,11 @@ const btnSkill = document.getElementById('btn-skill');
     logMessage("Η ΚΑΤΡΑΠΑΚΙΑ κάνει διπλάσια ζημιά.", "system");
     logMessage("Η ΕΚΤΕΛΕΣΗ κάνει ένα άμεσο χτύπημα σε έναν ετοιμοθάνατο εχθρό.", "system");
     logMessage("Η ΜΠΥΡΑ δινει ζωή! (10-50%).", "system");
-    logMessage("Το ΤΡΕΞΙΜΟ από τη μάχη, αν ενεργοποιηθεί γίνεται  μετά το θάνατο του επόμενου εχθρού.", "system");
+    logMessage("Το ΤΡΕΞΙΜΟ από τη μάχη, αν ενεργοποιηθεί, γίνεται μετά το θάνατο του επόμενου εχθρού.", "system");
 
     logMessage("...");
 
-    logMessage("Αν πεθάνεις χάνεις 10% XP και 10% χρυσό.", "system");
+    logMessage("Αν πεθάνεις χάνεις 10% XP και 10% χρυσό και ένα από τα αντεικείμενά σου πέφτει επίπεδο.", "system");
 
     logMessage("Στον τεκέ αναπληρώνεις ζωή σταδιακά.", "system");
     
