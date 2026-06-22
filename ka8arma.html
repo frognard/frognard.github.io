@@ -245,7 +245,7 @@
     cursor:pointer;
 
     --fill:100%;
-    --ready-color:#454fac;
+    --ready-color:#2d3466;
 }
 
 .skill-btn::before{
@@ -260,11 +260,11 @@
 }
 
 .hunt-btn{
-    --ready-color:#3f3f3f;      /* κόκκινο όταν λέει Σκότωσε */
+    --ready-color:#461a1a;      /* κόκκινο όταν λέει Σκότωσε */
 }
 
 .potion-btn{
-    --ready-color:#1b8550;
+    --ready-color:#0e703f;
 }
 
 .hunt-btn.retreat-ready{
@@ -2067,7 +2067,7 @@ function forceRetreat() {
     // 3. Επαναφορά μεταβλητών κατάστασης
     inCombat = false;
     isAttemptingRetreat = false;
-    
+    player.hp = Math.round(getPlayerMaxHp() * 0.10);
     logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
     
