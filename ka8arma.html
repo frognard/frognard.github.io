@@ -1649,7 +1649,7 @@ if (inCombat) {
     btnHuntRetreat.classList.add('retreat-mode');
 
     if (isAttemptingRetreat) {
-        btnHuntRetreat.innerHTML = "<span>Τρεχάλα! [↵]</span>";
+        btnHuntRetreat.innerHTML = "<span>Υποχώρηση... [↵]</span>";
         btnHuntRetreat.classList.add('skill-queued');
         btnHuntRetreat.classList.add('retreat-ready');
     }
@@ -1929,7 +1929,7 @@ function updateCooldownBars() {
         if (!inCombat) return;
         isAttemptingRetreat = !isAttemptingRetreat;
         if (isAttemptingRetreat) {
-            logMessage("Προετοιμασία διαφυγής! Η διαφυγή θα ολοκληρωθεί μετά τη μάχη.", 'retreat');
+            logMessage("Επιχειρείς να ξεφύγεις!", 'retreat');
         } else {
             logMessage("Η προσπάθεια διαφυγής ακυρώθηκε.", 'system');
         }
@@ -2051,6 +2051,30 @@ function resolvePlayerAttack(result) {
     return false;
 }
 
+function forceRetreat() {
+    // 1. ΣΤΑΜΑΤΗΜΑ του interval της μάχης
+    if (typeof combatInterval !== 'undefined') {
+        clearInterval(combatInterval);
+        combatInterval = null;
+    }
+
+    // 2. Επαναφορά του interface
+    document.getElementById('monster-hp-bar').classList.remove('monster-death');
+    startTownRegen();
+    document.getElementById('town-interface').classList.remove('hidden');
+    document.getElementById('combat-interface').classList.add('hidden');
+
+    // 3. Επαναφορά μεταβλητών κατάστασης
+    inCombat = false;
+    isAttemptingRetreat = false;
+    
+    logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
+    createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
+    
+    updateUI();
+    saveGame();
+}
+
 function executeCombatRound() {
     logMessage("--------", 'system');
     if (!inCombat) return;
@@ -2060,6 +2084,20 @@ function executeCombatRound() {
         spawnMonster();
         updateUI();
     }
+
+// Προσθήκη για την πιθανότητα υποχώρησης
+if (isAttemptingRetreat) {
+    if (Math.random() < 0.30) {
+       // logMessage("Ξέφυγες! Γυρίζεις εξουθενωμένος στον Τεκέ.", 'retreat');
+        // Προσομοίωση νίκης για να γίνει η διαφυγή με ασφάλεια
+      forceRetreat();
+      //DOCTOR
+      
+        return;
+    } else {
+        logMessage("Υποχώρηση...", 'monster');
+    }
+}
 
     // ==========================================
     // ΦΑΣΗ 1: ΥΠΟΛΟΓΙΣΜΟΣ ΕΠΙΘΕΣΕΩΝ (ταυτόχρονα)
