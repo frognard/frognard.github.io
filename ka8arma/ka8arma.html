@@ -2895,109 +2895,134 @@ function applyDefeatPenalties() {
 
     setInterval(updateCooldownBars, 100);
 
-    window.addEventListener('keydown', function(event) {
-         if (inCombat) return;
+    window.addEventListener('keydown', (event) => {
 
-    const selector = document.getElementById('area-selector');
+    // αν γράφεις όνομα, μη γίνονται hotkeys
+    const active = document.activeElement;
 
-    // Wheel Down = ίδιο με Numpad 2
-    if (event.deltaY > 0) {
+    if (
+        active &&
+        (
+            active.tagName === 'INPUT' ||
+            active.tagName === 'TEXTAREA' ||
+            active.isContentEditable
+        )
+    ) {
+        return;
+    }
+
+    const code = event.code;
+    const key = event.key;
+
+    // ENTER = Σφάξε / Υποχώρηση
+    if (
+        code === 'Enter' ||
+        code === 'NumpadEnter' ||
+        key === 'Enter'
+    ) {
+        event.preventDefault();
+
+        if (!inCombat)
+            enterCombatFromSelector();
+        else
+            toggleRetreat();
+
+        return;
+    }
+
+    // 0 = Υποχώρηση
+    if (
+        code === 'Digit0' ||
+        code === 'Numpad0' ||
+        key === '0'
+    ) {
+        event.preventDefault();
+
+        if (inCombat)
+            toggleRetreat();
+
+        return;
+    }
+
+    // 4 = Κατραπακιά
+    if (
+        code === 'Digit4' ||
+        code === 'Numpad4' ||
+        key === '4'
+    ) {
+        event.preventDefault();
+        queueSpecialAttack();
+        return;
+    }
+
+    // 5 = Εκτέλεση
+    if (
+        code === 'Digit5' ||
+        code === 'Numpad5' ||
+        key === '5'
+    ) {
+        event.preventDefault();
+        queuePreciseStrike();
+        return;
+    }
+
+    // 6 = Μπύρα
+    if (
+        code === 'Digit6' ||
+        code === 'Numpad6' ||
+        key === '6'
+    ) {
+        event.preventDefault();
+        usePotion();
+        return;
+    }
+
+    // τα παρακάτω μόνο εκτός μάχης
+    if (inCombat) return;
+
+    // επόμενο επίπεδο
+    if (
+        code === 'Digit2' ||
+        code === 'Numpad2' ||
+        key === '2'
+    ) {
+
+        event.preventDefault();
+
+        const selector = document.getElementById('area-selector');
+
         if (selector.selectedIndex < selector.options.length - 1) {
             selector.selectedIndex++;
             currentSelectedLevel = parseFloat(selector.value);
             saveGame();
             updateUI();
         }
+
+        return;
     }
 
-    // Wheel Up = ίδιο με Numpad 8
-    if (event.deltaY < 0) {
+    // προηγούμενο επίπεδο
+    if (
+        code === 'Digit8' ||
+        code === 'Numpad8' ||
+        key === '8'
+    ) {
+
+        event.preventDefault();
+
+        const selector = document.getElementById('area-selector');
+
         if (selector.selectedIndex > 0) {
             selector.selectedIndex--;
             currentSelectedLevel = parseFloat(selector.value);
             saveGame();
             updateUI();
         }
+
+        return;
     }
-        if (document.activeElement === document.getElementById('p-name')) return;
 
-        // Numpad Enter = Σφάξε
-        if (event.code === 'NumpadEnter') {
-            event.preventDefault();
-
-            if (!inCombat) {
-                enterCombatFromSelector();
-            }
-
-            return;
-        }
-
-        // Numpad 0 = Τρέξε
-        if (event.code === 'Numpad0') {
-            event.preventDefault();
-
-            if (inCombat) {
-                toggleRetreat();
-            }
-
-            return;
-        }
-        if (event.code === 'Numpad4' || event.key === '4') {
-            event.preventDefault();
-            queueSpecialAttack();
-            return;
-        }
-                if (event.code === 'Numpad5' || event.key === '5') {
-            event.preventDefault();
-            queuePreciseStrike();
-            return;
-        }
-        if (event.code === 'Numpad6' || event.key === '6') {
-            event.preventDefault();
-            usePotion();
-            return;
-        }
-
-        // Numpad 2 = επόμενο επίπεδο
-        if (event.code === 'Numpad2') {
-            event.preventDefault();
-
-            if (!inCombat) {
-                const selector = document.getElementById('area-selector');
-
-                if (selector.selectedIndex < selector.options.length - 1) {
-                    selector.selectedIndex++;
-                    currentSelectedLevel = parseFloat(selector.value);
-                    saveGame();
-                    updateUI();
-                }
-            }
-
-            return;
-        }
-
-        // Numpad 8 = προηγούμενο επίπεδο
-        if (event.code === 'Numpad8') {
-            event.preventDefault();
-
-            if (!inCombat) {
-                const selector = document.getElementById('area-selector');
-
-                if (selector.selectedIndex > 0) {
-                    selector.selectedIndex--;
-                    currentSelectedLevel = parseFloat(selector.value);
-                    saveGame();
-                    updateUI();
-                }
-            }
-
-            return;
-        }
-
-        
-
-
-    });
+});
 </script>
 
 <script>
