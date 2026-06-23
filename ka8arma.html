@@ -1730,7 +1730,7 @@ if (inCombat) {
         btnHuntRetreat.classList.add('retreat-ready');
     }
     else {
-        btnHuntRetreat.innerHTML = "<span>Τρέξε [↵]</span>";
+        btnHuntRetreat.innerHTML = "<span>Τρέξε [0]</span>";
         btnHuntRetreat.classList.remove('skill-queued');
     }
 
@@ -2003,12 +2003,12 @@ function updateCooldownBars() {
 
     function toggleRetreat() {
         if (!inCombat) return;
-        isAttemptingRetreat = !isAttemptingRetreat;
-        if (isAttemptingRetreat) {
-            logMessage("Επιχειρείς να ξεφύγεις!", 'retreat');
-        } else {
-            logMessage("Η προσπάθεια διαφυγής ακυρώθηκε.", 'system');
-        }
+
+        // Αν έχει ήδη πατηθεί, αγνόησε κάθε επόμενο πάτημα
+        if (isAttemptingRetreat) return;
+
+        isAttemptingRetreat = true;
+        logMessage("Επιχειρείς να ξεφύγεις!", 'retreat');
         updateUI();
     }
 
@@ -2572,13 +2572,25 @@ function applyDefeatPenalties() {
     window.addEventListener('keydown', function(event) {
         if (document.activeElement === document.getElementById('p-name')) return;
 
-        if (event.code === 'NumpadEnter' || event.key === 'Enter') {
-            event.preventDefault(); 
-            if (inCombat) {
-                toggleRetreat();
-            } else {
+        // Numpad Enter = Σφάξε
+        if (event.code === 'NumpadEnter') {
+            event.preventDefault();
+
+            if (!inCombat) {
                 enterCombatFromSelector();
             }
+
+            return;
+        }
+
+        // Numpad 0 = Τρέξε
+        if (event.code === 'Numpad0') {
+            event.preventDefault();
+
+            if (inCombat) {
+                toggleRetreat();
+            }
+
             return;
         }
         if (event.code === 'Numpad4' || event.key === '4') {
