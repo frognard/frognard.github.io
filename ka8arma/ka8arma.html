@@ -1938,7 +1938,10 @@ if (currentSelected) {
 }
 
     function updateUI() {
-        document.getElementById('p-name').innerText = player.name;
+        const pNameEl = document.getElementById('p-name');
+            if (document.activeElement !== pNameEl) {
+                pNameEl.innerText = player.name;
+            }
         document.getElementById('p-level').innerText = player.level;
         document.getElementById('p-title').innerText = getPlayerTitle(player.level);
       //  document.getElementById('p-atk').innerText = getPlayerAtk().toFixed(0);
@@ -2477,7 +2480,7 @@ function executeCombatRound() {
 
 // Προσθήκη για την πιθανότητα υποχώρησης
 if (isAttemptingRetreat) {
-    if (Math.random() < 0.20) {
+    if (Math.random() < 0.15) {
        // logMessage("Ξέφυγες! Γυρίζεις εξουθενωμένος στον Τεκέ.", 'retreat');
         // Προσομοίωση νίκης για να γίνει η διαφυγή με ασφάλεια
       forceRetreat();
