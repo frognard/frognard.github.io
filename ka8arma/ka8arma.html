@@ -1,12 +1,5 @@
 <!DOCTYPE html>
 <html lang="el">
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#000000">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Κάθαρμα">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -2476,7 +2469,7 @@ function executeCombatRound() {
 
 // Προσθήκη για την πιθανότητα υποχώρησης
 if (isAttemptingRetreat) {
-    if (Math.random() < 0.25) {
+    if (Math.random() < 0.20) {
        // logMessage("Ξέφυγες! Γυρίζεις εξουθενωμένος στον Τεκέ.", 'retreat');
         // Προσομοίωση νίκης για να γίνει η διαφυγή με ασφάλεια
       forceRetreat();
@@ -2892,7 +2885,29 @@ function applyDefeatPenalties() {
     setInterval(updateCooldownBars, 100);
 
     window.addEventListener('keydown', function(event) {
-        
+         if (inCombat) return;
+
+    const selector = document.getElementById('area-selector');
+
+    // Wheel Down = ίδιο με Numpad 2
+    if (event.deltaY > 0) {
+        if (selector.selectedIndex < selector.options.length - 1) {
+            selector.selectedIndex++;
+            currentSelectedLevel = parseFloat(selector.value);
+            saveGame();
+            updateUI();
+        }
+    }
+
+    // Wheel Up = ίδιο με Numpad 8
+    if (event.deltaY < 0) {
+        if (selector.selectedIndex > 0) {
+            selector.selectedIndex--;
+            currentSelectedLevel = parseFloat(selector.value);
+            saveGame();
+            updateUI();
+        }
+    }
         if (document.activeElement === document.getElementById('p-name')) return;
 
         // Numpad Enter = Σφάξε
@@ -2972,14 +2987,6 @@ function applyDefeatPenalties() {
 
 
     });
-</script>
-
-<script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-        .then(() => console.log('Service Worker ενεργός'))
-        .catch(err => console.log('SW error:', err));
-}
 </script>
 
 </body>
