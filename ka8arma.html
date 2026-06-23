@@ -2770,13 +2770,18 @@ else {
     logMessage("Ψάχνεις για νέο εχθρό...", "system");
     updateUI();
 
-    setTimeout(() => {
-        waitingForNextMonster = false;
+setTimeout(() => {
+    waitingForNextMonster = false;
 
-        if (inCombat) {
-            spawnMonster();
-            logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
-            updateUI();
+    if (inCombat) {
+        spawnMonster();
+        logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
+        updateUI();
+
+        // RESET: το ρολόι της μάχης ξεκινά ξανά από το spawn,
+        // ώστε το τέρας να έχει πάντα 2 πλήρη δευτ. πριν τον πρώτο γύρο
+        if (combatInterval) clearInterval(combatInterval);
+        combatInterval = setInterval(executeCombatRound, 2000);
         }
     }, 2000);
 }
