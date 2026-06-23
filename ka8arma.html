@@ -365,8 +365,35 @@
             background-color: #1a1a1a;
             color: #e74c3c;
         }
+
         .btn-delete-save:hover {
             background-color: #c0392b !important;
+            color: #fff;
+        }
+
+        .btn-showRules {
+            border-color: #218518; 
+            padding: 4px 8px; 
+            font-size: 0.75rem;
+            background-color: #1a1a1a;
+            color: #218518;
+        }
+
+        .btn-showRules:hover {
+            background-color: #336297 !important;
+            color: #fff;
+        }
+
+        .btn-showStats {
+            border-color: #2d66a7; 
+            padding: 4px 8px; 
+            font-size: 0.75rem;
+            background-color: #1a1a1a;
+            color: #2d66a7;
+        }
+
+        .btn-showStats:hover {
+            background-color: #2d66a7 !important;
             color: #fff;
         }
 
@@ -672,11 +699,12 @@ body {
         🔊
     </label>
 
-    <button 
-        style="background:#1e7d32; color:white; border:1px solid #2ecc71; 
-               width:32px; height:32px; padding:0; font-weight:bold; cursor:pointer;" 
-        onclick="showRules()">
-        ?
+    <button class = "btn-showStats" onclick="showStats()">
+        Stats
+    </button>
+
+    <button class = "btn-showRules" onclick="showRules()">
+        Help
     </button>
 
     <button class="btn-delete-save" onclick="resetGame()">
@@ -698,7 +726,23 @@ body {
 
 <script>
 
+function showStats() {
 
+    let efficiency = 0;
+
+    if (player.totalGoldGained > 0) {
+        efficiency = (
+            player.gold / player.totalGoldGained * 100
+        ).toFixed(1);
+    }
+
+    logMessage("====== ΣΤΑΤΙΣΤΙΚΑ ======");
+    logMessage(`Φόνοι: ${player.kills}`);
+    logMessage(`Θάνατοι: ${player.deaths}`);
+    logMessage(`Συνολικός χρυσός που αποκτήθηκε: ${player.totalGoldGained}`);
+    logMessage(`Αποδοτικότητα: ${efficiency}%`);
+    logMessage("=====================");
+}
 
 
 function getMonsterDisplayName(monster) {
@@ -1424,13 +1468,45 @@ const monsterFirstNames = [
 "Γκρίσνακ",
 "Ουλέλα",
 "Καφά-Καφάλ",
+"Ατάβαρ",
+"Ατατάρ",
 "Θαρθαραώρ",
 "Τόλογκ",
 "Μύρκαλ",
+"Θαλ",
+"Καχούρ",
+"Γκαλνάρα",
+"Ερλίκ",
+"Ραθόγκ",
+"Μαρδάκ",
+"Σχάνταρ",
+"Τερ-Μπατ-Μαχράκ",
+"Βαλεφάρ",
+"Γίρσα",
+"Φαλαβάρ",
+"Ουνέγκε",
+"Ουτουκκού",
 "Πόνμ",
 "Τσαθόγκουα",
+"Σεσνάκα",
+"Καβέκαρ",
+"Γκόρο",
 "Ενκίντου",
 "Κραθ",
+"Κοσχάι",
+"Μαρντούκ",
+"Χάττα",
+"Χεμπάτ",
+"Νακτάρ",
+"Κερεβάρ",
+"Μπόρζιγκ",
+"Ούντορ",
+"Μπέξα",
+"Ουράρτα",
+"Αράξ",
+"Πίσκε",
+"Σάγια",
+"Λουρ",
 "Μορ",
 "Γκρίσναχ",
 "Βρομ",
@@ -1446,7 +1522,7 @@ const monsterFirstNames = [
 "Ουλγκάν",
 "Χθιάβαρ",
 "Πέρκελε",
-"Αλέκος",
+"Σαρκόι",
 "Τιζίν"
 ];
 
@@ -1463,9 +1539,9 @@ const wildTitles = [
 "ο Βασανιστής",
 "ο Ματωμένος",
 "ο Ολετήρας",
-"ο Κατασπαρακτής",
+"ο Κατασπαραχτής",
 "ο Αιμοπότης",
-"ο Μανιασμένος",
+"ο Μανιακός",
 "ο Ανελέητος",
 "ο Χασάπης",
 "ο Αιματηρός",
@@ -1474,7 +1550,8 @@ const wildTitles = [
 "ο Οστεοθραύστης",
 "ο Ξεσκιστής",
 "ο Θηρευτής",
-"ο Αγριόκαρδος",
+"ο Σμερδαλέος",
+"ο Σμερδάνωψ",
 "ο Αχόρταγος",
 "ο Κόκκινος",
 "ο Καυλέας",
@@ -1529,6 +1606,7 @@ const armoredTitles = [
 "η Άλειωτη",
 "η Αιώνια",
 "η Σιδεροντυμένη",
+"η Φακλάνα",
 "η Άθραυστη",
 "η Πλατφόρμα",
 "η Θωρακισμένη",
@@ -1541,6 +1619,9 @@ const magicTitles = [
 "ο Γνωστικός",
 "ο Διεστραμμένος",
 "ο Απόμακρος",
+"ο Εξώκοσμος",
+"ο Αστροσκόπος",
+"ο Αναπόδραστος",
 "ο Θεουργός",
 "ο Κλειδούχος",
 "ο Νεκρωπός",
@@ -1559,7 +1640,7 @@ const magicTitles = [
 "ο Μυστηριώδης",
 "ο Σκιώδης",
 "ο Μάντης",
-"ο Αστρόφωτος",
+"ο Ασώματος",
 "ο Αρχαίος",
 "ο Στρεβλός",
 "ο Ψιθυριστής",
@@ -1569,7 +1650,7 @@ const magicTitles = [
 "ο Σοφός",
 "ο Αινιγματικός",
 "ο Δαιδαλώδης",
-"ο Μυστικιστής",
+"ο Μυσταγωγός",
 "ο Αστρικός",
 "ο Μιάστωρ",
 "ο Γνοφιστής",
@@ -1630,6 +1711,10 @@ function getPlayerTitle(level) {
         xp: 0,
         nextXp: 60,
         gold: 0,
+         // statistics
+            deaths: 0,
+            kills: 0,
+            totalGoldGained: 0,
         weapon: { name: "Σπασμένο Κλαδί", power: 1 },
         armor: { name: "Φθαρμένα Ρούχα", power: 1 },
         magic: { name: "Ξύλινο Φυλακτό", power: 1 },
@@ -2008,19 +2093,19 @@ const btnSkill = document.getElementById('btn-skill');
 
     logMessage("...");
 
-    logMessage("Τα τέρατα δίνουν XP και χρυσό.", "system");
+    logMessage("Τα τέρατα δίνουν XP και χρυσό. Τα XP ανεβάζουν το επίπεδό σου, και κατα συνέπεια τη ζωή και τη ζημιά σου. Το χρυσάφι είναι για το φλεξ.", "system");
 
     logMessage("...");
 
-    logMessage("Τα <σπάνια> τέρατα ρίχνουν εξοπλισμό.", "system");
+    logMessage("Τα σπάνια τέρατα, εκτός από διπλάσιο XP και χρυσάφι, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ. Τα καλά αντικείμενα είναι πολύ σημαντικά!", "system");
 
-    logMessage("• Τα <Άγρια> τέρατα ρίχνουν όπλα.", "system");
+    logMessage("• Τα άγρια (κόκκινα) τέρατα ρίχνουν όπλα.", "system");
 
-    logMessage("• Τα <Θωρακισμένα> τέρατα ρίχνουν πανοπλίες.", "system");
+    logMessage("• Τα θωρακισμένα (γαλάζια) τέρατα ρίχνουν πανοπλίες.", "system");
 
-    logMessage("• Τα <Μαγικά> τέρατα ρίχνουν μαγικά αντικείμενα.", "system");
+    logMessage("• Τα μαγικά (μωβ) τέρατα ρίχνουν μαγικά αντικείμενα.", "system");
       
-    logMessage("Κάθε επίπεδο οπλου ή πανοπλίας βελτιώνει τη ζημιά ή την προστασία. Τα μαγικά αντικείμενα βελτιώνουν και τα δυο!", "system");
+    logMessage("Κάθε επίπεδο οπλου ή πανοπλίας βελτιώνει τη ζημιά ή την προστασία. Τα μαγικά αντικείμενα βελτιώνουν και τα δυο ταυτόχρονα!", "system");
         
     logMessage("...");
 
@@ -2031,7 +2116,7 @@ const btnSkill = document.getElementById('btn-skill');
 
     logMessage("...");
 
-    logMessage("Αν πεθάνεις χάνεις 10% XP και 10% χρυσό και ένα από τα αντεικείμενά σου πέφτει επίπεδο.", "system");
+    logMessage("Αν πεθάνεις χάνεις 10% XP, 10% χρυσό και ένα από τα αντεικείμενά σου πέφτει επίπεδο.", "system");
 
     logMessage("Στον τεκέ αναπληρώνεις ζωή σταδιακά.", "system");
     
@@ -2569,6 +2654,7 @@ if (isAttemptingRetreat) {
     }
 
     player.gold += sellValue;
+    player.totalGoldGained += sellValue;
 
     logMessage(
         `[DROP] Το αντικείμενο ήταν κατώτερο και εκποιήθηκε για ${sellValue} χρυσά.`,
@@ -2590,6 +2676,7 @@ if (isAttemptingRetreat) {
             setTimeout(() => document.getElementById('monster-hp-bar').classList.remove('monster-death'), 500);
             logMessage(`${getMonsterDisplayName(monster)}: εξοντώθηκε.`, 'victory');
             monsterDeathSound();
+            player.kills++;
             
           
             // Υπολογισμός χρυσού με bonus για τα μη-normal τέρατα
@@ -2599,6 +2686,7 @@ if (isAttemptingRetreat) {
             
             player.gold += gainedGold;
             sessionGold += gainedGold;
+            player.totalGoldGained += gainedGold;
             logMessage(`+${gainedGold} GP`, 'victory');
             createFloatingText('stat-gold-box', `+${gainedGold}g`, "var(--accent-gold)");
 
@@ -2741,6 +2829,13 @@ function applyDefeatPenalties() {
         magic: "Το φυλαχτό"
     };
 
+        logMessage(
+        `Σκοτώθηκες! Μεταφερθήκες στον τεκέ με 1 HP. Απώλεια: -${goldLoss} χρυσά και -${xpLoss} XP.`,
+        'monster'
+    );
+    
+    player.deaths++;
+
     if (player[lostSlot].power > 1) {
         player[lostSlot].power--;
         player[lostSlot].name =
@@ -2751,11 +2846,6 @@ function applyDefeatPenalties() {
             'monster'
         );
     }
-
-    logMessage(
-        `Σκοτώθηκες! Μεταφερθήκες στην πόλη με 1 HP. Απώλεια: -${goldLoss} χρυσά και -${xpLoss} XP.`,
-        'monster'
-    );
 
     triggerSmoothTransition('#4a1515');
 
