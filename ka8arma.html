@@ -505,6 +505,12 @@ body {
         0 0 20px rgba(255,215,0,.4);
 }
 
+#battle-title {
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 1.2rem;
+}
+
 
     </style>
 </head>
@@ -613,8 +619,12 @@ body {
     </div>
 
     <div id="combat-interface" class="hidden">
-        <h3>Μάχη: <span id="m-name">Τέρας</span> (Επ. <span id="m-level">1</span>) <span id="retreat-status-text" style="color: #e67e22; font-size: 0.85rem; font-weight: normal; margin-left: 10px;"></span></h3>
-
+<h3 id="battle-title">
+    Μάχη:
+    <span id="m-name">Τέρας</span>
+    (<span id="m-level">1</span>)
+    <span id="retreat-status-text"></span>
+</h3>
         <!--
 <div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr; margin-bottom:5px;">
 <div class="stat-row">
@@ -691,7 +701,14 @@ body {
 
 
 
+function getMonsterDisplayName(monster) {
+    if (!monster) return "";
 
+    if (monster.variant === 'normal')
+        return monster.name;
+
+    return `${monster.firstName} ${monster.title}`;
+}
 
 
 function getPlayerDamageBonus() {
@@ -1397,6 +1414,180 @@ const levelTitles = {
     100: "Θρόνος"
 };
 
+const monsterFirstNames = [
+"Γκναχ",
+"Λασσονού",
+"Αταθαπαλάλ",
+"Μαγκρίβα",
+"Τυλλ",
+"Γκολχούμ",
+"Γκρίσνακ",
+"Ουλέλα",
+"Καφά-Καφάλ",
+"Θαρθαραώρ",
+"Τόλογκ",
+"Μύρκαλ",
+"Πόνμ",
+"Τσαθόγκουα",
+"Ενκίντου",
+"Κραθ",
+"Μορ",
+"Γκρίσναχ",
+"Βρομ",
+"Γκορ",
+"Ουλμ",
+"Βωλχ",
+"Κνώδαξ",
+"Ν'γκα",
+"Ράζλογκ",
+"Ζουούλ",
+"Πιζνού",
+"Ταρακάν",
+"Ουλγκάν",
+"Χθιάβαρ",
+"Πέρκελε",
+"Αλέκος",
+"Τιζίν"
+];
+
+const wildTitles = [
+"ο Τύραννος",
+"ο Αιμοπότης",
+"ο Δοξαπατρής",
+"ο Ανωμαλούρος",
+"ο Σφαγέας",
+"ο Κυνηγός",
+"ο Ξεντεριαστής",
+"ο Μουχλοφάγος",
+"ο Σπλαχνοφάγος",
+"ο Βασανιστής",
+"ο Ματωμένος",
+"ο Ολετήρας",
+"ο Κατασπαρακτής",
+"ο Αιμοπότης",
+"ο Μανιασμένος",
+"ο Ανελέητος",
+"ο Χασάπης",
+"ο Αιματηρός",
+"ο Τρομερός",
+"ο Σιδερομάσας",
+"ο Οστεοθραύστης",
+"ο Ξεσκιστής",
+"ο Θηρευτής",
+"ο Αγριόκαρδος",
+"ο Αχόρταγος",
+"ο Κόκκινος",
+"ο Καυλέας",
+"ο Δερματοφάγος",
+"ο Αχόρταγος",
+"ο Σουβλατζής",
+"ο Πετσοκόφτης",
+"η Σκύλα",
+"η Σφήκα",
+"η Φαγάνα",
+"η Ανδροφάγος",
+"η Τρελέγκω",
+"η Μαλάκω",
+"η Γαμψονύχα",
+"η Νταρντάνα",
+"η Καριόλα"
+];
+
+const armoredTitles = [
+"ο Σιδηρόδερμος",
+"ο Βράχος",
+"ο Βους",
+"ο Ρινόκερος",
+"ο Ατσαλάκωτος",
+"ο Τενεκές",
+"ο Χαλκόστερνος",
+"ο Αδάμαστος",
+"ο Ακλόνητος",
+"ο Ανίκητος",
+"ο Μπρούτζινος",
+"ο Πετρόστηθος",
+"ο Βαρύς",
+"ο Χοντρός",
+"ο Ανθεκτικός",
+"ο Ασπιδοφόρος",
+"ο Σιδηρόκαρδος",
+"ο Ταχύτατος",
+"ο Σιδεροκέφαλος",
+"ο Ατσάλινος",
+"ο Χαλύβδινος",
+"ο Απρόσβλητος",
+"ο Αμείλικτος",
+"ο Ασπιδοφόρος",
+"ο Οχυρός",
+"ο Χαλκάνωρ",
+"ο Ακέραιος",
+"ο Ασάλευτος",
+"ο Αλύγιστος",
+"ο Θωρακοφόρος",
+"ο Σιδηρογνάθος",
+"ο Κατάφραχτος",
+"η Άλειωτη",
+"η Αιώνια",
+"η Σιδεροντυμένη",
+"η Άθραυστη",
+"η Πλατφόρμα",
+"η Θωρακισμένη",
+"η Άτρωτη"
+];
+
+
+const magicTitles = [
+"ο Αιθερικός",
+"ο Γνωστικός",
+"ο Διεστραμμένος",
+"ο Απόμακρος",
+"ο Θεουργός",
+"ο Κλειδούχος",
+"ο Νεκρωπός",
+"ο Εμετός",
+"ο Ταρίφας",
+"ο Νέρτερος",
+"ο Πανόπτης",
+"ο Φλεγόμενος",
+"ο Λησμονημένος",
+"ο Ακατανόητος",
+"ο Ονειροβάτης",
+"ο Διαβολιστής",
+"ο Μουγκός",
+"ο Σκοτεινός",
+"ο Περκνός",
+"ο Μυστηριώδης",
+"ο Σκιώδης",
+"ο Μάντης",
+"ο Αστρόφωτος",
+"ο Αρχαίος",
+"ο Στρεβλός",
+"ο Ψιθυριστής",
+"ο Προφήτης",
+"ο Νυχτοβάτης",
+"ο Απόκρυφος",
+"ο Σοφός",
+"ο Αινιγματικός",
+"ο Δαιδαλώδης",
+"ο Μυστικιστής",
+"ο Αστρικός",
+"ο Μιάστωρ",
+"ο Γνοφιστής",
+"η Μάγισσα",
+"η Γητεύτρα",
+"η Πλανεύτρα",
+"η Ψυχορουφήχτρα",
+"η Φαρμακοτρίφτρα",
+"η Κλασοπαπαδιά",
+"η Γνοφερή",
+"η Μυστική",
+"η Τσαπερδώνα",
+"η Στρίγλα",
+"η Μέγαιρα"
+];
+
+
+
 function getPlayerTitle(level) {
     let currentTitle = "Αλήτης";
 
@@ -1499,6 +1690,10 @@ function getPlayerTitle(level) {
     function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
     
     function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 2)); }
+
+    function randomFrom(array) {
+    return array[Math.floor(Math.random() * array.length)];
+        }
 
     function createFloatingText(parentId, text, color) {
         const parent = document.getElementById(parentId);
@@ -1690,19 +1885,32 @@ if (currentSelected) {
         if (monster) {
             let displayedName = monster.name;
 
-                if (monster.variant === 'weapon') 
-                {
-                    displayedName = `<span style="color:#ff4444;"><Άγριο> ${monster.name}</span>`;
-                }
-                else if (monster.variant === 'armor') {
-                    displayedName = `<span style="color:#66ccff;"><Θωρακισμένο> ${monster.name}</span>`;
-                }
-                else if (monster.variant === 'magic') {
-                    displayedName = `<span style="color:#cc66ff;"><Μαγικό> ${monster.name}</span>`;
-                }
+if (monster.variant === 'weapon') {
+    displayedName =
+        `<span style="color:#ff4444;">${monster.firstName} ${monster.title}</span>`;
+}
+else if (monster.variant === 'armor') {
+    displayedName =
+        `<span style="color:#66ccff;">${monster.firstName} ${monster.title}</span>`;
+}
+else if (monster.variant === 'magic') {
+    displayedName =
+        `<span style="color:#cc66ff;">${monster.firstName} ${monster.title}</span>`;
+}
             document.getElementById('m-name').innerHTML = displayedName;
             
             document.getElementById('m-level').innerText = monster.level;
+            const title = document.getElementById("battle-title");
+
+                title.style.fontSize = "1.2rem";
+
+                while (
+                    title.scrollWidth > title.clientWidth &&
+                    parseFloat(title.style.fontSize) > 0.65
+                ) {
+                    title.style.fontSize =
+                        (parseFloat(title.style.fontSize) - 0.05) + "rem";
+                }
  
             const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
             document.getElementById('monster-hp-bar').style.width = mPct + '%';
@@ -1965,32 +2173,50 @@ function updateCooldownBars() {
     }
 
     function spawnMonster() {
-        let lvl = currentSelectedLevel;
-        let baseAtk = 10 + (lvl-1) + (lvl-1);
-        let baseDef = 10 + (lvl-1) + (lvl-1) ;
-        let baseHp = (lvl * 100)
-        let variant = 'normal';
+    let lvl = currentSelectedLevel;
+    let baseAtk = 10 + (lvl - 1) + (lvl - 1);
+    let baseDef = 10 + (lvl - 1) + (lvl - 1);
+    let baseHp = lvl * 100;
 
-        if (Math.random() < 0.15) {
-            let roll = Math.random();
-            if (roll < 0.33) { variant = 'weapon'; baseAtk = baseAtk + 10; }
-            else if (roll < 0.66) { variant = 'armor'; baseDef = baseDef + 10; }
-            else { 
-                variant = 'magic'; {
-                baseAtk = baseAtk + 10;
-                baseDef = baseDef + 10; }
-            }
+    let variant = 'normal';
+    let firstName = '';
+    let title = '';
+
+    if (Math.random() < 0.15) {
+        let roll = Math.random();
+
+        firstName = randomFrom(monsterFirstNames);
+
+        if (roll < 0.33) {
+            variant = 'weapon';
+            baseAtk += 10;
+            title = randomFrom(wildTitles);
         }
+        else if (roll < 0.66) {
+            variant = 'armor';
+            baseDef += 10;
+            title = randomFrom(armoredTitles);
+        }
+        else {
+            variant = 'magic';
+            baseAtk += 10;
+            baseDef += 10;
+            title = randomFrom(magicTitles);
+        }
+    }
 
-        monster = {
-            name: getMonsterName(lvl),
-            level: lvl,
-            atk: baseAtk,
-            def: baseDef,
-            hp: baseHp,      
-            maxHp: baseHp,   
-            variant: variant
-        };
+    monster = {
+        name: getMonsterName(lvl),
+        level: lvl,
+        atk: baseAtk,
+        def: baseDef,
+        hp: baseHp,
+        maxHp: baseHp,
+        variant: variant,
+        firstName: firstName,
+        title: title
+    };
+
 
         let prefix = "";
         if (variant === 'weapon') prefix = "<Άγριο> ";
@@ -2074,7 +2300,7 @@ function updateCooldownBars() {
 
             return {
                 damage,
-                log: `Χτύπησες: ${damage} ζημιά σε ${monster.name}.`
+                log: `Χτύπησες: ${damage} ζημιά σε ${getMonsterDisplayName(monster)}.`
             };
         }
 
@@ -2220,7 +2446,7 @@ if (isAttemptingRetreat) {
     monsterHitChance = Math.max(10, Math.min(100, monsterHitChance));
 
     if (Math.floor(Math.random() * 100) >= monsterHitChance) {
-        monsterActionLog = `${monster.name}: αστόχησε.`;
+        monsterActionLog = `${getMonsterDisplayName(monster)}: αστόχησε.`;
         monsterDamageCalculated = 0;
     } else {
         let d6 = Math.floor(Math.random() * 6) + 1;
@@ -2228,7 +2454,7 @@ if (isAttemptingRetreat) {
         let dmgModifier = calcDmgModifier(diff);
         let dmg = d6 * 5 * monster.level * dmgModifier;
         monsterDamageCalculated = Math.max(1, Math.round(dmg));
-        monsterActionLog = `${monster.name}: σου έκανε ${monsterDamageCalculated} ζημιά.`;
+        monsterActionLog = `${getMonsterDisplayName(monster)}: σου έκανε ${monsterDamageCalculated} ζημιά.`;
     }
 
     // ==========================================
@@ -2362,7 +2588,7 @@ if (isAttemptingRetreat) {
         if (outcome === 'victory' || outcome === 'mutual_death') {
             document.getElementById('monster-hp-bar').classList.add('monster-death');
             setTimeout(() => document.getElementById('monster-hp-bar').classList.remove('monster-death'), 500);
-            logMessage(`${monster.name}: εξοντώθηκε.`, 'victory');
+            logMessage(`${getMonsterDisplayName(monster)}: εξοντώθηκε.`, 'victory');
             monsterDeathSound();
             
           
@@ -2467,7 +2693,7 @@ else {
 
         if (inCombat) {
             spawnMonster();
-            logMessage(`Εμφανίζεται: ${monster.name}!`, "system");
+            logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
             updateUI();
         }
     }, 2000);
