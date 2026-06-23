@@ -736,13 +736,14 @@ function showStats() {
         ).toFixed(1);
     }
 
-    logMessage("====== ΣΤΑΤΙΣΤΙΚΑ ======");
+    logMessage("");
+    logMessage("ΣΤΑΤΙΣΤΙΚΑ");
     logMessage(`Φόνοι: ${player.kills}`);
     logMessage(`Θάνατοι: ${player.deaths}`);
     logMessage(`Χρυσός στην τσέπη: ${player.gold}`);
     logMessage(`Χρυσός που χάθηκε: ${player.totalGoldGained - player.gold}`);
     logMessage(`Αποδοτικότητα: ${efficiency}%`);
-    logMessage("=====================");
+    logMessage("");
 }
 
 
@@ -2070,58 +2071,48 @@ const btnSkill = document.getElementById('btn-skill');
     }
 
 
-    function logMessage(text, type = 'system') {
-        const logDiv = document.getElementById('log');
-        const entry = document.createElement('div');
-        entry.className = `log-entry log-${type}`;
-        entry.innerText = text;
-        // Εισαγωγή του νέου μηνύματος στο τέλος (κάτω μέρος)
-        logDiv.append(entry);
+function logMessage(text, type = 'system') {
+    const logDiv = document.getElementById('log');
+    const entry = document.createElement('div');
+    entry.className = `log-entry log-${type}`;
 
-        while (logDiv.children.length > 1000) {
-       logDiv.removeChild(logDiv.firstChild);
-}
-        
-        // Αυτόματη κύλιση προς τα κάτω για να φαίνεται το πιο πρόσφατο μήνυμα
-        logDiv.scrollTop = logDiv.scrollHeight;
+    if (text === "") {
+        entry.innerHTML = "&nbsp;";
+    } else {
+        entry.innerText = text;
     }
+
+    logDiv.append(entry);
+
+    while (logDiv.children.length > 1000) {
+        logDiv.removeChild(logDiv.firstChild);
+    }
+
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
 
     function showRules() {
 
-    logMessage("===== ΚΑΝΟΝΕΣ ΠΑΙΧΝΙΔΙΟΥ =====", "system");
-        
+    logMessage("");
+    logMessage("ΚΑΝΟΝΕΣ ΠΑΙΧΝΙΔΙΟΥ", "system");
     logMessage("ΕΙΣΑΙ ΚΑΘΑΡΜΑ. ΣΚΟΤΩΣΕ. ΓΙΝΕ ΠΑΝΙΣΧΥΡΟΣ. ΣΚΟΤΩΣΕ ΚΙ ΑΛΛΟ.", "system");
-
-    logMessage("...");
-
+    logMessage("");
     logMessage("Τα τέρατα δίνουν XP και χρυσό. Τα XP ανεβάζουν το επίπεδό σου, και κατα συνέπεια τη ζωή και τη ζημιά σου. Το χρυσάφι είναι για το φλεξ.", "system");
-
-    logMessage("...");
-
+    logMessage("");
     logMessage("Τα σπάνια τέρατα, εκτός από διπλάσιο XP και χρυσάφι, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ. Τα καλά αντικείμενα είναι πολύ σημαντικά!", "system");
-
     logMessage("• Τα άγρια (κόκκινα) τέρατα ρίχνουν όπλα.", "system");
-
     logMessage("• Τα θωρακισμένα (γαλάζια) τέρατα ρίχνουν πανοπλίες.", "system");
-
     logMessage("• Τα μαγικά (μωβ) τέρατα ρίχνουν μαγικά αντικείμενα.", "system");
-      
     logMessage("Κάθε επίπεδο οπλου ή πανοπλίας βελτιώνει τη ζημιά ή την προστασία. Τα μαγικά αντικείμενα βελτιώνουν και τα δυο ταυτόχρονα!", "system");
-        
-    logMessage("...");
-
+    logMessage("");
     logMessage("Η ΚΑΤΡΑΠΑΚΙΑ κάνει διπλάσια ζημιά.", "system");
     logMessage("Η ΕΚΤΕΛΕΣΗ κάνει ένα άμεσο χτύπημα σε έναν ετοιμοθάνατο εχθρό.", "system");
     logMessage("Η ΜΠΥΡΑ δινει ζωή! (10-50%).", "system");
     logMessage("Το ΤΡΕΞΙΜΟ δίνει μια πιθανότητα διαφυγής κάθε γύρο, μέχρι να σκοτωθεί ο εχθρός. Σε επιστρέφει στον τεκέ.", "system");
-
-    logMessage("...");
-
+    logMessage("");
     logMessage("Αν πεθάνεις χάνεις 10% XP, 10% χρυσό και ένα από τα αντεικείμενά σου πέφτει επίπεδο.", "system");
-
     logMessage("Στον τεκέ αναπληρώνεις ζωή σταδιακά.", "system");
-    
-    logMessage("==============================", "system");
+    logMessage("");
 }
 
 
@@ -2467,7 +2458,7 @@ function forceRetreat() {
 }
 
 function executeCombatRound() {
-    logMessage("--------", 'system');
+    logMessage("");
     if (!inCombat) return;
     if (waitingForNextMonster) return;
 
@@ -2675,6 +2666,7 @@ if (isAttemptingRetreat) {
         if (outcome === 'victory' || outcome === 'mutual_death') {
             document.getElementById('monster-hp-bar').classList.add('monster-death');
             setTimeout(() => document.getElementById('monster-hp-bar').classList.remove('monster-death'), 500);
+            logMessage("");
             logMessage(`${getMonsterDisplayName(monster)}: εξοντώθηκε.`, 'victory');
             monsterDeathSound();
             player.kills++;
@@ -2757,6 +2749,7 @@ else {
         startTownRegen();
         document.getElementById('town-interface').classList.remove('hidden');
         document.getElementById('combat-interface').classList.add('hidden');
+        logMessage("");
         logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
         player.hp = Math.round(getPlayerMaxHp() * 0.10);
         // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
