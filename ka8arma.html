@@ -2608,6 +2608,44 @@ function applyDefeatPenalties() {
             usePotion();
             return;
         }
+
+        // Numpad 8 = επόμενο επίπεδο
+        if (event.code === 'Numpad8') {
+            event.preventDefault();
+
+            if (!inCombat) {
+                const selector = document.getElementById('area-selector');
+
+                if (selector.selectedIndex < selector.options.length - 1) {
+                    selector.selectedIndex++;
+                    currentSelectedLevel = parseFloat(selector.value);
+                    saveGame();
+                    updateUI();
+                }
+            }
+
+            return;
+        }
+
+        // Numpad 2 = προηγούμενο επίπεδο
+        if (event.code === 'Numpad2') {
+            event.preventDefault();
+
+            if (!inCombat) {
+                const selector = document.getElementById('area-selector');
+
+                if (selector.selectedIndex > 0) {
+                    selector.selectedIndex--;
+                    currentSelectedLevel = parseFloat(selector.value);
+                    saveGame();
+                    updateUI();
+                }
+            }
+
+            return;
+        }
+
+
     });
 </script>
 
