@@ -1936,10 +1936,22 @@ if (savedMonsterLevel) {
         savedMonsterLevel;
 }
                 logMessage("Η πρόοδός φορτώθηκε αυτόματα.", 'system');
+                logMessage("");
+                    logMessage("Είσαι στον Τεκέ του Ζαλαδούρα");
+                    logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
+                    logMessage("");
             } catch (e) {
                 logMessage("Σφάλμα κατά τη φόρτωση του save.", 'system');
             }
+            
+            
         }
+        else {
+        logMessage("Είσαι στον Τεκέ του Ζαλαδούρα");
+        logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
+        logMessage("");
+    }
+
     }
 
     function saveGame() {
@@ -2576,7 +2588,6 @@ function forceRetreat() {
     queuedSkill = null;
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
     logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
-    logMessage("");
     logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
     retreatSound();
