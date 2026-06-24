@@ -2397,7 +2397,7 @@ function updateCooldownBars() {
             baseAtk += 17;
             title = randomFrom(wildTitles);
         }
-        else if (roll < 0.333) {
+        else if (roll < 0.666) {
             variant = 'armor';
             baseDef += 14;
             title = randomFrom(armoredTitles);
@@ -2588,7 +2588,7 @@ function forceRetreat() {
     queuedSkill = null;
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
     logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
-    logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
+    logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
     retreatSound();
     
@@ -2891,7 +2891,7 @@ else {
         logMessage("");
         logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
         logMessage("");
-        logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
+        logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
         player.hp = Math.round(getPlayerMaxHp() * 0.10);
         // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
         createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
@@ -2971,8 +2971,9 @@ function applyDefeatPenalties() {
 
         logMessage(
         `Σκοτώθηκες! Μεταφερθήκες στον τεκέ με 1 HP. Απώλεια: -${goldLoss} χρυσά και -${xpLoss} XP.`,
-        'monster'
-    );
+        'monster');
+        logMessage("");
+        logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
     
     player.deaths++;
 
