@@ -981,7 +981,7 @@ function itemDropSound() {
 
         osc.frequency.setValueAtTime(freq, t);
 
-        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.setValueAtTime(0.12, t);
         gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.10);
 
         osc.connect(gain);
