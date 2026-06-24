@@ -1771,9 +1771,9 @@ function getPlayerTitle(level) {
     }
 };
 
-   // function getPlayerAtk() { return player.baseAtk + (player.baseAtk * player.weapon.power * 0.1) + (player.baseAtk * player.magic.power * 0.1) ; }
-    function getPlayerAtk() { return 10 + player.weapon.power + player.magic.power; }
-    function getPlayerDef() { return 10 + player.armor.power + player.magic.power; }
+  // Attack and defense formulas for player
+    function getPlayerAtk() { return 10 + player.weapon.power + player.magic.power/2; }
+    function getPlayerDef() { return 10 + player.armor.power + player.magic.power/2; }
 
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
@@ -2260,10 +2260,12 @@ function updateCooldownBars() {
         combatInterval = setInterval(executeCombatRound, 2000);
     }
 
+
+ // Monster attack and defense formulas, also HP
     function spawnMonster() {
     let lvl = currentSelectedLevel;
-    let baseAtk = 10 + (lvl - 1) + (lvl - 1);
-    let baseDef = 10 + (lvl - 1) + (lvl - 1);
+    let baseAtk = 10 + (lvl - 1) + (lvl/2 - 0.5);
+    let baseDef = 10 + (lvl - 1) + (lvl/2 - 0.5);
     let baseHp = lvl * 100;
 
     let variant = 'normal';
@@ -2277,18 +2279,18 @@ function updateCooldownBars() {
 
         if (roll < 0.33) {
             variant = 'weapon';
-            baseAtk += 10;
+            baseAtk += 17;
             title = randomFrom(wildTitles);
         }
         else if (roll < 0.66) {
             variant = 'armor';
-            baseDef += 10;
+            baseDef += 14;
             title = randomFrom(armoredTitles);
         }
         else {
             variant = 'magic';
-            baseAtk += 10;
-            baseDef += 10;
+            baseAtk += 6;
+            baseDef += 6;
             title = randomFrom(magicTitles);
         }
     }
@@ -2334,11 +2336,21 @@ function updateCooldownBars() {
         }
     }
 
+//attack/defense damage modifier
+
+//complex εκθετικος modifier
     function calcDmgModifier(diff) {
     return diff >= 0
         ? 2 - Math.exp(-0.04 * diff)
         : 0.5 + 0.5 * Math.exp(0.08 * diff);
     }
+
+//simple modifier flat % steps
+//   function calcDmgModifier(diff) {
+ //   return Math.min(2, Math.max(0.4, 1 + diff * 0.03));
+//      }
+
+
 
     function rollBaseDamage(fixedDice = null) {
         let d6;
