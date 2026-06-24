@@ -2272,17 +2272,17 @@ function updateCooldownBars() {
     let firstName = '';
     let title = '';
 
-    if (Math.random() < 0.15) {
+    if (Math.random() < 0.17) {
         let roll = Math.random();
 
         firstName = randomFrom(monsterFirstNames);
 
-        if (roll < 0.33) {
+        if (roll < 0.333) {
             variant = 'weapon';
             baseAtk += 17;
             title = randomFrom(wildTitles);
         }
-        else if (roll < 0.66) {
+        else if (roll < 0.333) {
             variant = 'armor';
             baseDef += 14;
             title = randomFrom(armoredTitles);
