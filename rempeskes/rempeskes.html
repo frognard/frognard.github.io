@@ -1824,10 +1824,26 @@ function getPlayerTitle(level) {
     }
 
 //Equipment level roll
-    function rollItemTier(monsterLevel) {
-    let d6a = Math.floor(Math.random() * 6) + 1;
-    let d6b = Math.floor(Math.random() * 6) + 1;
-    let modifier = d6a - d6b; // -5 έως +5
+function rollItemTier(monsterLevel) {
+    // Παραγωγή ενός τυχαίου ακέραιου αριθμού από το 1 έως το 100
+    let roll = Math.floor(Math.random() * 100) + 1;
+    let modifier = 0;
+    // Έλεγχος των ορίων βάσει των ποσοστών σας:
+    if (roll <= 5) {
+        modifier = -3;  // 5% (1 έως 5)
+    } else if (roll <= 20) {
+        modifier = -2;  // 15% (6 έως 20)
+    } else if (roll <= 40) {
+        modifier = -1;  // 20% (21 έως 40)
+    } else if (roll <= 60) {
+        modifier = 0;   // 20% (41 έως 60)
+    } else if (roll <= 80) {
+        modifier = +1;  // 20% (61 έως 80)
+    } else if (roll <= 95) {
+        modifier = +2;  // 15% (81 έως 95)
+    } else {
+        modifier = +3;  // 5% (96 έως 100)
+    }
     let tier = monsterLevel + modifier;
     tier = Math.max(1, Math.min(100, tier));
     return tier;
@@ -2253,8 +2269,8 @@ function logMessage(text, type = 'system') {
     logMessage("Τα τέρατα δίνουν XP και χρυσό. Τα XP ανεβάζουν το επίπεδό σου, και κατα συνέπεια τη ζωή και τη ζημιά σου. Το χρυσάφι είναι για το φλεξ.", "system");
     logMessage("");
     logMessage("Τα σπάνια τέρατα, εκτός από διπλάσιο XP και χρυσάφι, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ.", "system");
-    logMessage("Ένα σπάνιο τέρας μπορεί να ρίξει αντικείμενο επιπέδου μέχρι και 5 επίπεδα μεγαλύτερο από το ίδιο.");
-    logMessage("Ο παίκτης μπορεί να βρεί και να φορέσει αντικείμενα μεχρι και 5 επίπεδα καλύτερα από το επίπεδό του.");
+    logMessage("Ένα σπάνιο τέρας μπορεί να ρίξει αντικείμενα επιπέδου μέχρι και 3 επίπεδα ψηλότερα από το επίπεδό του.");
+    logMessage("Ο παίκτης μπορεί να βρεί αντικείμενα μεχρι και 5 επίπεδα ψηλότερα από το επίπεδό του.");
     logMessage("Τα να έχει ισχυρά αντικείμενα είναι πολύ σημαντικό!");
     logMessage("");
     logMessage("• Τα άγρια (κόκκινα) τέρατα ρίχνουν όπλα.", "system");
