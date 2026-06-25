@@ -102,11 +102,28 @@
         .xp-bar-container {
             background-color: #333;
             width: 100%;
-            height: 6px;
-            border-radius: 2px;
+            height: 15px;      /* διπλάσιο ύψος */
+            border-radius: 3px;
             overflow: hidden;
             position: relative;
         }
+
+        .xp-bar-text{
+            position:absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:10px;
+            font-weight:bold;
+            color:white;
+            text-shadow:1px 1px 2px #000;
+            pointer-events:none;
+        }
+
         #p-xp-bar {
             height: 100%;
             width: 0%;
@@ -574,6 +591,7 @@ body {
         <div class="xp-wrapper-area" id="xp-parent">
             <div class="xp-bar-container">
                 <div id="p-xp-bar"></div>
+                <div id="p-xp-percent" class="xp-bar-text">0.0%</div>
             </div>
         </div>
 
@@ -610,10 +628,10 @@ body {
             <div class="stat-row equipment-row" id="stat-magic-box">
                 <div class="equip-label" style="font-weight:bold;">Μαγικό</div>
                 <div class="equip-name">
-                    <span id="eq-magic" style="color: #b57edc;">Χωρίς Φυλαχτό</span>
+                    <span id="eq-magic" style="color: #cc66ff;">Χωρίς Φυλαχτό</span>
                 </div>
                 <div class="equip-tier">
-                    <span id="p-mag-bonus" style="color: #b57edc;"></span>
+                    <span id="p-mag-bonus" style="color: #cc66ff;"></span>
                 </div>
             </div>
         
@@ -1085,12 +1103,12 @@ function retreatSound() {
 
 
     const monsterNames = [
-        "Γιγάντιος Αρουραίος", "Σπαθοσκώληκας", "Σκίταλος", "Κόβαλος", "Ληστής",
+        "Μπάμπουρας", "Γιγάντιος Αρουραίος", "Σκίταλος", "Κόβαλος", "Ληστής",
         "Βαθρακοδαίμονας", "Αγριάνθρωπος", "Μπασιμποζούκος", "Σκέλεθρο", "Σφήκα Δολοφόνος",
         "Τελώνι", "Δερβίσης", "Λυκομπάμπουρας", "Απελάτης", "Σμερδοκόβαλος",
         "Γιγάντια Αράχνη", "Κυνοκέφαλος", "Σαρκοσκέλεθρο", "Οφίονας", "Σμερδόλυκος",
         "Ανδροβλάττη", "Νεκροφάγος", "Δρασκελιστής", "Μπούγαρος", "Γιγάντιο Ερπετό",
-        "Γεκ", "Ποντικόμορφος", "Σφαγέας", "Καταχανάς", "Κατσαριδομάνα",
+        "Γεκ", "Ποντικόμορφος", "Χαμοδράκι", "Καταχανάς", "Κατσαριδομάνα",
         "Εξάχειρας", "Μάυρος Μάγος", "Σκουλκάτωρ", "Δαιμονιστής", "Σκορπίονας",
         "Καπρόμορφος", "Ογρίονας", "Ξωτικό", "Λυκάνθρωπος", "Νοσοφόρος",
         "Σαλαχίτης", "Φένακας", "Σιδερένιο Γκόλεμ", "Στυγικός Σκύλος", "Μέδουσα",
@@ -2074,6 +2092,14 @@ if (currentSelected) {
         document.getElementById('eq-armor').innerText = player.armor.name;
         document.getElementById('eq-magic').innerText = player.magic.name;
 
+//xp bar percentage
+        const xpPercent = (player.xp / player.nextXp) * 100;
+        document.getElementById("p-xp-bar").style.width =
+            `${xpPercent}%`;
+        document.getElementById("p-xp-percent").textContent =
+            `${xpPercent.toFixed(1)}%`;    
+
+
 
         let wCost = getWeaponUpgradeCost(player.weapon.power);
         let aCost = getArmorUpgradeCost(player.armor.power);  
@@ -2225,7 +2251,7 @@ function logMessage(text, type = 'system') {
     logMessage("");
     logMessage("Τα τέρατα δίνουν XP και χρυσό. Τα XP ανεβάζουν το επίπεδό σου, και κατα συνέπεια τη ζωή και τη ζημιά σου. Το χρυσάφι είναι για το φλεξ.", "system");
     logMessage("");
-    logMessage("Τα σπάνια τέρατα, εκτός από διπλάσιο XP και χρυσάφι, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ. Τα καλά αντικείμενα είναι πολύ σημαντικά!", "system");
+    logMessage("Τα σπάνια τέρατα, εκτός από διπλάσιο XP και χρυσάφι, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ. Ένα σπάνιο τέρας μπορεί να ρίξει αντικείμενο επιπέδου μέχρι και 5 επίπεδα μεγαλύτερο από το ίδιο. Τα καλά αντικείμενα είναι πολύ σημαντικά!", "system");
     logMessage("• Τα άγρια (κόκκινα) τέρατα ρίχνουν όπλα.", "system");
     logMessage("• Τα θωρακισμένα (γαλάζια) τέρατα ρίχνουν πανοπλίες.", "system");
     logMessage("• Τα μαγικά (μωβ) τέρατα ρίχνουν μαγικά αντικείμενα.", "system");
@@ -2251,17 +2277,27 @@ function logMessage(text, type = 'system') {
         container.style.backgroundColor = 'var(--panel-bg)';
     }
 
-    function startTownRegen() {
-        if (townRegenInterval) clearInterval(townRegenInterval);
-        townRegenInterval = setInterval(() => {
-            const maxHp = getPlayerMaxHp();
-            if (!inCombat && player.hp < maxHp) {
-                let regenAmount = Math.round(maxHp * 0.1);
-                player.hp = Math.min(maxHp, player.hp + regenAmount);
-                updateUI();
-            }
-        }, 2000);
-    }
+function startTownRegen() {
+    if (townRegenInterval) clearInterval(townRegenInterval);
+    townRegenInterval = setInterval(() => {
+        const maxHp = getPlayerMaxHp();
+        if (!inCombat && player.hp < maxHp) {
+            let regenAmount = Math.round(maxHp * 0.1);
+            // αν είμαστε κοντά στο full hp
+            regenAmount = Math.min(
+                regenAmount,
+                maxHp - player.hp
+            );
+            player.hp += regenAmount;
+            createFloatingText(
+                'player-hp-parent',
+                `+${regenAmount}`,
+                "var(--hp-player)"
+            );
+            updateUI();
+        }
+    }, 2000);
+}
 
     function stopTownRegen() { if (townRegenInterval) { clearInterval(townRegenInterval); townRegenInterval = null; } }
 
@@ -2792,7 +2828,14 @@ if (isAttemptingRetreat) {
         'system'
     );
 
-    createFloatingText('stat-gold-box', `+${sellValue}g`, "var(--accent-gold)");
+    setTimeout(() => {
+    createFloatingText(
+        'stat-gold-box',
+        `+${sellValue}g`,
+        "var(--accent-gold)"
+    );
+}, 500);
+
 }
 }
 
