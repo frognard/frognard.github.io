@@ -1897,7 +1897,8 @@ function rollItemTier(monsterLevel) {
     const skills = {
     heavyStrike: {
         name: "Κατραπακιά",
-        multiplier: 2,
+        multiplier: 1.0,
+        fixedDice: 6,
         hitChance: 90
     },
     preciseStrike: {
@@ -1973,6 +1974,7 @@ if (savedMonsterLevel) {
                 logMessage("Η πρόοδός φορτώθηκε αυτόματα.", 'system');
                 logMessage("");
                     logMessage("Είσαι στον Τεκέ του Ζαλαδούρα");
+                    logMessage("");
                     logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
                     logMessage("");
             } catch (e) {
@@ -2648,6 +2650,7 @@ function forceRetreat() {
     queuedSkill = null;
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
     logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
+    logMessage("");
     logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
     retreatSound();
@@ -2797,13 +2800,11 @@ if (isAttemptingRetreat) {
     }
 }
 
-    function handleEquipmentDrop(type, rolledTier) {
+function handleEquipmentDrop(type, rolledTier, forceSell = false) {
     let itemName = getItemName(type, rolledTier);
     logMessage(`[DROP] Στον εχθρό βρέθηκε: ${itemName}!`, 'victory');
-    
-   
 
-    if (rolledTier > player[type].power) {
+    if (!forceSell && rolledTier > player[type].power) {
         let oldTier = player[type].power;
         player[type] = { name: itemName, power: rolledTier };
         itemDropSound();
@@ -2847,10 +2848,17 @@ if (isAttemptingRetreat) {
     player.gold += sellValue;
     player.totalGoldGained += sellValue;
 
-    logMessage(
-        `[DROP] Το αντικείμενο ήταν κατώτερο και εκποιήθηκε για ${sellValue} χρυσά.`,
-        'system'
-    );
+    if (forceSell) {
+        logMessage(
+            `[DROP] Το αντικείμενο ήταν πολύ δυνατό για το επίπεδό σου και εκποιήθηκε για ${sellValue} χρυσά.`,
+            'system'
+        );
+    } else {
+        logMessage(
+            `[DROP] Το αντικείμενο ήταν κατώτερο και εκποιήθηκε για ${sellValue} χρυσά.`,
+            'system'
+        );
+    }
 
     setTimeout(() => {
     createFloatingText(
@@ -2910,19 +2918,17 @@ if (isAttemptingRetreat) {
     // κανένα drop
 }
 else {
-    let rolledPower = rollItemTier(monster.level);
+let rolledPower = rollItemTier(monster.level);
 
-    // Cap: ο παίκτης δεν μπορεί να βρει item πάνω από level+5 του ίδιου.
-    // Αν το roll ξεπερνάει το cap, δεν κόβεται στο cap αλλά πέφτει στο monster.level-5
-    // (δηλαδή στο "χειρότερο" δυνατό roll για αυτό το monster level).
-    let levelCap = player.level + 5;
-    if (rolledPower > levelCap) {
-        rolledPower = Math.max(1, monster.level - 5);
-    }
+// Cap: ο παίκτης δεν μπορεί να εξοπλίσει item πάνω από level+5 του ίδιου.
+// Αν το roll ξεπερνάει το cap, δεν υποβαθμίζεται - πουλιέται κατευθείαν
+// στην κανονική τιμή πώλησης του rolled tier (χωρίς να ελεγχθεί αν κάνει upgrade).
+let levelCap = player.level + 5;
+let forceSell = rolledPower > levelCap;
 
-    if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower);
-    if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower);
-    if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower);
+if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower, forceSell);
+if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower, forceSell);
+if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, forceSell);
 }
             if (droppedSomething) { triggerSmoothTransition('#3e3200'); }
 
