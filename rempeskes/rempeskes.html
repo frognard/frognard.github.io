@@ -3047,8 +3047,7 @@ function applyDefeatPenalties() {
         logMessage(
         `Σκοτώθηκες! Μεταφερθήκες στον τεκέ με 1 HP. Απώλεια: -${goldLoss} χρυσά και -${xpLoss} XP.`,
         'monster');
-        logMessage("");
-        logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
+        
     
     player.deaths++;
 
@@ -3062,6 +3061,9 @@ function applyDefeatPenalties() {
             'monster'
         );
     }
+
+        logMessage("");
+        logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
 
     triggerSmoothTransition('#4a1515');
 
