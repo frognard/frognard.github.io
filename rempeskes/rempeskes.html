@@ -2517,7 +2517,7 @@ function updateCooldownBars() {
         }
         let diff = getPlayerAtk() - monster.def;
         let dmgModifier = calcDmgModifier(diff);
-        let dmg = d6 * 5 * player.level * dmgModifier * 0.5;
+        let dmg = d6 * 5 * player.level * dmgModifier;
         return Math.max(1, Math.round(dmg));
     }
 
