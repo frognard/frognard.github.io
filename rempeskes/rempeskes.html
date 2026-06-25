@@ -2454,20 +2454,20 @@ function updateCooldownBars() {
         if (roll < 0.333) {
             variant = 'weapon';
             baseAtk += 17;
-            baseHp = lvl * 125;
+            baseHp = lvl * 100;
             title = randomFrom(wildTitles);
         }
         else if (roll < 0.666) {
             variant = 'armor';
             baseDef += 14;
-            baseHp = lvl * 125;
+            baseHp = lvl * 100;
             title = randomFrom(armoredTitles);
         }
         else {
             variant = 'magic';
             baseAtk += 6;
             baseDef += 6;
-            baseHp = lvl * 125;
+            baseHp = lvl * 100;
             title = randomFrom(magicTitles);
         }
     }
