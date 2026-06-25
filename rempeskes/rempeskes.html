@@ -1823,6 +1823,7 @@ function getPlayerTitle(level) {
         return `${arr[idx]} `;
     }
 
+//Equipment level roll
     function rollItemTier(monsterLevel) {
     let d6a = Math.floor(Math.random() * 6) + 1;
     let d6b = Math.floor(Math.random() * 6) + 1;
@@ -1835,20 +1836,20 @@ function getPlayerTitle(level) {
 
     let player = {
         name: "Ρεμπεσκές",
-        level: 1,
+        level: 82,
         baseAtk: 10,
         baseDef: 10,
         hp: 100, 
         xp: 0,
-        nextXp: 60,
+        nextXp: 50000000000,
         gold: 0,
          // statistics
             deaths: 0,
             kills: 0,
             totalGoldGained: 0,
-        weapon: { name: "Σπασμένο Κλαδί", power: 1 },
-        armor: { name: "Φθαρμένα Ρούχα", power: 1 },
-        magic: { name: "Ξύλινο Φυλακτό", power: 1 },
+        weapon: { name: "Σπασμένο Κλαδί", power: 93 },
+        armor: { name: "Φθαρμένα Ρούχα", power: 93 },
+        magic: { name: "Ξύλινο Φυλακτό", power: 93 },
         maxUnlockedLevel: 100
     };
 
@@ -2251,7 +2252,7 @@ function logMessage(text, type = 'system') {
     logMessage("");
     logMessage("Τα τέρατα δίνουν XP και χρυσό. Τα XP ανεβάζουν το επίπεδό σου, και κατα συνέπεια τη ζωή και τη ζημιά σου. Το χρυσάφι είναι για το φλεξ.", "system");
     logMessage("");
-    logMessage("Τα σπάνια τέρατα, εκτός από διπλάσιο XP και χρυσάφι, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ. Ένα σπάνιο τέρας μπορεί να ρίξει αντικείμενο επιπέδου μέχρι και 5 επίπεδα μεγαλύτερο από το ίδιο. Τα καλά αντικείμενα είναι πολύ σημαντικά!", "system");
+    logMessage("Τα σπάνια τέρατα, εκτός από διπλάσιο XP και χρυσάφι, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ. Ένα σπάνιο τέρας μπορεί να ρίξει αντικείμενο επιπέδου μέχρι και 5 επίπεδα μεγαλύτερο από το ίδιο. Ο παίκτης μπορεί να βρεί μεχρι 5 λεβελ καλύτερα αντικείμενα από το επίπεδό του. Τα καλά αντικείμενα είναι πολύ σημαντικά!", "system");
     logMessage("• Τα άγρια (κόκκινα) τέρατα ρίχνουν όπλα.", "system");
     logMessage("• Τα θωρακισμένα (γαλάζια) τέρατα ρίχνουν πανοπλίες.", "system");
     logMessage("• Τα μαγικά (μωβ) τέρατα ρίχνουν μαγικά αντικείμενα.", "system");
@@ -2512,7 +2513,7 @@ function updateCooldownBars() {
         }
         let diff = getPlayerAtk() - monster.def;
         let dmgModifier = calcDmgModifier(diff);
-        let dmg = d6 * 5 * player.level * dmgModifier;
+        let dmg = d6 * 5 * player.level * dmgModifier * 0.5;
         return Math.max(1, Math.round(dmg));
     }
 
@@ -2887,6 +2888,14 @@ if (isAttemptingRetreat) {
 }
 else {
     let rolledPower = rollItemTier(monster.level);
+
+    // Cap: ο παίκτης δεν μπορεί να βρει item πάνω από level+5 του ίδιου.
+    // Αν το roll ξεπερνάει το cap, δεν κόβεται στο cap αλλά πέφτει στο monster.level-5
+    // (δηλαδή στο "χειρότερο" δυνατό roll για αυτό το monster level).
+    let levelCap = player.level + 5;
+    if (rolledPower > levelCap) {
+        rolledPower = Math.max(1, monster.level - 5);
+    }
 
     if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower);
     if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower);
