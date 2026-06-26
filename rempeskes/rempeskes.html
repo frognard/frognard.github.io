@@ -1877,6 +1877,58 @@ function rollItemTier(monsterLevel) {
         maxUnlockedLevel: 100
     };
 
+const AREA_TYPES = {
+    NORMAL: 0,
+    RICH: 1,      // άσπρη
+    POOR: 2,      // γκρι
+    WEAPON: 3,    // κόκκινη
+    ARMOR: 4,     // μπλε
+    MAGIC: 5      // μωβ
+};
+
+let areaModifiers = {};
+
+// Βάρη (σε %) για το τυχαίο assign τύπου σε κάθε κυνηγώτοπο, μια φορά ανά save
+function rollAreaType() {
+    let roll = Math.random() * 100;
+    if (roll < 70) return AREA_TYPES.NORMAL;   // 50%
+    if (roll < 76) return AREA_TYPES.RICH;     // 10%
+    if (roll < 82) return AREA_TYPES.POOR;     // 10%
+    if (roll < 88) return AREA_TYPES.WEAPON;   // 10%
+    if (roll < 94) return AREA_TYPES.ARMOR;    // 10%
+    return AREA_TYPES.MAGIC;                   // 10%
+}
+
+function generateAreaModifiers() {
+    areaModifiers = {};
+    for (let lvl = 1; lvl <= 100; lvl++) {
+        areaModifiers[lvl] = rollAreaType();
+    }
+}
+
+function getAreaType(lvl) {
+    return areaModifiers[lvl] !== undefined ? areaModifiers[lvl] : AREA_TYPES.NORMAL;
+}
+
+// Οπτική ένδειξη τύπου κυνηγότοπου στο dropdown (emoji = πάντα ορατό, color = bonus όπου υποστηρίζεται)
+const AREA_TYPE_ICON = {
+    [AREA_TYPES.NORMAL]: '',
+    [AREA_TYPES.RICH]:   '',
+    [AREA_TYPES.POOR]:   '',
+    [AREA_TYPES.WEAPON]: '🔴',
+    [AREA_TYPES.ARMOR]:  '🔵',
+    [AREA_TYPES.MAGIC]:  '🟣'
+};
+
+const AREA_TYPE_COLOR = {
+    [AREA_TYPES.NORMAL]: null,
+    [AREA_TYPES.RICH]:   '#ffff00',
+    [AREA_TYPES.POOR]:   '#737373',
+    [AREA_TYPES.WEAPON]: '#ff5050',
+    [AREA_TYPES.ARMOR]:  '#4da6ff',
+    [AREA_TYPES.MAGIC]:  '#bb66ff'
+};
+
     let monster = null;
     let combatInterval = null;
     let townRegenInterval = null; 
@@ -1954,7 +2006,20 @@ function rollItemTier(monsterLevel) {
         setTimeout(() => { fText.remove(); }, 1400);
     }
 
-    function loadGame() {
+ function loadGame() {
+    const savedAreaModifiers = localStorage.getItem('rempeskes_areaModifiers');
+    if (savedAreaModifiers) {
+        try {
+            areaModifiers = JSON.parse(savedAreaModifiers);
+        } catch (e) {
+            generateAreaModifiers();
+            localStorage.setItem('rempeskes_areaModifiers', JSON.stringify(areaModifiers));
+        }
+    } else {
+        generateAreaModifiers();
+        localStorage.setItem('rempeskes_areaModifiers', JSON.stringify(areaModifiers));
+    }
+
         const savedData = localStorage.getItem('minimal_rpg_save');
         if (savedData) {
             try {
@@ -2001,6 +2066,7 @@ if (savedMonsterLevel) {
 
     function saveGame() {
     localStorage.setItem('minimal_rpg_save', JSON.stringify(player));
+    localStorage.setItem('rempeskes_areaModifiers', JSON.stringify(areaModifiers));
 
     const selector = document.getElementById('area-selector');
     if (selector) {
@@ -2011,6 +2077,7 @@ if (savedMonsterLevel) {
     if (confirm("Διαγραφή χαρακτήρα;")) {
         localStorage.removeItem('minimal_rpg_save');
         localStorage.removeItem('selectedMonsterLevel');
+        localStorage.removeItem('rempeskes_areaModifiers');
         location.reload();
     }
 }
@@ -2041,8 +2108,10 @@ function updateRates(){
     let mins = Math.max((Date.now()-rateStartTime)/60000,0.001);
     let xpMin = (sessionXp/mins).toFixed(0);
     let gpMin = (sessionGold/mins).toFixed(0);
-    document.getElementById('xpmin').value = xpMin + ' XP/m';
-    document.getElementById('gpmin').value = gpMin + ' GP/m';
+    const xpEl = document.getElementById('xpmin');
+    const gpEl = document.getElementById('gpmin');
+    if (xpEl) xpEl.value = xpMin + ' XP/m';
+    if (gpEl) gpEl.value = gpMin + ' GP/m';
 }
 
 function resetRates(){
@@ -2086,7 +2155,13 @@ updateCooldownBars();
         for (let i = 1; i <= 100; i++) {
             let opt = document.createElement('option');
             opt.value = i;
-            opt.innerText = `[${i}] ${getMonsterName(i)}`;
+            let areaType = getAreaType(i);
+            let icon = AREA_TYPE_ICON[areaType];
+            opt.innerText = `${icon ? icon + ' ' : ''}[${i}] ${getMonsterName(i)}`;
+            let color = AREA_TYPE_COLOR[areaType];
+            if (color) opt.style.color = color;
+            if (areaType === AREA_TYPES.RICH) opt.style.fontWeight = 'bold';
+            if (areaType === AREA_TYPES.POOR) opt.style.fontStyle = 'italic';
             selector.appendChild(opt);
         }
 
@@ -2288,12 +2363,14 @@ function logMessage(text, type = 'system') {
     logMessage("• Τα μαγικά (μωβ) τέρατα ρίχνουν μαγικά αντικείμενα.", "system");
     logMessage("Κάθε επίπεδο οπλου ή πανοπλίας βελτιώνει τη ζημιά ή την προστασία. Τα μαγικά αντικείμενα βελτιώνουν και τα δυο ταυτόχρονα!", "system");
     logMessage("");
+    logMessage("Ορισμένες περιοχές έχουν περισσότερα τέρατα ενός τύπου (ανάλογα το χρώμα). Άλλες έχουν απλά περισσότερα ή λιγότερα σπέσιαλ τέρατα (κίτρινες και γκρι)."); 
+    logMessage("");
     logMessage("Η ΚΑΤΡΑΠΑΚΙΑ κάνει διπλάσια ζημιά.", "system");
     logMessage("Η ΕΚΤΕΛΕΣΗ κάνει ένα άμεσο χτύπημα σε έναν ετοιμοθάνατο εχθρό.", "system");
     logMessage("Η ΜΠΥΡΑ δινει ζωή! (10-50%).", "system");
     logMessage("Το ΤΡΕΞΙΜΟ δίνει μια πιθανότητα διαφυγής κάθε γύρο, μέχρι να σκοτωθεί ο εχθρός. Σε επιστρέφει στον τεκέ.", "system");
     logMessage("");
-    logMessage("Αν πεθάνεις χάνεις 10% XP, 10% χρυσό και ένα από τα αντεικείμενά σου πέφτει επίπεδο.", "system");
+    logMessage("Αν πεθάνεις χάνεις 10% XP, 10% χρυσό και ένα από τα αντικείμενά σου πέφτει επίπεδο.", "system");
     logMessage("Στον τεκέ αναπληρώνεις ζωή σταδιακά.", "system");
     logMessage("");
 }
@@ -2443,6 +2520,7 @@ function updateCooldownBars() {
     }
 
 
+
  // Monster attack and defense formulas, also HP. to +/- tou level einai to penalty gia na isoropisei sto level
     function spawnMonster() {
     let lvl = currentSelectedLevel;
@@ -2454,18 +2532,38 @@ function updateCooldownBars() {
     let firstName = '';
     let title = '';
 
-    if (Math.random() < 0.17) {
-        let roll = Math.random();
+    let areaType = getAreaType(lvl);
 
+    // RICH/POOR αλλάζουν το βασικό chance εμφάνισης special τέρατος
+    let specialChance = 0.17;
+    if (areaType === AREA_TYPES.RICH) specialChance = 0.22;
+    else if (areaType === AREA_TYPES.POOR) specialChance = 0.11;
+
+    if (Math.random() < specialChance) {
         firstName = randomFrom(monsterFirstNames);
 
-        if (roll < 0.333) {
+        // WEAPON/ARMOR/MAGIC areas: extra 33% check να είναι ο "δικός" τους τύπος,
+        // αλλιώς γίνεται το κανονικό τυχαίο 33/33/33
+        let favored = null;
+        if (areaType === AREA_TYPES.WEAPON) favored = 'weapon';
+        else if (areaType === AREA_TYPES.ARMOR) favored = 'armor';
+        else if (areaType === AREA_TYPES.MAGIC) favored = 'magic';
+
+        let chosenVariant;
+        if (favored && Math.random() < 0.333) {
+            chosenVariant = favored;
+        } else {
+            let roll = Math.random();
+            chosenVariant = roll < 0.333 ? 'weapon' : (roll < 0.666 ? 'armor' : 'magic');
+        }
+
+        if (chosenVariant === 'weapon') {
             variant = 'weapon';
             baseAtk += 17;
             baseHp = lvl * 100;
             title = randomFrom(wildTitles);
         }
-        else if (roll < 0.666) {
+        else if (chosenVariant === 'armor') {
             variant = 'armor';
             baseDef += 14;
             baseHp = lvl * 100;
