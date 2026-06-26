@@ -490,6 +490,15 @@
     color:var(--text-main);
 }
 
+.town-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 31px;
+    margin-bottom: 15px;
+}
+
 @keyframes itemUpgradeFlash {
     0%   { background-color: #171717; }
     50%  {
@@ -664,12 +673,14 @@ body {
     </div>
 
 <div id="town-interface">
-        <h3 style="color: #c68642;">Τεκές του Ζαλαδούρα</h3>
-        <div class="area-select-container">
-            <label for="area-selector">Κατέβα στο λαβύρινθο:</label>
+    <div class="town-header-row">
+        <h3 style="color: #c68642; margin: 0; border-bottom: none;">Τεκές</h3>
+        <div class="area-select-container" style="margin-top: 0;">
+            <label for="area-selector"></label>
             <select id="area-selector"></select>
         </div>
     </div>
+</div>
 
 <div id="combat-interface" class="hidden">
     <h3 style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap; margin: 0 0 10px 0;">
@@ -2158,7 +2169,7 @@ function updateAreaSelector() {
         let icon = AREA_TYPE_ICON[areaType];
         
         // Αντικατάσταση της ονοματοδοσίας των τεράτων με την απλή ένδειξη βάθους
-        opt.innerText = `${icon ? icon + ' ' : ''}Βάθος ${i}`;
+        opt.innerText = `${icon ? icon + ' ' : ''}Βάθος λαβυρίνθου ${i}`;
         
         // Δίνουμε ΠΑΝΤΑ χρώμα στο option, ακόμα και αν είναι NORMAL
         opt.style.color = AREA_TYPE_COLOR[areaType];
