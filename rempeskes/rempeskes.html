@@ -1938,6 +1938,7 @@ const AREA_TYPE_COLOR = {
     let isSkillQueued = false; 
     let queuedSkill = null;
     let waitingForNextMonster = false;
+    let currentRunKills = 0
  
     const CD_DURATION = 10000;
     
@@ -1976,14 +1977,15 @@ const AREA_TYPE_COLOR = {
 
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
-   // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to eqpment
+   // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to equipment
     function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 3)); }
   
     // cost armor kai weapon: ligo pio megalos ek8eths apo to gold gain, giati ta levels megalwnoun se xrono
     function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
     function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
     
-    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 2.2)); }
+    //XP REWARD FORMULA
+    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 2.275)); }
 
     function randomFrom(array) {
     return array[Math.floor(Math.random() * array.length)];
@@ -2385,8 +2387,8 @@ function logMessage(text, type = 'system') {
     logMessage("");
     logMessage("Τα σπάνια τέρατα, εκτός από διπλάσιο XP και χρυσάφι, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ.", "system");
     logMessage("Ένα σπάνιο τέρας μπορεί να ρίξει αντικείμενα επιπέδου μέχρι και 5 επίπεδα ψηλότερα από το επίπεδό του.");
-    logMessage("Ο παίκτης μπορεί να χρησιμοποιήσει αντικείμενα μέχρι και 5 επίπεδα ψηλότερα από το επίπεδό του.");
-    logMessage("Τα να έχει ισχυρά αντικείμενα είναι πολύ σημαντικό!");
+ // logMessage("Ο παίκτης μπορεί να χρησιμοποιήσει αντικείμενα μέχρι και 5 επίπεδα ψηλότερα από το επίπεδό του.");
+    logMessage("Τα να έχει κανείς ισχυρά αντικείμενα είναι πολύ σημαντικό!");
     logMessage("");
     logMessage("• Τα άγρια (κόκκινα) τέρατα ρίχνουν όπλα.", "system");
     logMessage("• Τα θωρακισμένα (γαλάζια) τέρατα ρίχνουν πανοπλίες.", "system");
@@ -2798,8 +2800,8 @@ function forceRetreat() {
     isSkillQueued = false;
     queuedSkill = null;
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
-    logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
-    
+    logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την έξοδο. Ρίχνεις έναν υπνάκο.`, 'retreat');
+    currentRunKills = 0; // Μηδενισμός μετά την αναφορά
     logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
     retreatSound();
@@ -3033,6 +3035,7 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
             logMessage(`${getMonsterDisplayName(monster)}: εξοντώθηκε.`, 'victory');
             monsterDeathSound();
             player.kills++;
+            currentRunKills++;
             
           
             // Υπολογισμός χρυσού με bonus για τα μη-normal τέρατα
@@ -3072,7 +3075,8 @@ let rolledPower = rollItemTier(monster.level);
 // Cap: ο παίκτης δεν μπορεί να εξοπλίσει item πάνω από level+5 του ίδιου.
 // Αν το roll ξεπερνάει το cap, δεν υποβαθμίζεται - πουλιέται κατευθείαν
 // στην κανονική τιμή πώλησης του rolled tier (χωρίς να ελεγχθεί αν κάνει upgrade).
-let levelCap = player.level + 5;
+// SWITCH - afinoume anoixto to eq upgrade pros to paron.
+let levelCap = player.level + 100;
 let forceSell = rolledPower > levelCap;
 
 if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower, forceSell);
@@ -3119,8 +3123,8 @@ if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, force
         document.getElementById('town-interface').classList.remove('hidden');
         document.getElementById('combat-interface').classList.add('hidden');
         
-        logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
-        
+        logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την έξοδο. Ρίχνεις έναν υπνάκο...`, 'retreat');
+        currentRunKills = 0; // Μηδενισμός μετά την αναφορά
         logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
         player.hp = Math.round(getPlayerMaxHp() * 0.10);
         // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
@@ -3203,7 +3207,7 @@ function applyDefeatPenalties() {
         `Σκοτώθηκες! Μεταφερθήκες στον τεκέ με 1 HP. Απώλεια: -${goldLoss} χρυσά και -${xpLoss} XP.`,
         'monster');
         
-    
+    currentRunKills = 0;
     player.deaths++;
 
     if (player[lostSlot].power > 1) {
