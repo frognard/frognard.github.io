@@ -619,10 +619,10 @@ body {
             <div class="stat-row equipment-row" id="stat-def-box">
         <div class="equip-label" style="font-weight:bold;">Πανοπλία</div>
             <div class="equip-name">
-                <span id="eq-armor" style="color: #66ccff;">Κουρέλια</span>
+                <span id="eq-armor" style="color: #1ab2ff;">Κουρέλια</span>
             </div>
             <div class="equip-tier">
-                <span id="p-arm-bonus" style="color: #66ccff;"></span>
+                <span id="p-arm-bonus" style="color: #1ab2ff;"></span>
             </div>
         </div>
             <div class="stat-row equipment-row" id="stat-magic-box">
@@ -1910,12 +1910,12 @@ const AREA_TYPE_ICON = {
 };
 
 const AREA_TYPE_COLOR = {
-    [AREA_TYPES.NORMAL]: '#d9d9d9', // Το κανονικό σκούρο φόντο του select
+    [AREA_TYPES.NORMAL]: '#d9d9d9', 
     [AREA_TYPES.RICH]:   '#ffff00',
     [AREA_TYPES.POOR]:   '#737373',
-    [AREA_TYPES.WEAPON]: '#ff5050',
-    [AREA_TYPES.ARMOR]:  '#4da6ff',
-    [AREA_TYPES.MAGIC]:  '#bb66ff'
+    [AREA_TYPES.WEAPON]: '#ec6868',
+    [AREA_TYPES.ARMOR]:  '#1ab2ff',
+    [AREA_TYPES.MAGIC]:  '#cc66ff'
 };
 
     let monster = null;
@@ -2232,7 +2232,7 @@ document.getElementById('area-selector').addEventListener('change', function() {
             isVariant = true;
         }
         else if (monster.variant === 'armor') {
-            displayedName = `<span style="color:#66ccff;">${monster.firstName} ${monster.title}</span>`;
+            displayedName = `<span style="color:#1ab2ff;">${monster.firstName} ${monster.title}</span>`;
             isVariant = true;
         }
         else if (monster.variant === 'magic') {
@@ -2249,10 +2249,10 @@ document.getElementById('area-selector').addEventListener('change', function() {
             const areaType = getAreaType(monster.level);
             let areaColor = '#ffffff'; // Προεπιλογή: Κανονική (λευκο)
             
-            if (areaType === AREA_TYPES.RICH) areaColor = '#2ecc71';     // Πλούσια (Πράσινο)
-            else if (areaType === AREA_TYPES.POOR) areaColor = '#95a5a6';    // Φτωχική (Γκρίζο)
-            else if (areaType === AREA_TYPES.WEAPON) areaColor = '#ff4444';  // Άγρια (Κόκκινο)
-            else if (areaType === AREA_TYPES.ARMOR) areaColor = '#66ccff';   // Θωρακισμένη (Μπλε)
+            if (areaType === AREA_TYPES.RICH) areaColor = '#ffff00';     // Πλούσια (χρυσο)
+            else if (areaType === AREA_TYPES.POOR) areaColor = '#737373';    // Φτωχική (Γκρίζο)
+            else if (areaType === AREA_TYPES.WEAPON) areaColor = '#ec6868';  // Άγρια (Κόκκινο)
+            else if (areaType === AREA_TYPES.ARMOR) areaColor = '#1ab2ff';   // Θωρακισμένη (Μπλε)
             else if (areaType === AREA_TYPES.MAGIC) areaColor = '#cc66ff';   // Μαγική (Μωβ)
 
             title.innerText = `Βάθος ${monster.level}:`;
