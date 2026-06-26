@@ -2810,7 +2810,7 @@ if (isAttemptingRetreat) {
 
 function handleEquipmentDrop(type, rolledTier, forceSell = false) {
     let itemName = getItemName(type, rolledTier);
-    logMessage(`[DROP] Στον εχθρό βρέθηκε: ${itemName}!`, 'victory');
+    logMessage(`[DROP] Στον εχθρό βρέθηκε: ${itemName} (T${rolledTier})!`, 'victory');
 
     if (!forceSell && rolledTier > player[type].power) {
         let oldTier = player[type].power;
