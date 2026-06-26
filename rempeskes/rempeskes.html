@@ -671,45 +671,22 @@ body {
         </div>
     </div>
 
-    <div id="combat-interface" class="hidden">
-<h3 id="battle-title">
-    Μάχη:
-    <span id="m-name">Τέρας</span>
-    (<span id="m-level">1</span>)
-    <span id="retreat-status-text"></span>
-</h3>
-        <!--
-<div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr; margin-bottom:5px;">
-<div class="stat-row">
-    Ευστοχία:
-    <span id="m-atk" style="color:#5aeb66;font-weight:bold;">0</span>
-    <br>
-    <span id="p-dmg-bonus" style="color:#5aeb66;font-weight:bold;font-size:0.9em;">
-        +0%
-    </span>
-</div>
+<div id="combat-interface" class="hidden">
+    <h3 style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap; margin: 0 0 10px 0;">
+        <span id="battle-title">Μάχη:</span>
+        
+        <span id="m-name" style="color: #fff;">Τέρας</span>
+        
+        <span id="retreat-status-text"></span>
+    </h3>
 
-<div class="stat-row">
-    Τέρατος:
-    <span id="m-def" style="color:#f15454;font-weight:bold;">0</span>
-    <br>
-    <span id="m-dmg-bonus" style="color:#f15454;font-weight:bold;font-size:0.9em;">
-        +0%
-    </span>
-</div>
+    <span id="m-level" style="display: none;"></span>
 
-    <div class="stat-row">
-        Επ/Αμ:
-        <span id="m-ratio" style="color:#ffd700;font-weight:bold;">1.00</span>
+    <div class="bar-container" id="monster-hp-parent">
+        <div id="monster-hp-bar" class="bar"></div>
+        <div id="monster-hp-text" class="bar-text">0 / 0 HP</div>
     </div>
 </div>
--->
-
-        <div class="bar-container" id="monster-hp-parent">
-            <div id="monster-hp-bar" class="bar"></div>
-            <div id="monster-hp-text" class="bar-text">0 / 0 HP</div>
-        </div>
-    </div>
 
     <main style="margin-top: 20px;">
         
@@ -1906,6 +1883,18 @@ function generateAreaModifiers() {
     }
 }
 
+function logAreaTransition(level) {
+    const areaType = getAreaType(level);
+    let typeName = "Κανονική";
+    
+    if (areaType === AREA_TYPES.RICH) typeName = "Πλούσια (Rich)";
+    else if (areaType === AREA_TYPES.POOR) typeName = "Φτωχική (Poor)";
+    else if (areaType === AREA_TYPES.WEAPON) typeName = "Άγρια / Όπλων (Κόκκινη)";
+    else if (areaType === AREA_TYPES.ARMOR) typeName = "Θωρακισμένη / Πανοπλιών (Μπλε)";
+    else if (areaType === AREA_TYPES.MAGIC) typeName = "Μαγική (Μωβ)";
+    
+}
+
 function getAreaType(lvl) {
     return areaModifiers[lvl] !== undefined ? areaModifiers[lvl] : AREA_TYPES.NORMAL;
 }
@@ -2045,11 +2034,11 @@ if (savedMonsterLevel) {
         savedMonsterLevel;
 }
                 logMessage("Η πρόοδός φορτώθηκε αυτόματα.", 'system');
-                logMessage("");
+                
                     logMessage("Είσαι στον Τεκέ του Ζαλαδούρα");
-                    logMessage("");
+                    
                     logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
-                    logMessage("");
+                    
             } catch (e) {
                 logMessage("Σφάλμα κατά τη φόρτωση του save.", 'system');
             }
@@ -2059,7 +2048,7 @@ if (savedMonsterLevel) {
         else {
         logMessage("Είσαι στον Τεκέ του Ζαλαδούρα");
         logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
-        logMessage("");
+        
     }
 
     }
@@ -2170,6 +2159,13 @@ updateCooldownBars();
 
     // Αλλαγή του χρώματος στο κείμενο του select κατά την αρχική φόρτωση
     updateSelectorColor(selector);
+    // ΠΡΟΣΘΗΚΗ: Listener για την αλλαγή περιοχής από το dropdown
+    selector.onchange = function() {
+        currentSelectedLevel = parseFloat(this.value);
+        logAreaTransition(currentSelectedLevel);
+        saveGame();
+        updateUI();
+    };
 }
 
 function updateSelectorColor(selector) {
@@ -2183,157 +2179,168 @@ document.getElementById('area-selector').addEventListener('change', function() {
 });
 
 
-    function updateUI() {
-        const pNameEl = document.getElementById('p-name');
-            if (document.activeElement !== pNameEl) {
-                pNameEl.innerText = player.name;
-            }
-        document.getElementById('p-level').innerText = player.level;
-        document.getElementById('p-title').innerText = getPlayerTitle(player.level);
-      //  document.getElementById('p-atk').innerText = getPlayerAtk().toFixed(0);
-        document.getElementById('p-wep-bonus').innerText =
-            `T${player.weapon.power}`;
-        document.getElementById('p-arm-bonus').innerText =
-            `T${player.armor.power}`;
-        document.getElementById('p-mag-bonus').innerText =
-            `T${player.magic.power}`;
-        document.getElementById('p-xp').innerText = player.xp;
-        document.getElementById('p-next-xp').innerText = player.nextXp;
-        document.getElementById('p-gold').innerText = player.gold;
-        
-        document.getElementById('eq-weapon').innerText = player.weapon.name;
-        document.getElementById('eq-armor').innerText = player.armor.name;
-        document.getElementById('eq-magic').innerText = player.magic.name;
-
-//xp bar percentage
-        const xpPercent = (player.xp / player.nextXp) * 100;
-        document.getElementById("p-xp-bar").style.width =
-            `${xpPercent}%`;
-        document.getElementById("p-xp-percent").textContent =
-            `${xpPercent.toFixed(1)}%`;    
-
-
-
-        let wCost = getWeaponUpgradeCost(player.weapon.power);
-        let aCost = getArmorUpgradeCost(player.armor.power);  
-        
-      //  const btnWep = document.getElementById('btn-upgrade-weapon');
-      //  const btnArm = document.getElementById('btn-upgrade-armor');
-        
-     //   btnWep.innerText = `Up (${wCost}g)`;
-     //   btnArm.innerText = `Up (${aCost}g)`;
-
-     //   btnWep.disabled = inCombat || player.gold < wCost;
-      //  btnArm.disabled = inCombat || player.gold < aCost;
-
-        const xpPct = Math.max(0, Math.min(100, (player.xp / player.nextXp) * 100));
-        document.getElementById('p-xp-bar').style.width = xpPct + '%';
-
-        const maxHp = getPlayerMaxHp();
-        const pPct = Math.max(0, (player.hp / maxHp) * 100);
-        document.getElementById('player-hp-bar').style.width = pPct + '%';
-        document.getElementById('player-hp-text').innerText = `${Math.ceil(player.hp)} / ${maxHp} HP`;
-
-        if (monster) {
-            let displayedName = monster.name;
-
-if (monster.variant === 'weapon') {
-    displayedName =
-        `<span style="color:#ff4444;">${monster.firstName} ${monster.title}</span>`;
-}
-else if (monster.variant === 'armor') {
-    displayedName =
-        `<span style="color:#66ccff;">${monster.firstName} ${monster.title}</span>`;
-}
-else if (monster.variant === 'magic') {
-    displayedName =
-        `<span style="color:#cc66ff;">${monster.firstName} ${monster.title}</span>`;
-}
-            document.getElementById('m-name').innerHTML = displayedName;
-            
-            document.getElementById('m-level').innerText = monster.level;
-            const title = document.getElementById("battle-title");
-
-                title.style.fontSize = "1.2rem";
-
-                while (
-                    title.scrollWidth > title.clientWidth &&
-                    parseFloat(title.style.fontSize) > 0.65
-                ) {
-                    title.style.fontSize =
-                        (parseFloat(title.style.fontSize) - 0.05) + "rem";
-                }
- 
-            const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
-            document.getElementById('monster-hp-bar').style.width = mPct + '%';
-            document.getElementById('monster-hp-text').innerText = `${Math.ceil(monster.hp)} / ${monster.maxHp} HP`;
-            document.getElementById('m-name').style.color = "#fff";
-        } else {
-            document.getElementById('m-name').innerText = "Περιπλάνηση...";
-            document.getElementById('m-name').style.color = "#888";
-            document.getElementById('monster-hp-bar').style.width = '0%';
-            document.getElementById('monster-hp-text').innerText = '-';
-        }
-        
+   function updateUI() {
+    const pNameEl = document.getElementById('p-name');
+    if (document.activeElement !== pNameEl) {
+        pNameEl.innerText = player.name;
+    }
+    document.getElementById('p-level').innerText = player.level;
+    document.getElementById('p-title').innerText = getPlayerTitle(player.level);
+    //  document.getElementById('p-atk').innerText = getPlayerAtk().toFixed(0);
+    document.getElementById('p-wep-bonus').innerText = `T${player.weapon.power}`;
+    document.getElementById('p-arm-bonus').innerText = `T${player.armor.power}`;
+    document.getElementById('p-mag-bonus').innerText = `T${player.magic.power}`;
+    document.getElementById('p-xp').innerText = player.xp;
+    document.getElementById('p-next-xp').innerText = player.nextXp;
+    document.getElementById('p-gold').innerText = player.gold;
     
-const btnHuntRetreat = document.getElementById('btn-hunt-retreat');
-btnHuntRetreat.classList.remove('retreat-mode');
-btnHuntRetreat.classList.remove('retreat-ready');
+    document.getElementById('eq-weapon').innerText = player.weapon.name;
+    document.getElementById('eq-armor').innerText = player.armor.name;
+    document.getElementById('eq-magic').innerText = player.magic.name;
 
-if (inCombat) {
+    // xp bar percentage
+    const xpPercent = (player.xp / player.nextXp) * 100;
+    document.getElementById("p-xp-bar").style.width = `${xpPercent}%`;
+    document.getElementById("p-xp-percent").textContent = `${xpPercent.toFixed(1)}%`;    
 
-    btnHuntRetreat.classList.add('retreat-mode');
+    let wCost = getWeaponUpgradeCost(player.weapon.power);
+    let aCost = getArmorUpgradeCost(player.armor.power);  
+    
+    //  const btnWep = document.getElementById('btn-upgrade-weapon');
+    //  const btnArm = document.getElementById('btn-upgrade-armor');
+    
+    //   btnWep.innerText = `Up (${wCost}g)`;
+    //   btnArm.innerText = `Up (${aCost}g)`;
 
-    if (isAttemptingRetreat) {
-        btnHuntRetreat.innerHTML = "<span>Υποχώρηση... [↵]</span>";
-        btnHuntRetreat.classList.add('skill-queued');
-        btnHuntRetreat.classList.add('retreat-ready');
+    //   btnWep.disabled = inCombat || player.gold < wCost;
+    //   btnArm.disabled = inCombat || player.gold < aCost;
+
+    const xpPct = Math.max(0, Math.min(100, (player.xp / player.nextXp) * 100));
+    document.getElementById('p-xp-bar').style.width = xpPct + '%';
+
+    const maxHp = getPlayerMaxHp();
+    const pPct = Math.max(0, (player.hp / maxHp) * 100);
+    document.getElementById('player-hp-bar').style.width = pPct + '%';
+    document.getElementById('player-hp-text').innerText = `${Math.ceil(player.hp)} / ${maxHp} HP`;
+
+    if (monster) {
+        let displayedName = monster.name;
+        let isVariant = false; // Έλεγχος για να μην χάσουμε το χρώμα του τέρατος
+
+        if (monster.variant === 'weapon') {
+            displayedName = `<span style="color:#ff4444;">${monster.firstName} ${monster.title}</span>`;
+            isVariant = true;
+        }
+        else if (monster.variant === 'armor') {
+            displayedName = `<span style="color:#66ccff;">${monster.firstName} ${monster.title}</span>`;
+            isVariant = true;
+        }
+        else if (monster.variant === 'magic') {
+            displayedName = `<span style="color:#cc66ff;">${monster.firstName} ${monster.title}</span>`;
+            isVariant = true;
+        }
+        document.getElementById('m-name').innerHTML = displayedName;
+        
+        document.getElementById('m-level').innerText = monster.level;
+        const title = document.getElementById("battle-title");
+
+        // === ΑΛΛΑΓΗ ΤΙΤΛΟΥ & ΧΡΩΜΑΤΟΣ ΠΕΡΙΟΧΗΣ ===
+        if (title) {
+            const areaType = getAreaType(monster.level);
+            let areaColor = '#ffffff'; // Προεπιλογή: Κανονική (λευκο)
+            
+            if (areaType === AREA_TYPES.RICH) areaColor = '#2ecc71';     // Πλούσια (Πράσινο)
+            else if (areaType === AREA_TYPES.POOR) areaColor = '#95a5a6';    // Φτωχική (Γκρίζο)
+            else if (areaType === AREA_TYPES.WEAPON) areaColor = '#ff4444';  // Άγρια (Κόκκινο)
+            else if (areaType === AREA_TYPES.ARMOR) areaColor = '#66ccff';   // Θωρακισμένη (Μπλε)
+            else if (areaType === AREA_TYPES.MAGIC) areaColor = '#cc66ff';   // Μαγική (Μωβ)
+
+            title.innerText = `Βάθος ${monster.level}:`;
+            title.style.color = areaColor;
+            title.style.fontSize = "1.2rem";
+
+            while (
+                title.scrollWidth > title.clientWidth &&
+                parseFloat(title.style.fontSize) > 0.65
+            ) {
+                title.style.fontSize = (parseFloat(title.style.fontSize) - 0.05) + "rem";
+            }
+        }
+        // =========================================
+ 
+        const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
+        document.getElementById('monster-hp-bar').style.width = mPct + '%';
+        document.getElementById('monster-hp-text').innerText = `${Math.ceil(monster.hp)} / ${monster.maxHp} HP`;
+        
+        // Εφαρμόζουμε το λευκό χρώμα μόνο εάν το τέρας είναι κανονικό (όχι variant)
+        if (!isVariant) {
+            document.getElementById('m-name').style.color = "#fff";
+        }
+    } else {
+        document.getElementById('m-name').innerText = "Περιπλάνηση...";
+        document.getElementById('m-name').style.color = "#888";
+        document.getElementById('monster-hp-bar').style.width = '0%';
+        document.getElementById('monster-hp-text').innerText = '-';
+        
+        // Επαναφορά του τίτλου όταν δεν υπάρχει μάχη
+        const title = document.getElementById("battle-title");
+        if (title) {
+            title.innerText = "Μάχη:";
+            title.style.color = "#888";
+        }
+    }
+        
+    const btnHuntRetreat = document.getElementById('btn-hunt-retreat');
+    btnHuntRetreat.classList.remove('retreat-mode');
+    btnHuntRetreat.classList.remove('retreat-ready');
+
+    if (inCombat) {
+        btnHuntRetreat.classList.add('retreat-mode');
+
+        if (isAttemptingRetreat) {
+            btnHuntRetreat.innerHTML = "<span>Υποχώρηση... [↵]</span>";
+            btnHuntRetreat.classList.add('skill-queued');
+            btnHuntRetreat.classList.add('retreat-ready');
+        }
+        else {
+            btnHuntRetreat.innerHTML = "<span>Τρέξε [0]</span>";
+            btnHuntRetreat.classList.remove('skill-queued');
+        }
     }
     else {
-        btnHuntRetreat.innerHTML = "<span>Τρέξε [0]</span>";
+        btnHuntRetreat.innerHTML = "<span>Σφάξε [↵]</span>";
         btnHuntRetreat.classList.remove('skill-queued');
     }
 
-}
-else {
+    const btnSkill = document.getElementById('btn-skill');
+    btnSkill.disabled = !inCombat || !monster || skillCooldownActive || isSkillQueued;
 
-    btnHuntRetreat.innerHTML = "<span>Σφάξε [↵]</span>";
-    btnHuntRetreat.classList.remove('skill-queued');
-
-}
-
-const btnSkill = document.getElementById('btn-skill');
-
-            btnSkill.disabled = !inCombat || !monster || skillCooldownActive || isSkillQueued;
-
-            if (isSkillQueued && queuedSkill === skills.heavyStrike) {
-                btnSkill.classList.add('skill-queued');
-                btnSkill.innerHTML = "<span>Κατραπακιά [4]</span>";
-            }
-            else {
-                btnSkill.classList.remove('skill-queued');
-                btnSkill.innerHTML = "<span>Κατραπακιά [4]</span>";
-            }
-
-
-            const btnPrecise = document.getElementById('btn-precise');
-
-            btnPrecise.disabled = !inCombat || !monster || monster.hp > monster.maxHp * skills.preciseStrike.executeThreshold || monster.hp < 1 || preciseCooldownActive; 
-
-            if (isSkillQueued && queuedSkill === skills.preciseStrike) {
-                btnPrecise.classList.add('skill-queued');
-                btnPrecise.innerText = "Έτοιμο!";
-            }
-            else {
-                btnPrecise.classList.remove('skill-queued');
-                btnPrecise.innerHTML = "<span>Εκτέλεση [5]</span>";
-            }
-
-        const btnPotion = document.getElementById('btn-potion');
-        btnPotion.disabled = potionCooldownActive;
-
-     //   updateAreaSelector();
+    if (isSkillQueued && queuedSkill === skills.heavyStrike) {
+        btnSkill.classList.add('skill-queued');
+        btnSkill.innerHTML = "<span>Κατραπακιά [4]</span>";
     }
+    else {
+        btnSkill.classList.remove('skill-queued');
+        btnSkill.innerHTML = "<span>Κατραπακιά [4]</span>";
+    }
+
+    const btnPrecise = document.getElementById('btn-precise');
+    btnPrecise.disabled = !inCombat || !monster || monster.hp > monster.maxHp * skills.preciseStrike.executeThreshold || monster.hp < 1 || preciseCooldownActive; 
+
+    if (isSkillQueued && queuedSkill === skills.preciseStrike) {
+        btnPrecise.classList.add('skill-queued');
+        btnPrecise.innerText = "Έτοιμο!";
+    }
+    else {
+        btnPrecise.classList.remove('skill-queued');
+        btnPrecise.innerHTML = "<span>Εκτέλεση [5]</span>";
+    }
+
+    const btnPotion = document.getElementById('btn-potion');
+    btnPotion.disabled = potionCooldownActive;
+
+    //   updateAreaSelector();
+}
 
 
 function logMessage(text, type = 'system') {
@@ -2506,29 +2513,42 @@ function updateCooldownBars() {
     }
 
     function enterCombatFromSelector() {
-    //  resetRates(); // μηδενισμός XP/m και GP/m
-        document.getElementById('p-name').blur();
-        stopTownRegen(); 
-        currentSelectedLevel = parseFloat(document.getElementById('area-selector').value);
-
+    //   resetRates(); // μηδενισμός XP/m και GP/m
+    document.getElementById('p-name').blur();
+    stopTownRegen(); 
+    currentSelectedLevel = parseFloat(document.getElementById('area-selector').value);
     
+    // === ΠΡΟΣΘΗΚΗ: ΚΑΤΑΓΡΑΦΗ ΠΕΡΙΟΧΗΣ ΣΤΟ LOG ===
+    const level = currentSelectedLevel;
+    const areaType = getAreaType(level);
+    let typeName = ""; // Προεπιλογή
+    
+    if (areaType === AREA_TYPES.RICH) typeName = ": Φαίνεται πως υπάρχουν πολλά επικίνδυνα τέρατα εδώ...";
+    else if (areaType === AREA_TYPES.POOR) typeName = ": Δεν φαίνεται να υπάρχουν πολλά επικίνδυνα τέρατα εδώ...";
+    else if (areaType === AREA_TYPES.WEAPON) typeName = ": Εδώ τριγυρνούν αρκετά άγρια τέρατα...";
+    else if (areaType === AREA_TYPES.ARMOR) typeName = ": Εδώ τριγυρνούν αρκετά θωρακισμένα τέρατα...";
+    else if (areaType === AREA_TYPES.MAGIC) typeName = ": Εδώ τριγυρνούν αρκετά μαγικά τέρατα...";
+
+    logMessage(`[ΠΕΡΙΟΧΗ] Κατάβαση στο βάθος ${level}. ${typeName}`, 'system');
+    // ============================================
+
     saveGame();
     updateUI();
 
-        inCombat = true;
-        isAttemptingRetreat = false;
-        isSkillQueued = false;
-        
-        spawnMonster();
-        
-        document.getElementById('town-interface').classList.add('hidden');
-        document.getElementById('combat-interface').classList.remove('hidden');
-        
-        updateUI();
-        
-        if (combatInterval) clearInterval(combatInterval);
-        combatInterval = setInterval(executeCombatRound, 2000);
-    }
+    inCombat = true;
+    isAttemptingRetreat = false;
+    isSkillQueued = false;
+    
+    spawnMonster();
+    
+    document.getElementById('town-interface').classList.add('hidden');
+    document.getElementById('combat-interface').classList.remove('hidden');
+    
+    updateUI();
+    
+    if (combatInterval) clearInterval(combatInterval);
+    combatInterval = setInterval(executeCombatRound, 2000);
+}
 
 
 
@@ -2607,8 +2627,8 @@ function updateCooldownBars() {
         if (variant === 'armor') prefix = "<Θωρακισμένο> ";
         if (variant === 'magic') prefix = "<Μαγικό> ";
 
-       // logMessage("--------", 'system');
-       // logMessage(`Εμφανίστηκε: ${prefix}${monster.name} (Lvl ${monster.level})!`, 'system');
+    let monsterFullName = (variant === 'normal') ? monster.name : `${monster.firstName} ${monster.title}`;
+    logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
     }
 
     function toggleRetreat() {
@@ -2767,7 +2787,7 @@ function forceRetreat() {
     queuedSkill = null;
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
     logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
-    logMessage("");
+    
     logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
     retreatSound();
@@ -2777,7 +2797,7 @@ function forceRetreat() {
 }
 
 function executeCombatRound() {
-    logMessage("");
+   
     if (!inCombat) return;
     if (waitingForNextMonster) return;
 
@@ -2997,7 +3017,7 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
         if (outcome === 'victory' || outcome === 'mutual_death') {
             document.getElementById('monster-hp-bar').classList.add('monster-death');
             setTimeout(() => document.getElementById('monster-hp-bar').classList.remove('monster-death'), 500);
-            logMessage("");
+            
             logMessage(`${getMonsterDisplayName(monster)}: εξοντώθηκε.`, 'victory');
             monsterDeathSound();
             player.kills++;
@@ -3086,9 +3106,9 @@ if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, force
         startTownRegen();
         document.getElementById('town-interface').classList.remove('hidden');
         document.getElementById('combat-interface').classList.add('hidden');
-        logMessage("");
+        
         logMessage("Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ρίχνεις έναν υπνάκο.", 'retreat');
-        logMessage("");
+        
         logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
         player.hp = Math.round(getPlayerMaxHp() * 0.10);
         // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
@@ -3105,7 +3125,7 @@ if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, force
  else {
     waitingForNextMonster = true;
     monster = null;
-
+    
     logMessage("Ψάχνεις για νέο εχθρό...", "system");
     updateUI();
 
@@ -3114,7 +3134,7 @@ setTimeout(() => {
 
     if (inCombat) {
         spawnMonster();
-        logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
+      //  logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
         updateUI();
 
         // RESET: το ρολόι της μάχης ξεκινά ξανά από το spawn,
@@ -3185,7 +3205,7 @@ function applyDefeatPenalties() {
         );
     }
 
-        logMessage("");
+        
         logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
 
     triggerSmoothTransition('#4a1515');
