@@ -1366,7 +1366,7 @@ const weaponNames = [
 "Δαχτυλίδι του Πάγου",
 "Μενταγιόν των Ανέμων",
 "Λίθος του Κεραυνού",
-"Αστέρι της Νύχτας",
+"Μαύρο Άστρο",
 "Κρυστάλλινο Φυλακτό",
 "Ουράνιο Δαχτυλίδι",
 "Αιθερικό Μενταγιόν",
@@ -1912,12 +1912,12 @@ function getAreaType(lvl) {
 
 // Οπτική ένδειξη τύπου κυνηγότοπου στο dropdown (emoji = πάντα ορατό, color = bonus όπου υποστηρίζεται)
 const AREA_TYPE_ICON = {
-    [AREA_TYPES.NORMAL]: '',
-    [AREA_TYPES.RICH]:   '',
-    [AREA_TYPES.POOR]:   '',
-    [AREA_TYPES.WEAPON]: '',
-    [AREA_TYPES.ARMOR]:  '',
-    [AREA_TYPES.MAGIC]:  ''
+    [AREA_TYPES.NORMAL]: '⚪',
+    [AREA_TYPES.RICH]:   '🟡',
+    [AREA_TYPES.POOR]:   '⚫',
+    [AREA_TYPES.WEAPON]: '🔴',
+    [AREA_TYPES.ARMOR]:  '🔵',
+    [AREA_TYPES.MAGIC]:  '🟣'
 };
 
 const AREA_TYPE_COLOR = {
@@ -2161,8 +2161,8 @@ function updateAreaSelector() {
         // Δίνουμε ΠΑΝΤΑ χρώμα στο option, ακόμα και αν είναι NORMAL
         opt.style.color = AREA_TYPE_COLOR[areaType];
         
-        if (areaType === AREA_TYPES.RICH) opt.style.fontWeight = 'bold';
-        if (areaType === AREA_TYPES.POOR) opt.style.fontStyle = 'italic';
+      //  if (areaType === AREA_TYPES.RICH) opt.style.fontWeight = 'bold';
+      //  if (areaType === AREA_TYPES.POOR) opt.style.fontStyle = 'italic';
         selector.appendChild(opt);
     }
 
