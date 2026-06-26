@@ -1879,7 +1879,7 @@ function rollItemTier(monsterLevel) {
 
 const AREA_TYPES = {
     NORMAL: 0,
-    RICH: 1,      // άσπρη
+    RICH: 1,      // κιτρινη
     POOR: 2,      // γκρι
     WEAPON: 3,    // κόκκινη
     ARMOR: 4,     // μπλε
@@ -1915,13 +1915,13 @@ const AREA_TYPE_ICON = {
     [AREA_TYPES.NORMAL]: '',
     [AREA_TYPES.RICH]:   '',
     [AREA_TYPES.POOR]:   '',
-    [AREA_TYPES.WEAPON]: '🔴',
-    [AREA_TYPES.ARMOR]:  '🔵',
-    [AREA_TYPES.MAGIC]:  '🟣'
+    [AREA_TYPES.WEAPON]: '',
+    [AREA_TYPES.ARMOR]:  '',
+    [AREA_TYPES.MAGIC]:  ''
 };
 
 const AREA_TYPE_COLOR = {
-    [AREA_TYPES.NORMAL]: null,
+    [AREA_TYPES.NORMAL]: '#d9d9d9', // Το κανονικό σκούρο φόντο του select
     [AREA_TYPES.RICH]:   '#ffff00',
     [AREA_TYPES.POOR]:   '#737373',
     [AREA_TYPES.WEAPON]: '#ff5050',
@@ -2139,38 +2139,49 @@ startTownRegen();
 updateCooldownBars();
 
     function updateAreaSelector() {
-        const selector = document.getElementById('area-selector');
-        if (!selector) return;
+    const selector = document.getElementById('area-selector');
+    if (!selector) return;
 
-        if (selector.options.length === 100) return;
+    if (selector.options.length === 100) return;
 
-        const currentSelected = selector.value;
-        selector.innerHTML = '';
+    const currentSelected = selector.value;
+    selector.innerHTML = '';
 
-  //      let optHalf = document.createElement('option');
-   //     optHalf.value = 0.5;
-    //    optHalf.innerText = "[½] Μπάμπουρας";
-     //   selector.appendChild(optHalf);
+    for (let i = 1; i <= 100; i++) {
+        let opt = document.createElement('option');
+        opt.value = i;
+        let areaType = getAreaType(i);
+        let icon = AREA_TYPE_ICON[areaType];
+        opt.innerText = `${icon ? icon + ' ' : ''}[${i}] ${getMonsterName(i)}`;
+        
+        // Δίνουμε ΠΑΝΤΑ χρώμα στο option, ακόμα και αν είναι NORMAL
+        opt.style.color = AREA_TYPE_COLOR[areaType];
+        
+        if (areaType === AREA_TYPES.RICH) opt.style.fontWeight = 'bold';
+        if (areaType === AREA_TYPES.POOR) opt.style.fontStyle = 'italic';
+        selector.appendChild(opt);
+    }
 
-        for (let i = 1; i <= 100; i++) {
-            let opt = document.createElement('option');
-            opt.value = i;
-            let areaType = getAreaType(i);
-            let icon = AREA_TYPE_ICON[areaType];
-            opt.innerText = `${icon ? icon + ' ' : ''}[${i}] ${getMonsterName(i)}`;
-            let color = AREA_TYPE_COLOR[areaType];
-            if (color) opt.style.color = color;
-            if (areaType === AREA_TYPES.RICH) opt.style.fontWeight = 'bold';
-            if (areaType === AREA_TYPES.POOR) opt.style.fontStyle = 'italic';
-            selector.appendChild(opt);
-        }
+    if (currentSelected) {
+        selector.value = currentSelected;
+    } else {
+        selector.value = "1";
+    }
 
-if (currentSelected) {
-    selector.value = currentSelected;
-} else {
-    selector.value = "1";
+    // Αλλαγή του χρώματος στο κείμενο του select κατά την αρχική φόρτωση
+    updateSelectorColor(selector);
 }
+
+function updateSelectorColor(selector) {
+    let selectedLvl = parseInt(selector.value);
+    let areaType = getAreaType(selectedLvl);
+    selector.style.color = AREA_TYPE_COLOR[areaType];
 }
+
+document.getElementById('area-selector').addEventListener('change', function() {
+    updateSelectorColor(this);
+});
+
 
     function updateUI() {
         const pNameEl = document.getElementById('p-name');
