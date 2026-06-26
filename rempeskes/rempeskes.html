@@ -666,16 +666,16 @@ body {
 <div id="town-interface">
         <h3 style="color: #c68642;">Τεκές του Ζαλαδούρα</h3>
         <div class="area-select-container">
-            <label for="area-selector">Κυνηγότοπος:</label>
+            <label for="area-selector">Κατέβα στο λαβύρινθο:</label>
             <select id="area-selector"></select>
         </div>
     </div>
 
 <div id="combat-interface" class="hidden">
     <h3 style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap; margin: 0 0 10px 0;">
-        <span id="battle-title">Μάχη:</span>
+        <span id="battle-title" style="color: #d9d9d9;">Μάχη:</span>
         
-        <span id="m-name" style="color: #fff;">Τέρας</span>
+        <span id="m-name" style="color: #fff; font-weight: bold;">Τέρας</span>
         
         <span id="retreat-status-text"></span>
     </h3>
@@ -1787,10 +1787,21 @@ function getPlayerTitle(level) {
     return currentTitle;
 }
 
-    function getMonsterName(lvl) {
-    if (lvl === 0.5) return "Μπάμπουρας";
+function getMonsterName(lvl) {
+    // 1. Το κανονικό index του τέρατος με βάση το επίπεδό του
+    let baseIndex = Math.floor(lvl) - 1;
 
-    return monsterNames[Math.min(Math.floor(lvl) - 1, monsterNames.length - 1)];
+    // 2. Υπολογισμός τυχαίας μετατόπισης από -2 έως +2
+    const offset = Math.floor(Math.random() * 5) - 2; // Παράγει: -2, -1, 0, 1, 2
+
+    // 3. Εφαρμογή της μετατόπισης
+    let nameIndex = baseIndex + offset;
+
+    // 4. Δικλείδα ασφαλείας για να μην βγούμε ποτέ εκτός των ορίων του πίνακα (0 έως 99)
+    nameIndex = Math.max(0, Math.min(nameIndex, monsterNames.length - 1));
+
+    // 5. Επιστροφή του τυχαίου ονόματος
+    return monsterNames[nameIndex];
 }
 
     function getItemName(type, power) {
@@ -2127,7 +2138,7 @@ updateUI();
 startTownRegen();
 updateCooldownBars();
 
-    function updateAreaSelector() {
+function updateAreaSelector() {
     const selector = document.getElementById('area-selector');
     if (!selector) return;
 
@@ -2141,7 +2152,9 @@ updateCooldownBars();
         opt.value = i;
         let areaType = getAreaType(i);
         let icon = AREA_TYPE_ICON[areaType];
-        opt.innerText = `${icon ? icon + ' ' : ''}[${i}] ${getMonsterName(i)}`;
+        
+        // Αντικατάσταση της ονοματοδοσίας των τεράτων με την απλή ένδειξη βάθους
+        opt.innerText = `${icon ? icon + ' ' : ''}Βάθος ${i}`;
         
         // Δίνουμε ΠΑΝΤΑ χρώμα στο option, ακόμα και αν είναι NORMAL
         opt.style.color = AREA_TYPE_COLOR[areaType];
@@ -2159,7 +2172,7 @@ updateCooldownBars();
 
     // Αλλαγή του χρώματος στο κείμενο του select κατά την αρχική φόρτωση
     updateSelectorColor(selector);
-    // ΠΡΟΣΘΗΚΗ: Listener για την αλλαγή περιοχής από το dropdown
+    
     selector.onchange = function() {
         currentSelectedLevel = parseFloat(this.value);
         logAreaTransition(currentSelectedLevel);
@@ -2224,69 +2237,65 @@ document.getElementById('area-selector').addEventListener('change', function() {
     document.getElementById('player-hp-text').innerText = `${Math.ceil(player.hp)} / ${maxHp} HP`;
 
     if (monster) {
-        let displayedName = monster.name;
-        let isVariant = false; // Έλεγχος για να μην χάσουμε το χρώμα του τέρατος
+        let displayedName = getMonsterDisplayName(monster);
+        
+        // Προσθήκη επιπέδου (γκρι μόνο το νούμερο)
+        displayedName += ` <span style="color:#bbbbbb; font-size:1.1rem;">(${monster.level})</span>`;
 
+        // Χρώματα για SPECIAL τέρατα
         if (monster.variant === 'weapon') {
-            displayedName = `<span style="color:#ff4444;">${monster.firstName} ${monster.title}</span>`;
-            isVariant = true;
+            displayedName = `<span style="color:#ff4444;">${displayedName}</span>`;
         }
         else if (monster.variant === 'armor') {
-            displayedName = `<span style="color:#1ab2ff;">${monster.firstName} ${monster.title}</span>`;
-            isVariant = true;
+            displayedName = `<span style="color:#1ab2ff;">${displayedName}</span>`;
         }
         else if (monster.variant === 'magic') {
-            displayedName = `<span style="color:#cc66ff;">${monster.firstName} ${monster.title}</span>`;
-            isVariant = true;
+            displayedName = `<span style="color:#cc66ff;">${displayedName}</span>`;
         }
+
         document.getElementById('m-name').innerHTML = displayedName;
         
-        document.getElementById('m-level').innerText = monster.level;
-        const title = document.getElementById("battle-title");
+        // === ΧΡΩΜΑ ΟΝΟΜΑΤΟΣ ===
+        const mNameEl = document.getElementById('m-name');
+        if (monster.variant === 'normal' || !monster.variant) {
+            mNameEl.style.color = "#fff";           // Κανονικά τέρατα = άσπρο
+        }
+        // τα special έχουν ήδη χρώμα από το span παραπάνω
 
-        // === ΑΛΛΑΓΗ ΤΙΤΛΟΥ & ΧΡΩΜΑΤΟΣ ΠΕΡΙΟΧΗΣ ===
+        // Κρύβουμε το παλιό level
+        document.getElementById('m-level').style.display = 'none';
+
+        // === ΤΙΤΛΟΣ ΜΑΧΗΣ ===
+        const title = document.getElementById("battle-title");
         if (title) {
             const areaType = getAreaType(monster.level);
-            let areaColor = '#ffffff'; // Προεπιλογή: Κανονική (λευκο)
+            let areaColor = '#d9d9d9';
             
-            if (areaType === AREA_TYPES.RICH) areaColor = '#ffff00';     // Πλούσια (χρυσο)
-            else if (areaType === AREA_TYPES.POOR) areaColor = '#737373';    // Φτωχική (Γκρίζο)
-            else if (areaType === AREA_TYPES.WEAPON) areaColor = '#ec6868';  // Άγρια (Κόκκινο)
-            else if (areaType === AREA_TYPES.ARMOR) areaColor = '#1ab2ff';   // Θωρακισμένη (Μπλε)
-            else if (areaType === AREA_TYPES.MAGIC) areaColor = '#cc66ff';   // Μαγική (Μωβ)
+            if (areaType === AREA_TYPES.RICH) areaColor = '#ffff00';
+            else if (areaType === AREA_TYPES.POOR) areaColor = '#737373';
+            else if (areaType === AREA_TYPES.WEAPON) areaColor = '#e07a7a';
+            else if (areaType === AREA_TYPES.ARMOR) areaColor = '#6fa8e0';
+            else if (areaType === AREA_TYPES.MAGIC) areaColor = '#b37ed9';
 
-            title.innerText = `Βάθος ${monster.level}:`;
+            title.innerText = `Μάχη:`;
             title.style.color = areaColor;
             title.style.fontSize = "1.2rem";
-
-            while (
-                title.scrollWidth > title.clientWidth &&
-                parseFloat(title.style.fontSize) > 0.65
-            ) {
-                title.style.fontSize = (parseFloat(title.style.fontSize) - 0.05) + "rem";
-            }
         }
-        // =========================================
  
         const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
         document.getElementById('monster-hp-bar').style.width = mPct + '%';
         document.getElementById('monster-hp-text').innerText = `${Math.ceil(monster.hp)} / ${monster.maxHp} HP`;
         
-        // Εφαρμόζουμε το λευκό χρώμα μόνο εάν το τέρας είναι κανονικό (όχι variant)
-        if (!isVariant) {
-            document.getElementById('m-name').style.color = "#fff";
-        }
     } else {
         document.getElementById('m-name').innerText = "Περιπλάνηση...";
         document.getElementById('m-name').style.color = "#888";
         document.getElementById('monster-hp-bar').style.width = '0%';
         document.getElementById('monster-hp-text').innerText = '-';
         
-        // Επαναφορά του τίτλου όταν δεν υπάρχει μάχη
         const title = document.getElementById("battle-title");
         if (title) {
             title.innerText = "Μάχη:";
-            title.style.color = "#888";
+          //  title.style.color = "#888";
         }
     }
         
@@ -2369,6 +2378,7 @@ function logMessage(text, type = 'system') {
     logMessage("ΚΑΝΟΝΕΣ ΠΑΙΧΝΙΔΙΟΥ", "system");
     logMessage("ΕΙΣΑΙ ΚΑΘΑΡΜΑ. ΣΚΟΤΩΣΕ. ΓΙΝΕ ΠΑΝΙΣΧΥΡΟΣ. ΣΚΟΤΩΣΕ ΚΙ ΑΛΛΟ.", "system");
     logMessage("");
+    logMessage("Κάθε βάθος στο λαβύρινθο έχει συγκεκριμένη δυσκολία.");
     logMessage("Τα τέρατα δίνουν XP και χρυσό. Τα XP ανεβάζουν το επίπεδό σου, και κατα συνέπεια τη ζωή και τη ζημιά σου. Το χρυσάφι είναι για το φλεξ.", "system");
     logMessage("");
     logMessage("Τα σπάνια τέρατα, εκτός από διπλάσιο XP και χρυσάφι, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ.", "system");
@@ -2567,8 +2577,8 @@ function updateCooldownBars() {
 
     // RICH/POOR αλλάζουν το βασικό chance εμφάνισης special τέρατος
     let specialChance = 0.17;
-    if (areaType === AREA_TYPES.RICH) specialChance = 0.22;
-    else if (areaType === AREA_TYPES.POOR) specialChance = 0.11;
+    if (areaType === AREA_TYPES.RICH) specialChance = specialChance * 1.25;
+    else if (areaType === AREA_TYPES.POOR) specialChance = specialChance * 0.65;
 
     if (Math.random() < specialChance) {
         firstName = randomFrom(monsterFirstNames);
