@@ -2130,8 +2130,10 @@ updateAreaSelector();
 const savedMonsterLevel = localStorage.getItem('selectedMonsterLevel');
 
 if (savedMonsterLevel) {
-    document.getElementById('area-selector').value = savedMonsterLevel;
+    const areaSelectorEl = document.getElementById('area-selector');
+    areaSelectorEl.value = savedMonsterLevel;
     currentSelectedLevel = parseFloat(savedMonsterLevel);
+    updateSelectorColor(areaSelectorEl);
 }
 
 updateUI();
