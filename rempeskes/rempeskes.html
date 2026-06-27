@@ -2011,8 +2011,8 @@ const AREA_TYPE_COLOR = {
 };
 
   // Attack and defense formulas for player
-    function getPlayerAtk() { return player.level + player.weapon.power + player.magic.power/2; }
-    function getPlayerDef() { return player.level + player.armor.power + player.magic.power/2; }
+    function getPlayerAtk() { return player.level * 0.75 + player.weapon.power + player.magic.power/2; }
+    function getPlayerDef() { return player.level * 0.75 + player.armor.power + player.magic.power/2; }
 
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
@@ -2619,8 +2619,8 @@ function updateCooldownBars() {
  // Monster attack and defense formulas, also HP. to +/- tou level einai to penalty gia na isoropisei sto level
     function spawnMonster() {
     let lvl = currentSelectedLevel;
-    let baseAtk = lvl + (lvl - 1) + (lvl/2 - 0.5);
-    let baseDef = lvl + (lvl - 1) + (lvl/2 - 0.5);
+    let baseAtk = lvl * 0.75 + (lvl - 1) + (lvl/2 - 0.5);
+    let baseDef = lvl *0.75 + (lvl - 1) + (lvl/2 - 0.5);
     let baseHp = lvl * 100;
 
     let variant = 'normal';
