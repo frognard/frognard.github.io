@@ -2024,7 +2024,18 @@ const AREA_TYPE_COLOR = {
     function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
     
     //XP REWARD FORMULA
-    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 2.4)); }
+    //function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 2.275)); }
+
+    function getMonsterXpReward(monsterLvl) { 
+    let xp = 10 * Math.pow(monsterLvl, 2.275);
+
+    let diff = player.level - monsterLvl;
+// extra lvl difference penalty
+    if (diff > 0) {
+        xp *= Math.pow(0.90, diff);
+    }
+    return Math.round(xp);
+}
 
     function randomFrom(array) {
     return array[Math.floor(Math.random() * array.length)];
