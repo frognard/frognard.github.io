@@ -2017,7 +2017,7 @@ const AREA_TYPE_COLOR = {
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
    // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to equipment
-    function calculateNextXpRequirement(lvl) { return Math.round(100 * Math.pow(lvl, 3)); }
+    function calculateNextXpRequirement(lvl) { return Math.round(80 * Math.pow(lvl, 3)); }
   
     // cost armor kai weapon: ligo pio megalos ek8eths apo to gold gain, giati ta levels megalwnoun se xrono
     function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
@@ -2027,7 +2027,7 @@ const AREA_TYPE_COLOR = {
     //function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 2.275)); }
 
     function getMonsterXpReward(monsterLvl) { 
-    let xp = 10 * Math.pow(monsterLvl, 2.275);
+    let xp = 10 * Math.pow(monsterLvl, 2.4);
 
     let diff = player.level - monsterLvl;
 // extra lvl difference penalty
