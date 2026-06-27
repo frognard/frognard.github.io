@@ -297,7 +297,7 @@
 }
 
 .hunt-btn.retreat-mode{
-    --ready-color:#8a8a8a;      /* γαλάζιο όταν λέει Τρέξε */
+    --ready-color:#5d7d96;      /* γαλάζιο όταν λέει Τρέξε */
 }
 
 .hunt-btn::before{
@@ -774,12 +774,12 @@ function getMonsterDisplayName(monster) {
 }
 
 
-function getPlayerDamageBonus() {
-    return (getPlayerAtk() - monster.def) * 0.05;
-}
-function getMonsterDamageBonus() {
-    return (monster.atk - getPlayerDef()) * 0.05;
-}
+// function getPlayerDamageBonus() {
+//     return (getPlayerAtk() - monster.def) * 0.05;
+// }
+// function getMonsterDamageBonus() {
+//     return (monster.atk - getPlayerDef()) * 0.05;
+// }
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let soundEnabled = true;
@@ -1055,7 +1055,7 @@ function playerHitSound() {
     osc.frequency.exponentialRampToValueAtTime(170, now + 0.04);
 
     // Ελάχιστο gain για να μην μπουκώνει το ηχείο του Android στην ταυτόχρονη μάχη
-    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.setValueAtTime(0.16, now);
     gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
 
     osc.connect(gain);
