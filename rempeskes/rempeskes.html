@@ -726,6 +726,8 @@ body {
     </button>
 
 </div>
+
+<!-- XP and GOLD per minute meters -->
  <!--       <div class="rates-row">
             <input id="xpmin" readonly value="0 XP/m">
             <input id="gpmin" readonly value="0 GP/m">
@@ -1880,6 +1882,8 @@ function rollItemTier(monsterLevel) {
     return tier;
 }
 
+// CHARACTER STATISTICS ===================================================================
+//=========================================================================================
 
     let player = {
         name: "Ρεμπεσκές",
@@ -1888,7 +1892,7 @@ function rollItemTier(monsterLevel) {
         baseDef: 10,
         hp: 100, 
         xp: 0,
-        nextXp: 50,
+        nextXp: 100,
         gold: 0,
          // statistics
             deaths: 0,
@@ -2013,14 +2017,14 @@ const AREA_TYPE_COLOR = {
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
    // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to equipment
-    function calculateNextXpRequirement(lvl) { return Math.round(50* Math.pow(lvl, 3)); }
+    function calculateNextXpRequirement(lvl) { return Math.round(100 * Math.pow(lvl, 3)); }
   
     // cost armor kai weapon: ligo pio megalos ek8eths apo to gold gain, giati ta levels megalwnoun se xrono
     function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
     function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
     
     //XP REWARD FORMULA
-    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 2.275)); }
+    function getMonsterXpReward(monsterLvl) { return Math.round(10 * Math.pow(monsterLvl, 2.4)); }
 
     function randomFrom(array) {
     return array[Math.floor(Math.random() * array.length)];
