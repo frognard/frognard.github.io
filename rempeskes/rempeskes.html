@@ -2852,7 +2852,7 @@ function forceRetreat() {
     isSkillQueued = false;
     queuedSkill = null;
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
-    logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την έξοδο. Ρίχνεις έναν υπνάκο.`, 'retreat');
+    logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο.`, 'retreat');
     currentRunKills = 0; // Μηδενισμός μετά την αναφορά
     logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
