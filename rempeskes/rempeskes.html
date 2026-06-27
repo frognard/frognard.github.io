@@ -756,6 +756,7 @@ function showStats() {
     logMessage("ΣΤΑΤΙΣΤΙΚΑ");
     logMessage(`Φόνοι: ${player.kills}`);
     logMessage(`Θάνατοι: ${player.deaths}`);
+    logMessage(`Κατανάλωση μπύρας: ${player.beersDrunk.toLocaleString()} λίτρα`);
     logMessage(`Χρυσός στην τσέπη: ${player.gold}`);
     logMessage(`Χρυσός που χάθηκε: ${player.totalGoldGained - player.gold}`);
     logMessage(`Αποδοτικότητα: ${efficiency}%`);
@@ -1898,6 +1899,7 @@ function rollItemTier(monsterLevel) {
             deaths: 0,
             kills: 0,
             totalGoldGained: 0,
+            beersDrunk: 0,
         weapon: { name: "Σπασμένο Κλαδί", power: 1 },
         armor: { name: "Φθαρμένα Ρούχα", power: 1 },
         magic: { name: "Ξύλινο Φυλακτό", power: 1 },
@@ -3299,6 +3301,7 @@ function applyDefeatPenalties() {
         player.hp = Math.min(maxHp, player.hp + heal);
         logMessage(`Έσφιξες μια μπύρα για +${heal} HP! (Αναπλήρωση: ${pct}%).`, 'player');
         potionSound();
+        player.beersDrunk += 0.5;
 
         createFloatingText('player-hp-parent', `+${heal} HP`, "var(--hp-player)");
 
