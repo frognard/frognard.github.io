@@ -2039,9 +2039,9 @@ function getDailySeed() {
     const d = new Date();
 
     return (
-        d.getFullYear() * 10000 +
-        (d.getMonth() + 1) * 100 +
-        d.getDate()
+        d.getUTCFullYear() * 10000 +
+        (d.getUTCMonth() + 1) * 100 +
+        d.getUTCDate()
     );
 }
 
@@ -2196,19 +2196,7 @@ const AREA_TYPE_COLOR = {
     }
 
  function loadGame() {
-    const savedAreaModifiers = localStorage.getItem('rempeskes_areaModifiers');
-    if (savedAreaModifiers) {
-        try {
-            areaModifiers = JSON.parse(savedAreaModifiers);
-        } catch (e) {
-            generateAreaModifiers();
-            localStorage.setItem('rempeskes_areaModifiers', JSON.stringify(areaModifiers));
-        }
-    } else {
         generateAreaModifiers();
-        localStorage.setItem('rempeskes_areaModifiers', JSON.stringify(areaModifiers));
-    }
-
         const savedData = localStorage.getItem('minimal_rpg_save');
         if (savedData) {
             try {
@@ -2255,8 +2243,7 @@ if (savedMonsterLevel) {
 
     function saveGame() {
     localStorage.setItem('minimal_rpg_save', JSON.stringify(player));
-    localStorage.setItem('rempeskes_areaModifiers', JSON.stringify(areaModifiers));
-
+    
     const selector = document.getElementById('area-selector');
     if (selector) {
         localStorage.setItem('selectedMonsterLevel', selector.value);
@@ -2381,6 +2368,20 @@ function updateSelectorColor(selector) {
 document.getElementById('area-selector').addEventListener('change', function() {
     updateSelectorColor(this);
 });
+
+function refreshAreaSelectorAppearance() {
+    const selector = document.getElementById('area-selector');
+    if (!selector) return;
+    for (let i = 0; i < selector.options.length; i++) {
+        const opt = selector.options[i];
+        const lvl = parseInt(opt.value);
+        const areaType = getAreaType(lvl);
+        const icon = AREA_TYPE_ICON[areaType];
+        opt.innerText = `${icon ? icon + ' ' : ''}${depthNames[lvl - 1]}`;
+        opt.style.color = AREA_TYPE_COLOR[areaType];
+    }
+    updateSelectorColor(selector);
+}
 
 
    function updateUI() {
@@ -2976,6 +2977,9 @@ function resolvePlayerAttack(result) {
     return false;
 }
 
+generateAreaModifiers();
+refreshAreaSelectorAppearance();
+
 function forceRetreat() {
     // 1. ΣΤΑΜΑΤΗΜΑ του interval της μάχης
     if (typeof combatInterval !== 'undefined') {
@@ -3314,7 +3318,8 @@ if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, force
 
         document.getElementById('monster-hp-bar').classList.remove('monster-death');
 
-
+        generateAreaModifiers();
+        refreshAreaSelectorAppearance();    
 
         startTownRegen();
         document.getElementById('town-interface').classList.remove('hidden');
@@ -3373,6 +3378,9 @@ setTimeout(() => {
                 applyDefeatPenalties();
             } else if (outcome === 'retreat') {
                 
+                generateAreaModifiers();
+                refreshAreaSelectorAppearance();
+
                 startTownRegen();
                 saveGame();
                 document.getElementById('town-interface').classList.remove('hidden');
@@ -3383,6 +3391,8 @@ setTimeout(() => {
     }
 
 function applyDefeatPenalties() {
+    generateAreaModifiers();
+    refreshAreaSelectorAppearance();
     let xpLoss = Math.floor(player.xp * 0.10);
     let goldLoss = Math.floor(player.gold * 0.10);
 
