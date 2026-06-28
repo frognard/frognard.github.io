@@ -682,7 +682,7 @@ body {
         <div><b>XP:</b> <span id="p-xp" class="xp-value">0</span> / <span id="p-next-xp" class="xp-value">50</span></div>
     </div>
     <div class="stat-row" id="stat-gold-box" style="display:flex;justify-content:flex-end;">
-        <div><b>GP:</b> <span id="p-gold" class="gold">0</span></div>
+        <div><b>Χρυσάφι:</b> <span id="p-gold" class="gold">0</span></div>
     </div>
 </div>
 
@@ -858,9 +858,6 @@ function showStats() {
     logMessage(`Φόνοι: ${formatNumber(player.kills)}`);
     logMessage(`Θάνατοι: ${formatNumber(player.deaths)}`);
     logMessage(`Κατανάλωση μπύρας: ${player.beersDrunk.toLocaleString()} λίτρα`);
-    logMessage(`Χρυσός στην τσέπη: ${formatNumber(player.gold)}`);
-    logMessage(`Χρυσός που χάθηκε: ${formatNumber(player.totalGoldGained - player.gold)}`);
-    logMessage(`Αποδοτικότητα: ${efficiency}%`);
     logMessage("==========");
 }
 
@@ -2744,8 +2741,9 @@ function logMessage(text, type = 'system') {
     logMessage("Η ΕΚΤΕΛΕΣΗ κάνει ένα άμεσο χτύπημα σε έναν ετοιμοθάνατο εχθρό.", "system");
     logMessage("Η ΜΠΥΡΑ δινει ζωή! (10-50%).", "system");
     logMessage("Το ΤΡΕΞΙΜΟ δίνει μια πιθανότητα διαφυγής κάθε γύρο, μέχρι να σκοτωθεί ο εχθρός. Σε επιστρέφει στον τεκέ.", "system");
+    logMessage("Αν γυρίσεις στον τεκέ με χρυσάφι, θα το σπαταλήσεις σε γλέντι και θα κερδίσεις 1 XP για κάθε GP.");
     logMessage("");
-    logMessage("Αν πεθάνεις χάνεις 10% XP, 10% χρυσό και ένα από τα αντικείμενά σου πέφτει επίπεδο.", "system");
+    logMessage("Αν σκοτωθείς χάνεις όλο το χρυσάφι που κουβαλάς, και ένα από τα αντικείμενά σου πέφτει επίπεδο.", "system");
     logMessage("Στον τεκέ αναπληρώνεις ζωή σταδιακά.", "system");
     logMessage("");
 }
@@ -3505,6 +3503,7 @@ setTimeout(() => {
                 if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
                 inCombat = false;
                 applyDefeatPenalties();
+                
             }
         } else {
             if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
@@ -3529,7 +3528,7 @@ setTimeout(() => {
 function applyDefeatPenalties() {
     generateAreaModifiers();
     refreshAreaSelectorAppearance();
-
+    player.gold = 0;
     player.hp = 1;
 
     // xasimo eksoplismou
