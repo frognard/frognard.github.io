@@ -742,6 +742,11 @@ body {
 
 <script>
 
+function formatNumber(num) {
+    if (num === undefined || num === null) return "0";
+    return Number(num).toLocaleString('el-GR');
+}
+
 function showStats() {
 
     let efficiency = 0;
@@ -2275,9 +2280,9 @@ document.getElementById('area-selector').addEventListener('change', function() {
     document.getElementById('p-wep-bonus').innerText = `T${player.weapon.power}`;
     document.getElementById('p-arm-bonus').innerText = `T${player.armor.power}`;
     document.getElementById('p-mag-bonus').innerText = `T${player.magic.power}`;
-    document.getElementById('p-xp').innerText = player.xp;
-    document.getElementById('p-next-xp').innerText = player.nextXp;
-    document.getElementById('p-gold').innerText = player.gold;
+    document.getElementById('p-xp').innerText = formatNumber(player.xp);
+    document.getElementById('p-next-xp').innerText = formatNumber(player.nextXp);
+    document.getElementById('p-gold').innerText = formatNumber(player.gold);
     
     document.getElementById('eq-weapon').innerText = player.weapon.name;
     document.getElementById('eq-armor').innerText = player.armor.name;
@@ -2306,7 +2311,7 @@ document.getElementById('area-selector').addEventListener('change', function() {
     const maxHp = getPlayerMaxHp();
     const pPct = Math.max(0, (player.hp / maxHp) * 100);
     document.getElementById('player-hp-bar').style.width = pPct + '%';
-    document.getElementById('player-hp-text').innerText = `${Math.ceil(player.hp)} / ${maxHp} HP`;
+    document.getElementById('player-hp-text').innerText = `${formatNumber(Math.ceil(player.hp))} / ${formatNumber(maxHp)} HP`;
 
     if (monster) {
         let displayedName = getMonsterDisplayName(monster);
@@ -2356,7 +2361,7 @@ document.getElementById('area-selector').addEventListener('change', function() {
  
         const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
         document.getElementById('monster-hp-bar').style.width = mPct + '%';
-        document.getElementById('monster-hp-text').innerText = `${Math.ceil(monster.hp)} / ${monster.maxHp} HP`;
+        document.getElementById('monster-hp-text').innerText = `${formatNumber(Math.ceil(monster.hp))} / ${formatNumber(monster.maxHp)} HP`;
         
     } else {
         document.getElementById('m-name').innerText = depthNames[currentSelectedLevel - 1] + "...";
@@ -2499,9 +2504,9 @@ function startTownRegen() {
             player.hp += regenAmount;
             createFloatingText(
                 'player-hp-parent',
-                `+${regenAmount}`,
+                `+${formatNumber(regenAmount)}`,
                 "var(--hp-player)"
-            );
+                 );
             updateUI();
         }
     }, 2000);
@@ -2790,13 +2795,13 @@ function updateCooldownBars() {
 
                 return {
                     damage,
-                    log: `[SKILL] ${skill.name}! Προκάλεσες ${damage} ζημιά.`
+                    log: `[SKILL] ${skill.name}! Προκάλεσες ${formatNumber(damage)} ζημιά.`
                 };
             }
 
             return {
                 damage,
-                log: `Χτύπησες: ${damage} ζημιά σε ${getMonsterDisplayName(monster)}.`
+                log: `Χτύπησες: ${formatNumber(damage)} ζημιά σε ${getMonsterDisplayName(monster)}.`
             };
         }
 
@@ -2830,7 +2835,7 @@ function resolvePlayerAttack(result) {
     if (result.damage > 0) {
         monster.hp = Math.max(0, monster.hp - result.damage);
         if (monster.hp > 0) hitSound();
-        createFloatingText('monster-hp-parent', `-${result.damage}`, "var(--hp-monster)");
+        createFloatingText('monster-hp-parent', `-${formatNumber(result.damage)}`, "var(--hp-monster)");
     }
     else {
     createFloatingText('monster-hp-parent', 'ΑΠΕΦΥΓΕ', '#ffffff');
@@ -2952,7 +2957,7 @@ if (isAttemptingRetreat) {
         let dmgModifier = calcDmgModifier(diff);
         let dmg = d6 * 5 * monster.level * dmgModifier;
         monsterDamageCalculated = Math.max(1, Math.round(dmg));
-        monsterActionLog = `${getMonsterDisplayName(monster)}: σου έκανε ${monsterDamageCalculated} ζημιά.`;
+        monsterActionLog = `${getMonsterDisplayName(monster)}: σου έκανε ${formatNumber(monsterDamageCalculated)} ζημιά.`;
     }
 
     // ==========================================
@@ -2983,7 +2988,7 @@ if (isAttemptingRetreat) {
     if (monsterActionLog) logMessage(monsterActionLog, 'monster');
     if (monsterDamageCalculated > 0) {
         player.hp = Math.max(0, player.hp - monsterDamageCalculated);
-        createFloatingText('player-hp-parent', `-${monsterDamageCalculated}`, "var(--hp-monster)");
+        createFloatingText('player-hp-parent', `-${formatNumber(monsterDamageCalculated)}`, "var(--hp-monster)");
         playerHitSound();
     } else {
         createFloatingText('player-hp-parent', 'ΑΠΕΦΥΓΕΣ', "var(--hp-player)");
@@ -3069,22 +3074,22 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
 
     if (forceSell) {
         logMessage(
-            `[DROP] Το αντικείμενο ήταν πολύ δυνατό για το επίπεδό σου και εκποιήθηκε για ${sellValue} χρυσά.`,
+            `[DROP] Το αντικείμενο ήταν πολύ δυνατό για το επίπεδό σου και εκποιήθηκε για ${formatNumber(sellValue)} χρυσά.`,
             'system'
         );
     } else {
         logMessage(
-            `[DROP] Το αντικείμενο ήταν κατώτερο και εκποιήθηκε για ${sellValue} χρυσά.`,
+            `[DROP] Το αντικείμενο ήταν κατώτερο και εκποιήθηκε για ${formatNumber(sellValue)} χρυσά.`,
             'system'
         );
     }
 
     setTimeout(() => {
-    createFloatingText(
-        'stat-gold-box',
-        `+${sellValue}g`,
-        "var(--accent-gold)"
-    );
+        createFloatingText(
+            'stat-gold-box',
+            `+${formatNumber(sellValue)}g`,
+            "var(--accent-gold)"
+        );
 }, 500);
 
 }
@@ -3114,15 +3119,15 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
             player.gold += gainedGold;
             sessionGold += gainedGold;
             player.totalGoldGained += gainedGold;
-            logMessage(`+${gainedGold} GP`, 'victory');
-            createFloatingText('stat-gold-box', `+${gainedGold}g`, "var(--accent-gold)");
+            logMessage(`+${formatNumber(gainedGold)} GP`, 'victory');
+            createFloatingText('stat-gold-box', `+${formatNumber(gainedGold)}g`, "var(--accent-gold)");
 
             let gainedXp = getMonsterXpReward(monster.level) *
                (monster.variant !== 'normal' ? 2 : 1);
             player.xp += gainedXp;
             sessionXp += gainedXp;
-            logMessage(`+${gainedXp} XP`, 'victory');
-            createFloatingText('xp-parent', `+${gainedXp} XP`, "var(--accent-gold)");
+            logMessage(`+${formatNumber(gainedXp)} XP`, 'victory');
+            createFloatingText('xp-parent', `+${formatNumber(gainedXp)} XP`, "var(--accent-gold)");
 
             
             // weaponchances
@@ -3272,7 +3277,7 @@ function applyDefeatPenalties() {
     };
 
         logMessage(
-        `Σκοτώθηκες! Μεταφερθήκες στον τεκέ με 1 HP. Απώλεια: -${goldLoss} χρυσά και -${xpLoss} XP.`,
+        `Σκοτώθηκες! Μεταφερθήκες στον τεκέ με 1 HP. Απώλεια: -${formatNumber(xpLoss)} XP και -${formatNumber(goldLoss)} χρυσά.`,
         'monster');
         
     currentRunKills = 0;
@@ -3319,7 +3324,7 @@ function applyDefeatPenalties() {
         potionSound();
         player.beersDrunk += 0.5;
 
-        createFloatingText('player-hp-parent', `+${heal} HP`, "var(--hp-player)");
+        createFloatingText('player-hp-parent', `+${formatNumber(heal)} HP`, "var(--hp-player)");
 
         potionCooldownActive = true;
         potionCdStart = Date.now();
