@@ -341,6 +341,34 @@
     align-items: center;
 }
 
+@keyframes skillCastFlash {
+
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+        box-shadow: none;
+    }
+
+    20% {
+        transform: scale(1.08);
+        filter: brightness(2.5);
+        box-shadow:
+            0 0 10px #fff,
+            0 0 20px #fff,
+            0 0 40px #fff;
+    }
+
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+        box-shadow: none;
+    }
+}
+
+.skill-cast-flash {
+    animation: skillCastFlash 280ms ease-out;
+}
+
 /* Προσθήκη για τη μείωση του ύψους του ίδιου του drop-down κουτιού */
 .area-select-container select {
     height: 28px;       /* <-- Μειώνει το συνολικό ύψος του κουτιού (π.χ. από το default ~38px στα 28px) */
@@ -528,7 +556,7 @@
 
 
 .skill-queued {
-    background-color: #e67e22 !important;
+  /* background-color: #e67e22 !important; */
     border-color: #ffb347 !important;
     color: white !important;
 }
@@ -766,6 +794,22 @@ function showStats() {
     logMessage(`Χρυσός που χάθηκε: ${formatNumber(player.totalGoldGained - player.gold)}`);
     logMessage(`Αποδοτικότητα: ${efficiency}%`);
     logMessage("==========");
+}
+
+function flashSkillButton(buttonId) {
+
+    const btn = document.getElementById(buttonId);
+
+    if (!btn) return;
+
+    // αφαιρούμε τυχόν προηγούμενο animation
+    btn.classList.remove("skill-cast-flash");
+
+    // αναγκάζει τον browser να ξανατρέξει το animation
+    void btn.offsetWidth;
+
+    // ενεργοποίηση flash
+    btn.classList.add("skill-cast-flash");
 }
 
 
@@ -2786,18 +2830,24 @@ function updateCooldownBars() {
 
             // skill modifier
             
-            if (skill) {
+if (skill) {
                
-                damage = Math.round(damage * skill.multiplier);
+    damage = Math.round(damage * skill.multiplier);
 
-                if (skill.sound)
-                    skill.sound();
+    if (skill === skills.heavyStrike)
+        flashSkillButton("btn-skill");
 
-                return {
-                    damage,
-                    log: `[SKILL] ${skill.name}! Προκάλεσες ${formatNumber(damage)} ζημιά.`
-                };
-            }
+    if (skill === skills.preciseStrike)
+        flashSkillButton("btn-precise");
+
+    if (skill.sound)
+        skill.sound();
+
+    return {
+        damage,
+        log: `[SKILL] ${skill.name}! Προκάλεσες ${formatNumber(damage)} ζημιά.`
+    };
+}
 
             return {
                 damage,
@@ -3277,7 +3327,7 @@ function applyDefeatPenalties() {
     };
 
         logMessage(
-        `Σκοτώθηκες! Μεταφερθήκες στον τεκέ με 1 HP. Απώλεια: -${formatNumber(xpLoss)} XP και -${formatNumber(goldLoss)} χρυσά.`,
+        `Σκοτώθηκες! Μεταφερθήκες στον τεκέ με 1 HP. Απώλεια: ${formatNumber(xpLoss)} XP και ${formatNumber(goldLoss)} GP.`,
         'monster');
         
     currentRunKills = 0;
@@ -3322,6 +3372,7 @@ function applyDefeatPenalties() {
         player.hp = Math.min(maxHp, player.hp + heal);
         logMessage(`Έσφιξες μια μπύρα για +${formatNumber(heal)} HP! (Αναπλήρωση: ${pct}%).`, 'player');
         potionSound();
+        flashSkillButton("btn-potion");
         player.beersDrunk += 0.5;
 
         createFloatingText('player-hp-parent', `+${formatNumber(heal)} HP`, "var(--hp-player)");
