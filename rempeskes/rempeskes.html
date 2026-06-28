@@ -450,6 +450,19 @@
             color: #fff;
         }
 
+        .btn-save {
+            border-color: #8b5814; 
+            padding: 4px 8px; 
+            font-size: 0.75rem;
+            background-color: #1a1a1a;
+            color: #8b5814;
+        }
+
+        .btn-save:hover {
+            background-color: #8b5814 !important;
+            color: #fff;
+        }
+
         .hidden { display: none; }
         .hotkey-hint { color: var(--text-muted); font-size: 0.8rem; text-align: right; white-space: nowrap; }
 
@@ -779,6 +792,14 @@ body {
         Help
     </button>
 
+    <button class="btn-save" onclick="exportSave()">
+        Export
+    </button>
+
+    <button class="btn-save" onclick="importSave()">
+        Import
+    </button>
+    
     <button class="btn-delete-save" onclick="resetGame()">
         Διαγραφή Save
     </button>
@@ -2255,6 +2276,65 @@ if (savedMonsterLevel) {
         localStorage.removeItem('selectedMonsterLevel');
         localStorage.removeItem('rempeskes_areaModifiers');
         location.reload();
+    }
+}
+
+function exportSave() {
+    const exportData = {
+        v: 1,
+        player: player,
+        selectedMonsterLevel: document.getElementById('area-selector')
+            ? document.getElementById('area-selector').value
+            : null
+    };
+    const json = JSON.stringify(exportData);
+    const encoded = "RMPK1-" + btoa(unescape(encodeURIComponent(json)));
+    prompt("Αντίγραψε αυτόν τον κωδικό (Ctrl+C) και αποθήκευσέ τον κάπου:", encoded);
+}
+
+function importSave() {
+    const encoded = prompt("Επικόλλησε εδώ τον κωδικό save:");
+    if (!encoded) return;
+
+    const trimmed = encoded.trim();
+    if (!trimmed.startsWith("RMPK1-")) {
+        alert("Μη έγκυρος κωδικός save.");
+        return;
+    }
+
+    try {
+        const json = decodeURIComponent(escape(atob(trimmed.slice(6))));
+        const data = JSON.parse(json);
+        if (!data || !data.player) throw new Error("invalid");
+
+        if (!confirm("Αυτό θα αντικαταστήσει τον τρέχοντα χαρακτήρα σου. Συνέχεια;")) return;
+
+        player = { ...player, ...data.player };
+        player.level = Math.min(player.level, 100);
+        player.weapon.power = Math.min(player.weapon.power, 100);
+        player.armor.power = Math.min(player.armor.power, 100);
+        player.magic.power = Math.min(player.magic.power, 100);
+        if (!player.name) player.name = "Ρεμπεσκές";
+        player.maxUnlockedLevel = 100;
+        player.nextXp = calculateNextXpRequirement(player.level);
+        player.weapon.name = getItemName('weapon', player.weapon.power);
+        player.armor.name = getItemName('armor', player.armor.power);
+        player.magic.name = getItemName('magic', player.magic.power);
+
+        if (data.selectedMonsterLevel) {
+            const selector = document.getElementById('area-selector');
+            if (selector) {
+                selector.value = data.selectedMonsterLevel;
+                currentSelectedLevel = parseFloat(data.selectedMonsterLevel);
+                updateSelectorColor(selector);
+            }
+        }
+
+        saveGame();
+        updateUI();
+        logMessage("Το save εισήχθη επιτυχώς.", 'system');
+    } catch (e) {
+        alert("Ο κωδικός save είναι χαλασμένος ή άκυρος.");
     }
 }
 
