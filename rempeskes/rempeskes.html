@@ -2255,6 +2255,11 @@ if (savedMonsterLevel) {
             
         }
         else {
+        let chosenName = prompt("Όνομα χαρακτήρα");
+        if (chosenName) chosenName = chosenName.trim();
+        if (chosenName) player.name = chosenName;
+        saveGame();
+
         logMessage("Είσαι στον Τεκέ του Ζαλαδούρα");
         logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
         
