@@ -2195,6 +2195,76 @@ const AREA_TYPE_COLOR = {
     return Math.round(xp);
 }
 
+//GOLD roll: 8eloume kata vash na einai to 10% twn mosnter xp
+function rollGoldForLevel(level) {
+    const averageGold = Math.pow(level, 2);
+    const randomFactor = 0.5 + Math.random();   // 0.5 - 1.5
+
+    return Math.max(
+        1,
+        Math.round(averageGold * randomFactor)
+    );
+}
+
+function cashInGoldForXp() {
+    if (player.gold <= 0) return;
+
+    const bankedGold = player.gold;
+
+    player.xp += bankedGold;
+    player.gold = 0;
+
+    logMessage(
+        `[ΤΕΚΕΣ] Σκόρπισες σε γλέντια ${formatNumber(bankedGold)} GP και απέκτησες ${formatNumber(bankedGold)} XP!`,
+        'victory'
+    );
+    checkLevelUp();
+    createFloatingText(
+        'xp-parent',
+        `+${formatNumber(bankedGold)} XP`,
+        "var(--accent-gold)"
+    );
+}
+
+
+
+function checkLevelUp() {
+
+    while (player.xp >= player.nextXp && player.level < 100) {
+
+        player.level++;
+        player.xp -= player.nextXp;
+
+        if (player.level > player.maxUnlockedLevel) {
+            player.maxUnlockedLevel = player.level;
+            refreshAreaSelectorAppearance();
+        }
+
+        player.nextXp = calculateNextXpRequirement(player.level);
+
+        player.hp = getPlayerMaxHp();
+
+        logMessage(`[LEVEL UP] Έφτασες στο επίπεδο ${player.level}!`, 'victory');
+
+        createFloatingText(
+            'xp-parent',
+            'LEVEL UP!',
+            '#ffffff'
+        );
+
+        document
+            .getElementById('xp-box')
+            .classList.add('xp-level-flash');
+
+        setTimeout(() => {
+            document
+                .getElementById('xp-box')
+                .classList.remove('xp-level-flash');
+        }, 1400);
+    }
+}
+
+
     function randomFrom(array) {
     return array[Math.floor(Math.random() * array.length)];
         }
@@ -3086,6 +3156,7 @@ function forceRetreat() {
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
     logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο.`, 'retreat');
     currentRunKills = 0; // Μηδενισμός μετά την αναφορά
+    cashInGoldForXp();
     logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
     retreatSound();
@@ -3269,30 +3340,20 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
 
     } else {
 
-    let sellValue;
-
-    if (type === 'weapon') {
-        sellValue = Math.floor(getWeaponUpgradeCost(rolledTier - 1) / 8);
-    }
-    else if (type === 'armor') {
-        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 8);
-    }
-    else {
-        // magic
-        sellValue = Math.floor(getArmorUpgradeCost(rolledTier - 1) / 8);
-    }
+        // timh magikwn antikeimenon
+    let sellValue = rollGoldForLevel(rolledTier) * 2;
 
     player.gold += sellValue;
     player.totalGoldGained += sellValue;
 
     if (forceSell) {
         logMessage(
-            `[DROP] Το αντικείμενο ήταν πολύ δυνατό για το επίπεδό σου και εκποιήθηκε για ${formatNumber(sellValue)} χρυσά.`,
+            `[DROP] Το αντικείμενο ήταν πολύ δυνατό για το επίπεδό σου και θα πουληθεί για ${formatNumber(sellValue)} χρυσά.`,
             'system'
         );
     } else {
         logMessage(
-            `[DROP] Το αντικείμενο ήταν κατώτερο και εκποιήθηκε για ${formatNumber(sellValue)} χρυσά.`,
+            `[DROP] Το αντικείμενο ήταν κατώτερο και θα πουληθεί για ${formatNumber(sellValue)} χρυσά.`,
             'system'
         );
     }
@@ -3325,13 +3386,16 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
             
           
             // Υπολογισμός χρυσού με bonus για τα μη-normal τέρατα
-            let d6Gold = Math.floor(Math.random() * 6) + 1;
-            let goldMultiplier = (monster.variant !== 'normal') ? 2 : 1;
-            let gainedGold = Math.floor(d6Gold * (monster.level ** 1.3) * goldMultiplier);
-            
+            let gainedGold = rollGoldForLevel(monster.level);
+
+            if (monster.variant !== 'normal') {
+                gainedGold *= 2;
+            }
+
             player.gold += gainedGold;
             sessionGold += gainedGold;
             player.totalGoldGained += gainedGold;
+   
             logMessage(`+${formatNumber(gainedGold)} GP`, 'victory');
             createFloatingText('stat-gold-box', `+${formatNumber(gainedGold)}g`, "var(--accent-gold)");
 
@@ -3371,21 +3435,7 @@ if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, force
 }
             if (droppedSomething) { triggerSmoothTransition('#3e3200'); }
 
-        if (player.xp >= player.nextXp && player.level < 100) {
-            player.level++;
-            player.xp -= player.nextXp;
-            if (player.level >= 100) {
-                player.level = 100;
-                player.xp = 0;              // προαιρετικά
-                player.nextXp = 0;          // προαιρετικά
-            } else {
-                player.nextXp = calculateNextXpRequirement(player.level);
-            }
-            player.hp = getPlayerMaxHp();
-            logMessage(`*** ΑΠΟΚΤΗΣΗ ΕΠΙΠΕΔΟΥ ${player.level}! ***`, 'victory');
-            levelUpSound();
-            triggerSmoothTransition('#113f11');
-        }
+            checkLevelUp();
 
             saveGame();
             if (outcome === 'victory') {
@@ -3412,6 +3462,7 @@ if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, force
         
         logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την έξοδο. Ρίχνεις έναν υπνάκο...`, 'retreat');
         currentRunKills = 0; // Μηδενισμός μετά την αναφορά
+        cashInGoldForXp();
         logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
         player.hp = Math.round(getPlayerMaxHp() * 0.10);
         // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
@@ -3478,11 +3529,7 @@ setTimeout(() => {
 function applyDefeatPenalties() {
     generateAreaModifiers();
     refreshAreaSelectorAppearance();
-    let xpLoss = Math.floor(player.xp * 0.10);
-    let goldLoss = Math.floor(player.gold * 0.10);
 
-    player.xp = Math.max(0, player.xp - xpLoss);
-    player.gold = Math.max(0, player.gold - goldLoss);
     player.hp = 1;
 
     // xasimo eksoplismou
@@ -3496,7 +3543,7 @@ function applyDefeatPenalties() {
     };
 
         logMessage(
-        `Σκοτώθηκες! Μεταφερθήκες στον τεκέ με 1 HP. Απώλεια: ${formatNumber(xpLoss)} XP και ${formatNumber(goldLoss)} GP.`,
+        `Σκοτώθηκες! Έχασες το χρυσάφι σου και μεταφερθήκες στον τεκέ με 1 HP.`,
         'monster');
         
     currentRunKills = 0;
