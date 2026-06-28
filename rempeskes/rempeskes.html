@@ -128,7 +128,7 @@
             height: 100%;
             width: 0%;
             background-color: #40a8ee;
-            transition: width 0.2s ease;
+            transition: width 0.28s ease;
         }
 
         .stats-grid {
@@ -206,7 +206,7 @@
         .bar {
             height: 100%;
             width: 100%;
-            transition: width 0.2s ease;
+            transition: width 0.28s ease;
             border-radius: 3px;
         }
 
@@ -463,8 +463,6 @@
             text-shadow: 1px 1px 3px #000, -1px -1px 3px #000;
         }
 
-
-
         @keyframes floatUp {
             0% { opacity: 1; transform: translateY(0) scale(1); }
             20% { transform: translateY(-12px) scale(1.2); }
@@ -598,6 +596,38 @@ body {
     white-space: nowrap;
     overflow: hidden;
     font-size: 1.2rem;
+}
+
+@keyframes hpDamageFlash {
+    0% {
+        box-shadow: 0 0 0 rgba(231, 76, 60, 0);
+    }
+    25% {
+        box-shadow: 0 0 8px 3px rgba(231, 76, 60, 0.75);
+    }
+    100% {
+        box-shadow: 0 0 0 rgba(231, 76, 60, 0);
+    }
+}
+
+.hp-damage-flash {
+    animation: hpDamageFlash 280ms ease-out;
+}
+
+@keyframes hpHealFlash {
+    0% {
+        box-shadow: 0 0 0 rgba(46, 204, 113, 0);
+    }
+    25% {
+        box-shadow: 0 0 8px 3px rgba(46, 204, 113, 0.75);
+    }
+    100% {
+        box-shadow: 0 0 0 rgba(46, 204, 113, 0);
+    }
+}
+
+.hp-heal-flash {
+    animation: hpHealFlash 280ms ease-out;
 }
 
 
@@ -769,6 +799,23 @@ body {
 
 
 <script>
+
+function flashHpBar(containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.classList.remove("hp-damage-flash", "hp-heal-flash");
+    void el.offsetWidth;
+    el.classList.add("hp-damage-flash");
+}
+
+function flashHpBarHeal(containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.classList.remove("hp-damage-flash", "hp-heal-flash");
+    void el.offsetWidth;
+    el.classList.add("hp-heal-flash");
+}
+
 
 function formatNumber(num) {
     if (num === undefined || num === null) return "0";
@@ -998,8 +1045,6 @@ function levelUpSound() {
     if (!soundEnabled) return;
     const now = audioCtx.currentTime;
 
-    // Εδώ είχες ήδη 0.15 gain, το οποίο είναι καλό. Χαμηλώσαμε τις νότες κατά μία οκτάβα 
-    // (από 523, 659, 784 σε Do-Mi-Sol της προηγούμενης οκτάβας) για να ακούγεται πιο γλυκό και "γεμάτο"
     const notes = [261.63, 329.63, 392.00];
 
     notes.forEach((freq, i) => {
@@ -2551,6 +2596,7 @@ function startTownRegen() {
                 `+${formatNumber(regenAmount)}`,
                 "var(--hp-player)"
                  );
+                 flashHpBarHeal('player-hp-parent');
             updateUI();
         }
     }, 2000);
@@ -2886,6 +2932,7 @@ function resolvePlayerAttack(result) {
         monster.hp = Math.max(0, monster.hp - result.damage);
         if (monster.hp > 0) hitSound();
         createFloatingText('monster-hp-parent', `-${formatNumber(result.damage)}`, "var(--hp-monster)");
+        flashHpBar('monster-hp-parent');  
     }
     else {
     createFloatingText('monster-hp-parent', 'ΑΠΕΦΥΓΕ', '#ffffff');
@@ -3020,6 +3067,7 @@ if (isAttemptingRetreat) {
         monster.hp = Math.max(0, monster.hp - result.damage);
         if (monster.hp > 0) hitSound();
         createFloatingText('monster-hp-parent', `-${formatNumber(result.damage)}`, "var(--hp-monster)");
+        flashHpBar('monster-hp-parent');
     } else {
         createFloatingText('monster-hp-parent', 'ΑΠΕΦΥΓΕ', '#ffffff');
     }
@@ -3040,6 +3088,7 @@ if (isAttemptingRetreat) {
         player.hp = Math.max(0, player.hp - monsterDamageCalculated);
         createFloatingText('player-hp-parent', `-${formatNumber(monsterDamageCalculated)}`, "var(--hp-monster)");
         playerHitSound();
+        flashHpBar('player-hp-parent');  
     } else {
         createFloatingText('player-hp-parent', 'ΑΠΕΦΥΓΕΣ', "var(--hp-player)");
     }
@@ -3376,6 +3425,7 @@ function applyDefeatPenalties() {
         player.beersDrunk += 0.5;
 
         createFloatingText('player-hp-parent', `+${formatNumber(heal)} HP`, "var(--hp-player)");
+        flashHpBarHeal('player-hp-parent');
 
         potionCooldownActive = true;
         potionCdStart = Date.now();
