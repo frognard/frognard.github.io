@@ -759,11 +759,11 @@ function showStats() {
 
     logMessage("==========");
     logMessage("ΣΤΑΤΙΣΤΙΚΑ");
-    logMessage(`Φόνοι: ${player.kills}`);
-    logMessage(`Θάνατοι: ${player.deaths}`);
+    logMessage(`Φόνοι: ${formatNumber(player.kills)}`);
+    logMessage(`Θάνατοι: ${formatNumber(player.deaths)}`);
     logMessage(`Κατανάλωση μπύρας: ${player.beersDrunk.toLocaleString()} λίτρα`);
-    logMessage(`Χρυσός στην τσέπη: ${player.gold}`);
-    logMessage(`Χρυσός που χάθηκε: ${player.totalGoldGained - player.gold}`);
+    logMessage(`Χρυσός στην τσέπη: ${formatNumber(player.gold)}`);
+    logMessage(`Χρυσός που χάθηκε: ${formatNumber(player.totalGoldGained - player.gold)}`);
     logMessage(`Αποδοτικότητα: ${efficiency}%`);
     logMessage("==========");
 }
@@ -2969,7 +2969,7 @@ if (isAttemptingRetreat) {
     if (result.damage > 0) {
         monster.hp = Math.max(0, monster.hp - result.damage);
         if (monster.hp > 0) hitSound();
-        createFloatingText('monster-hp-parent', `-${result.damage}`, "var(--hp-monster)");
+        createFloatingText('monster-hp-parent', `-${formatNumber(result.damage)}`, "var(--hp-monster)");
     } else {
         createFloatingText('monster-hp-parent', 'ΑΠΕΦΥΓΕ', '#ffffff');
     }
@@ -3320,7 +3320,7 @@ function applyDefeatPenalties() {
         let pct = Math.floor(Math.random() * 41) + 10; 
         let heal = Math.round(maxHp * (pct / 100));
         player.hp = Math.min(maxHp, player.hp + heal);
-        logMessage(`Έσφιξες μια μπύρα για +${heal} HP! (Αναπλήρωση: ${pct}%).`, 'player');
+        logMessage(`Έσφιξες μια μπύρα για +${formatNumber(heal)} HP! (Αναπλήρωση: ${pct}%).`, 'player');
         potionSound();
         player.beersDrunk += 0.5;
 
