@@ -3339,7 +3339,7 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
     } else {
 
         // timh magikwn antikeimenon
-    let sellValue = rollGoldForLevel(rolledTier) * 2;
+    let sellValue = rollGoldForLevel(rolledTier) * 1;
 
     player.gold += sellValue;
     player.totalGoldGained += sellValue;
@@ -3387,7 +3387,7 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
             let gainedGold = rollGoldForLevel(monster.level);
 
             if (monster.variant !== 'normal') {
-                gainedGold *= 2;
+                gainedGold *= 1;
             }
 
             player.gold += gainedGold;
