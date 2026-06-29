@@ -866,7 +866,7 @@ function showStats() {
     logMessage("==========");
     logMessage("ΣΤΑΤΙΣΤΙΚΑ");
     logMessage(`Φόνοι: ${formatNumber(player.kills)}`);
-    logMessage(`Θάνατοι: ${formatNumber(player.deaths)}`);
+    logMessage(`Θάνατοι: ${player.ironman ? 'IRONMAN' : formatNumber(player.deaths)}`);
     logMessage(`Κατανάλωση μπύρας: ${player.beersDrunk.toLocaleString()} λίτρα`);
     logMessage("==========");
 }
@@ -878,7 +878,7 @@ function showIronmanHighscores() {
     logMessage("ΨΟΦΟΛΟΓΙΟN", "system");
 
     if (scores.length === 0) {
-        logMessage("Δεν υπάρχουν ακόμα νεκροί Ironman.");
+        logMessage("Δεν υπάρχουν ακόμα νεκροί Ironmen.");
     } else {
         scores.forEach(s => {
             logMessage(`${s.name}, επίπεδο ${s.level}, σκοτώθηκε στο βάθος ${s.depth} από ${s.killer}.`);
