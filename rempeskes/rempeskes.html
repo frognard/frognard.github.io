@@ -859,9 +859,14 @@ body {
 
 <div id="ironman-modal" class="hidden ironman-modal-overlay">
     <div class="ironman-modal-box">
-        <p>Ironman mode; Αν πεθάνεις, ο χαρακτήρας κλειδώνει οριστικά και δε θα μπορείς να ξαναμπείς στο λαβύρινθο.</p>
-        <button class="btn-showRules" onclick="selectIronmanMode(false)">Κανονικός</button>
-        <button class="btn-delete-save" onclick="selectIronmanMode(true)">Ironman</button>
+        <p>Όνομα χαρακτήρα:</p>
+        <input type="text" id="char-name-input" placeholder="Ρεμπεσκές"
+               style="width: 100%; padding: 6px; margin-bottom: 14px; background: #1a1a1a; color: #fff; border: 1px solid var(--accent-gold); border-radius: 4px;">
+        <label style="display: block; margin-bottom: 18px; cursor: pointer;">
+            <input type="checkbox" id="ironman-checkbox">
+            Ironman mode (αν πεθάνεις, ο χαρακτήρας κλειδώνει οριστικά)
+        </label>
+        <button class="btn-showRules" onclick="confirmCharacterCreation()">Έναρξη</button>
     </div>
 </div>
 
@@ -1888,15 +1893,23 @@ const tekeSongs = [
 "Ο Δερβίσης",
 "Πέντε χρόνια δικασμένος",
 "Το μινόρε της αυγής",
+"Τράβα μάγκα στη δουλειά σου",
+"Στα σίδερα με βάλανε",
+"Γιαφ γιουφ",
 "Όλοι οι ρεμπέτες του ντουνιά",
 "Η κοινωνία με κατακρίνει",
 "Δυο μάγκες μες τη φυλακή",
+"Πού `ναι τα χρόνια τα παλιά",
 "Τα ματόκλαδά σου λάμπουν",
 "Φραγκοσυριανή",
+"Μπαρμπούτι",
 "Αντιλαλούν οι φυλακές",
 "Σαν πεθάνω στο καράβι",
 "Μάνα μου το στήθοσ μου πονεί",
+"Γεια σου Λόλα μερακλού",
+"Μαρίκα χασικλού",
 "Ο θερμαστής",
+"Κουβέντα Με Το Χάρο",
 "Καραντουζένι",
 "Ταξίμι ζεϊμπέκικο",
 "Ο Αργιλές",
@@ -2392,9 +2405,9 @@ if (savedMonsterLevel) {
             
         }
         else {
-        let chosenName = prompt("Όνομα χαρακτήρα");
-        if (chosenName) chosenName = chosenName.trim();
-        if (chosenName) player.name = chosenName;
+     //   let chosenName = prompt("Όνομα χαρακτήρα");
+     //   if (chosenName) chosenName = chosenName.trim();
+     //   if (chosenName) player.name = chosenName;
 
         document.getElementById('ironman-modal').classList.remove('hidden');
     }
@@ -2435,10 +2448,13 @@ function saveIronmanHighscore(record) {
     localStorage.setItem('rempeskes_ironman_highscores', JSON.stringify(scores));
 }
 
-function selectIronmanMode(isIronman) {
+function confirmCharacterCreation() {
     document.getElementById('ironman-modal').classList.add('hidden');
 
-    player.ironman = isIronman;
+    let chosenName = document.getElementById('char-name-input').value.trim();
+    if (chosenName) player.name = chosenName;
+
+    player.ironman = document.getElementById('ironman-checkbox').checked;
     if (player.ironman) {
         logMessage("Ironman mode ενεργό. Δεν υπάρχει γυρισμός.", 'system');
     }
