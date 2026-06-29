@@ -328,6 +328,25 @@
     }
 }
 
+.legendary-monster-glow {
+    color: #ffaa00 !important;
+    font-weight: bold !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: legendaryMonsterPulse 1.2s infinite alternate;
+}
+
+@keyframes legendaryMonsterPulse {
+    from {
+        text-shadow: 0 0 5px #ff5500, 0 0 10px #ffaa00, 0 0 15px #ffaa00;
+        transform: scale(1);
+    }
+    to {
+        text-shadow: 0 0 15px #ff5500, 0 0 25px #ffaa00, 0 0 35px #ff0000, 0 0 50px #ff5500;
+        transform: scale(1.02);
+    }
+}
+
 .skill-btn{
     position:relative;
     overflow:hidden;
@@ -415,6 +434,7 @@
         .log-system { color: #95a5a6; }
         .log-victory { color: var(--accent-gold); font-weight: bold; }
         .log-retreat { color: #e67e22; font-weight: bold; }
+        .log-konanos { color: #ffffff; font-weight: bold; }
 
         .area-select-container {
     margin-top: 15px;
@@ -2251,7 +2271,7 @@ function rollItemTier(monsterLevel) {
         level: 1,
         baseAtk: 10,
         baseDef: 10,
-        hp: 100, 
+        hp: 150, 
         xp: 0,
         nextXp: 80,
         gold: 0,
@@ -2261,6 +2281,7 @@ function rollItemTier(monsterLevel) {
             totalGoldGained: 0,
             beersDrunk: 0,
             legendaryDrops: 0,
+            hasBeatenConanos: false,
         weapon: { name: "Σπασμένο Κλαδί", power: 1, legendary: false },
         armor: { name: "Φθαρμένα Ρούχα", power: 1, legendary: false },
         magic: { name: "Ξύλινο Φυλακτό", power: 1, legendary: false },
@@ -2577,6 +2598,12 @@ function loadGame() {
 
         document.getElementById('ironman-modal').classList.remove('hidden');
     }
+    const savedConanos = localStorage.getItem('rempeskes_hasBeatenConanos');
+    if (savedConanos) {
+        player.hasBeatenConanos = (savedConanos === "true");
+    } else {
+        player.hasBeatenConanos = false;
+    }
 }
 
 function resetGame() {
@@ -2584,6 +2611,7 @@ function resetGame() {
         localStorage.removeItem('minimal_rpg_save');
         localStorage.removeItem('selectedMonsterLevel');
         localStorage.removeItem('rempeskes_areaModifiers');
+        localStorage.setItem('rempeskes_hasBeatenConanos', "false");
 
         if (!confirm("Να κρατηθεί το Ψοφολόγιο των Ironmen;")) {
             localStorage.removeItem('rempeskes_ironman_highscores');
@@ -2595,7 +2623,7 @@ function resetGame() {
 
     function saveGame() {
     localStorage.setItem('minimal_rpg_save', JSON.stringify(player));
-    
+    localStorage.setItem('rempeskes_hasBeatenConanos', player.hasBeatenConanos ? "true" : "false");
     const selector = document.getElementById('area-selector');
     if (selector) {
         localStorage.setItem('selectedMonsterLevel', selector.value);
@@ -2855,7 +2883,7 @@ function refreshAreaSelectorAppearance() {
     if (document.activeElement !== pNameEl) {
         pNameEl.innerText = player.name;
     }
-       const skullEl = document.getElementById('p-name-skull');
+        const skullEl = document.getElementById('p-name-skull');
     if (player.ironman) {
         skullEl.classList.remove('hidden');
     } else {
@@ -2935,12 +2963,21 @@ function refreshAreaSelectorAppearance() {
 
         document.getElementById('m-name').innerHTML = displayedName;
         
-        // === ΧΡΩΜΑ ΟΝΟΜΑΤΟΣ ===
+        // === ΧΡΩΜΑ ΚΑΙ ΕΦΕ ΟΝΟΜΑΤΟΣ ===
         const mNameEl = document.getElementById('m-name');
-        if (monster.variant === 'normal' || !monster.variant) {
-            mNameEl.style.color = "#fff";           // Κανονικά τέρατα = άσπρο
+        
+        // Έλεγχος για τη σπέσιαλ λάμψη του Θεού Κόνανου
+        if (monster.name === "Θεός Κόνανος") {
+            mNameEl.classList.add('legendary-monster-glow');
+            mNameEl.style.color = ""; // Αφήνουμε το CSS class να ορίσει το χρώμα
+        } else {
+            mNameEl.classList.remove('legendary-monster-glow');
+            if (monster.variant === 'normal' || !monster.variant) {
+                mNameEl.style.color = "#fff";           // Κανονικά τέρατα = άσπρο
+            } else {
+                mNameEl.style.color = ""; // Καθαρισμός για τα special spans
+            }
         }
-        // τα special έχουν ήδη χρώμα από το span παραπάνω
 
         // Κρύβουμε το παλιό level
         document.getElementById('m-level').style.display = 'none';
@@ -2967,8 +3004,12 @@ function refreshAreaSelectorAppearance() {
         document.getElementById('monster-hp-text').innerText = `${formatNumber(Math.ceil(monster.hp))} / ${formatNumber(monster.maxHp)} HP`;
         
     } else {
-        document.getElementById('m-name').innerText = depthNames[currentSelectedLevel - 1] + "...";
-        document.getElementById('m-name').style.color = "#888";
+        const mNameEl = document.getElementById('m-name');
+        if (mNameEl) {
+            mNameEl.classList.remove('legendary-monster-glow');
+            mNameEl.innerText = depthNames[currentSelectedLevel - 1] + "...";
+            mNameEl.style.color = "#888";
+        }
         document.getElementById('monster-hp-bar').style.width = '0%';
         document.getElementById('monster-hp-text').innerText = '-';
         
@@ -3029,6 +3070,17 @@ function refreshAreaSelectorAppearance() {
     btnPotion.disabled = potionCooldownActive;
 
     //   updateAreaSelector();
+    const nameElement = document.getElementById("p-name");
+    if (player.hasBeatenConanos) {
+        nameElement.style.color = "#FFD700"; // Χρυσό χρώμα
+        nameElement.style.textShadow = "0 0 8px rgba(255, 215, 0, 0.9), 0 0 15px rgba(255, 170, 0, 0.6)"; // Glow λαμπερό
+        nameElement.style.fontWeight = "bold";
+    } else {
+        // Επαναφορά στο κανονικό αν δεν το έχει (π.χ. σε νέο παιχνίδι)
+        nameElement.style.color = ""; 
+        nameElement.style.textShadow = "";
+        nameElement.style.fontWeight = "";
+    }
 }
 
 
@@ -3062,6 +3114,7 @@ function logMessage(text, type = 'system') {
     logMessage("");
     logMessage("Περιγραφή παιχνιδιού:", "help");
     logMessage("ΣΚΟΤΩΣΕ. ΓΙΝΕ ΠΑΝΙΣΧΥΡΟΣ. ΣΚΟΤΩΣΕ ΚΙ ΑΛΛΟ. ΓΙΝΕ ΑΚΟΜΑ ΠΙΟ ΠΑΝΙΣΧΥΡΟΣ.", "help");
+    logMessage("ΣΚΟΤΩΣΕ ΤΟ ΘΕΟ ΚΟΝΑΝΟ ΣΤΟ ΒΑΘΟΣ 100.", "help");
     logMessage("");
     logMessage("Κάθε βάθος στο λαβύρινθο έχει συγκεκριμένη δυσκολία.", "help");
     logMessage("Τα τέρατα δίνουν XP και χρυσό. Τα XP ανεβάζουν το επίπεδό σου, και κατα συνέπεια τη ζωή και τη ζημιά σου. Το χρυσάφι είναι για το φλεξ.", "help");
@@ -3255,6 +3308,35 @@ function updateCooldownBars() {
 
  // Monster attack and defense formulas, also HP. to +/- tou level einai to penalty gia na isoropisei sto level
     function spawnMonster() {
+
+
+let isBossConanos = false;
+
+// Αν ο παίκτης είναι στο βάθος 100, ρίχνουμε ζάρι 1% (1 στις 100)
+if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenConanos) {
+    isBossConanos = true;
+    
+    // Στατιστικά Θεού Κόνανου (Επίπεδο 110 για τα drops/XP)
+    monster = {
+        name: "Θεός Κόνανος",
+        level: 110,
+        hp: 16666,       // Βάλε όση ζωή θες για να είναι ζόρικος
+        maxHp: 16666,
+        atk: 230,     // Δυνατό χτύπημα
+        def: 230,    // Σκληρή άμυνα
+        isBoss: true,
+        firstName: '',
+        title: '',
+        variant: 'normal'
+    };
+    
+    // Ειδικό μήνυμα με κόκκινο glow στο log σου
+    logMessage("Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΕΜΦΑΝΙΣΤΗΚΕ ΑΠΟ ΤΑ ΒΑΘΗ ΤΗΣ ΚΑΤΑΒΥΘΥΣΗΣ! ΠΡΟΣΚΥΝΗΣΤΕ!", 'konanos');
+} else {
+    // ΕΔΩ ΑΦΗΝΕΙΣ ΤΟΝ ΔΙΚΟ ΣΟΥ ΚΩΔΙΚΑ που φτιάχνει τα κανονικά τέρατα
+    // π.χ. monster.name = monsterNames[...];
+
+
     let lvl = currentSelectedLevel;
     let baseAtk = lvl * 0.75 + (lvl - 1) + (lvl/2 - 0.5);
     let baseDef = lvl *0.75 + (lvl - 1) + (lvl/2 - 0.5);
@@ -3331,6 +3413,7 @@ function updateCooldownBars() {
     let monsterFullName = (variant === 'normal') ? monster.name : `${monster.firstName} ${monster.title}`;
     logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
     }
+}
 
     function toggleRetreat() {
         if (!inCombat) return;
@@ -3770,6 +3853,44 @@ function showLegendaryPopup() {
             player.kills++;
             currentRunKills++;
             
+            // --- ΕΛΕΓΧΟΣ ΓΙΑ ΘΕΟ ΚΟΝΑΝΟ ---
+         if (monster && monster.name === "Θεός Κόνανος") {
+            // Όλα τα παρακάτω εκτελούνται ΜΟΝΟ αν είναι η πρώτη φορά που νικιέται ο Θεός
+            if (!player.hasBeatenConanos) {
+                player.hasBeatenConanos = true;
+                
+               // logMessage(`Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΠΕΘΑΝΕ! Το παιχνίδι νικήθηκε! Αιώνια δόξα στον ${player.name}! Απο δω και πέρα θα είναι γνωστός ως ΘΕΟΣΦΑΧΤΗΣ.`, 'victory');
+                
+                if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+                inCombat = false;
+                monster = null;
+                isAttemptingRetreat = false;
+
+                generateAreaModifiers();
+                refreshAreaSelectorAppearance();    
+
+                startTownRegen();
+                document.getElementById('town-interface').classList.remove('hidden');
+                document.getElementById('combat-interface').classList.add('hidden');
+                
+                logMessage(`Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΠΕΘΑΝΕ! Το παιχνίδι νικήθηκε! Αιώνια δόξα στον ${player.name}!. Απο δω και πέρα θα είναι γνωστός ως ΘΕΟΣΦΑΧΤΗΣ. Επιστρέφεις στον τεκέ και ρίχνεις έναν υπνάκο...`, 'konanos');
+                currentRunKills = 0;
+                cashInGoldForXp();
+                logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
+                player.hp = Math.round(getPlayerMaxHp() * 0.10);
+                
+                createFloatingText('player-hp-parent', "ΝΙΚΗ", "#ffd700");
+                
+                checkLevelUp();
+                saveGame();
+                updateUI();
+                return; // Σταματάει η εκτέλεση εδώ, δεν πάει σε επόμενο τέρας
+            } else {
+                // Αν έχει ήδη νικηθεί στο παρελθόν, τυπώνεται απλό μήνυμα και η μάχη συνεχίζεται κανονικά
+               //  logMessage("Ξαναξεπαστρέψες τον Θεό Κόνανο, αλλά η δόξα σου ως ΘΕΟΣΦΑΧΤΗΣ είναι ήδη γραμμένη στην ιστορία.", "victory");
+            }
+        }
+            // ----------------------------------
           
             // Υπολογισμός χρυσού με bonus για τα μη-normal τέρατα
             let gainedGold = rollGoldForLevel(monster.level);
@@ -3803,22 +3924,22 @@ function showLegendaryPopup() {
             let droppedSomething = false;
 
             if (monster.level === 0.5) {
-    // κανένα drop
-}
-else {
-let rolledPower = rollItemTier(monster.level);
+                // κανένα drop
+            }
+            else {
+                let rolledPower = rollItemTier(monster.level);
 
-// Cap: ο παίκτης δεν μπορεί να εξοπλίσει item πάνω από level+5 του ίδιου.
-// Αν το roll ξεπερνάει το cap, δεν υποβαθμίζεται - πουλιέται κατευθείαν
-// στην κανονική τιμή πώλησης του rolled tier (χωρίς να ελεγχθεί αν κάνει upgrade).
-// SWITCH - afinoume anoixto to eq upgrade pros to paron.
-let levelCap = player.level + 100;
-let forceSell = rolledPower > levelCap;
+                // Cap: ο παίκτης δεν μπορεί να εξοπλίσει item πάνω από level+5 του ίδιου.
+                // Αν το roll ξεπερνάει το cap, δεν υποβαθμίζεται - πουλιέται κατευθείαν
+                // στην κανονική τιμή πώλησης του rolled tier (χωρίς να ελεγχθεί αν κάνει upgrade).
+                // SWITCH - afinoume anoixto to eq upgrade pros to paron.
+                let levelCap = player.level + 100;
+                let forceSell = rolledPower > levelCap;
 
-if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower, forceSell);
-if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower, forceSell);
-if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, forceSell);
-}
+                if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower, forceSell);
+                if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower, forceSell);
+                if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, forceSell);
+            }
             if (droppedSomething) { triggerSmoothTransition('#3e3200'); }
 
             checkLevelUp();
@@ -3827,63 +3948,63 @@ if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, force
             if (outcome === 'victory') {
                 if (isAttemptingRetreat) {
 
-    document.getElementById('monster-hp-bar').classList.add('monster-death');
+                    document.getElementById('monster-hp-bar').classList.add('monster-death');
 
-        if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
-        inCombat = false;
-        monster = null;
-        isAttemptingRetreat = false;
+                    if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+                    inCombat = false;
+                    monster = null;
+                    isAttemptingRetreat = false;
 
 
-    setTimeout(() => {
+                    setTimeout(() => {
 
-        document.getElementById('monster-hp-bar').classList.remove('monster-death');
+                        document.getElementById('monster-hp-bar').classList.remove('monster-death');
 
-        generateAreaModifiers();
-        refreshAreaSelectorAppearance();    
+                        generateAreaModifiers();
+                        refreshAreaSelectorAppearance();    
 
-        startTownRegen();
-        document.getElementById('town-interface').classList.remove('hidden');
-        document.getElementById('combat-interface').classList.add('hidden');
-        
-        logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την έξοδο. Ρίχνεις έναν υπνάκο...`, 'retreat');
-        currentRunKills = 0; // Μηδενισμός μετά την αναφορά
-        cashInGoldForXp();
-        logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
-        player.hp = Math.round(getPlayerMaxHp() * 0.10);
-        // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
-        createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
-        retreatSound();
-        
-        
-        updateUI();
+                        startTownRegen();
+                        document.getElementById('town-interface').classList.remove('hidden');
+                        document.getElementById('combat-interface').classList.add('hidden');
+                        
+                        logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την έξοδο. Ρίχνεις έναν υπνάκο...`, 'retreat');
+                        currentRunKills = 0; // Μηδενισμός μετά την αναφορά
+                        cashInGoldForXp();
+                        logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
+                        player.hp = Math.round(getPlayerMaxHp() * 0.10);
+                        // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
+                        createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
+                        retreatSound();
+                        
+                        
+                        updateUI();
 
-    }, 500);
+                    }, 500);
 
-    return;
-}
- else {
-    waitingForNextMonster = true;
-    monster = null;
-    
-    logMessage("Περιπλιανιέσαι στο λαβύρινθο...", "system");
-    updateUI();
+                    return;
+                }
+                else {
+                    waitingForNextMonster = true;
+                    monster = null;
+                    
+                    logMessage("Περιπλιανιέσαι στο λαβύρινθο...", "system");
+                    updateUI();
 
-setTimeout(() => {
-    waitingForNextMonster = false;
+                    setTimeout(() => {
+                        waitingForNextMonster = false;
 
-    if (inCombat) {
-        spawnMonster();
-      //  logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
-        updateUI();
+                        if (inCombat) {
+                            spawnMonster();
+                            //  logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
+                            updateUI();
 
-        // RESET: το ρολόι της μάχης ξεκινά ξανά από το spawn,
-        // ώστε το τέρας να έχει πάντα 2 πλήρη δευτ. πριν τον πρώτο γύρο
-        if (combatInterval) clearInterval(combatInterval);
-        combatInterval = setInterval(executeCombatRound, 2000);
-        }
-    }, 2000);
-}
+                            // RESET: το ρολόι της μάχης ξεκινά ξανά από το spawn,
+                            // ώστε το τέρας να έχει πάντα 2 πλήρη δευτ. πριν τον πρώτο γύρο
+                            if (combatInterval) clearInterval(combatInterval);
+                            combatInterval = setInterval(executeCombatRound, 2000);
+                        }
+                    }, 2000);
+                }
             }
             updateUI();
 
