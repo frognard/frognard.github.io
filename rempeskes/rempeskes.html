@@ -2298,6 +2298,7 @@ function checkLevelUp() {
         if (savedData) {
             try {
                 player = { ...player, ...JSON.parse(savedData) };
+                player.gold = 0;
                 player.level = Math.min(player.level, 100);
                 player.weapon.power = Math.min(player.weapon.power, 100);
                 player.armor.power = Math.min(player.armor.power, 100);
@@ -2391,6 +2392,7 @@ function importSave() {
         if (!confirm("Αυτό θα αντικαταστήσει τον τρέχοντα χαρακτήρα σου. Συνέχεια;")) return;
 
         player = { ...player, ...data.player };
+        player.gold = 0;
         player.level = Math.min(player.level, 100);
         player.weapon.power = Math.min(player.weapon.power, 100);
         player.armor.power = Math.min(player.armor.power, 100);
@@ -3002,6 +3004,12 @@ function updateCooldownBars() {
         // Αν έχει ήδη πατηθεί, αγνόησε κάθε επόμενο πάτημα
         if (isAttemptingRetreat) return;
 
+        // Άμεση υποχώρηση όταν δε βρισκόμαστε ανάμεσα σε μάχη (ψάχνουμε το επόμενο τέρας)
+        if (waitingForNextMonster || !monster) {
+            forceRetreat();
+            return;
+        }
+
         isAttemptingRetreat = true;
         logMessage("Επιχειρείς να ξεφύγεις!", 'retreat');
         updateUI();
@@ -3356,12 +3364,12 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
     if (forceSell) {
         logMessage(
             `[DROP] Το αντικείμενο ήταν πολύ δυνατό για το επίπεδό σου και θα πουληθεί για ${formatNumber(sellValue)} χρυσά.`,
-            'system'
+            'victory'
         );
     } else {
         logMessage(
-            `[DROP] Το αντικείμενο ήταν κατώτερο και θα πουληθεί για ${formatNumber(sellValue)} χρυσά.`,
-            'system'
+            `[DROP] Θα πουληθεί για ${formatNumber(sellValue)} χρυσά.`,
+            'victory'
         );
     }
 
