@@ -2421,7 +2421,7 @@ const AREA_TYPE_COLOR = {
     let diff = player.level - monsterLvl;
 // extra lvl difference penalty
     if (diff > 0) {
-        xp *= Math.pow(0.95, diff);
+        xp *= Math.pow(0.92, diff);
     }
     return Math.round(xp);
 }
