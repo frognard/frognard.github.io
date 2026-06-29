@@ -791,23 +791,27 @@ body {
     </label>
 
     <button class = "btn-showStats" onclick="showStats()">
-        Stats
+        %
+    </button>
+
+    <button class = "btn-showStats" onclick="showIronmanHighscores()">
+        Hi
     </button>
 
     <button class = "btn-showRules" onclick="showRules()">
-        Help
+        Hlp
     </button>
 
     <button class="btn-save" onclick="exportSave()">
-        Export
+        Exp
     </button>
 
     <button class="btn-save" onclick="importSave()">
-        Import
+        Imp
     </button>
     
     <button class="btn-delete-save" onclick="resetGame()">
-        Delete
+        Del
     </button>
 
 </div>
@@ -866,6 +870,24 @@ function showStats() {
     logMessage(`Κατανάλωση μπύρας: ${player.beersDrunk.toLocaleString()} λίτρα`);
     logMessage("==========");
 }
+
+function showIronmanHighscores() {
+    const scores = getIronmanHighscores();
+
+    logMessage("==========");
+    logMessage("ΨΟΦΟΛΟΓΙΟN", "system");
+
+    if (scores.length === 0) {
+        logMessage("Δεν υπάρχουν ακόμα νεκροί Ironman.");
+    } else {
+        scores.forEach(s => {
+            logMessage(`${s.name}, επίπεδο ${s.level}, σκοτώθηκε στο βάθος ${s.depth} από ${s.killer}.`);
+        });
+    }
+
+    logMessage("==========");
+}
+
 
 function flashSkillButton(buttonId) {
 
@@ -2250,7 +2272,7 @@ function checkLevelUp() {
         player.hp = getPlayerMaxHp();
 
         logMessage(`[LEVEL UP] Έφτασες στο επίπεδο ${player.level}!`, 'victory');
-
+        triggerSmoothTransition('#113f11');
         createFloatingText(
             'xp-parent',
             'LEVEL UP!',
@@ -2357,14 +2379,42 @@ if (savedMonsterLevel) {
         localStorage.setItem('selectedMonsterLevel', selector.value);
     }
 }
-    function resetGame() {
+
+function resetGame() {
     if (confirm("Διαγραφή χαρακτήρα;")) {
         localStorage.removeItem('minimal_rpg_save');
         localStorage.removeItem('selectedMonsterLevel');
         localStorage.removeItem('rempeskes_areaModifiers');
+
+        if (!confirm("Να κρατηθεί το Ψοφολόγιο των Ironman;")) {
+            localStorage.removeItem('rempeskes_ironman_highscores');
+        }
+
         location.reload();
     }
 }
+
+function saveIronmanHighscore(record) {
+    let scores = [];
+    try {
+        scores = JSON.parse(localStorage.getItem('rempeskes_ironman_highscores')) || [];
+    } catch (e) {
+        scores = [];
+    }
+    scores.push(record);
+    localStorage.setItem('rempeskes_ironman_highscores', JSON.stringify(scores));
+}
+
+function getIronmanHighscores() {
+    let scores = [];
+    try {
+        scores = JSON.parse(localStorage.getItem('rempeskes_ironman_highscores')) || [];
+    } catch (e) {
+        scores = [];
+    }
+    return scores.sort((a, b) => b.level - a.level);
+}
+
 
 function exportSave() {
     const exportData = {
@@ -3588,7 +3638,15 @@ function applyDefeatPenalties() {
 
     if (player.ironman) {
         player.ironmanDead = true;
-        logMessage("ΥΣΤΑΤΗ ΠΝΟΗ: Ο Ironman χαρακτήρας πέθανε οριστικά.", 'monster');
+        const killerName = getMonsterDisplayName(monster);
+        const deathDepth = monster.level;
+        logMessage(`ΥΣΤΑΤΗ ΠΝΟΗ: ${player.name}, επίπεδο ${player.level}, σκοτώθηκε στο βάθος ${deathDepth} από ${killerName}.`, 'monster');
+        saveIronmanHighscore({
+            name: player.name,
+            level: player.level,
+            depth: deathDepth,
+            killer: killerName
+        });
     }
 
     if (player[lostSlot].power > 1) {
