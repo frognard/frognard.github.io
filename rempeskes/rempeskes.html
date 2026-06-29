@@ -249,6 +249,85 @@
             margin-bottom:15px;
         }
 
+.legendary-item {
+    color: #e2c258 !important; /* πραγματικό gold base */
+    font-weight: 700;
+/*
+    text-shadow:
+        0 0 2px #3a2a00,
+        0 0 6px #b8860b,
+        0 0 12px #ffcc66,
+        0 0 18px #ffb84d;
+*/
+    animation: legendaryGlow 2.2s ease-in-out infinite;
+}
+
+@keyframes legendaryGlow {
+    0% {
+        color: #c7b377;
+        text-shadow:
+            0 0 2px #1a0005,
+            0 0 6px #66001a,
+            0 0 10px #990026;
+    }
+    50% {
+        color: #e6da9a; /* Ελαφρώς πιο φωτεινό χλωμό χρυσό στην κορύφωση */
+        text-shadow:
+            0 0 2px #26000c,
+            0 0 8px #990026,
+            0 0 16px #ff1a53,
+            0 0 24px #4d0014;
+    }
+    100% {
+        color: #c7b377;
+        text-shadow:
+            0 0 2px #1a0005,
+            0 0 6px #66001a,
+            0 0 10px #990026;
+    }
+}
+
+        .legendary-popup {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow:
+        0 0 10px #ffd700,
+        0 0 25px #ffea7a,
+        0 0 40px #ffd700;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.legendary-popup.show {
+    opacity: 1;
+    animation: popGlow 0.8s ease;
+}
+
+.hidden {
+    display: none;
+}
+
+@keyframes popGlow {
+    0% {
+        transform: translate(-50%, -50%) scale(0.6);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
 .skill-btn{
     position:relative;
     overflow:hidden;
@@ -375,6 +454,9 @@
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+
+
 
 
 /* Προσθήκη για τη μείωση του ύψους του ίδιου του drop-down κουτιού */
@@ -911,6 +993,7 @@ function showStats() {
     logMessage(`Φόνοι: ${formatNumber(player.kills)}`);
     logMessage(`Θάνατοι: ${player.ironman ? 'IRONMAN' : formatNumber(player.deaths)}`);
     logMessage(`Κατανάλωση μπύρας: ${player.beersDrunk.toLocaleString()} λίτρα`);
+    logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`);
     logMessage("==========");
 }
 
@@ -2016,6 +2099,35 @@ const depthNames = [
 
 
 
+
+const legendaryWeaponNamesTiered = [
+    "Σπασμένη Δόξα",        // 1–20
+    "Φλεγόμενο Ξίφος",      // 21–40
+    "Ο Παππούκας",           // 41–60
+    "Ζουλφικάρ",        // 61–80
+    "Σαλίβα της Σύνθλιψης",   // 81–100
+    "Ξίφος των Οιονών"   // 101–120
+];
+
+const legendaryArmorNamesTiered = [
+    "Χρυσά Κουρέλια",        // 1–20
+    "Μαγική Σκούτα",        // 21–40
+    "Δρακόντειο Δέρας",      // 41–60
+    "Δαιμονική Πανοπλία",       // 61–80
+    "Αρχαίος Θυρεός",         // 81–100
+    "Πανοπλία Ατρωσιμότητας"           // 101–120
+];
+
+const legendaryMagicNamesTiered = [
+    "Ιερό Τζατζίκι",          // 1–20
+    "Δαχτυλίδι Προστασίας",        // 21–40
+    "Τρίτο Μάτι",       // 41–60
+    "Μανδύας Διατοπισμού",     // 61–80
+    "Κράνος Τηλεμεταφοράς",         // 81–100
+    "Οικείος Γνόφος"              // 101–120
+];
+
+
 function randomTekeSong() {
     return tekeSongs[Math.floor(Math.random() * tekeSongs.length)];
 }
@@ -2056,6 +2168,28 @@ function getMonsterName(lvl) {
         let idx = Math.min(power - 1, arr.length - 1);
         return `${arr[idx]} `;
     }
+
+function getLegendaryItemName(type, tier) {
+    // Μετατρέπει το tier (1-120) σε index (0-5). 
+    // Π.χ. το 25 γίνεται: Math.floor((25 - 1) / 20) = Math.floor(1.2) = 1 (δηλ. η 2η θέση).
+    let index = Math.floor((tier - 1) / 20);
+    
+    // Ασφάλεια: αν το tier ξεπεράσει το 120, το περιορίζουμε στην τελευταία θέση (5)
+    if (index > 5) index = 5; 
+    if (index < 0) index = 0;
+
+    let pool;
+    if (type === 'weapon') {
+        pool = legendaryWeaponNamesTiered[index];
+    } else if (type === 'armor') {
+        pool = legendaryArmorNamesTiered[index];
+    } else if (type === 'magic') {
+        pool = legendaryMagicNamesTiered[index];
+    }
+    
+    return pool ? pool : "Θρυλικό Αντικείμενο";
+}
+
 
 //Equipment level roll
 function rollItemTier(monsterLevel) {
@@ -2110,11 +2244,13 @@ function rollItemTier(monsterLevel) {
             kills: 0,
             totalGoldGained: 0,
             beersDrunk: 0,
-        weapon: { name: "Σπασμένο Κλαδί", power: 1 },
-        armor: { name: "Φθαρμένα Ρούχα", power: 1 },
-        magic: { name: "Ξύλινο Φυλακτό", power: 1 },
+            legendaryDrops: 0,
+        weapon: { name: "Σπασμένο Κλαδί", power: 1, legendary: false },
+        armor: { name: "Φθαρμένα Ρούχα", power: 1, legendary: false },
+        magic: { name: "Ξύλινο Φυλακτό", power: 1, legendary: false },
         maxUnlockedLevel: 100
     };
+
 
 const AREA_TYPES = {
     NORMAL: 0,
@@ -2365,61 +2501,64 @@ function checkLevelUp() {
         setTimeout(() => { fText.remove(); }, 1400);
     }
 
- function loadGame() {
-        generateAreaModifiers();
-        const savedData = localStorage.getItem('minimal_rpg_save');
-        if (savedData) {
-            try {
-                player = { ...player, ...JSON.parse(savedData) };
-                player.gold = 0;
-                player.level = Math.min(player.level, 100);
-                player.weapon.power = Math.min(player.weapon.power, 100);
-                player.armor.power = Math.min(player.armor.power, 100);
-                player.magic.power = Math.min(player.magic.power, 100);
-                if (!player.name) player.name = "Ρεμπεσκές";
-                player.maxUnlockedLevel = 100;
+function loadGame() {
+    generateAreaModifiers();
+    const savedData = localStorage.getItem('minimal_rpg_save');
+    if (savedData) {
+        try {
+            player = { ...player, ...JSON.parse(savedData) };
+            player.gold = 0;
+            player.level = Math.min(player.level, 100);
+            player.weapon.power = Math.min(player.weapon.power, 100);
+            player.armor.power = Math.min(player.armor.power, 100);
+            player.magic.power = Math.min(player.magic.power, 100);
+            if (!player.name) player.name = "Ρεμπεσκές";
+            player.maxUnlockedLevel = 100;
 
-                player.nextXp = calculateNextXpRequirement(player.level);
+            player.nextXp = calculateNextXpRequirement(player.level);
+
+            // ΔΙΟΡΘΩΣΗ: Έλεγχος για το όνομα του όπλου
+            if (player.weapon.legendary) {
+                player.weapon.name = getLegendaryItemName('weapon', player.weapon.power);
+            } else {
                 player.weapon.name = getItemName('weapon', player.weapon.power);
+            }
+
+            // ΔΙΟΡΘΩΣΗ: Έλεγχος για το όνομα της πανοπλίας
+            if (player.armor.legendary) {
+                player.armor.name = getLegendaryItemName('armor', player.armor.power);
+            } else {
                 player.armor.name = getItemName('armor', player.armor.power);
+            }
+
+            // ΔΙΟΡΘΩΣΗ: Έλεγχος για το όνομα της μαγείας
+            if (player.magic.legendary) {
+                player.magic.name = getLegendaryItemName('magic', player.magic.power);
+            } else {
                 player.magic.name = getItemName('magic', player.magic.power);
-                const savedMonsterLevel =
-    localStorage.getItem('selectedMonsterLevel');
+            }
 
-if (savedMonsterLevel) {
-    currentSelectedLevel = parseFloat(savedMonsterLevel);
+            const savedMonsterLevel = localStorage.getItem('selectedMonsterLevel');
 
-    document.getElementById('area-selector').value =
-        savedMonsterLevel;
-}
-                logMessage("Η πρόοδός φορτώθηκε αυτόματα.", 'system');
-                
-                    logMessage("Είσαι στον Τεκέ του Ζαλαδούρα.");
-                    
-                    logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
-                    
-            } catch (e) {
-                logMessage("Σφάλμα κατά τη φόρτωση του save.", 'system');
+            if (savedMonsterLevel) {
+                currentSelectedLevel = parseFloat(savedMonsterLevel);
+                document.getElementById('area-selector').value = savedMonsterLevel;
             }
             
-            
+            logMessage("Η πρόοδός φορτώθηκε αυτόματα.", 'system');
+            logMessage("Είσαι στον Τεκέ του Ζαλαδούρα.");
+            logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
+                
+        } catch (e) {
+            logMessage("Σφάλμα κατά τη φόρτωση του save.", 'system');
         }
-        else {
-     //   let chosenName = prompt("Όνομα χαρακτήρα");
-     //   if (chosenName) chosenName = chosenName.trim();
-     //   if (chosenName) player.name = chosenName;
+    }
+    else {
+        //   let chosenName = prompt("Όνομα χαρακτήρα");
+        //   if (chosenName) chosenName = chosenName.trim();
+        //   if (chosenName) player.name = chosenName;
 
         document.getElementById('ironman-modal').classList.remove('hidden');
-    }
-
-    }
-
-    function saveGame() {
-    localStorage.setItem('minimal_rpg_save', JSON.stringify(player));
-    
-    const selector = document.getElementById('area-selector');
-    if (selector) {
-        localStorage.setItem('selectedMonsterLevel', selector.value);
     }
 }
 
@@ -2434,6 +2573,15 @@ function resetGame() {
         }
 
         location.reload();
+    }
+}
+
+    function saveGame() {
+    localStorage.setItem('minimal_rpg_save', JSON.stringify(player));
+    
+    const selector = document.getElementById('area-selector');
+    if (selector) {
+        localStorage.setItem('selectedMonsterLevel', selector.value);
     }
 }
 
@@ -2517,9 +2665,30 @@ function importSave() {
         if (!player.name) player.name = "Ρεμπεσκές";
         player.maxUnlockedLevel = 100;
         player.nextXp = calculateNextXpRequirement(player.level);
-        player.weapon.name = getItemName('weapon', player.weapon.power);
-        player.armor.name = getItemName('armor', player.armor.power);
-        player.magic.name = getItemName('magic', player.magic.power);
+
+        // ΔΙΟΡΘΩΣΗ: Εξασφάλιση ότι η ιδιότητα legendary υπάρχει, ακόμα και σε παλιά saves
+        if (player.weapon.legendary === undefined) player.weapon.legendary = false;
+        if (player.armor.legendary === undefined) player.armor.legendary = false;
+        if (player.magic.legendary === undefined) player.magic.legendary = false;
+
+        // Σωστή ανάκτηση ονομάτων κατά το Import (λαμβάνοντας υπόψη τα Legendary)
+        if (player.weapon.legendary) {
+            player.weapon.name = getLegendaryItemName('weapon', player.weapon.power);
+        } else {
+            player.weapon.name = getItemName('weapon', player.weapon.power);
+        }
+
+        if (player.armor.legendary) {
+            player.armor.name = getLegendaryItemName('armor', player.armor.power);
+        } else {
+            player.armor.name = getItemName('armor', player.armor.power);
+        }
+
+        if (player.magic.legendary) {
+            player.magic.name = getLegendaryItemName('magic', player.magic.power);
+        } else {
+            player.magic.name = getItemName('magic', player.magic.power);
+        }
 
         if (data.selectedMonsterLevel) {
             const selector = document.getElementById('area-selector');
@@ -2687,9 +2856,18 @@ function refreshAreaSelectorAppearance() {
     document.getElementById('p-next-xp').innerText = formatNumber(player.nextXp);
     document.getElementById('p-gold').innerText = formatNumber(player.gold);
     
-    document.getElementById('eq-weapon').innerText = player.weapon.name;
-    document.getElementById('eq-armor').innerText = player.armor.name;
-    document.getElementById('eq-magic').innerText = player.magic.name;
+    
+    const weaponEl = document.getElementById('eq-weapon');
+    const armorEl = document.getElementById('eq-armor');
+    const magicEl = document.getElementById('eq-magic');
+
+    weaponEl.innerText = player.weapon.name;
+    armorEl.innerText = player.armor.name;
+    magicEl.innerText = player.magic.name;
+
+    weaponEl.classList.toggle('legendary-item', player.weapon.legendary === true);
+    armorEl.classList.toggle('legendary-item', player.armor.legendary === true);
+    magicEl.classList.toggle('legendary-item', player.magic.legendary === true);
 
     // xp bar percentage
     const xpPercent = (player.xp / player.nextXp) * 100;
@@ -3457,17 +3635,43 @@ if (isAttemptingRetreat) {
 }
 
 function handleEquipmentDrop(type, rolledTier, forceSell = false) {
-    let itemName = getItemName(type, rolledTier);
+    const isLegendary = Math.random() < 0.002; // legendary drop rate
+    
+    console.log("LEGENDARY?", isLegendary);
+    console.log("TIER BEFORE:", rolledTier);
+
+    if (isLegendary) {
+        rolledTier = Math.min(rolledTier + 20, 120);
+    }
+
+    // Πρώτα δημιουργούμε το itemName...
+    let itemName = isLegendary
+        ? getLegendaryItemName(type, rolledTier)
+        : getItemName(type, rolledTier);
+
+    // ...και ΜΕΤΑ μπορούμε να το χρησιμοποιήσουμε στο console.log!
+    console.log("ITEM:", itemName);
+
+    // Το popup πρέπει να εμφανίζεται ΜΟΝΟ αν είναι Legendary
+    if (isLegendary) {
+        player.legendaryDrops++;
+        showLegendaryPopup();
+    }
+
     logMessage(`[DROP] Στον εχθρό βρέθηκε: ${itemName} (T${rolledTier})!`, 'victory');
 
     if (!forceSell && rolledTier > player[type].power) {
         let oldTier = player[type].power;
-        player[type] = { name: itemName, power: rolledTier };
+        player[type] = {
+            name: itemName,
+            power: rolledTier,
+            legendary: isLegendary
+        };
         itemDropSound();
         logMessage(
-         `[EQUIP] Αναβάθμιση εξοπλισμού! (T${oldTier} → T${rolledTier})`,
-         'victory'
-                 );
+            `[EQUIP] Αναβάθμιση εξοπλισμού! (T${oldTier} → T${rolledTier})`,
+            'victory'
+        );
 
         let targetBox =
             type === 'weapon' ? 'stat-atk-box' :
@@ -3475,10 +3679,10 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
             'stat-magic-box';
 
         const box = document.getElementById(targetBox);
-            box.classList.add('item-upgrade-flash');
-            setTimeout(() => {
+        box.classList.add('item-upgrade-flash');
+        setTimeout(() => {
             box.classList.remove('item-upgrade-flash');
-            }, 400);
+        }, 400);
 
         if (type !== 'magic') {
             createFloatingText(targetBox, "NEW EQUIP!", "var(--accent-gold)");
@@ -3487,35 +3691,46 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
         }
 
     } else {
-
         // timh magikwn antikeimenon
-    let sellValue = rollGoldForLevel(rolledTier) * 1;
+        let sellValue = rollGoldForLevel(rolledTier) * 1;
 
-    player.gold += sellValue;
-    player.totalGoldGained += sellValue;
+        player.gold += sellValue;
+        player.totalGoldGained += sellValue;
 
-    if (forceSell) {
-        logMessage(
-            `[DROP] Το αντικείμενο ήταν πολύ δυνατό για το επίπεδό σου και θα πουληθεί για ${formatNumber(sellValue)} χρυσά.`,
-            'victory'
-        );
-    } else {
-        logMessage(
-            `[DROP] Θα πουληθεί για ${formatNumber(sellValue)} χρυσά.`,
-            'victory'
-        );
+        if (forceSell) {
+            logMessage(
+                `[DROP] Το αντικείμενο ήταν πολύ δυνατό για το επίπεδό σου και θα πουληθεί για ${formatNumber(sellValue)} χρυσά.`,
+                'victory'
+            );
+        } else {
+            logMessage(
+                `[DROP] Θα πουληθεί για ${formatNumber(sellValue)} χρυσά.`,
+                'victory'
+            );
+        }
+
+        setTimeout(() => {
+            createFloatingText(
+                'stat-gold-box',
+                `+${formatNumber(sellValue)}g`,
+                "var(--accent-gold)"
+            );
+        }, 500);
     }
+}
+
+function showLegendaryPopup() {
+    const popup = document.getElementById('legendary-popup');
+
+    popup.classList.remove('hidden');
+    popup.classList.add('show');
 
     setTimeout(() => {
-        createFloatingText(
-            'stat-gold-box',
-            `+${formatNumber(sellValue)}g`,
-            "var(--accent-gold)"
-        );
-}, 500);
+        popup.classList.remove('show');
+        popup.classList.add('hidden');
+    }, 900);
+}
 
-}
-}
 
    function endCombat(outcome) {
         if (outcome !== 'victory') {
@@ -3911,6 +4126,10 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js');
 }
 </script>
+
+<div id="legendary-popup" class="legendary-popup hidden">
+    ΘΡΥΛΙΚΟ DROP!
+</div>
 
 
 </body>
