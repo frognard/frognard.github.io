@@ -2335,7 +2335,7 @@ if (savedMonsterLevel) {
         if (chosenName) chosenName = chosenName.trim();
         if (chosenName) player.name = chosenName;
 
-        player.ironman = confirm("Ironman mode; Αν πεθάνεις, ο χαρακτήρας κλειδώνει οριστικά και δε θα μπορείς να ξαναμπείς στο dungeon.");
+        player.ironman = confirm("Ironman mode; Αν πεθάνεις, ο χαρακτήρας κλειδώνει οριστικά και δε θα μπορείς να ξαναμπείς στο λαβύρινθο.");
         if (player.ironman) {
             logMessage("Ironman mode ενεργό. Δεν υπάρχει γυρισμός.", 'system');
         }
@@ -2600,9 +2600,14 @@ function refreshAreaSelectorAppearance() {
     document.getElementById('p-xp-bar').style.width = xpPct + '%';
 
     const maxHp = getPlayerMaxHp();
-    const pPct = Math.max(0, (player.hp / maxHp) * 100);
-    document.getElementById('player-hp-bar').style.width = pPct + '%';
-    document.getElementById('player-hp-text').innerText = `${formatNumber(Math.ceil(player.hp))} / ${formatNumber(maxHp)} HP`;
+    if (player.ironman && player.ironmanDead) {
+        document.getElementById('player-hp-bar').style.width = '0%';
+        document.getElementById('player-hp-text').innerText = '-';
+    } else {
+        const pPct = Math.max(0, (player.hp / maxHp) * 100);
+        document.getElementById('player-hp-bar').style.width = pPct + '%';
+        document.getElementById('player-hp-text').innerText = `${formatNumber(Math.ceil(player.hp))} / ${formatNumber(maxHp)} HP`;
+    }
 
     if (monster) {
         let displayedName = getMonsterDisplayName(monster);
@@ -2786,7 +2791,7 @@ function startTownRegen() {
     if (townRegenInterval) clearInterval(townRegenInterval);
     townRegenInterval = setInterval(() => {
         const maxHp = getPlayerMaxHp();
-        if (!inCombat && player.hp < maxHp) {
+        if (!inCombat && player.hp < maxHp && !(player.ironman && player.ironmanDead)) {
             let regenAmount = Math.round(maxHp * 0.1);
             // αν είμαστε κοντά στο full hp
             regenAmount = Math.min(
@@ -2894,7 +2899,7 @@ function updateCooldownBars() {
 
     function enterCombatFromSelector() {
         if (player.ironman && player.ironmanDead) {
-        logMessage("Ο Ironman χαρακτήρας έχει πεθάνει. Δεν μπορείς να ξαναμπείς στο dungeon.", 'system');
+        logMessage("Ο Ironman χαρακτήρας έχει πεθάνει. Δεν μπορείς να ξαναμπείς στο λαβύρινθο.", 'system');
         return; }
     //   resetRates(); // μηδενισμός XP/m και GP/m
     document.getElementById('p-name').blur();
