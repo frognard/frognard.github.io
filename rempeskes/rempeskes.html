@@ -2475,7 +2475,8 @@ function checkLevelUp() {
 
         player.hp = getPlayerMaxHp();
 
-        logMessage(`[LEVEL UP] Έφτασες στο επίπεδο ${player.level}!`, 'victory');
+        logMessage(`*** ΑΠΟΚΤΗΣΗ ΕΠΙΠΕΔΟΥ: Level ${player.level}! ***`, 'victory');
+        levelUpSound();
         triggerSmoothTransition('#113f11');
         createFloatingText(
             'xp-parent',
