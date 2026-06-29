@@ -3332,11 +3332,11 @@ function updateCooldownBars() {
         // Αν έχει ήδη πατηθεί, αγνόησε κάθε επόμενο πάτημα
         if (isAttemptingRetreat) return;
 
-        // Άμεση υποχώρηση όταν δε βρισκόμαστε ανάμεσα σε μάχη (ψάχνουμε το επόμενο τέρας)
-        if (waitingForNextMonster || !monster) {
-            forceRetreat();
-            return;
-        }
+        // Άμεση υποχώρηση στους διαδρόμους όταν δε βρισκόμαστε ανάμεσα σε μάχη (ψάχνουμε το επόμενο τέρας)
+     //   if (waitingForNextMonster || !monster) {
+      //      forceRetreat();
+      //      return;
+      //  }
 
         isAttemptingRetreat = true;
         logMessage("Επιχειρείς να ξεφύγεις!", 'retreat');
@@ -3860,7 +3860,7 @@ if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, force
     waitingForNextMonster = true;
     monster = null;
     
-    logMessage("Ψάχνεις για νέο εχθρό...", "system");
+    logMessage("Περιπλιανιέσαι στο λαβύρινθο...", "system");
     updateUI();
 
 setTimeout(() => {
