@@ -2116,33 +2116,30 @@ const depthNames = [
 
 
 
-
 const legendaryWeaponNamesTiered = [
-    "Κεντρί",        // 16
-    "Φλεγόμενο Ξίφος",      // 36
-    "Ο Παππούκας",           // 56
-    "Ζουλφικάρ",        // 76
-    "Σαλίβα της Σύνθλιψης",   // 96 
-    "Ξίφος των Οιωνών"   // 116
+    ...Array(20).fill("Κεντρί"),  // tier 21-40
+    ...Array(20).fill("Φλεγόμενο Ξίφος"),  // tier 41-60
+    ...Array(20).fill("Ο Παππούκας"),  // tier 61-80
+    ...Array(20).fill("Ζουλφικάρ"),  // tier 81-100
+    ...Array(20).fill("Ξίφος των Οιωνών")   // tier 101-120
 ];
 
 const legendaryArmorNamesTiered = [
-    "Χρυσά Κουρέλια",        //
-    "Μαγική Σκούτα",        // 
-    "Δρακόντειο Δέρας",      // 
-    "Δαιμονική Πανοπλία",       // 
-    "Αρχαίος Θυρεός",         //
-    "Πανοπλία Ατρωσιμότητας"           // 
+    ...Array(20).fill("Χρυσά Κουρέλια"),
+    ...Array(20).fill("Μαγική Σκούτα"),
+    ...Array(20).fill("Δρακόντειο Δέρας"),
+    ...Array(20).fill("Αρχαίος Θυρεός"),
+    ...Array(20).fill("Πανοπλία Ατρωσιμότητας")
 ];
 
 const legendaryMagicNamesTiered = [
-    "Ιερό Τζατζίκι",          // 
-    "Δαχτυλίδι Προστασίας",        // 
-    "Τρίτο Μάτι",       // 
-    "Μανδύας Διατοπισμού",     // 
-    "Κράνος Τηλεμεταφοράς",         // 
-    "Οικείος Γνόφος"              // 
+    ...Array(20).fill("Ιερό Τζατζίκι"),
+    ...Array(20).fill("Μανδύας Διατοπισμού"),
+    ...Array(20).fill("Δαχτυλίδι της Δύναμης"),
+    ...Array(20).fill("Κράνος Τηλεμεταφοράς"),
+    ...Array(20).fill("Δαίμονας")
 ];
+
 
 
 function randomTekeSong() {
@@ -2187,11 +2184,9 @@ function getMonsterName(lvl) {
     }
 
 function getLegendaryItemName(type, tier) {
-    // Νέα κλίμακα: Βάση το 16, βήματα ανά 20 επίπεδα
-    let index = Math.floor((tier - 16) / 20);
-    
-    // Ασφάλεια: Περιορισμός στα όρια του πίνακα (0 έως 5)
-    if (index > 5) index = 5; 
+    // tier κυμαίνεται 21-120 -> index 0-99, ευθεία αντιστοίχιση
+    let index = tier - 21;
+    if (index > 99) index = 99;
     if (index < 0) index = 0;
 
     let pool;
@@ -3663,7 +3658,7 @@ function handleEquipmentDrop(type, rolledTier, forceSell = false) {
     console.log("TIER BEFORE:", rolledTier);
 
     if (isLegendary) {
-        rolledTier = Math.max(16, Math.min(rolledTier + 20, 120));
+        rolledTier = Math.max(21, Math.min(rolledTier + 20, 120));
     }
 
     // Πρώτα δημιουργούμε το itemName...
