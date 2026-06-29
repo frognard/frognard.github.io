@@ -659,10 +659,7 @@ body {
 <div id="game-container">
     <div class="header-row">
         <h3>
-<span id="p-name" class="editable-name"
-                  contenteditable="true"
-                  onblur="savePlayerName()"
-                  onkeydown="handleNameKey(event)">Ρεμπεσκές</span>
+<span id="p-name-skull" class="hidden" style="margin-right:4px;">💀</span><span id="p-name">Ρεμπεσκές</span>
 
             <span style="margin-left: 12px; font-weight: normal; font-size: 1rem; color: #ffffff; vertical-align: middle;">
                 Επ. <span id="p-level">1</span> -
@@ -2025,6 +2022,8 @@ function rollItemTier(monsterLevel) {
 
     let player = {
         name: "Ρεμπεσκές",
+        ironman: false,
+        ironmanDead: false,
         level: 1,
         baseAtk: 10,
         baseDef: 10,
@@ -2335,6 +2334,12 @@ if (savedMonsterLevel) {
         let chosenName = prompt("Όνομα χαρακτήρα");
         if (chosenName) chosenName = chosenName.trim();
         if (chosenName) player.name = chosenName;
+
+        player.ironman = confirm("Ironman mode; Αν πεθάνεις, ο χαρακτήρας κλειδώνει οριστικά και δε θα μπορείς να ξαναμπείς στο dungeon.");
+        if (player.ironman) {
+            logMessage("Ironman mode ενεργό. Δεν υπάρχει γυρισμός.", 'system');
+        }
+
         saveGame();
 
         logMessage("Είσαι στον Τεκέ του Ζαλαδούρα");
@@ -2548,10 +2553,18 @@ function refreshAreaSelectorAppearance() {
 
 
    function updateUI() {
-    const pNameEl = document.getElementById('p-name');
+   const pNameEl = document.getElementById('p-name');
     if (document.activeElement !== pNameEl) {
         pNameEl.innerText = player.name;
     }
+       const skullEl = document.getElementById('p-name-skull');
+    if (player.ironman) {
+        skullEl.classList.remove('hidden');
+    } else {
+        skullEl.classList.add('hidden');
+    }
+    pNameEl.style.color = player.ironmanDead ? '#e74c3c' : '';
+
     document.getElementById('p-level').innerText = player.level;
     document.getElementById('p-title').innerText = getPlayerTitle(player.level);
     //  document.getElementById('p-atk').innerText = getPlayerAtk().toFixed(0);
@@ -2880,6 +2893,9 @@ function updateCooldownBars() {
     }
 
     function enterCombatFromSelector() {
+        if (player.ironman && player.ironmanDead) {
+        logMessage("Ο Ironman χαρακτήρας έχει πεθάνει. Δεν μπορείς να ξαναμπείς στο dungeon.", 'system');
+        return; }
     //   resetRates(); // μηδενισμός XP/m και GP/m
     document.getElementById('p-name').blur();
     stopTownRegen(); 
@@ -3564,6 +3580,11 @@ function applyDefeatPenalties() {
         
     currentRunKills = 0;
     player.deaths++;
+
+    if (player.ironman) {
+        player.ironmanDead = true;
+        logMessage("ΥΣΤΑΤΗ ΠΝΟΗ: Ο Ironman χαρακτήρας πέθανε οριστικά.", 'monster');
+    }
 
     if (player[lostSlot].power > 1) {
         player[lostSlot].power--;
