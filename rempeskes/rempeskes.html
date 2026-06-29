@@ -2031,7 +2031,7 @@ function rollItemTier(monsterLevel) {
         hp: 100, 
         xp: 0,
         nextXp: 80,
-        gold: 0,
+        gold: 150,
          // statistics
             deaths: 0,
             kills: 0,
@@ -2259,12 +2259,12 @@ function checkLevelUp() {
         );
 
         document
-            .getElementById('xp-box')
+            .getElementById('xp-parent')
             .classList.add('xp-level-flash');
 
         setTimeout(() => {
             document
-                .getElementById('xp-box')
+                .getElementById('xp-parent')
                 .classList.remove('xp-level-flash');
         }, 1400);
     }
