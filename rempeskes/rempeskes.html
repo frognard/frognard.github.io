@@ -1462,11 +1462,11 @@ const weaponNames = [
   "Απελατίκι",
 
   // 31-40: Όπλα Ιππικού & Εξειδικευμένες Λεπίδες
-  "Γιαταγάνι",
-  "Ξίφος",
-  "Σπαθί",
-  "Σπάθη",
-  "Πάλα",
+  "Ληστρικό Γιαταγάνι",
+  "Σιδερένιο Ξίφος",
+  "Σπαθί Σκουτάτου",
+  "Κυρτή Σπάθη",
+  "Νομαδική Πάλα",
   "Μακρύ Δόρυ",
   "Σύνθετο Τόξο",
   "Ελαφρύς Πέλεκυς",
@@ -2931,6 +2931,8 @@ function refreshAreaSelectorAppearance() {
     document.getElementById('p-xp').innerText = formatNumber(player.xp);
     document.getElementById('p-next-xp').innerText = formatNumber(player.nextXp);
     document.getElementById('p-gold').innerText = formatNumber(player.gold);
+    document.getElementById('p-name').style.color =
+    (player.ironman && player.ironmanDead) ? '#e74c3c' : '';
     
     
     const weaponEl = document.getElementById('eq-weapon');
