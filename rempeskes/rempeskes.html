@@ -2931,8 +2931,7 @@ function refreshAreaSelectorAppearance() {
     document.getElementById('p-xp').innerText = formatNumber(player.xp);
     document.getElementById('p-next-xp').innerText = formatNumber(player.nextXp);
     document.getElementById('p-gold').innerText = formatNumber(player.gold);
-    document.getElementById('p-name').style.color =
-    (player.ironman && player.ironmanDead) ? '#e74c3c' : '';
+    
     
     
     const weaponEl = document.getElementById('eq-weapon');
@@ -3103,17 +3102,22 @@ function refreshAreaSelectorAppearance() {
     btnPotion.disabled = potionCooldownActive;
 
     //   updateAreaSelector();
-    const nameElement = document.getElementById("p-name");
-    if (player.hasBeatenConanos) {
-        nameElement.style.color = "#FFD700"; // Χρυσό χρώμα
-        nameElement.style.textShadow = "0 0 8px rgba(255, 215, 0, 0.9), 0 0 15px rgba(255, 170, 0, 0.6)"; // Glow λαμπερό
-        nameElement.style.fontWeight = "bold";
-    } else {
-        // Επαναφορά στο κανονικό αν δεν το έχει (π.χ. σε νέο παιχνίδι)
-        nameElement.style.color = ""; 
-        nameElement.style.textShadow = "";
-        nameElement.style.fontWeight = "";
-    }
+const nameElement = document.getElementById("p-name");
+if (player.ironman && player.ironmanDead) {
+    // Ο νεκρός Ironman χαρακτήρας μένει πάντα κόκκινος
+    nameElement.style.color = "#e74c3c";
+    nameElement.style.textShadow = "";
+    nameElement.style.fontWeight = "";
+} else if (player.hasBeatenConanos) {
+    nameElement.style.color = "#FFD700"; // Χρυσό χρώμα
+    nameElement.style.textShadow = "0 0 8px rgba(255, 215, 0, 0.9), 0 0 15px rgba(255, 170, 0, 0.6)"; // Glow λαμπερό
+    nameElement.style.fontWeight = "bold";
+} else {
+    // Επαναφορά στο κανονικό αν δεν το έχει (π.χ. σε νέο παιχνίδι)
+    nameElement.style.color = ""; 
+    nameElement.style.textShadow = "";
+    nameElement.style.fontWeight = "";
+}
 }
 
 
