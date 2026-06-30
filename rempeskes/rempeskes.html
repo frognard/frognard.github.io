@@ -4074,6 +4074,9 @@ function showLegendaryPopup() {
 function applyDefeatPenalties() {
     generateAreaModifiers();
     refreshAreaSelectorAppearance();
+    logMessage(
+        `Σκοτώθηκες! Έχασες ${formatNumber(player.gold)} GP και μεταφέρθηκες στον τεκέ με 1 HP.`,
+        'monster');
     player.gold = 0;
     player.hp = 1;
 
@@ -4086,11 +4089,7 @@ function applyDefeatPenalties() {
         armor: "Η πανοπλία",
         magic: "Το φυλαχτό"
     };
-
-        logMessage(
-        `Σκοτώθηκες! Έχασες το χρυσάφι σου και μεταφερθήκες στον τεκέ με 1 HP.`,
-        'monster');
-        
+       
     currentRunKills = 0;
     player.deaths++;
 
