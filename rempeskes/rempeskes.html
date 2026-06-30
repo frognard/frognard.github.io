@@ -2497,7 +2497,7 @@ function cashInGoldForXp() {
     player.gold = 0;
 
     logMessage(
-        `[ΤΕΚΕΣ] Σκόρπισες σε γλέντια ${formatNumber(bankedGold)} GP και απέκτησες ${formatNumber(bankedGold)} XP!`,
+        `[ΤΕΚΕΣ] Σκόρπισες σε γλέντια όλο σου το χρυσάφι και απέκτησες ${formatNumber(bankedGold)} XP!`,
         'victory'
     );
     checkLevelUp();
@@ -3459,7 +3459,7 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
       //  }
 
         isAttemptingRetreat = true;
-        logMessage("Επιχειρείς να ξεφύγεις!", 'retreat');
+        logMessage("Επιχειρείς να ξεφύγεις!");
         updateUI();
     }
 
@@ -3641,14 +3641,14 @@ function executeCombatRound() {
 // Προσθήκη για την πιθανότητα υποχώρησης
 if (isAttemptingRetreat) {
     if (Math.random() < 0.15) {
-       // logMessage("Ξέφυγες! Γυρίζεις εξουθενωμένος στον Τεκέ.", 'retreat');
+       logMessage("Ξέφυγες από το τέρας!");
         // Προσομοίωση νίκης για να γίνει η διαφυγή με ασφάλεια
       forceRetreat();
       //DOCTOR
       
         return;
     } else {
-        logMessage("Υποχώρηση...", 'retreat');
+        logMessage("Υποχώρηση...");
     }
 }
 
