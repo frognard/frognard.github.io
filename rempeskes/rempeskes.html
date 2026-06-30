@@ -2357,12 +2357,12 @@ function rollAreaType(depth) {
 
     const roll = rng() * 100;
 
-    if (roll < 70) return AREA_TYPES.NORMAL;
-    if (roll < 76) return AREA_TYPES.RICH;
-    if (roll < 82) return AREA_TYPES.POOR;
-    if (roll < 88) return AREA_TYPES.WEAPON;
-    if (roll < 94) return AREA_TYPES.ARMOR;
-    return AREA_TYPES.MAGIC;
+    if (roll < 50) return AREA_TYPES.NORMAL;   
+    if (roll < 60) return AREA_TYPES.RICH;     
+    if (roll < 70) return AREA_TYPES.POOR;     
+    if (roll < 80) return AREA_TYPES.WEAPON;   
+    if (roll < 90) return AREA_TYPES.ARMOR;    
+    return AREA_TYPES.MAGIC;                   
 }
 
 function generateAreaModifiers() {
