@@ -3996,7 +3996,7 @@ function showLegendaryPopup() {
             // Πρώτα βάθη (1-3): εγγυημένο ελάχιστο drop tier +1 για ειδικά (variant) τέρατα,
             // ώστε το ήδη-εγγυημένο 100% drop chance να μεταφράζεται σε πραγματικό upgrade
             // και όχι σε άχρηστο drop που απλά πουλιέται.
-            if (monster.variant !== 'normal' && monster.level <= 3) {
+            if (monster.variant !== 'normal' && monster.level <= 2) {
                 rolledPower = Math.max(rolledPower, monster.level + 1);
             }
 
