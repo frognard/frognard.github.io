@@ -445,6 +445,7 @@
         .log-monster { color: #f1948a; }
         .log-system { color: #95a5a6; }
         .log-bright {color: #ffffff}
+        .log-britalic {color: #ffffff; font-style: italic}
         .log-victory { color: var(--accent-gold); font-weight: bold; }
         .log-retreat { color: #e67e22; font-weight: bold; }
         .log-konanos { color: #ffffff; font-weight: bold; }
@@ -2200,6 +2201,27 @@ const depthNames = [
     "[96] Καταβύθιση", "[97] Καταβύθιση", "[98] Καταβύθιση", "[99] Καταβύθιση", "[100] Καταβύθιση"
 ];
 
+const zaladouras = [
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Το καζάνι βράζει, του κόβαλου ο κώλος γιορτάζει!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: Αν νιώθεις ότι το τέρας πρόκειται να σε φάει, πάτα έγκαιρα το ''ΤΡΕΞΕ''! Του χέστη η μάνα δεν έκλαψε ποτέ!''",
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Δώσε βάση στο χρώμα του κάθε βάθους στο λαβύρινθο: δείχνει τι είδους ή τι πλήθους ονομαστά τέρατα κυκλοφορούν εκεί.''",
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Φρόντιζε να έχεις εξοπλισμό τουλάχιστον ίδιου επιπέδου με το βάθος που θες να πάς! Το επίπεδό σου δεν αρκεί από μόνο του!΄΄",
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Τα όπλα βελτιώνουν τη ζημιά. Οι πανοπλίες την προστασία. Τα μαγικά αντικείμενα καί τα δύο, από λίγο!''",
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ΄΄Η πιο καλή στιγμή να υποχωρήσεις είναι ανάμεσα στις μάχες: τότε η υποχώρηση είναι αυτόματη!''",
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Όποιος τη νύχτα περπατεί, μάζες μελανές πατεί!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Μπουγαρομαζώματα, κοβαλοσκορπίσματα!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Έκαν' το σκιτάλι κώλο, κι έχεσε τον κόσμο όλο!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως στο εκατοστό βάθος, κάθεται φωλιασμένος ο Θεός Κόνανος, γελαστός και παγκάκιστος, ο μισός παγωμένος κι ο μισός πυρωμένος, με κέρατα, με δόντια, με νύχια ματωμένα, με τα πλεμόνια του απ'όξω από το στήθος!''",
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''ΓΙΑΤΙ ΦΩΝΑΖΕΙΣ ΡΕ ΜΑΛΑΚΑ??!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όταν προσπαθείς να ξεφύγεις από ένα τέρας, έχεις 15% πιθανότητα το γύρο να τη σκαπουλάρεις.''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι αν είσαι κωλόφαρδος μπορεί να βρείς θρυλικά αντικείμενα 20 επίπεδα πιο πάνω από το τέρας που τα έριξε!''" ,
+    "Ένας μεθυσμένος παπάς φωνάζει: ''ΠΟΙΟΣ ΑΛΗΤΗΣ ΜΟΥ ΕΚΛΕΨΕ ΤΟ ΙΕΡΟ ΤΖΑΤΖΙΚΙ???''" ,
+    "Μια παρέα από φωνακλάδες ρεμπεσκέδες παίζουν Κρύπτες & Καθάρματα σε μια γωνιά του τεκέ.",
+    "Ο Στάυρακας έρχεται τρεκλίζοντας μπροστά σου και σε κοιτάει με το βλέμμα των χιλίων χιλιομέτρων. Ξερνάει στις μπότες σου. Μετά φεύγει.",
+    "Μια παρέα από μεθυσμένους ρεμπεσκέδες παίζουν Τυχοδιωκτικόν σε μια γωνιά του τεκέ.",
+    "Μια παρέα από σπασίκλες ρεμπεσκέδες παίζουν Ανδραγάθημα σε μια γωνιά του τεκέ.",
+    "Η πόρτα ανοίγει ξαφνικά και μπαίνει μέσα ο Ανάπηρος: ''ΨΗΝΕΙ ΚΑΝΕΙΣ ΜΠΙΛΙΑΡΔΑΚΙ;''"
+];
 
 
 const legendaryWeaponNamesTiered = [
@@ -2648,6 +2670,7 @@ function loadGame() {
             logMessage("Η πρόοδός φορτώθηκε αυτόματα.", 'system');
             logMessage("Είσαι στον Τεκέ του Ζαλαδούρα.");
             logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
+            if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
                 
         } catch (e) {
             logMessage("Σφάλμα κατά τη φόρτωση του save.", 'system');
@@ -2726,6 +2749,7 @@ function confirmCharacterCreation() {
    
     // logMessage("Είσαι στον Τεκέ του Ζαλαδούρα");
     logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
+    if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
 
     updateUI();
 }
@@ -3250,7 +3274,7 @@ function startTownRegen() {
                  flashHpBarHeal('player-hp-parent');
             updateUI();
             saveGame();
-        }
+         }
     }, 2000);
 }
 
@@ -3668,6 +3692,7 @@ function forceRetreat() {
     currentRunKills = 0; // Μηδενισμός μετά την αναφορά
     cashInGoldForXp();
     logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
+    if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
     retreatSound();
     
@@ -3955,6 +3980,7 @@ function showLegendaryPopup() {
                 currentRunKills = 0;
                 cashInGoldForXp();
                 logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
+                if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
                 player.hp = Math.round(getPlayerMaxHp() * 0.10);
                 
                 createFloatingText('player-hp-parent', "ΝΙΚΗ", "#ffd700");
@@ -4053,6 +4079,7 @@ function showLegendaryPopup() {
                         currentRunKills = 0; // Μηδενισμός μετά την αναφορά
                         cashInGoldForXp();
                         logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
+                        if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
                         player.hp = Math.round(getPlayerMaxHp() * 0.10);
                         // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
                         createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
@@ -4164,6 +4191,7 @@ function applyDefeatPenalties() {
 
         
         logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
+        if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
 
     triggerSmoothTransition('#4a1515');
 
