@@ -2647,7 +2647,7 @@ function loadGame() {
             
             logMessage("Η πρόοδός φορτώθηκε αυτόματα.", 'system');
             logMessage("Είσαι στον Τεκέ του Ζαλαδούρα.");
-            logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
+            logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
                 
         } catch (e) {
             logMessage("Σφάλμα κατά τη φόρτωση του save.", 'system');
@@ -3667,7 +3667,7 @@ function forceRetreat() {
     logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο.`, 'retreat');
     currentRunKills = 0; // Μηδενισμός μετά την αναφορά
     cashInGoldForXp();
-    logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
+    logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
     retreatSound();
     
@@ -3954,7 +3954,7 @@ function showLegendaryPopup() {
                 logMessage(`Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΠΕΘΑΝΕ! Το παιχνίδι νικήθηκε! Αιώνια δόξα στον ${player.name}!. Απο δω και πέρα θα είναι γνωστός ως ΘΕΟΣΦΑΧΤΗΣ. Επιστρέφεις στον τεκέ και ρίχνεις έναν υπνάκο...`, 'konanos');
                 currentRunKills = 0;
                 cashInGoldForXp();
-                logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
+                logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
                 player.hp = Math.round(getPlayerMaxHp() * 0.10);
                 
                 createFloatingText('player-hp-parent', "ΝΙΚΗ", "#ffd700");
@@ -4052,7 +4052,7 @@ function showLegendaryPopup() {
                         logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την έξοδο. Ρίχνεις έναν υπνάκο...`, 'retreat');
                         currentRunKills = 0; // Μηδενισμός μετά την αναφορά
                         cashInGoldForXp();
-                        logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
+                        logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
                         player.hp = Math.round(getPlayerMaxHp() * 0.10);
                         // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
                         createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
@@ -4163,7 +4163,7 @@ function applyDefeatPenalties() {
     }
 
         
-        logMessage("Η κομπανία παίζει το «" + randomTekeSong() + "».");
+        logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
 
     triggerSmoothTransition('#4a1515');
 
