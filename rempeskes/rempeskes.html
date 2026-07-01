@@ -3128,7 +3128,8 @@ function refreshAreaSelectorAppearance() {
     }
 
     const btnPotion = document.getElementById('btn-potion');
-    btnPotion.disabled = potionCooldownActive;
+  //  btnPotion.disabled = potionCooldownActive;   // gia mpyra ektos maxhs
+    btnPotion.disabled = potionCooldownActive || !inCombat;
 
     //   updateAreaSelector();
 const nameElement = document.getElementById("p-name");
@@ -4162,6 +4163,10 @@ function applyDefeatPenalties() {
 
     function usePotion() {
         if (potionCooldownActive) return;
+            if (!inCombat) {
+        logMessage("Δεν μπορείς να πιεις μπύρα στον τεκέ.", 'system');
+        return;
+            }
         
         let maxHp = getPlayerMaxHp();
         if (player.hp >= maxHp) {
