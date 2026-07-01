@@ -3991,23 +3991,26 @@ function showLegendaryPopup() {
             let rolledPower = monster.level;
             let droppedSomething = false;
 
-            if (monster.level === 0.5) {
-                // κανένα drop
-            }
-            else {
-                let rolledPower = rollItemTier(monster.level);
+            rolledPower = rollItemTier(monster.level);
 
-                // Cap: ο παίκτης δεν μπορεί να εξοπλίσει item πάνω από level+5 του ίδιου.
-                // Αν το roll ξεπερνάει το cap, δεν υποβαθμίζεται - πουλιέται κατευθείαν
-                // στην κανονική τιμή πώλησης του rolled tier (χωρίς να ελεγχθεί αν κάνει upgrade).
-                // SWITCH - afinoume anoixto to eq upgrade pros to paron.
-                let levelCap = player.level + 100;
-                let forceSell = rolledPower > levelCap;
-
-                if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower, forceSell);
-                if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower, forceSell);
-                if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, forceSell);
+            // Πρώτα βάθη (1-3): εγγυημένο ελάχιστο drop tier +1 για ειδικά (variant) τέρατα,
+            // ώστε το ήδη-εγγυημένο 100% drop chance να μεταφράζεται σε πραγματικό upgrade
+            // και όχι σε άχρηστο drop που απλά πουλιέται.
+            if (monster.variant !== 'normal' && monster.level <= 3) {
+                rolledPower = Math.max(rolledPower, monster.level + 1);
             }
+
+            // Cap: ο παίκτης δεν μπορεί να εξοπλίσει item πάνω από level+5 του ίδιου.
+            // Αν το roll ξεπερνάει το cap, δεν υποβαθμίζεται - πουλιέται κατευθείαν
+            // στην κανονική τιμή πώλησης του rolled tier (χωρίς να ελεγχθεί αν κάνει upgrade).
+            // SWITCH - afinoume anoixto to eq upgrade pros to paron.
+            let levelCap = player.level + 100;
+            let forceSell = rolledPower > levelCap;
+
+            if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower, forceSell);
+            if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower, forceSell);
+            if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, forceSell);
+
             if (droppedSomething) { triggerSmoothTransition('#3e3200'); }
 
             checkLevelUp();
