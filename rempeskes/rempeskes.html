@@ -781,6 +781,15 @@ body {
         0 0 20px rgba(255,215,0,.4);
 }
 
+.skill-btn.skill-queued:hover:not(:disabled){
+    border-color: var(--accent-gold) !important;
+    box-shadow:
+        0 0 6px rgba(255,215,0,.8),
+        0 0 12px rgba(255,215,0,.6),
+        0 0 20px rgba(255,215,0,.4);
+}
+
+
 #battle-title {
     white-space: nowrap;
     overflow: hidden;
@@ -3479,10 +3488,10 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
         if (isAttemptingRetreat) return;
 
         // Άμεση υποχώρηση στους διαδρόμους όταν δε βρισκόμαστε ανάμεσα σε μάχη (ψάχνουμε το επόμενο τέρας)
-     //   if (waitingForNextMonster || !monster) {
-      //      forceRetreat();
-      //      return;
-      //  }
+        if (waitingForNextMonster || !monster) {
+            forceRetreat();
+            return;
+        }
 
         isAttemptingRetreat = true;
         logMessage("Επιχειρείς να ξεφύγεις!");
