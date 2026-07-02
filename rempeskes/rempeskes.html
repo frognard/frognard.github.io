@@ -2536,7 +2536,7 @@ const AREA_TYPE_COLOR = {
 
 //GOLD roll: 8eloume kata vash na einai to 10% twn mosnter xp !!tou!! level
 function rollGoldForLevel(level) {
-    const averageGold = Math.pow(level+1, 2) * 0.80 ;
+    const averageGold = Math.pow(level+1, 2) * 0.85 ;
     const randomFactor = 0.1 + Math.random() * 1.8;   // 0.1 - 1.9
 
     return Math.max(
@@ -2596,7 +2596,7 @@ function checkLevelUp() {
 
         logMessage(`*** ΑΠΟΚΤΗΣΗ ΕΠΙΠΕΔΟΥ: Level ${player.level}! ***`, 'victory');
         levelUpSound();
-        triggerSmoothTransition('#113f11');
+        triggerSmoothTransition('#ffd700');
         createFloatingText(
             'xp-parent',
             'LEVEL UP!',
@@ -2705,18 +2705,19 @@ function loadGame() {
 }
 
 function resetGame() {
-    if (confirm("Διαγραφή χαρακτήρα;")) {
-        localStorage.removeItem('minimal_rpg_save');
-        localStorage.removeItem('selectedMonsterLevel');
-        localStorage.removeItem('rempeskes_areaModifiers');
-        localStorage.setItem('rempeskes_hasBeatenConanos', "false");
+    if (!confirm("Διαγραφή χαρακτήρα;")) return;
 
+    localStorage.removeItem('minimal_rpg_save');
+    localStorage.removeItem('selectedMonsterLevel');
+    localStorage.removeItem('rempeskes_areaModifiers');
+    localStorage.setItem('rempeskes_hasBeatenConanos', "false");
+
+    setTimeout(() => {
         if (!confirm("Να κρατηθεί το Ψοφολόγιο των Ironmen;")) {
             localStorage.removeItem('rempeskes_ironman_highscores');
         }
-
         location.reload();
-    }
+    }, 50);
 }
 
     function saveGame() {
