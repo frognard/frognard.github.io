@@ -2531,13 +2531,13 @@ const AREA_TYPE_COLOR = {
     return Math.round(xp);
 }
 
-//GOLD roll: 8eloume kata vash na einai to 10% twn mosnter xp
+//GOLD roll: 8eloume kata vash na einai to 10% twn mosnter xp !!tou!! level
 function rollGoldForLevel(level) {
-    const averageGold = Math.pow(level, 2);
-    const randomFactor = 0.5 + Math.random();   // 0.5 - 1.5
+    const averageGold = Math.pow(level+1, 2);
+    const randomFactor = 0.1 + Math.random() * 1.8;   // 0.1 - 1.9
 
     return Math.max(
-        1,
+        2,
         Math.round(averageGold * randomFactor)
     );
 }
@@ -2753,7 +2753,7 @@ function confirmCharacterCreation() {
     logMessage(``);
     logMessage(`Ο Ζαλαδούρας λέει: "Βρε βρε, ο ${player.name}! Καλώς το παιδί! Μπες στο λαβύρινθο και σφάξε ό,τι κινείται. Μετά γύρνα εδώ και ρίχτο στο πιοτό. Αυτή είναι η ζωή σου τώρα!"`, 'bright');
     logMessage(``);
-    logMessage(`"Και μία συμβουλή: Πριν πας βαθύτερα φρόντισε να έχεις βρει και κατάλληλο εξοπλισμό. Δεν αρκεί το επίπεδό σου."`, 'bright');
+    // logMessage(`"Και μία συμβουλή: Πριν πας βαθύτερα φρόντισε να έχεις βρει και κατάλληλο εξοπλισμό. Δεν αρκεί το επίπεδό σου."`, 'bright');
 
    
    
