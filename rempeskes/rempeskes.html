@@ -1429,9 +1429,9 @@ function retreatSound() {
 
     osc.start(now);
     osc.stop(now + 0.6);
+
+
 }
-
-
 
     const monsterNames = [
         "Γιγάντιος Αρουραίος", "Σκίταλος", "Κόβαλος", "Ληστής",
@@ -3260,7 +3260,7 @@ function logMessage(text, type = 'system') {
         container.style.transition = 'none';
         container.style.backgroundColor = colorHex;
         void container.offsetHeight;
-        container.style.transition = 'background-color 1.5s ease';
+        container.style.transition = 'background-color 1.0s ease';
         container.style.backgroundColor = 'var(--panel-bg)';
     }
 
@@ -3705,6 +3705,7 @@ function forceRetreat() {
     if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
     retreatSound();
+    triggerSmoothTransition('#1a2742');
     
     updateUI();
     saveGame();
@@ -4094,7 +4095,7 @@ function showLegendaryPopup() {
                         // --- ΠΡΟΣΘΗΚΗ FLOATING TEXT ΚΑΤΑ ΤΗΝ ΥΠΟΧΩΡΗΣΗ ---
                         createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
                         retreatSound();
-                        
+                        triggerSmoothTransition('#1a2742');
                         
                         updateUI();
 
