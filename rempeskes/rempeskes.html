@@ -1254,7 +1254,8 @@ function showIronmanHighscores() {
         logMessage("Δεν υπάρχουν ακόμα νεκροί Ironmen.", "psof");
     } else {
         scores.forEach(s => {
-            logMessage(`${s.name}, επίπεδο ${s.level}, σκοτώθηκε στο βάθος ${s.depth} από ${s.killer}.`, "psof");
+            logMessage(`${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο βάθος ${s.depth} από: ${s.killer}.`,
+        "psof");
         });
     }
 
@@ -4356,7 +4357,10 @@ function applyDefeatPenalties() {
             name: player.name,
             level: player.level,
             depth: deathDepth,
-            killer: killerName
+            killer: killerName,
+            weapon: player.weapon.power,
+            armor: player.armor.power,
+            magic: player.magic.power
         });
     }
 
