@@ -397,7 +397,7 @@
 }
 
 .hunt-btn.retreat-ready{
-    --ready-color:var(--accent-gold);
+    --ready-color:#e6b800;
 }
 
 .hunt-btn.retreat-mode{
@@ -2527,7 +2527,7 @@ function rollItemTier(monsterLevel) {
         baseDef: 10,
         hp: 150, 
         xp: 0,
-        nextXp: 80,
+        nextXp: 1,
         lastGoldCashedLevel: 1,
         gold: 0,
          // statistics
@@ -2741,6 +2741,23 @@ function cashInGoldForXp() {
         `+${formatNumber(bankedGold)} XP`,
         "var(--accent-gold)"
     );
+    createFloatingText(
+    'stat-gold-box',
+    `-${formatNumber(bankedGold)}g`,
+    "#e74c3c"
+    );
+
+flashSkillButton('btn-hunt-retreat');
+document
+    .getElementById('xp-parent')
+    .classList.add('xp-level-flash');
+
+setTimeout(() => {
+    document
+        .getElementById('xp-parent')
+        .classList.remove('xp-level-flash');
+}, 1400);
+
     saveGame();
 }
 
@@ -3167,6 +3184,7 @@ function refreshAreaSelectorAppearance() {
 
 
    function updateUI() {
+  
    const pNameEl = document.getElementById('p-name');
     if (document.activeElement !== pNameEl) {
         pNameEl.innerText = player.name;
@@ -3312,6 +3330,7 @@ function refreshAreaSelectorAppearance() {
     const btnHuntRetreat = document.getElementById('btn-hunt-retreat');
     btnHuntRetreat.classList.remove('retreat-mode');
     btnHuntRetreat.classList.remove('retreat-ready');
+    btnHuntRetreat.classList.remove('skill-queued');
 
     if (inCombat) {
         btnHuntRetreat.classList.add('retreat-mode');
@@ -3326,9 +3345,15 @@ function refreshAreaSelectorAppearance() {
             btnHuntRetreat.classList.remove('skill-queued');
         }
     }
+    else if (player.level > player.lastGoldCashedLevel && player.gold > 0) {
+    btnHuntRetreat.innerHTML = "<span>Γλέντα! [↵]</span>";
+    btnHuntRetreat.classList.add('retreat-ready');
+    
+    }
     else {
         btnHuntRetreat.innerHTML = "<span>Σφάξε [↵]</span>";
         btnHuntRetreat.classList.remove('skill-queued');
+        btnHuntRetreat.classList.remove('retreat-ready');
     }
 
     const btnSkill = document.getElementById('btn-skill');
@@ -3730,13 +3755,19 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
         updateUI();
     }
 
-    function handleHuntRetreatClick() {
-        if (inCombat) {
-            toggleRetreat();
-        } else {
-            enterCombatFromSelector();
-        }
+function handleHuntRetreatClick() {
+    if (inCombat) {
+        toggleRetreat();
+    } else if (player.level > player.lastGoldCashedLevel && player.gold > 0) {
+        cashInGoldForXp();
+        setTimeout(() => {
+        updateUI();
+    }, 280);
+        levelUpSound();
+    } else {
+        enterCombatFromSelector();
     }
+}
 
 //attack/defense damage modifier
 
@@ -3886,7 +3917,6 @@ function forceRetreat() {
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
     logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο.`, 'retreat');
     currentRunKills = 0; // Μηδενισμός μετά την αναφορά
-    cashInGoldForXp();
     logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
     if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
@@ -4175,7 +4205,6 @@ function showLegendaryPopup() {
                 
                 logMessage(`Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΠΕΘΑΝΕ! Το παιχνίδι νικήθηκε! Αιώνια δόξα στον ${player.name}!. Απο δω και πέρα θα είναι γνωστός ως ΘΕΟΣΦΑΧΤΗΣ. Επιστρέφεις στον τεκέ και ρίχνεις έναν υπνάκο...`, 'konanos');
                 currentRunKills = 0;
-                cashInGoldForXp();
                 logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
                 if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
                 player.hp = Math.round(getPlayerMaxHp() * 0.10);
@@ -4274,7 +4303,6 @@ function showLegendaryPopup() {
                         
                         logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς σε αυτή την έξοδο. Ρίχνεις έναν υπνάκο...`, 'retreat');
                         currentRunKills = 0; // Μηδενισμός μετά την αναφορά
-                        cashInGoldForXp();
                         logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
                         if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
                         player.hp = Math.round(getPlayerMaxHp() * 0.10);
