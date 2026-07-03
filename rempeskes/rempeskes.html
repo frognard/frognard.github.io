@@ -1013,7 +1013,8 @@ body {
 <div id="ironman-modal" class="hidden ironman-modal-overlay">
     <div class="ironman-modal-box">
         <p>Όνομα χαρακτήρα:</p>
-        <input type="text" id="char-name-input" placeholder="Ρεμπεσκές"
+        <input type="text" id="char-name-input" placeholder="Ρεμπεσκές" enterkeyhint="go"
+               onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmCharacterCreation();}"
                style="width: 100%; padding: 6px; margin-bottom: 14px; background: #1a1a1a; color: #fff; border: 1px solid var(--accent-gold); border-radius: 4px;">
         <label style="display: block; margin-bottom: 18px; cursor: pointer;">
             <input type="checkbox" id="ironman-checkbox">
@@ -1027,7 +1028,7 @@ body {
 
 <script>
 
-
+//============MUZKA=============================================================================================
 // --- ORIGINAL MYSTERY WITH WAVE-SWELLING ISON (120% SLOW & LOWER OCTAVE) ---
 let bgMusicInterval = null;
 let isMusicPlaying = false;
@@ -2514,7 +2515,7 @@ function rollItemTier(monsterLevel) {
     return tier;
 }
 
-// CHARACTER STATISTICS ===================================================================
+// CHARACTER sheet ===================================================================
 //=========================================================================================
 
     let player = {
@@ -2763,7 +2764,7 @@ function checkLevelUp() {
 
         logMessage(`*** ΑΠΟΚΤΗΣΗ ΕΠΙΠΕΔΟΥ: Level ${player.level}! ***`, 'victory');
         levelUpSound();
-        triggerSmoothTransition('#ffd700');
+        triggerSmoothTransition('#997a00');
         createFloatingText(
             'xp-parent',
             'LEVEL UP!',
@@ -2811,9 +2812,9 @@ function loadGame() {
         try {
             player = { ...player, ...JSON.parse(savedData) };
             player.level = Math.min(player.level, 100);
-            player.weapon.power = Math.min(player.weapon.power, 100);
-            player.armor.power = Math.min(player.armor.power, 100);
-            player.magic.power = Math.min(player.magic.power, 100);
+            player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 100);
+            player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 100);
+            player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 100);
             if (!player.name) player.name = "Ρεμπεσκές";
             player.maxUnlockedLevel = 100;
 
@@ -2874,25 +2875,38 @@ function loadGame() {
 function resetGame() {
     if (!confirm("Διαγραφή χαρακτήρα;")) return;
 
-    localStorage.removeItem('minimal_rpg_save');
-    localStorage.removeItem('selectedMonsterLevel');
-    localStorage.removeItem('rempeskes_areaModifiers');
-    localStorage.setItem('rempeskes_hasBeatenConanos', "false");
+    try {
+        localStorage.removeItem('minimal_rpg_save');
+        localStorage.removeItem('selectedMonsterLevel');
+        localStorage.removeItem('rempeskes_areaModifiers');
+        localStorage.setItem('rempeskes_hasBeatenConanos', "false");
+    } catch (e) {
+        console.error('resetGame storage cleanup failed:', e);
+    }
 
     setTimeout(() => {
-        if (!confirm("Να κρατηθεί το Ψοφολόγιο των Ironmen;")) {
-            localStorage.removeItem('rempeskes_ironman_highscores');
+        try {
+            if (!confirm("Να κρατηθεί το Ψοφολόγιο των Ironmen;")) {
+                localStorage.removeItem('rempeskes_ironman_highscores');
+            }
+        } catch (e) {
+            console.error('resetGame highscore cleanup failed:', e);
         }
         location.reload();
     }, 50);
 }
 
     function saveGame() {
-    localStorage.setItem('minimal_rpg_save', JSON.stringify(player));
-    localStorage.setItem('rempeskes_hasBeatenConanos', player.hasBeatenConanos ? "true" : "false");
-    const selector = document.getElementById('area-selector');
-    if (selector) {
-        localStorage.setItem('selectedMonsterLevel', selector.value);
+    try {
+        localStorage.setItem('minimal_rpg_save', JSON.stringify(player));
+        localStorage.setItem('rempeskes_hasBeatenConanos', player.hasBeatenConanos ? "true" : "false");
+        const selector = document.getElementById('area-selector');
+        if (selector) {
+            localStorage.setItem('selectedMonsterLevel', selector.value);
+        }
+    } catch (e) {
+        console.error('saveGame failed:', e);
+        logMessage("Δεν ήταν δυνατή η αποθήκευση (ο browser μπλόκαρε το localStorage — π.χ. Private Browsing).", 'system');
     }
 }
 
@@ -2978,9 +2992,9 @@ function importSave() {
 
         player = { ...player, ...data.player };
         player.level = Math.min(player.level, 100);
-        player.weapon.power = Math.min(player.weapon.power, 100);
-        player.armor.power = Math.min(player.armor.power, 100);
-        player.magic.power = Math.min(player.magic.power, 100);
+        player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 100);
+        player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 100);
+        player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 100);
         if (!player.name) player.name = "Ρεμπεσκές";
         player.maxUnlockedLevel = 100;
         player.nextXp = calculateNextXpRequirement(player.level);
