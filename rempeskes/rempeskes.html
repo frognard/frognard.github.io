@@ -1258,7 +1258,7 @@ function showIronmanHighscores() {
         logMessage("Δεν υπάρχουν ακόμα νεκροί Ironmen.", "psof");
     } else {
         scores.forEach(s => {
-            logMessage(`${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο βάθος ${depthNames[s.depth - 1]}, από: ${s.killer}.`, "psof");
+            logMessage(`${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1]}, από: ${s.killer}.`, "psof");
         });
     }
 
