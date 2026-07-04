@@ -3859,10 +3859,22 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
 
     variant = 'legendary';
 
-    // Πρώτα αποφασίζουμε τον τύπο (33/33/33) - καθορίζει ΚΑΙ το χρώμα/λάμψη
-    // ΚΑΙ τι είδους αντικείμενο θα πέσει.
-    let lootRoll = Math.random();
-    legendaryLootType = lootRoll < 0.333 ? 'weapon' : (lootRoll < 0.666 ? 'armor' : 'magic');
+    // Αν βρισκόμαστε σε WEAPON/ARMOR/MAGIC περιοχή, ο αντίστοιχος τύπος legendary
+    // είναι πιο πιθανός - ίδια λογική με τα κανονικά variant τέρατα παρακάτω.
+    // Άλλαξε το legendaryAreaFavorChance για να ρυθμίσεις πόσο δυνατό είναι το boost.
+    const legendaryAreaFavorChance = 0.5; // 50% να είναι ο "δικός" τύπος της περιοχής
+    let favoredLegendary = null;
+    if (areaType === AREA_TYPES.WEAPON) favoredLegendary = 'weapon';
+    else if (areaType === AREA_TYPES.ARMOR) favoredLegendary = 'armor';
+    else if (areaType === AREA_TYPES.MAGIC) favoredLegendary = 'magic';
+
+    if (favoredLegendary && Math.random() < legendaryAreaFavorChance) {
+        legendaryLootType = favoredLegendary;
+    } else {
+        // Κανονικό τυχαίο 33/33/33
+        let lootRoll = Math.random();
+        legendaryLootType = lootRoll < 0.333 ? 'weapon' : (lootRoll < 0.666 ? 'armor' : 'magic');
+    }
 
     // Μετά διαλέγουμε το ζευγάρι όνομα+αντικείμενο που ταιριάζει με τύπο & επίπεδο
     const legendaryPair = getLegendaryMonster(lvl, legendaryLootType);
