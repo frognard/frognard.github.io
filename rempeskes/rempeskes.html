@@ -4683,9 +4683,11 @@ function applyDefeatPenalties() {
         const actualLoss = Math.min(rawLoss, oldPower - 1);
 
         player[lostSlot].power -= actualLoss;
-        if (!player[lostSlot].legendary) {
-            player[lostSlot].name = getItemName(lostSlot, player[lostSlot].power);
-        }
+     
+     //τα αντικείμενα απλα πέφτουν τιερ
+        //   if (!player[lostSlot].legendary) {
+     //       player[lostSlot].name = getItemName(lostSlot, player[lostSlot].power);
+     //   }
 
         logMessage(
             `${slotNames[lostSlot]} σου φθείρεται: (T${oldPower} → T${player[lostSlot].power})`,
