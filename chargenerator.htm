@@ -1106,6 +1106,10 @@ body {
             <input type="checkbox" id="ironman-checkbox">
             Ironman mode (αν πεθάνεις, ο χαρακτήρας κλειδώνει οριστικά)
         </label>
+        <label style="display: block; margin-bottom: 18px; cursor: pointer;">
+            <input type="checkbox" id="clear-ironman-scores-checkbox">
+            Διαγραφή του Ψοφολογίου των Ironmen
+        </label>
         <button class="btn-showRules" onclick="confirmCharacterCreation()">Έναρξη</button>
     </div>
 </div>
@@ -3048,16 +3052,7 @@ function resetGame() {
         console.error('resetGame storage cleanup failed:', e);
     }
 
-    setTimeout(() => {
-        try {
-            if (!confirm("Να κρατηθεί το Ψοφολόγιο των Ironmen;")) {
-                localStorage.removeItem('rempeskes_ironman_highscores');
-            }
-        } catch (e) {
-            console.error('resetGame highscore cleanup failed:', e);
-        }
-        location.reload();
-    }, 50);
+    location.reload();
 }
 
     function saveGame() {
@@ -3094,6 +3089,15 @@ function confirmCharacterCreation() {
     player.ironman = document.getElementById('ironman-checkbox').checked;
     if (player.ironman) {
         logMessage("Ironman mode ενεργό. Δεν υπάρχει γυρισμός.", 'system');
+    }
+
+    if (document.getElementById('clear-ironman-scores-checkbox').checked) {
+        try {
+            localStorage.removeItem('rempeskes_ironman_highscores');
+            logMessage("Το Ψοφολόγιο των Ironmen διαγράφηκε.", 'system');
+        } catch (e) {
+            console.error('clear ironman highscores failed:', e);
+        }
     }
 
     saveGame();
