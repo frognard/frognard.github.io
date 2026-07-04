@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v167</title>
+    <title>Ρεμπεσκές v177</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -2631,22 +2631,20 @@ function getMonsterName(lvl) {
         return `${arr[idx]} `;
     }
 
+// ψοφιος κωδικας
 function getLegendaryItemName(type, tier) {
-    // tier κυμαίνεται 21-120 -> index 0-99, ευθεία αντιστοίχιση
-    let index = tier - 21;
-    if (index > 99) index = 99;
-    if (index < 0) index = 0;
+    // Το tier ενός legendary item = (επίπεδο τέρατος βάσει rollItemTier) + 20
+    // (βλ. handleEquipmentDrop: rolledTier = Math.min(125, rolledTier + 20)).
+    // Άρα αφαιρούμε το +20 για να βρούμε ξανά το αντίστοιχο bracket επιπέδου
+    // μέσα στο legendaryMonstersByType, το ίδιο table που χρησιμοποιείται
+    // και τη στιγμή του drop.
+    let baseLevel = tier - 20;
+    baseLevel = Math.max(1, Math.min(100, baseLevel));
 
-    let pool;
-    if (type === 'weapon') {
-        pool = legendaryWeaponNamesTiered[index];
-    } else if (type === 'armor') {
-        pool = legendaryArmorNamesTiered[index];
-    } else if (type === 'magic') {
-        pool = legendaryMagicNamesTiered[index];
-    }
-    
-    return pool ? pool : "Θρυλικό Αντικείμενο";
+    const list = legendaryMonstersByType[type] || [];
+    const entry = list.find(p => baseLevel >= p.min && baseLevel <= p.max);
+
+    return entry ? entry.itemName : "Θρυλικό Αντικείμενο";
 }
 
 
@@ -3015,24 +3013,18 @@ function loadGame() {
 
             player.nextXp = calculateNextXpRequirement(player.level);
 
-            // ΔΙΟΡΘΩΣΗ: Έλεγχος για το όνομα του όπλου
-            if (player.weapon.legendary) {
-                player.weapon.name = getLegendaryItemName('weapon', player.weapon.power);
-            } else {
+            // ΔΙΟΡΘΩΣΗ: Έλεγχος για το όνομα του όπλου (τα legendary κρατούν πάντα το όνομά τους)
+            if (!player.weapon.legendary) {
                 player.weapon.name = getItemName('weapon', player.weapon.power);
             }
 
-            // ΔΙΟΡΘΩΣΗ: Έλεγχος για το όνομα της πανοπλίας
-            if (player.armor.legendary) {
-                player.armor.name = getLegendaryItemName('armor', player.armor.power);
-            } else {
+            // ΔΙΟΡΘΩΣΗ: Έλεγχος για το όνομα της πανοπλίας (τα legendary κρατούν πάντα το όνομά τους)
+            if (!player.armor.legendary) {
                 player.armor.name = getItemName('armor', player.armor.power);
             }
 
-            // ΔΙΟΡΘΩΣΗ: Έλεγχος για το όνομα της μαγείας
-            if (player.magic.legendary) {
-                player.magic.name = getLegendaryItemName('magic', player.magic.power);
-            } else {
+            // ΔΙΟΡΘΩΣΗ: Έλεγχος για το όνομα της μαγείας (τα legendary κρατούν πάντα το όνομά τους)
+            if (!player.magic.legendary) {
                 player.magic.name = getItemName('magic', player.magic.power);
             }
 
@@ -3199,22 +3191,16 @@ function importSave() {
         if (player.armor.legendary === undefined) player.armor.legendary = false;
         if (player.magic.legendary === undefined) player.magic.legendary = false;
 
-        // Σωστή ανάκτηση ονομάτων κατά το Import (λαμβάνοντας υπόψη τα Legendary)
-        if (player.weapon.legendary) {
-            player.weapon.name = getLegendaryItemName('weapon', player.weapon.power);
-        } else {
+        // Σωστή ανάκτηση ονομάτων κατά το Import (τα legendary κρατούν πάντα το όνομά τους)
+        if (!player.weapon.legendary) {
             player.weapon.name = getItemName('weapon', player.weapon.power);
         }
 
-        if (player.armor.legendary) {
-            player.armor.name = getLegendaryItemName('armor', player.armor.power);
-        } else {
+        if (!player.armor.legendary) {
             player.armor.name = getItemName('armor', player.armor.power);
         }
 
-        if (player.magic.legendary) {
-            player.magic.name = getLegendaryItemName('magic', player.magic.power);
-        } else {
+        if (!player.magic.legendary) {
             player.magic.name = getItemName('magic', player.magic.power);
         }
 
@@ -4666,9 +4652,9 @@ function applyDefeatPenalties() {
     const lostSlot = slots[Math.floor(Math.random() * slots.length)];
 
     const slotNames = {
-        weapon: "το όπλο",
-        armor: "την πανοπλία",
-        magic: "το φυλαχτό"
+        weapon: "Το όπλο",
+        armor: "Η πανοπλία",
+        magic: "Το φυλαχτό"
     };
        
     currentRunKills = 0;
@@ -4697,11 +4683,12 @@ function applyDefeatPenalties() {
         const actualLoss = Math.min(rawLoss, oldPower - 1);
 
         player[lostSlot].power -= actualLoss;
-        player[lostSlot].name =
-            getItemName(lostSlot, player[lostSlot].power);
+        if (!player[lostSlot].legendary) {
+            player[lostSlot].name = getItemName(lostSlot, player[lostSlot].power);
+        }
 
         logMessage(
-            `${getMonsterDisplayName(monster)}: σου αρπάζει ${slotNames[lostSlot]}! (T${oldPower} → T${player[lostSlot].power})`,
+            `${slotNames[lostSlot]} σου φθείρεται: (T${oldPower} → T${player[lostSlot].power})`,
             'monster'
         );
     }
