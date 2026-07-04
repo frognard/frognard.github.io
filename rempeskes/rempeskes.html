@@ -251,40 +251,126 @@
         }
 
 .legendary-item {
-    color: #e2c258 !important; /* πραγματικό gold base */
+    color: #ffde21 !important; /* πραγματικό gold base */
     font-weight: 700;
-/*
-    text-shadow:
-        0 0 2px #3a2a00,
-        0 0 6px #b8860b,
-        0 0 12px #ffcc66,
-        0 0 18px #ffb84d;
-*/
     animation: legendaryGlow 2.2s ease-in-out infinite;
 }
 
 @keyframes legendaryGlow {
     0% {
-        color: #c7b377;
+        color: #ffde21;
         text-shadow:
-            0 0 2px #1a0005,
-            0 0 6px #66001a,
-            0 0 10px #990026;
+            0 0 2px #990026,
+            0 0 5px #cc0033,
+            0 0 8px #ff1a53;
     }
     50% {
-        color: #e6da9a; /* Ελαφρώς πιο φωτεινό χλωμό χρυσό στην κορύφωση */
+        color: #ffde21;
         text-shadow:
-            0 0 2px #26000c,
-            0 0 8px #990026,
-            0 0 16px #ff1a53,
-            0 0 24px #4d0014;
+            0 0 4px #ff1a53,
+            0 0 10px #ff3366,
+            0 0 17px #ff4d79,
+            0 0 25px #ff1a53;
     }
     100% {
-        color: #c7b377;
+        color: #ffde21;
         text-shadow:
-            0 0 2px #1a0005,
-            0 0 6px #66001a,
-            0 0 10px #990026;
+            0 0 2px #990026,
+            0 0 5px #cc0033,
+            0 0 8px #ff1a53;
+    }
+}
+
+/* Legendary τέρατα: ίδιο gold+glow στυλ όπως τα legendary items,
+   αλλά το χρώμα της λάμψης αλλάζει ανάλογα με τον τύπο (weapon/armor/magic) */
+.legendary-glow-weapon {
+    color: #ffde21 !important;
+    font-weight: 700;
+    animation: legendaryGlowWeapon 2.2s ease-in-out infinite;
+}
+.legendary-glow-armor {
+    color: #ffde21 !important;
+    font-weight: 700;
+    animation: legendaryGlowArmor 2.2s ease-in-out infinite;
+}
+.legendary-glow-magic {
+    color: #ffde21 !important;
+    font-weight: 700;
+    animation: legendaryGlowMagic 2.2s ease-in-out infinite;
+}
+
+@keyframes legendaryGlowWeapon {
+    0% {
+        color: #ffde21;
+        text-shadow:
+            0 0 2px #990026,
+            0 0 5px #cc0033,
+            0 0 8px #ff1a53;
+    }
+    50% {
+        color: #fff2c2;
+        text-shadow:
+            0 0 4px #ff1a53,
+            0 0 10px #ff3366,
+            0 0 17px #ff4d79,
+            0 0 25px #ff1a53;
+    }
+    100% {
+        color: #ffde21;
+        text-shadow:
+            0 0 2px #990026,
+            0 0 5px #cc0033,
+            0 0 8px #ff1a53;
+    }
+}
+
+@keyframes legendaryGlowArmor {
+    0% {
+        color: #ffde21;
+        text-shadow:
+            0 0 2px #0059b3,
+            0 0 5px #0073e6,
+            0 0 8px #1ab2ff;
+    }
+    50% {
+        color: #fff2c2;
+        text-shadow:
+            0 0 4px #1ab2ff,
+            0 0 10px #33bbff,
+            0 0 17px #66ccff,
+            0 0 25px #1ab2ff;
+    }
+    100% {
+        color: #ffde21;
+        text-shadow:
+            0 0 2px #0059b3,
+            0 0 5px #0073e6,
+            0 0 8px #1ab2ff;
+    }
+}
+
+@keyframes legendaryGlowMagic {
+    0% {
+        color: #ffde21;
+        text-shadow:
+            0 0 2px #7a00cc,
+            0 0 5px #9933ff,
+            0 0 8px #cc66ff;
+    }
+    50% {
+        color: #fff2c2;
+        text-shadow:
+            0 0 4px #cc66ff,
+            0 0 10px #d966ff,
+            0 0 17px #e699ff,
+            0 0 25px #cc66ff;
+    }
+    100% {
+        color: #ffde21;
+        text-shadow:
+            0 0 2px #7a00cc,
+            0 0 5px #9933ff,
+            0 0 8px #cc66ff;
     }
 }
 
@@ -1020,6 +1106,10 @@ body {
             <input type="checkbox" id="ironman-checkbox">
             Ironman mode (αν πεθάνεις, ο χαρακτήρας κλειδώνει οριστικά)
         </label>
+        <label style="display: block; margin-bottom: 18px; cursor: pointer;">
+            <input type="checkbox" id="clear-ironman-scores-checkbox">
+            Διαγραφή του Ψοφολογίου των Ironmen
+        </label>
         <button class="btn-showRules" onclick="confirmCharacterCreation()">Έναρξη</button>
     </div>
 </div>
@@ -1286,9 +1376,17 @@ function flashSkillButton(buttonId) {
 function getMonsterDisplayName(monster) {
     if (!monster) return "";
 
-    if (monster.variant === 'normal')
-        return monster.name;
+    // Legendary monsters έχουν μόνο ένα καθαρό όνομα
+    if (monster.variant === 'legendary') {
+        return monster.firstName;
+    }
 
+    // Normal monsters
+    if (monster.variant === 'normal' || !monster.variant) {
+        return monster.name;
+    }
+
+    // Special monsters (weapon/armor/magic)
     return `${monster.firstName} ${monster.title}`;
 }
 
@@ -2192,7 +2290,7 @@ const magicTitles = [
 "ο Φλεγόμενος",
 "ο Λησμονημένος",
 "ο Ακατανόητος",
-"ο Ονειροβγάλκτης",
+"ο Ονειροβγάλτης",
 "ο Διαβολιστής",
 "ο Μουγκός",
 "ο Σκοτεινός",
@@ -2387,7 +2485,7 @@ const zaladouras = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''ΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑ!!!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Του λαγού ο λαιμός είναι ένας ωραίος λαμός.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όταν προσπαθείς να ξεφύγεις από ένα τέρας, έχεις 15% πιθανότητα το γύρο να τη σκαπουλάρεις.''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι αν είσαι κωλόφαρδος μπορεί να βρείς θρυλικά αντικείμενα 20 επίπεδα πιο πάνω από το τέρας που τα έριξε!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι αν είσαι κωλόφαρδος μπορεί να βρείς θρυλικά τέρατα, που ρίχνουν τα πανίσχυρα θρυλικά τους αντικείμενα!''" ,
     "Ένας μεθυσμένος παπάς φωνάζει: ''ΠΟΙΟΣ ΑΛΗΤΗΣ ΜΟΥ ΕΚΛΕΨΕ ΤΟ ΙΕΡΟ ΤΖΑΤΖΙΚΙ;;;''" ,
     "Μια παρέα από φωνακλάδες ρεμπεσκέδες παίζουν Κρύπτες & Καθάρματα σε μια γωνιά του τεκέ.",
     "Ο Σταύρακας έρχεται τρεκλίζοντας μπροστά σου και σε κοιτάει με το βλέμμα των χιλίων χιλιομέτρων. Ξερνάει στις μπότες σου. Μετά φεύγει.",
@@ -2397,50 +2495,80 @@ const zaladouras = [
 ];
 
 
-const legendaryWeaponNamesTiered = [
-    ...Array(10).fill("Το Κεντρί"),  // tier 21-40
-    ...Array(10).fill("Οστεοθράυστης"),
-    ...Array(10).fill("Φλεγόμενο Ξίφος"),  // tier 41-60
-    ...Array(10).fill("Βορπάλειο Ξίφος"),
-    ...Array(10).fill("Ο Παππούκας"),  // tier 61-80
-    ...Array(10).fill("Τσαρόνκλο"),
-    ...Array(10).fill("Εξκάλιμπερ"),  // tier 81-100
-    ...Array(10).fill("Το Ζουλφικάρι"),
-    ...Array(10).fill("Γνοφικό Λεπίδι"),
-    ...Array(10).fill("Ξίφος των Οιωνών")   // tier 101-120
-];
+// Κάθε legendary τέρας ανήκει σε έναν τύπο (weapon=κόκκινο, armor=μπλε, magic=μωβ).
+// Το όνομα του τέρατος και το όνομα του αντικειμένου πάνε πάντα μαζί, ανά ζευγάρι,
+// ομαδοποιημένα σε επίπεδα (min-max). Ο τύπος αποφασίζεται πρώτα (τυχαία, 33/33/33
+// στο spawnMonster), και μετά διαλέγεται ζευγάρι όνομα+αντικείμενο ταιριαστό
+// με τον τύπο και το επίπεδο του παίκτη.
+// Στατιστικά ανά τύπο legendary τέρατος. Άλλαξε ελεύθερα τα νούμερα εδώ
+// για να πειράξεις πόσο δυνατό είναι κάθε "χρώμα" τέρατος.
+// atkBonus/defBonus προστίθενται πάνω στο κανονικό atk/def του επιπέδου.
+// hpMultiplier πολλαπλασιάζεται με το επίπεδο (lvl * hpMultiplier) για να βγει το HP.
+const legendaryStatsByType = {
+    weapon: { atkBonus: 21, defBonus: 0,  hpMultiplier: 125 }, // κόκκινα: επιθετικά, λιγότερη ζωή
+    armor:  { atkBonus: 0,  defBonus: 17, hpMultiplier: 125 }, // μπλε: αμυντικά, πολλή ζωή
+    magic:  { atkBonus: 8, defBonus: 8, hpMultiplier: 125 }  // μωβ: ισορροπημένα
+};
 
-const legendaryArmorNamesTiered = [
-    ...Array(10).fill("Χρυσά Κουρέλια"),
-    ...Array(10).fill("Λωρίκιο του Σκύλη"),
-    ...Array(10).fill("Μαγική Σκούτα"),
-    ...Array(10).fill("Πράσινη Ζάβα"),
-    ...Array(10).fill("Δρακόντειο Δέρας"),
-    ...Array(10).fill("Νεκορσάβανο"),
-    ...Array(10).fill("Αστρικός Θυρεός"),
-    ...Array(10).fill("Σεληνιακός Θώρακας"),
-    ...Array(10).fill("Ηλιακή Πανοπλία"),
-    ...Array(10).fill("Πανοπλία Ατρωσιμότητας"),
-];
+const legendaryMonstersByType = {
+    weapon: [
+        { min: 1,  max: 10,  name: "Γιακουμής",         itemName: "Μπαλτάς του Γιακουμή" },
+        { min: 11, max: 20,  name: "Σταύρακας",     itemName: "Σουγιάς του Σταύρακα" },
+        { min: 21, max: 30,  name: "Πρωτοτσίγγελος",     itemName: "Χειροτσίγγελα" },
+        { min: 31, max: 40, name: "Σαψάλης",         itemName: "Ο Παππούκας" },
+        { min: 41, max: 50, name: "Η Μεγίστη Μούμια",         itemName: "Οστεοθραύστης" },        
+        { min: 51, max: 60,  name: "Κωλοτερορίτα",         itemName: "ΑΚ47" },
+        { min: 61, max: 70,  name: "Βασιλιάς Αρθούρος",     itemName: "Εξκάλιμπερ" },
+        { min: 71, max: 80,  name: "Ο Προφήτης",     itemName: "Ζουλφικάρι" },
+        { min: 81, max: 90, name: "Ο Χάρος",         itemName: "Τσαρόνκλο" },
+        { min: 91, max: 100, name: "Λάιονο",         itemName: "Ξίφος των Οιωνών" }       
+    ],
+    armor: [
+        { min: 1,  max: 10,  name: "Ριχάρδος",         itemName: "Χρυσά Κουρελια" },
+        { min: 11, max: 20,  name: "Σκύλης ο Σκουτάτος",     itemName: "Σκουτάρι του Σκύλι" },
+        { min: 21, max: 30,  name: "Πράσινος Πρόμαχος",     itemName: "Πράσινη Ζάβα" },
+        { min: 31, max: 40, name: "Θαμβόπουλος",         itemName: "Θυρεός του Θαμβόπουλου" },
+        { min: 41, max: 50, name: "Αρμούρης",         itemName: "Λωρίκι του Αρμούρη" },        
+        { min: 51, max: 60,  name: "Θερμουθαρίν",         itemName: "Αμαζόνιο Κράνος" },
+        { min: 61, max: 70,  name: "Ο Κυνηγός",     itemName: "Αστρικός Θώρακας" },
+        { min: 71, max: 80,  name: "Κοσέι ο Αθάνατος",     itemName: "Σκελετικός Θώρακας" },
+        { min: 81, max: 90, name: "Ο Νοφιστής",         itemName: "Δρακόντειο Δέρας" },
+        { min: 91, max: 100, name: "Sol Invictus",         itemName: "Ηλιακή Πανοπλία" }       
+    ],
 
-const legendaryMagicNamesTiered = [
-    ...Array(10).fill("Ιερό Τζατζίκι"),
-    ...Array(10).fill("Καπέλο του Σκύλη"),
-    ...Array(10).fill("Φακοί Ερυθρόρασης"),
-    ...Array(10).fill("Υπερμπάμπουρας"),
-    ...Array(10).fill("Μανδύας Διατοπισμού"),
-    ...Array(10).fill("Γάντια Γιγαντοδύναμης"),
-    ...Array(10).fill("Κράνος Τηλεμεταφοράς"),
-    ...Array(10).fill("Το Ένα Δαχτυλίδι"),
-    ...Array(10).fill("Νεκυοδαίμονας")
-];
+    magic: [
+        { min: 1,  max: 10,  name: "Πάτερ Τζατζίκιας",         itemName: "Ιερό Τζατζίκι" },
+        { min: 11, max: 20,  name: "Μπεν Μίλτον",     itemName: "Απατεών" },
+        { min: 21, max: 30,  name: "Ο Δερβίσης",     itemName: "Καπέλο του Δερβίση" },
+        { min: 31, max: 40, name: "Μάγος Σπέκουλης",         itemName: "Φακοί Ερυθρόρασης" },
+        { min: 41, max: 50, name: "Μπαμπουράρχης",         itemName: "Υπερμπάμπουρας" },        
+        { min: 51, max: 60,  name: "Κρυπτόπραμα",         itemName: "Κράνος Τηλεμεταφοράς" },
+        { min: 61, max: 70,  name: "Κεμπεχσενούφ",     itemName: "Κλειδί του Κεμπεχσενούφ" },
+        { min: 71, max: 80,  name: "Μέγας Νεκτεναβός",     itemName: "Μέγα Γριμμόριο" },
+        { min: 81, max: 90, name: "Αμπντούλ Αλχαζρέντ",         itemName: "Νεκρονομικόν" },
+        { min: 91, max: 100, name: "Φαλαβάρ ο Νεκυοδαίμων",         itemName: "Νεκυοδαίμων" }    
+    ]
+};
+
+
+
+function getLegendaryMonster(level, lootType) {
+    const list = legendaryMonstersByType[lootType] || [];
+    const pool = list.filter(p => level >= p.min && level <= p.max);
+
+    // Αν δεν υπάρχει ζευγάρι ακριβώς για αυτό το επίπεδο, πάρε από όλη τη λίστα του τύπου
+    // (ασφάλεια, δεν θα έπρεπε να χρειαστεί αν η λίστα καλύπτει όλα τα brackets)
+    const chosen = randomFrom(pool.length ? pool : list);
+
+    if (!chosen) return { name: "Άγνωστος Θρύλος", itemName: "Θρυλικό Αντικείμενο" };
+
+    return { name: chosen.name, itemName: chosen.itemName };
+}
+
 
 function randomTekeSong() {
     return tekeSongs[Math.floor(Math.random() * tekeSongs.length)];
 }
-
-
-
 
 function getPlayerTitle(level) {
     let currentTitle = "Αλήτης";
@@ -2924,16 +3052,7 @@ function resetGame() {
         console.error('resetGame storage cleanup failed:', e);
     }
 
-    setTimeout(() => {
-        try {
-            if (!confirm("Να κρατηθεί το Ψοφολόγιο των Ironmen;")) {
-                localStorage.removeItem('rempeskes_ironman_highscores');
-            }
-        } catch (e) {
-            console.error('resetGame highscore cleanup failed:', e);
-        }
-        location.reload();
-    }, 50);
+    location.reload();
 }
 
     function saveGame() {
@@ -2970,6 +3089,15 @@ function confirmCharacterCreation() {
     player.ironman = document.getElementById('ironman-checkbox').checked;
     if (player.ironman) {
         logMessage("Ironman mode ενεργό. Δεν υπάρχει γυρισμός.", 'system');
+    }
+
+    if (document.getElementById('clear-ironman-scores-checkbox').checked) {
+        try {
+            localStorage.removeItem('rempeskes_ironman_highscores');
+            logMessage("Το Ψοφολόγιο των Ironmen διαγράφηκε.", 'system');
+        } catch (e) {
+            console.error('clear ironman highscores failed:', e);
+        }
     }
 
     saveGame();
@@ -3240,9 +3368,9 @@ function refreshAreaSelectorAppearance() {
     armorEl.innerText = player.armor.name;
     magicEl.innerText = player.magic.name;
 
-    weaponEl.classList.toggle('legendary-item', player.weapon.legendary === true);
-    armorEl.classList.toggle('legendary-item', player.armor.legendary === true);
-    magicEl.classList.toggle('legendary-item', player.magic.legendary === true);
+    weaponEl.classList.toggle('legendary-glow-weapon', player.weapon.legendary === true);
+    armorEl.classList.toggle('legendary-glow-armor', player.armor.legendary === true);
+    magicEl.classList.toggle('legendary-glow-magic', player.magic.legendary === true);
 
     // xp bar percentage
     const xpPercent = (player.xp / player.nextXp) * 100;
@@ -3290,7 +3418,11 @@ function refreshAreaSelectorAppearance() {
         else if (monster.variant === 'magic') {
             displayedName = `<span style="color:#cc66ff;">${displayedName}</span>`;
         }
-
+        else if (monster.variant === 'legendary') {
+            // Το χρώμα/λάμψη δίνεται από τις legendary-glow-* κλάσεις παρακάτω,
+            // όχι από inline style, ώστε να είναι ΑΚΡΙΒΩΣ ίδιο με τα legendary αντικείμενα.
+        }
+        
         document.getElementById('m-name').innerHTML = displayedName;
         
         // === ΧΡΩΜΑ ΚΑΙ ΕΦΕ ΟΝΟΜΑΤΟΣ ===
@@ -3299,13 +3431,25 @@ function refreshAreaSelectorAppearance() {
         // Έλεγχος για τη σπέσιαλ λάμψη του Θεού Κόνανου
         if (monster.name === "Θεός Κόνανος") {
             mNameEl.classList.add('legendary-monster-glow');
-            mNameEl.style.color = ""; // Αφήνουμε το CSS class να ορίσει το χρώμα
-        } else {
+            mNameEl.classList.remove('legendary-glow-weapon', 'legendary-glow-armor', 'legendary-glow-magic');
+            mNameEl.style.color = ""; // αφήνει το CSS να ορίσει εμφάνιση Κόνανα
+        } 
+        else if (monster.variant === 'legendary') {
+            mNameEl.classList.remove('legendary-glow-weapon', 'legendary-glow-armor', 'legendary-glow-magic');
+            const glowClass = monster.lootType === 'armor' ? 'legendary-glow-armor'
+                             : monster.lootType === 'magic' ? 'legendary-glow-magic'
+                             : 'legendary-glow-weapon'; // default/fallback = κόκκινο (weapon)
+            mNameEl.classList.add(glowClass);
+            mNameEl.style.color = ""; // αφήνει την κλάση να ορίσει το χρώμα/glow
+        } 
+        else {
             mNameEl.classList.remove('legendary-monster-glow');
+            mNameEl.classList.remove('legendary-glow-weapon', 'legendary-glow-armor', 'legendary-glow-magic');
+
             if (monster.variant === 'normal' || !monster.variant) {
-                mNameEl.style.color = "#fff";           // Κανονικά τέρατα = άσπρο
+                mNameEl.style.color = "#fff";
             } else {
-                mNameEl.style.color = ""; // Καθαρισμός για τα special spans
+                mNameEl.style.color = ""; // special spans (weapon/armor/magic)
             }
         }
 
@@ -3337,6 +3481,7 @@ function refreshAreaSelectorAppearance() {
         const mNameEl = document.getElementById('m-name');
         if (mNameEl) {
             mNameEl.classList.remove('legendary-monster-glow');
+            mNameEl.classList.remove('legendary-glow-weapon', 'legendary-glow-armor', 'legendary-glow-magic');
             mNameEl.innerText = depthNames[currentSelectedLevel - 1] + "...";
             mNameEl.style.color = "#888";
         }
@@ -3653,10 +3798,11 @@ function updateCooldownBars() {
 
 
  // Monster attack and defense formulas, also HP. to +/- tou level einai to penalty gia na isoropisei sto level
-    function spawnMonster() {
+
+function spawnMonster() {
 
 
-let isBossConanos = false;
+    let isBossConanos = false;
 
 // Αν ο παίκτης είναι στο βάθος 100, ρίχνουμε ζάρι 1% (1 στις 100)
 if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenConanos) {
@@ -3679,8 +3825,6 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     // Ειδικό μήνυμα με κόκκινο glow στο log σου
     logMessage("Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΕΜΦΑΝΙΣΤΗΚΕ ΑΠΟ ΤΑ ΒΑΘΗ ΤΗΣ ΚΑΤΑΒΥΘΥΣΗΣ! ΠΡΟΣΚΥΝΗΣΤΕ!", 'konanos');
 } else {
-    // ΕΔΩ ΑΦΗΝΕΙΣ ΤΟΝ ΔΙΚΟ ΣΟΥ ΚΩΔΙΚΑ που φτιάχνει τα κανονικά τέρατα
-    // π.χ. monster.name = monsterNames[...];
 
 
     let lvl = currentSelectedLevel;
@@ -3688,18 +3832,53 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     let baseDef = lvl *0.75 + (lvl - 1) + (lvl/2 - 0.5);
     let baseHp = lvl * 100;
 
+    let areaType = getAreaType(lvl);
+
+    // Βασική πιθανότητα Legendary (1 στις 1000). RICH/POOR areas την επηρεάζουν,
+    // με δικούς της πολλαπλασιαστές ώστε να ρυθμίζεται ξεχωριστά από το specialChance.
+    let legendaryChance = 0.001;
+    const legendaryRichMultiplier = 1.25;  // πόσο πιο συχνά σε RICH areas
+    const legendaryPoorMultiplier = 0.65;  // πόσο πιο σπάνια σε POOR areas
+    if (areaType === AREA_TYPES.RICH) legendaryChance = legendaryChance * legendaryRichMultiplier;
+    else if (areaType === AREA_TYPES.POOR) legendaryChance = legendaryChance * legendaryPoorMultiplier;
+
+    const isLegendary = Math.random() < legendaryChance;
+
     let variant = 'normal';
     let firstName = '';
     let title = '';
+    let legendaryLootType = null;
+    let legendaryItemName = null;
 
-    let areaType = getAreaType(lvl);
-
-    // RICH/POOR αλλάζουν το βασικό chance εμφάνισης special τέρατος
+    // BASE RARE MONSTER CHANCE RICH/POOR αλλάζουν το βασικό chance εμφάνισης special τέρατος
     let specialChance = 0.17;
     if (areaType === AREA_TYPES.RICH) specialChance = specialChance * 1.25;
     else if (areaType === AREA_TYPES.POOR) specialChance = specialChance * 0.65;
 
-    if (Math.random() < specialChance) {
+    if (isLegendary) {
+
+    variant = 'legendary';
+
+    // Πρώτα αποφασίζουμε τον τύπο (33/33/33) - καθορίζει ΚΑΙ το χρώμα/λάμψη
+    // ΚΑΙ τι είδους αντικείμενο θα πέσει.
+    let lootRoll = Math.random();
+    legendaryLootType = lootRoll < 0.333 ? 'weapon' : (lootRoll < 0.666 ? 'armor' : 'magic');
+
+    // Μετά διαλέγουμε το ζευγάρι όνομα+αντικείμενο που ταιριάζει με τύπο & επίπεδο
+    const legendaryPair = getLegendaryMonster(lvl, legendaryLootType);
+    firstName = legendaryPair.name;
+    legendaryItemName = legendaryPair.itemName;
+
+    title = ""; // δεν χρειάζεται τίτλος στα legendary
+
+    // Στατιστικά ανάλογα με τον τύπο (βλ. legendaryStatsByType)
+    const legendaryStats = legendaryStatsByType[legendaryLootType];
+    baseAtk += legendaryStats.atkBonus;
+    baseDef += legendaryStats.defBonus;
+    baseHp = lvl * legendaryStats.hpMultiplier;
+
+}
+else if (Math.random() < specialChance) {
         firstName = randomFrom(monsterFirstNames);
 
         // WEAPON/ARMOR/MAGIC areas: extra 33% check να είναι ο "δικός" τους τύπος,
@@ -3747,14 +3926,17 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
         maxHp: baseHp,
         variant: variant,
         firstName: firstName,
-        title: title
+        title: title,
+        lootType: legendaryLootType,
+        lootItemName: legendaryItemName
     };
 
-
+// pros to paron den xrisimopoiountai. egine color coded
         let prefix = "";
         if (variant === 'weapon') prefix = "<Άγριο> ";
         if (variant === 'armor') prefix = "<Θωρακισμένο> ";
         if (variant === 'magic') prefix = "<Μαγικό> ";
+        if (variant === 'legendary') prefix = "<Θρυλικό> ";
 
     let monsterFullName = (variant === 'normal') ? monster.name : `${monster.firstName} ${monster.title}`;
     logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
@@ -4096,38 +4278,43 @@ if (isAttemptingRetreat) {
     }
 }
 
-function handleEquipmentDrop(type, rolledTier, forceSell = false) {
-    const isLegendary = Math.random() < 0.002; // legendary drop rate
-    
-    console.log("LEGENDARY?", isLegendary);
+function handleEquipmentDrop(type, rolledTier, monster, forceSell = false) {
+
+    const isLegendaryDrop = monster && monster.variant === 'legendary';
+        if (isLegendaryDrop) {
+            rolledTier = Math.min(125, rolledTier + 20);
+        }
+
+    console.log("LEGENDARY?", isLegendaryDrop);
     console.log("TIER BEFORE:", rolledTier);
 
-    if (isLegendary) {
-        rolledTier = Math.max(21, Math.min(rolledTier + 20, 120));
-    }
-
     // Πρώτα δημιουργούμε το itemName...
-    let itemName = isLegendary
-        ? getLegendaryItemName(type, rolledTier)
-        : getItemName(type, rolledTier);
+let itemName;
+
+if (isLegendaryDrop && monster.lootItemName) {
+    itemName = monster.lootItemName;
+} else {
+    itemName = getItemName(type, rolledTier);
+}
 
     // ...και ΜΕΤΑ μπορούμε να το χρησιμοποιήσουμε στο console.log!
     console.log("ITEM:", itemName);
 
     // Το popup πρέπει να εμφανίζεται ΜΟΝΟ αν είναι Legendary
-    if (isLegendary) {
+    if (isLegendaryDrop) {
         player.legendaryDrops++;
         showLegendaryPopup();
     }
 
     logMessage(`[DROP] Στον εχθρό βρέθηκε: ${itemName} (T${rolledTier})!`, 'victory');
+let finalType = type;
 
-    if (!forceSell && rolledTier > player[type].power) {
+    if (!forceSell && rolledTier > player[finalType].power) {
         let oldTier = player[type].power;
-        player[type] = {
+        player[finalType] = {
             name: itemName,
             power: rolledTier,
-            legendary: isLegendary
+            legendary: isLegendaryDrop
         };
         itemDropSound();
         logMessage(
@@ -4278,6 +4465,14 @@ function showLegendaryPopup() {
             let armorChance  = (monster.variant === 'armor') ? 1.00 : 0.000;
             let magicChance  = (monster.variant === 'magic') ? 1.00 : 0.000;
 
+            // Legendary: 100% drop, στον τύπο που ορίστηκε τυχαία στη γέννηση του τέρατος
+            if (monster.variant === 'legendary') {
+                const lootType = monster.lootType || 'weapon'; // ασφάλεια, δεν θα έπρεπε να χρειαστεί
+                weaponChance = (lootType === 'weapon') ? 1.00 : 0.000;
+                armorChance  = (lootType === 'armor') ? 1.00 : 0.000;
+                magicChance  = (lootType === 'magic') ? 1.00 : 0.000;
+            }
+
             
             let rolledPower = monster.level;
             let droppedSomething = false;
@@ -4299,9 +4494,9 @@ function showLegendaryPopup() {
             let levelCap = player.level + 100;
             let forceSell = rolledPower > levelCap;
 
-            if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower, forceSell);
-            if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower, forceSell);
-            if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, forceSell);
+            if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower, monster, forceSell);
+            if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower, monster, forceSell);
+            if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, monster, forceSell);
 
             if (droppedSomething) { triggerSmoothTransition('#3e3200'); }
 
