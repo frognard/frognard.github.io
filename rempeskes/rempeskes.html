@@ -1332,7 +1332,7 @@ function showStats() {
     logMessage(`Θάνατοι: ${player.ironman ? 'IRONMAN' : formatNumber(player.deaths)}`,"stats");
     logMessage(`Χρυσάφι που γλεντήθηκε: ${formatNumber(player.goldSpent)}`,"stats");
     logMessage(`Χρυσάφι που χάθηκε: ${formatNumber(player.goldLost)}`,"stats");
-    logMessage(`Κατανάλωση μπύρας: ${player.beersDrunk.toLocaleString()} λίτρα`,"stats");
+    logMessage(`Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`,"stats");
     logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
     logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
     
@@ -2127,10 +2127,12 @@ const monsterFirstNames = [
 "Καφά-Καφάλ",
 "Ατάβαρ",
 "Ατατάρ",
+"Αλαλάρ",
+"Βερσιμεχέτ",
 "Θαρθαραώρ",
 "Τόλογκ",
 "Μύρκαλ",
-"Θαλ",
+"Θουλμ",
 "Καχούρ",
 "Σούουρ",
 "Ερλίκ",
@@ -2149,7 +2151,7 @@ const monsterFirstNames = [
 "Καβέκαρ",
 "Γκόρο",
 "Ενκίντου",
-"Κραθ",
+"Κράθα",
 "Κοσχάι",
 "Μαρντούκ",
 "Χάττα",
@@ -2160,13 +2162,13 @@ const monsterFirstNames = [
 "Ούντορ",
 "Μπέξα",
 "Ουράρτα",
-"Αράξ",
+"Καλέντζο",
 "Πίσκε",
 "Σάγια",
 "Λουρ",
-"Μορ",
+"Υξηξίξ",
 "Γκρίσναχ",
-"Βρομ",
+"Ωλφαμπόγκ",
 "Γκορ",
 "Ουλμ",
 "Βωλχ",
