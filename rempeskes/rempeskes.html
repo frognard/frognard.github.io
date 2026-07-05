@@ -1350,9 +1350,11 @@ function showIronmanHighscores() {
 
     logMessage("");
     logMessage("ΨΟΦΟΛΟΓΙΟN", "psof");
-    
+                
+        logMessage(``);
     if (scores.length === 0) {
         logMessage("Δεν υπάρχουν ακόμα νεκροί Ironmen.", "psof");
+        logMessage("");
     } else {
         scores.forEach(s => {
             // Μετατροπή της ημερομηνίας σε μορφή ΗΗ/ΜΜ/ΕΕΕΕ
@@ -1364,13 +1366,11 @@ function showIronmanHighscores() {
            
           });
 
-        if (typeof syncIronmanRecordsToCloud === 'function') {
-             logMessageHTML(`Μέγα Ψοφολόγιον: <a href="https://frognard.github.io/rempeskes/psofologio.html" style="color: #0099ff; text-decoration: underline;">https://frognard.github.io/rempeskes/psofologio.html</a>`, "psof");
+    }
+         logMessageHTML(`Μέγα Ψοφολόγιον: <a href="https://frognard.github.io/rempeskes/psofologio.html" style="color: #0099ff; text-decoration: underline;">https://frognard.github.io/rempeskes/psofologio.html</a>`, "psof");
     logMessageHTML(`<a href="#" onclick="uploadPsofologioToCloud(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε Μέγα Ψοφολόγιο</a>`,
         "psof");
-        logMessage(``);
-}
-    }
+
 }
 
 
