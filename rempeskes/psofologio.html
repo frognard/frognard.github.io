@@ -29,8 +29,8 @@
             repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px);
         color: var(--parchment);
         font-family: 'PT Serif', serif;
-        font-size: 16px;
-        line-height: 1.55;
+        font-size: 18px; /* Αυξήθηκε από 16px */
+        line-height: 1.6;  /* Αυξήθηκε ελαφρώς για καλύτερη ροή */
         display: flex;
         justify-content: center;
         padding: 40px 16px 80px;
@@ -38,7 +38,7 @@
 
     #book {
         width: 100%;
-        max-width: 620px;
+        max-width: 680px; /* Αυξήθηκε ελαφρώς για να χωράει τα μεγαλύτερα γράμματα */
     }
 
     header {
@@ -50,14 +50,14 @@
 
     header .eyebrow {
         letter-spacing: 4px;
-        font-size: 0.65rem;
+        font-size: 0.75rem; /* Αυξήθηκε από 0.65rem */
         color: var(--parchment-dim);
         text-transform: uppercase;
     }
 
     header h1 {
         font-family: 'Old Standard TT', serif;
-        font-size: 2.6rem;
+        font-size: 3rem; /* Αυξήθηκε από 2.6rem */
         letter-spacing: 3px;
         margin: 6px 0 2px;
         color: var(--brass);
@@ -68,7 +68,7 @@
         font-style: italic;
         color: var(--parchment-dim);
         margin: 0;
-        font-size: 0.85rem;
+        font-size: 0.95rem; /* Αυξήθηκε από 0.85rem */
     }
 
     #tally {
@@ -76,14 +76,14 @@
         justify-content: center;
         gap: 28px;
         margin: 20px 0 30px;
-        font-size: 0.8rem;
+        font-size: 0.9rem; /* Αυξήθηκε από 0.8rem */
         color: var(--parchment-dim);
     }
 
     #tally strong {
         display: block;
         font-family: 'Old Standard TT', serif;
-        font-size: 1.6rem;
+        font-size: 1.8rem; /* Αυξήθηκε από 1.6rem */
         color: var(--brass);
     }
 
@@ -91,7 +91,7 @@
 
     .entry {
         position: relative;
-        padding: 16px 14px 16px 54px;
+        padding: 18px 14px 18px 60px; /* Προσαρμογή padding για τα μεγαλύτερα στοιχεία */
         border-bottom: 1px solid var(--ledger-line);
     }
 
@@ -100,14 +100,14 @@
     .rank-badge {
         position: absolute;
         left: 10px;
-        top: 16px;
-        width: 32px;
-        height: 32px;
+        top: 18px;
+        width: 36px;  /* Αυξήθηκε από 32px */
+        height: 36px; /* Αυξήθηκε από 32px */
         border-radius: 50%;
         background: var(--wine);
         color: var(--parchment);
         font-family: 'Old Standard TT', serif;
-        font-size: 0.95rem;
+        font-size: 1.05rem; /* Αυξήθηκε από 0.95rem */
         display: flex;
         align-items: center;
         justify-content: center;
@@ -115,26 +115,27 @@
     }
 
     .entry .line1 {
-        font-size: 1rem;
+        font-size: 1.1rem; /* Αυξήθηκε από 1rem */
         color: var(--parchment);
     }
 
     .entry .name {
         font-family: 'Old Standard TT', serif;
-        font-size: 1.25rem;
+        font-size: 1.4rem; /* Αυξήθηκε από 1.25rem */
         color: var(--brass);
         letter-spacing: 0.5px;
     }
 
     .entry .line2 {
-        font-size: 0.78rem;
+        font-size: 0.95rem; /* Σημαντική αύξηση από 0.78rem για τις λεπτομέρειες */
         color: var(--parchment-dim);
-        margin-top: 4px;
+        margin-top: 6px;
+        line-height: 1.5;
     }
 
     .entry .gear {
         color: var(--parchment-dim);
-        font-size: 0.75rem;
+        font-size: 0.85rem; /* Αυξήθηκε από 0.75rem */
     }
 
     #empty, #err {
@@ -142,19 +143,20 @@
         color: var(--parchment-dim);
         font-style: italic;
         padding: 40px 10px;
+        font-size: 1.1rem;
     }
 
     footer {
         text-align: center;
-        margin-top: 30px;
-        font-size: 0.68rem;
+        margin-top: 40px;
+        font-size: 0.75rem; /* Αυξήθηκε από 0.68rem */
         color: var(--ledger-line);
         letter-spacing: 1px;
     }
 
     @media (max-width: 420px) {
-        header h1 { font-size: 2.1rem; }
-        .entry { padding-left: 46px; }
+        header h1 { font-size: 2.4rem; }
+        .entry { padding-left: 54px; }
     }
 </style>
 </head>
@@ -258,7 +260,7 @@ async function load() {
                 <div class="line2">
                     Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)} &middot; ${formattedDate}
                     <br>
-                    <span class="gear">εξοπλισμός: όπλο T${s.weapon} / πανοπλία T${s.armor} / φυλαχτό T${s.magic}</span>
+                    <span class="gear">εξοπλισμός: ${s.weapon} / ${s.armor} / ${s.magic}</span>
                 </div>
             </div>
         `;
