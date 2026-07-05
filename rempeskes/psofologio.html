@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ψοφολόγιο — Ρεμπεσκές</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #120e0a;
+        --ledger: #1b160f;
+        --ledger-line: #35291a;
+        --parchment: #d9c9a0;
+        --parchment-dim: #9c8c6a;
+        --brass: #c9a227;
+        --wine: #7c2430;
+        --wine-bright: #a8394a;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+            radial-gradient(ellipse at top, #201911 0%, var(--bg) 55%),
+            repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px);
+        color: var(--parchment);
+        font-family: 'Special Elite', monospace;
+        display: flex;
+        justify-content: center;
+        padding: 40px 16px 80px;
+    }
+
+    #book {
+        width: 100%;
+        max-width: 620px;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 8px;
+        border-bottom: 1px double var(--ledger-line);
+        padding-bottom: 18px;
+    }
+
+    header .eyebrow {
+        letter-spacing: 4px;
+        font-size: 0.65rem;
+        color: var(--parchment-dim);
+        text-transform: uppercase;
+    }
+
+    header h1 {
+        font-family: 'IM Fell English SC', serif;
+        font-size: 2.6rem;
+        letter-spacing: 3px;
+        margin: 6px 0 2px;
+        color: var(--brass);
+        text-shadow: 0 0 18px rgba(201,162,39,0.25);
+    }
+
+    header p.sub {
+        font-style: italic;
+        color: var(--parchment-dim);
+        margin: 0;
+        font-size: 0.85rem;
+    }
+
+    #tally {
+        display: flex;
+        justify-content: center;
+        gap: 28px;
+        margin: 20px 0 30px;
+        font-size: 0.8rem;
+        color: var(--parchment-dim);
+    }
+
+    #tally strong {
+        display: block;
+        font-family: 'IM Fell English SC', serif;
+        font-size: 1.6rem;
+        color: var(--brass);
+    }
+
+    #entries { display: flex; flex-direction: column; gap: 0; }
+
+    .entry {
+        position: relative;
+        padding: 16px 14px 16px 54px;
+        border-bottom: 1px solid var(--ledger-line);
+    }
+
+    .entry:first-child .rank-badge { background: var(--wine-bright); }
+
+    .rank-badge {
+        position: absolute;
+        left: 10px;
+        top: 16px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--wine);
+        color: var(--parchment);
+        font-family: 'IM Fell English SC', serif;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(0,0,0,0.4);
+    }
+
+    .entry .line1 {
+        font-size: 1rem;
+        color: var(--parchment);
+    }
+
+    .entry .name {
+        font-family: 'IM Fell English SC', serif;
+        font-size: 1.25rem;
+        color: var(--brass);
+        letter-spacing: 0.5px;
+    }
+
+    .entry .line2 {
+        font-size: 0.78rem;
+        color: var(--parchment-dim);
+        margin-top: 4px;
+    }
+
+    .entry .gear {
+        color: var(--parchment-dim);
+        font-size: 0.75rem;
+    }
+
+    #empty, #err {
+        text-align: center;
+        color: var(--parchment-dim);
+        font-style: italic;
+        padding: 40px 10px;
+    }
+
+    footer {
+        text-align: center;
+        margin-top: 30px;
+        font-size: 0.68rem;
+        color: var(--ledger-line);
+        letter-spacing: 1px;
+    }
+
+    @media (max-width: 420px) {
+        header h1 { font-size: 2.1rem; }
+        .entry { padding-left: 46px; }
+    }
+</style>
+</head>
+<body>
+
+<div id="book">
+    <header>
+        <div class="eyebrow">Ο Τεκές του Ζαλαδούρα</div>
+        <h1>Ψοφολόγιο</h1>
+        <p class="sub">Κατάστιχο των Ironmen που δεν γύρισαν</p>
+    </header>
+
+    <div id="tally"></div>
+    <div id="entries"></div>
+    <div id="empty" style="display:none;">Το κατάστιχο είναι άδειο... ακόμα κανείς δεν ψόφησε.</div>
+    <div id="err" style="display:none;">Δεν κατάφερα να διαβάσω το κατάστιχο αυτή τη στιγμή.</div>
+
+    <footer>ΡΕΜΠΕΣΚΕΣ &middot; ενημερώνεται ζωντανά από το online ψοφολόγιο</footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = "https://khdovgrolpyblnymfoty.supabase.co";
+const SUPABASE_KEY = "sb_publishable_GZ8VgQ9QFWRs-PKwQjByrQ_4dRFSDne";
+
+const depthNames = [
+    "[1] Συντρίμμια", "[2] Γκρεμισμένα Προπύλαια", "[3] Ο Κοβαλώνας", "[4] Καταφύγιο", "[5] Πλημμυρισμένη Στοά",
+    "[6] Το Άσυλο", "[7] Θάλαμοι", "[8] Μνημούρια", "[9] Σφηκοφωλιές", "[10] Λημέρι του Τελώνη",
+    "[11] Άντρο του Δερβίση", "[12] Περάσματα", "[13] Κρησφύγετο", "[14] Σμερδότρυπες", "[15] Μεγασπήλαιον",
+    "[16] Λασπομέρος", "[17] Κυνοτροφείο", "[18] Μνημούρια", "[19] Οφεώνας", "[20] Λαγούμια",
+    "[21] Υπόνομος", "[22] Βάραθρο", "[23] Δρασκέλα", "[24] Μπουγαροφωλιές", "[25] Ερπετοθάλαμοι",
+    "[26] Φιδοσπηλιά", "[27] Αρουρίδα", "[28] Υπόγειο Ρέμα", "[29] Μαύρο Χάσμα", "[30] Κατσαριδοφωλιές",
+    "[31] Κατακόμβες", "[32] Ιερατείο", "[33] Σκουλκατόριο", "[34] Σπουδαστήριο", "[35] Σκορποχώρι",
+    "[36] Σαρκοφάγοι", "[37] Ογριανή", "[38] Τάφοι των Ξωτικών", "[39] Κελιά", "[40] Μολυσμένες Κρύπτες",
+    "[41] Η Λεωφόρος", "[42] Φενακίδα", "[43] Φρουραρχείο", "[44] Σταυροδρόμια", "[45] Μεδουσιανή",
+    "[46] Βουκολέων", "[47] Μαύρη Αλέα", "[48] Αγορά των Νεκρών", "[49] Φθαρμένες Αψίδες", "[50] Μαύρο Παλάτι",
+    "[51] Καταβόθρες", "[52] Περάσματα", "[53] Αδιέξοδα", "[54] Υποβρύχιοι Διάδρομοι", "[55] Μουσείο",
+    "[56] Κήπος Αγαλμάτων", "[57] Αρένα", "[58] Παγίδες", "[59] Κέντακλο", "[60] Καθρέφτες",
+    "[61] Στοά του Δούκα", "[62] Εκκλησίασμα", "[63] Μαύρη Πύλη", "[64] Πυραμίδα", "[65] Άδυτον",
+    "[66] Βεστιάριο", "[67] Εικονοστάσια", "[68] Μαύρο Ιερό", "[69] Τύμβος των Οστών", "[70] Ναός των Οστών",
+    "[71] Βασαλτική Πύλη", "[72] Ο Θόλος της Στρίγγλας", "[73] Δρακοντική Αυλή", "[74] Βασαλτική Αψίδα", "[75] Στοά του Ιφρίτη",
+    "[76] Αβυσσάλειο", "[77] Μέγα Παλάτιο", "[78] Βασαλτική Πόλη", "[79] Εχιδναϊκή Λεωφόρος", "[80] Μεταλλουργείο",
+    "[81] Πύλες της Νερτερίας", "[82] Αχέρων", "[83] Κωκυτός", "[84] Φλεγέθων", "[85] Στυξ",
+    "[86] Λήθη", "[87] Νερτέρα Χθων", "[88] Χαρόντειο Μέλαθρον", "[89] Πύλη της Αβύσσου", "[90] Άβυσσος",
+    "[91] Καταβύθιση", "[92] Αχρονα Πεδία", "[93] Παγωμένη Άβυσσος", "[94] Πυρωμένη Άβυσσος", "[95] Εξώτερος Πυρήν",
+    "[96] Εσώτερος Πυρήν", "[97] Κόλαση", "[98] Αληθής Κόλαση", "[99] Εκτυφλωτικά Πεδία", "[100] Προγενής Γνόφος"
+];
+
+function depthLabel(d) {
+    return depthNames[d - 1] || `Βάθος ${d}`;
+}
+
+function romanish(n) {
+    return `${n}`;
+}
+
+async function load() {
+    const entriesEl = document.getElementById('entries');
+    const tallyEl = document.getElementById('tally');
+    const emptyEl = document.getElementById('empty');
+    const errEl = document.getElementById('err');
+
+    let client;
+    try {
+        client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch (e) {
+        errEl.style.display = 'block';
+        return;
+    }
+
+    const { data, error } = await client
+        .from('ironman_deaths')
+        .select('*')
+        .order('level', { ascending: false })
+        .order('death_date', { ascending: false });
+
+    if (error) {
+        console.error(error);
+        errEl.style.display = 'block';
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        emptyEl.style.display = 'block';
+        return;
+    }
+
+    const topLevel = data[0].level;
+    tallyEl.innerHTML = `
+        <div><strong>${data.length}</strong>νεκροί</div>
+        <div><strong>${topLevel}</strong>ανώτερο επίπεδο</div>
+    `;
+
+    entriesEl.innerHTML = data.map((s, i) => {
+        const d = new Date(s.death_date);
+        const formattedDate = d.toLocaleDateString('el-GR');
+        return `
+            <div class="entry">
+                <div class="rank-badge">${romanish(i + 1)}</div>
+                <div class="line1"><span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level}</div>
+                <div class="line2">
+                    Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)} &middot; ${formattedDate}
+                    <br>
+                    <span class="gear">εξοπλισμός: όπλο T${s.weapon} / πανοπλία T${s.armor} / φυλαχτό T${s.magic}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str ?? '';
+    return div.innerHTML;
+}
+
+load();
+</script>
+</body>
+</html>
