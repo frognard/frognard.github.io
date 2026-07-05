@@ -138,6 +138,41 @@
         font-size: 0.85rem; /* Αυξήθηκε από 0.75rem */
     }
 
+    .entry.victory {
+        background: linear-gradient(90deg, rgba(201,162,39,0.10), transparent 70%);
+        border-bottom: 1px solid var(--brass);
+    }
+
+    .entry.victory .rank-badge {
+        background: var(--brass);
+        color: #1b160f;
+        box-shadow: 0 0 10px rgba(201,162,39,0.6);
+    }
+
+    .entry.victory .name {
+        color: var(--brass);
+        text-shadow: 0 0 8px rgba(201,162,39,0.6);
+    }
+
+    .entry.victory .line1::after {
+        content: " ★ ΘΕΟΣΦΑΧΤΗΣ";
+        color: var(--brass);
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
+
+    #victors-heading {
+        text-align: center;
+        font-family: 'Old Standard TT', serif;
+        color: var(--brass);
+        letter-spacing: 2px;
+        margin: 30px 0 10px;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        border-bottom: 1px double var(--ledger-line);
+        padding-bottom: 8px;
+    }
+
     #empty, #err {
         text-align: center;
         color: var(--parchment-dim);
@@ -244,27 +279,48 @@ async function load() {
         return;
     }
 
+    const victors = data.filter(s => s.victory);
+    const deaths = data.filter(s => !s.victory);
+
     const topLevel = data[0].level;
     tallyEl.innerHTML = `
-        <div><strong>${data.length}</strong>νεκροί</div>
+        <div><strong>${deaths.length}</strong>νεκροί</div>
+        <div><strong>${victors.length}</strong>θεοσφάχτες</div>
         <div><strong>${topLevel}</strong>ανώτερο επίπεδο</div>
     `;
 
-    entriesEl.innerHTML = data.map((s, i) => {
+    function renderEntry(s, i, isVictory) {
         const d = new Date(s.death_date);
         const formattedDate = d.toLocaleDateString('el-GR');
+        const detailLine = isVictory
+            ? `Νίκησε τον <em>${escapeHtml(s.killer)}</em> στο ${escapeHtml(depthLabel(s.depth))} &middot; ${formattedDate}`
+            : `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)} &middot; ${formattedDate}`;
         return `
-            <div class="entry">
+            <div class="entry${isVictory ? ' victory' : ''}">
                 <div class="rank-badge">${romanish(i + 1)}</div>
                 <div class="line1"><span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level}</div>
                 <div class="line2">
-                    Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)} &middot; ${formattedDate}
+                    ${detailLine}
                     <br>
                     <span class="gear">εξοπλισμός: ${s.weapon} / ${s.armor} / ${s.magic}</span>
                 </div>
             </div>
         `;
-    }).join('');
+    }
+
+    let html = '';
+    if (victors.length > 0) {
+        html += `<div id="victors-heading">Θεοσφάχτες</div>`;
+        html += victors.map((s, i) => renderEntry(s, i, true)).join('');
+    }
+    if (deaths.length > 0) {
+        if (victors.length > 0) {
+            html += `<div id="victors-heading">Ψοφολόγιον</div>`;
+        }
+        html += deaths.map((s, i) => renderEntry(s, i, false)).join('');
+    }
+
+    entriesEl.innerHTML = html;
 }
 
 function escapeHtml(str) {
