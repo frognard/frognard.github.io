@@ -1338,6 +1338,13 @@ function showStats() {
     
 }
 
+function uploadPsofologioToCloud() {
+    const scores = getIronmanHighscores();
+    if (typeof syncIronmanRecordsToCloud === 'function') {
+        syncIronmanRecordsToCloud(scores);
+    }
+}
+
 function showIronmanHighscores() {
     const scores = getIronmanHighscores();
 
@@ -1353,7 +1360,16 @@ function showIronmanHighscores() {
             
             logMessage(`${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1]}, από ${s.killer} [${formattedDate}]`, "psof");
             logMessage(``);
-        });
+           
+           
+          });
+
+        if (typeof syncIronmanRecordsToCloud === 'function') {
+             logMessageHTML(`Μέγα Ψοφολόγιον: <a href="https://frognard.github.io/rempeskes/psofologio.html" style="color: #0099ff; text-decoration: underline;">https://frognard.github.io/rempeskes/psofologio.html</a>`, "psof");
+    logMessageHTML(`<a href="#" onclick="uploadPsofologioToCloud(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε Μέγα Ψοφολόγιο</a>`,
+        "psof");
+        logMessage(``);
+}
     }
 }
 
@@ -3606,9 +3622,24 @@ function logMessage(text, type = 'system') {
     logDiv.scrollTop = logDiv.scrollHeight;
 }
 
+function logMessageHTML(html, type = 'system') {
+    const logDiv = document.getElementById('log');
+    const entry = document.createElement('div');
+    entry.className = `log-entry log-${type}`;
+    entry.innerHTML = html;
+
+    logDiv.append(entry);
+
+    while (logDiv.children.length > 1000) {
+        logDiv.removeChild(logDiv.firstChild);
+    }
+
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+
+
     function showRules() {
-    
-    
     
     logMessage("");
     logMessage("ΡΕΜΠΕΣΚΕΣ", "help");
@@ -4889,6 +4920,58 @@ if (
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js');
 }
+</script>
+
+<!-- Supabase sync tou Psofologiou (siwpila, sto background) -->
+<!-- Supabase sync tou Psofologiou (ginetai MONO otan to zitisei o paiktis, patontas Ψ) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+(function () {
+    const SUPABASE_URL = "https://khdovgrolpyblnymfoty.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_GZ8VgQ9QFWRs-PKwQjByrQ_4dRFSDne";
+
+    let sbClient = null;
+    try {
+        sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch (e) {
+        console.error('Supabase init failed (psofologio sync off):', e);
+    }
+
+    // Anevazei OLES tis kataxwriseis tou topikou psofologiou sto online database.
+    // An kapoia yparxei idi (idio name/level/depth/killer/weapon/armor/magic/date),
+    // ginetai overwrite (upsert) anti gia diplotypo.
+    window.syncIronmanRecordsToCloud = function (records) {
+        if (!sbClient || !records || records.length === 0) return;
+
+        const rows = records.map(r => ({
+            name: r.name,
+            level: r.level,
+            depth: r.depth,
+            killer: r.killer,
+            weapon: r.weapon,
+            armor: r.armor,
+            magic: r.magic,
+            death_date: new Date(r.date).toISOString()
+        }));
+
+        try {
+            sbClient
+                .from('ironman_deaths')
+                .upsert(rows, { onConflict: 'name,level,depth,killer,weapon,armor,magic,death_date' })
+                .then(({ error }) => {
+                    if (error) {
+                        console.error('Psofologio cloud sync error:', error);
+                        logMessage("Απέτυχε η αποστολή στο online Ψοφολόγιο.", 'system');
+                    } else {
+                        logMessage("Το Ψοφολόγιο ανέβηκε στο online database.", 'system');
+                    }
+                });
+        } catch (e) {
+            console.error('Psofologio cloud sync exception:', e);
+            logMessage("Απέτυχε η αποστολή στο online Ψοφολόγιο.", 'system');
+        }
+    };
+})();
 </script>
 
 <div id="legendary-popup" class="legendary-popup hidden">
