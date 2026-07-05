@@ -2558,7 +2558,7 @@ const zaladouras = [
 // hpMultiplier πολλαπλασιάζεται με το επίπεδο (lvl * hpMultiplier) για να βγει το HP.
 const legendaryStatsByType = {
     weapon: { atkBonus: 15, defBonus: 0,  hpMultiplier: 120 }, // κόκκινα: επιθετικά, λιγότερη ζωή
-    armor:  { atkBonus: 0,  defBonus: 12, hpMultiplier: 120 }, // μπλε: αμυντικά, πολλή ζωή
+    armor:  { atkBonus: 0,  defBonus: 15, hpMultiplier: 120 }, // μπλε: αμυντικά, πολλή ζωή
     magic:  { atkBonus: 7.5, defBonus: 7.5, hpMultiplier: 120 }  // μωβ: ισορροπημένα
 };
 
@@ -2885,9 +2885,9 @@ const AREA_TYPE_COLOR = {
     
  //XP REWARD FORMULA
     function getMonsterXpReward(monsterLvl) { 
-    let difficultyModifier = calculateDifficulty(player, monster);
-    
-    // experimental
+   
+   // experimental
+//    let difficultyModifier = calculateDifficulty(player, monster);
  // let xp = 10 * Math.pow(monsterLvl, 2) * (difficultyModifier+0.12 );
     let xp = 10 * Math.pow(monsterLvl, 2);
 
@@ -4000,7 +4000,7 @@ else if (Math.random() < specialChance) {
         }
         else if (chosenVariant === 'armor') {
             variant = 'armor';
-            baseDef += 10;
+            baseDef += 12;
             baseHp = lvl * 100;
             title = randomFrom(armoredTitles);
         }
@@ -4578,9 +4578,9 @@ function showLegendaryPopup() {
             logMessage(`+${formatNumber(gainedGold)} GP`, 'victory');
             createFloatingText('stat-gold-box', `+${formatNumber(gainedGold)}g`, "var(--accent-gold)");
 
-        //ta variants me o dynamic difficulty system den pairnoun perissotera edw - pairnoun apo to diff
+        //ta variants me o dynamic difficulty system den pairnoun perissotera edw - pairnoun apo to diff - ektos an einai kleisto to dynamic
             let gainedXp = getMonsterXpReward(monster.level) *
-               (monster.variant !== 'normal' ? 1 : 1);
+               (monster.variant !== 'normal' ? 1.5 : 1);
             player.xp += gainedXp;
             sessionXp += gainedXp;
             logMessage(`+${formatNumber(gainedXp)} XP`, 'victory');
