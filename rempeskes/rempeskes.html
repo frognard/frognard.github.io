@@ -2559,7 +2559,7 @@ const zaladouras = [
 const legendaryStatsByType = {
     weapon: { atkBonus: 15, defBonus: 0,  hpMultiplier: 120 }, // κόκκινα: επιθετικά, λιγότερη ζωή
     armor:  { atkBonus: 0,  defBonus: 12, hpMultiplier: 120 }, // μπλε: αμυντικά, πολλή ζωή
-    magic:  { atkBonus: 7, defBonus: 7, hpMultiplier: 120 }  // μωβ: ισορροπημένα
+    magic:  { atkBonus: 7.5, defBonus: 7.5, hpMultiplier: 120 }  // μωβ: ισορροπημένα
 };
 
 const legendaryMonstersByType = {
@@ -3975,8 +3975,8 @@ else if (Math.random() < specialChance) {
         }
         else {
             variant = 'magic';
-            baseAtk += 5;
-            baseDef += 5;
+            baseAtk += 5.5;
+            baseDef += 5.5;
             baseHp = lvl * 100;
             title = randomFrom(magicTitles);
         }
