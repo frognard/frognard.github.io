@@ -528,6 +528,7 @@
         .log-help { color: #439439; }
         .log-stats { color: #5680ce; font-weight: bold;}
         .log-psof { color: #9b69b3; font-weight: bold;}
+        .log-psof-victory { color: var(--accent-gold); font-weight: bold; text-shadow: 0 0 6px rgba(255,215,0,0.5); }
         .log-monster { color: #f1948a; }
         .log-system { color: #95a5a6; }
         .log-bright {color: #ffffff}
@@ -1099,10 +1100,11 @@ body {
 <div id="ironman-modal" class="hidden ironman-modal-overlay">
     <div class="ironman-modal-box">
         <p>Όνομα χαρακτήρα:</p>
-        <input type="text" id="char-name-input" placeholder="Ρεμπεσκές" enterkeyhint="go"
+        <input type="text" id="char-name-input" placeholder="Όνομα ρεμπεσκέ" enterkeyhint="go"
                onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmCharacterCreation();}"
                style="width: 100%; padding: 6px; margin-bottom: 14px; background: #1a1a1a; color: #fff; border: 1px solid var(--accent-gold); border-radius: 4px;">
-        <label style="display: block; margin-bottom: 18px; cursor: pointer;">
+        <p id="char-name-error" class="hidden" style="color:#e74c3c; font-size:0.85rem; margin: 0 0 10px;">Πρέπει να δώσεις ένα όνομα.</p>
+               <label style="display: block; margin-bottom: 18px; cursor: pointer;">
             <input type="checkbox" id="ironman-checkbox">
             Ironman mode (αν πεθάνεις, ο χαρακτήρας κλειδώνει οριστικά)
         </label>
@@ -1359,8 +1361,12 @@ function showIronmanHighscores() {
         scores.forEach(s => {
             // Μετατροπή της ημερομηνίας σε μορφή ΗΗ/ΜΜ/ΕΕΕΕ
             const formattedDate = new Date(s.date).toLocaleDateString('el-GR');
-            
-            logMessage(`${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1]}, από ${s.killer} [${formattedDate}]`, "psof");
+
+            if (s.victory) {
+                logMessage(`★ ${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)} και έγινε ΘΕΟΣΦΑΧΤΗΣ! [${formattedDate}]`, "psof-victory");
+            } else {
+                logMessage(`${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer} [${formattedDate}]`, "psof");
+            }
             logMessage(``);
            
            
@@ -2361,7 +2367,7 @@ const tekeSongs = [
 "Βάλτε μου δυο καναβουριές",
 "Το χαρέμι στο χαμάμ",
 "Μάγισσα της αραπιάς",
-"Δυο χασικλήφρε πιάσανε",
+"Δυο χασικλήδες πιάσανε",
 "Εφουμάραμ' ένα βράδυ",
 "Εγώ μάγκας φαινόμουνα",
 "Ο μάγκας του Βοτανικού",
@@ -2498,7 +2504,7 @@ const depthNames = [
     "[76] Αβυσσάλειο", "[77] Μέγα Παλάτιο", "[78] Βασαλτική Πόλη", "[79] Εχιδναϊκή Λεωφόρος", "[80] Μεταλλουργείο",
     "[81] Πύλες της Νερτερίας", "[82] Αχέρων", "[83] Κωκυτός", "[84] Φλεγέθων", "[85] Στυξ",
     "[86] Λήθη", "[87] Νερτέρα Χθων", "[88] Χαρόντειο Μέλαθρον", "[89] Πύλη της Αβύσσου", "[90] Άβυσσος",
-    "[91] Καταβύθιση", "[92] Αχρονα Πεδία", "[93] Παγωμένη Άβυσσος", "[94] Πυρωμένη Άβυσσος", "[95] Εξώτερος Πυρήν",
+    "[91] Καταβύθιση", "[92] Άχρονα Πεδία", "[93] Παγωμένη Άβυσσος", "[94] Πυρωμένη Άβυσσος", "[95] Εξώτερος Πυρήν",
     "[96] Εσώτερος Πυρήν", "[97] Κόλαση", "[98] Αληθής Κόλαση", "[99] Εκτυφλωτικά Πεδία", "[100] Προγενής Γνόφος"
 ];
 
@@ -3117,10 +3123,20 @@ function saveIronmanHighscore(record) {
 }
 
 function confirmCharacterCreation() {
+    const nameInput = document.getElementById('char-name-input');
+    const errorEl = document.getElementById('char-name-error');
+    let chosenName = nameInput.value.trim();
+
+    if (!chosenName) {
+        errorEl.classList.remove('hidden');
+        nameInput.focus();
+        return;
+    }
+    errorEl.classList.add('hidden');
+
     document.getElementById('ironman-modal').classList.add('hidden');
 
-    let chosenName = document.getElementById('char-name-input').value.trim();
-    if (chosenName) player.name = chosenName;
+    player.name = chosenName;
 
     player.ironman = document.getElementById('ironman-checkbox').checked;
     if (player.ironman) {
@@ -3804,6 +3820,10 @@ function updateCooldownBars() {
         logMessage("Ο Ironman χαρακτήρας έχει πεθάνει. Δεν μπορείς να ξαναμπείς στο λαβύρινθο.", 'system');
         return; }
     //   resetRates(); // μηδενισμός XP/m και GP/m
+    if (player.hasBeatenConanos) {
+    logMessage("Είσαι ήδη ΘΕΟΣΦΑΧΤΗΣ. Η δόξα σου είναι γραμμένη στην ιστορία — δεν χρειάζεται να ξαναμπείς στο λαβύρινθο!", 'system');
+    return; }       
+
     document.getElementById('p-name').blur();
     stopTownRegen(); 
     currentSelectedLevel = parseFloat(document.getElementById('area-selector').value);
@@ -4463,6 +4483,21 @@ function showLegendaryPopup() {
                 player.hasBeatenConanos = true;
                 
                // logMessage(`Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΠΕΘΑΝΕ! Το παιχνίδι νικήθηκε! Αιώνια δόξα στον ${player.name}! Απο δω και πέρα θα είναι γνωστός ως ΘΕΟΣΦΑΧΤΗΣ.`, 'victory');
+
+                // --- Καταχώρηση της ΝΙΚΗΣ στο Ψοφολόγιο (μόνο για Ironman, ίδια διαδικασία με τους θανάτους) ---
+                if (player.ironman) {
+                    saveIronmanHighscore({
+                        name: player.name,
+                        level: player.level,
+                        depth: currentSelectedLevel,
+                        killer: "Θεός Κόνανος",
+                        weapon: player.weapon.power,
+                        armor: player.armor.power,
+                        magic: player.magic.power,
+                        date: Date.now(),
+                        victory: true
+                    });
+                }
                 
                 if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
                 inCombat = false;
@@ -4951,7 +4986,8 @@ if ('serviceWorker' in navigator) {
             weapon: r.weapon,
             armor: r.armor,
             magic: r.magic,
-            death_date: new Date(r.date).toISOString()
+            death_date: new Date(r.date).toISOString(),
+            victory: !!r.victory
         }));
 
         try {
