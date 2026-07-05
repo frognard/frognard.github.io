@@ -1348,11 +1348,13 @@ function showIronmanHighscores() {
         logMessage("Δεν υπάρχουν ακόμα νεκροί Ironmen.", "psof");
     } else {
         scores.forEach(s => {
-            logMessage(`${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1]}, από: ${s.killer}.`, "psof");
+            // Μετατροπή της ημερομηνίας σε μορφή ΗΗ/ΜΜ/ΕΕΕΕ
+            const formattedDate = new Date(s.date).toLocaleDateString('el-GR');
+            
+            logMessage(`${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1]}, από ${s.killer} [${formattedDate}]`, "psof");
+            logMessage(``);
         });
     }
-
-    
 }
 
 
@@ -3826,8 +3828,8 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
         level: 110,
         hp: 16666,       // Βάλε όση ζωή θες για να είναι ζόρικος
         maxHp: 16666,
-        atk: 230,     // Δυνατό χτύπημα
-        def: 230,    // Σκληρή άμυνα
+        atk: 246,     // Δυνατό χτύπημα
+        def: 246,    // Σκληρή άμυνα
         isBoss: true,
         firstName: '',
         title: '',
@@ -4671,7 +4673,8 @@ function applyDefeatPenalties() {
             killer: killerName,
             weapon: player.weapon.power,
             armor: player.armor.power,
-            magic: player.magic.power
+            magic: player.magic.power,
+            date: Date.now()
         });
     }
 
