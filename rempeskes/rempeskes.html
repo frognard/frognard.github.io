@@ -2557,8 +2557,8 @@ const zaladouras = [
 // atkBonus/defBonus προστίθενται πάνω στο κανονικό atk/def του επιπέδου.
 // hpMultiplier πολλαπλασιάζεται με το επίπεδο (lvl * hpMultiplier) για να βγει το HP.
 const legendaryStatsByType = {
-    weapon: { atkBonus: 13, defBonus: 0,  hpMultiplier: 120 }, // κόκκινα: επιθετικά, λιγότερη ζωή
-    armor:  { atkBonus: 0,  defBonus: 17, hpMultiplier: 120 }, // μπλε: αμυντικά, πολλή ζωή
+    weapon: { atkBonus: 15, defBonus: 0,  hpMultiplier: 120 }, // κόκκινα: επιθετικά, λιγότερη ζωή
+    armor:  { atkBonus: 0,  defBonus: 19, hpMultiplier: 120 }, // μπλε: αμυντικά, πολλή ζωή
     magic:  { atkBonus: 7, defBonus: 7, hpMultiplier: 120 }  // μωβ: ισορροπημένα
 };
 
@@ -3902,8 +3902,8 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     // Βασική πιθανότητα Legendary (1 στις 1000). RICH/POOR areas την επηρεάζουν,
     // με δικούς της πολλαπλασιαστές ώστε να ρυθμίζεται ξεχωριστά από το specialChance.
     let legendaryChance = 0.001;
-    const legendaryRichMultiplier = 1.25;  // πόσο πιο συχνά σε RICH areas
-    const legendaryPoorMultiplier = 0.65;  // πόσο πιο σπάνια σε POOR areas
+    const legendaryRichMultiplier = 1.30;  // πόσο πιο συχνά σε RICH areas
+    const legendaryPoorMultiplier = 0.70;  // πόσο πιο σπάνια σε POOR areas
     if (areaType === AREA_TYPES.RICH) legendaryChance = legendaryChance * legendaryRichMultiplier;
     else if (areaType === AREA_TYPES.POOR) legendaryChance = legendaryChance * legendaryPoorMultiplier;
 
@@ -3917,8 +3917,8 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
 
     // BASE RARE MONSTER CHANCE RICH/POOR αλλάζουν το βασικό chance εμφάνισης special τέρατος
     let specialChance = 0.17;
-    if (areaType === AREA_TYPES.RICH) specialChance = specialChance * 1.25;
-    else if (areaType === AREA_TYPES.POOR) specialChance = specialChance * 0.65;
+    if (areaType === AREA_TYPES.RICH) specialChance = specialChance * 1.30;
+    else if (areaType === AREA_TYPES.POOR) specialChance = specialChance * 0.70;
 
     if (isLegendary) {
 
@@ -3963,13 +3963,13 @@ else if (Math.random() < specialChance) {
 
         if (chosenVariant === 'weapon') {
             variant = 'weapon';
-            baseAtk += 10;
+            baseAtk += 12;
             baseHp = lvl * 100;
             title = randomFrom(wildTitles);
         }
         else if (chosenVariant === 'armor') {
             variant = 'armor';
-            baseDef += 13;
+            baseDef += 16;
             baseHp = lvl * 100;
             title = randomFrom(armoredTitles);
         }
