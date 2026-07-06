@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v181</title>
+    <title>Ρεμπεσκές v190</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1877,6 +1877,12 @@ const weaponNames = [
   "Χαλύβδινος Πέλεκυς",
   "Επιχρυσωμένο Βαρδούκι",
   "Σπαθί του Αυτοκράτορα",
+  "Απόλυτη Ρομφαία",
+
+  "Απόλυτη Ρομφαία",
+  "Απόλυτη Ρομφαία",
+  "Απόλυτη Ρομφαία",
+  "Απόλυτη Ρομφαία",
   "Απόλυτη Ρομφαία"
 ];
 
@@ -1999,6 +2005,12 @@ const armorNames = [
   "Μέγας Αυτοκρατορικός Θώρακας",
   "Επιχρυσωμένο Κλιβάνιο",
   "Κλιβάνιο του Αυτοκράτορα",
+  "Απόλυτο Κλιβάνιο",
+
+  "Απόλυτο Κλιβάνιο",
+  "Απόλυτο Κλιβάνιο",
+  "Απόλυτο Κλιβάνιο",
+  "Απόλυτο Κλιβάνιο",
   "Απόλυτο Κλιβάνιο"
 ];
 
@@ -2121,6 +2133,12 @@ const magicNames = [
   "Λίθος των Κόσμων",
   "Αυτοκρατορική Σφραγίδα",
   "Αιώνιο Κειμήλιο",
+  "Σφαίρα Γνόφου",
+
+  "Σφαίρα Γνόφου",
+  "Σφαίρα Γνόφου",
+  "Σφαίρα Γνόφου",
+  "Σφαίρα Γνόφου",
   "Σφαίρα Γνόφου"
 ];
 
@@ -2567,7 +2585,7 @@ const zaladouras = [
 // atkBonus/defBonus προστίθενται πάνω στο κανονικό atk/def του επιπέδου.
 // hpMultiplier πολλαπλασιάζεται με το επίπεδο (lvl * hpMultiplier) για να βγει το HP.
 const legendaryStatsByType = {
-    weapon: { atkBonus: 15, defBonus: 0,  hpMultiplier: 120 }, // κόκκινα: επιθετικά, λιγότερη ζωή
+    weapon: { atkBonus: 12, defBonus: 0,  hpMultiplier: 120 }, // κόκκινα: επιθετικά, λιγότερη ζωή
     armor:  { atkBonus: 0,  defBonus: 15, hpMultiplier: 120 }, // μπλε: αμυντικά, πολλή ζωή
     magic:  { atkBonus: 7.5, defBonus: 7.5, hpMultiplier: 120 }  // μωβ: ισορροπημένα
 };
@@ -2673,7 +2691,7 @@ function getLegendaryItemName(type, tier) {
     // Άρα αφαιρούμε το +20 για να βρούμε ξανά το αντίστοιχο bracket επιπέδου
     // μέσα στο legendaryMonstersByType, το ίδιο table που χρησιμοποιείται
     // και τη στιγμή του drop.
-    let baseLevel = tier - 10;
+    let baseLevel = tier - 15;
     baseLevel = Math.max(1, Math.min(100, baseLevel));
 
     const list = legendaryMonstersByType[type] || [];
@@ -2713,7 +2731,7 @@ function rollItemTier(monsterLevel) {
         modifier = +5;  // 1% (99 έως 100)
     }
     let tier = monsterLevel + modifier;
-    tier = Math.max(2, Math.min(100, tier));
+    tier = Math.max(2, Math.min(105, tier));
     return tier;
 }
 
@@ -2897,20 +2915,17 @@ const AREA_TYPE_COLOR = {
  //XP REWARD FORMULA
     function getMonsterXpReward(monsterLvl) { 
    
-   // experimental
-//    let difficultyModifier = calculateDifficulty(player, monster);
- // let xp = 10 * Math.pow(monsterLvl, 2) * (difficultyModifier+0.12 );
-    let xp = 10 * Math.pow(monsterLvl, 2);
+   // dynamic experimental diffmod xp system
+  //  let difficultyModifier = calculateDifficulty(player, monster);
+ // let xp = 10 * Math.pow(monsterLvl, 2) * ((difficultyModifier+0.12 + 1)/2);
+    let xp = 10 * Math.pow(monsterLvl, 2); //SIMPLER energopoihse ayto gia to klassiko
 
 
 // simpler extra lvl difference penalty
-  let diff = player.level - monsterLvl;
-if (diff > 0) {
-        // Ο παίκτης είναι μεγαλύτερο επίπεδο: Πέναλτι ανά επίπεδο διαφοράς
+let diff = player.level - monsterLvl;
+if (diff > 0) {   // Ο παίκτης είναι μεγαλύτερο επίπεδο: Πέναλτι ανά επίπεδο διαφοράς
         xp *= Math.pow(0.90, diff);
-    } else if (diff < 0) {
-        // Το τέρας είναι μεγαλύτερο επίπεδο: Μπόνους ανά επίπεδο διαφοράς
-        // Χρησιμοποιούμε Math.abs(diff) για να γίνει ο εκθέτης θετικός
+    } else if (diff < 0) {  // Το τέρας είναι μεγαλύτερο επίπεδο: Μπόνους ανά επίπεδο διαφοράς. Χρησιμοποιούμε Math.abs(diff) για να γίνει ο εκθέτης θετικός
         xp *= Math.pow(1.05, Math.abs(diff));
     }
     return Math.round(xp);
@@ -4006,7 +4021,7 @@ else if (Math.random() < specialChance) {
 
         if (chosenVariant === 'weapon') {
             variant = 'weapon';
-            baseAtk += 12;
+            baseAtk += 9;
             baseHp = lvl * 100;
             title = randomFrom(wildTitles);
         }
@@ -4406,7 +4421,7 @@ function handleEquipmentDrop(type, rolledTier, monster, forceSell = false) {
 
     const isLegendaryDrop = monster && monster.variant === 'legendary';
         if (isLegendaryDrop) {
-            rolledTier = Math.min(115, rolledTier + 10);
+            rolledTier = Math.min(120, rolledTier + 15);
         }
 
     console.log("LEGENDARY?", isLegendaryDrop);
@@ -4592,8 +4607,14 @@ function showLegendaryPopup() {
             createFloatingText('stat-gold-box', `+${formatNumber(gainedGold)}g`, "var(--accent-gold)");
 
         //ta variants me o dynamic difficulty system den pairnoun perissotera edw - pairnoun apo to diff - ektos an einai kleisto to dynamic
-            let gainedXp = Math.round(getMonsterXpReward(monster.level) *
-               (monster.variant !== 'normal' ? 1.5 : 1));
+            let xpMultiplier =
+                monster.variant === 'legendary' ? 2 :
+                monster.variant !== 'normal' ? 1.5 :
+                1;
+            let gainedXp = Math.round(
+                getMonsterXpReward(monster.level) * xpMultiplier
+                );
+          
             player.xp += gainedXp;
             sessionXp += gainedXp;
             logMessage(`+${formatNumber(gainedXp)} XP`, 'victory');
