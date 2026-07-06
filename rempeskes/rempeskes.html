@@ -3085,9 +3085,9 @@ function loadGame() {
         try {
             player = { ...player, ...JSON.parse(savedData) };
             player.level = Math.min(player.level, 100);
-            player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 100);
-            player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 100);
-            player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 100);
+            player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105);
+            player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
+            player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
             if (!player.name) player.name = "Ρεμπεσκές";
             player.maxUnlockedLevel = 100;
 
@@ -3269,9 +3269,9 @@ function importSave() {
 
         player = { ...player, ...data.player };
         player.level = Math.min(player.level, 100);
-        player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 100);
-        player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 100);
-        player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 100);
+        player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105);
+        player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
+        player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
         if (!player.name) player.name = "Ρεμπεσκές";
         player.maxUnlockedLevel = 100;
         player.nextXp = calculateNextXpRequirement(player.level);
