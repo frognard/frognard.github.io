@@ -2586,7 +2586,7 @@ const zaladouras = [
 // hpMultiplier πολλαπλασιάζεται με το επίπεδο (lvl * hpMultiplier) για να βγει το HP.
 const legendaryStatsByType = {
     weapon: { atkBonus: 12, defBonus: 0,  hpMultiplier: 120 }, // κόκκινα: επιθετικά, λιγότερη ζωή
-    armor:  { atkBonus: 0,  defBonus: 15, hpMultiplier: 120 }, // μπλε: αμυντικά, πολλή ζωή
+    armor:  { atkBonus: 0,  defBonus: 18, hpMultiplier: 120 }, // μπλε: αμυντικά, πολλή ζωή
     magic:  { atkBonus: 7.5, defBonus: 7.5, hpMultiplier: 120 }  // μωβ: ισορροπημένα
 };
 
@@ -4027,7 +4027,7 @@ else if (Math.random() < specialChance) {
         }
         else if (chosenVariant === 'armor') {
             variant = 'armor';
-            baseDef += 12;
+            baseDef += 15;
             baseHp = lvl * 100;
             title = randomFrom(armoredTitles);
         }
