@@ -4592,8 +4592,8 @@ function showLegendaryPopup() {
             createFloatingText('stat-gold-box', `+${formatNumber(gainedGold)}g`, "var(--accent-gold)");
 
         //ta variants me o dynamic difficulty system den pairnoun perissotera edw - pairnoun apo to diff - ektos an einai kleisto to dynamic
-            let gainedXp = getMonsterXpReward(monster.level) *
-               (monster.variant !== 'normal' ? 1.5 : 1);
+            let gainedXp = Math.round(getMonsterXpReward(monster.level) *
+               (monster.variant !== 'normal' ? 1.5 : 1));
             player.xp += gainedXp;
             sessionXp += gainedXp;
             logMessage(`+${formatNumber(gainedXp)} XP`, 'victory');
