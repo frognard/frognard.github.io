@@ -2907,11 +2907,11 @@ const AREA_TYPE_COLOR = {
   let diff = player.level - monsterLvl;
 if (diff > 0) {
         // Ο παίκτης είναι μεγαλύτερο επίπεδο: Πέναλτι ανά επίπεδο διαφοράς
-        xp *= Math.pow(0.96, diff);
+        xp *= Math.pow(0.90, diff);
     } else if (diff < 0) {
         // Το τέρας είναι μεγαλύτερο επίπεδο: Μπόνους ανά επίπεδο διαφοράς
         // Χρησιμοποιούμε Math.abs(diff) για να γίνει ο εκθέτης θετικός
-        xp *= Math.pow(1.04, Math.abs(diff));
+        xp *= Math.pow(1.05, Math.abs(diff));
     }
     return Math.round(xp);
 }
