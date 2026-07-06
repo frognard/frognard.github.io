@@ -1318,6 +1318,15 @@ function formatNumber(num) {
     return Number(num).toLocaleString('el-GR');
 }
 
+
+function formatActiveTime(totalSeconds) {
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    return `${h}ω ${m}λ ${s}δ`;
+}
+
+
 function showStats() {
 
     let efficiency = 0;
@@ -1335,7 +1344,8 @@ function showStats() {
     logMessage(`Χρυσάφι που γλεντήθηκε: ${formatNumber(player.goldSpent)}`,"stats");
     logMessage(`Χρυσάφι που χάθηκε: ${formatNumber(player.goldLost)}`,"stats");
     logMessage(`Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`,"stats");
-    logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
+    logMessage(`Ενεργός χρόνος: ${formatActiveTime(player.activeTime)}`,"stats");
+    // logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
     logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
     
 }
@@ -2659,11 +2669,11 @@ function getMonsterName(lvl) {
 // ψοφιος κωδικας
 function getLegendaryItemName(type, tier) {
     // Το tier ενός legendary item = (επίπεδο τέρατος βάσει rollItemTier) + 20
-    // (βλ. handleEquipmentDrop: rolledTier = Math.min(125, rolledTier + 20)).
+    // (βλ. handleEquipmentDrop: rolledTier = Math.min(125, rolledTier + 20)).  ayta ginan +10 115 ktl
     // Άρα αφαιρούμε το +20 για να βρούμε ξανά το αντίστοιχο bracket επιπέδου
     // μέσα στο legendaryMonstersByType, το ίδιο table που χρησιμοποιείται
     // και τη στιγμή του drop.
-    let baseLevel = tier - 20;
+    let baseLevel = tier - 10;
     baseLevel = Math.max(1, Math.min(100, baseLevel));
 
     const list = legendaryMonstersByType[type] || [];
@@ -2729,6 +2739,7 @@ function rollItemTier(monsterLevel) {
             goldSpent: 0,
             goldLost: 0,
             beersDrunk: 0,
+            activeTime: 0, // σε δευτερόλεπτα
             legendaryDrops: 0,
             bestKillStreak: 0,
             hasBeatenConanos: false,
@@ -3737,7 +3748,7 @@ function logMessageHTML(html, type = 'system') {
 function startTownRegen() {
     if (townRegenInterval) clearInterval(townRegenInterval);
     townRegenInterval = setInterval(() => {
-        const maxHp = getPlayerMaxHp();
+       const maxHp = getPlayerMaxHp();
         if (!inCombat && player.hp < maxHp && !(player.ironman && player.ironmanDead)) {
             let regenAmount = Math.round(maxHp * 0.1);
             // αν είμαστε κοντά στο full hp
@@ -3746,6 +3757,7 @@ function startTownRegen() {
                 maxHp - player.hp
             );
             player.hp += regenAmount;
+            player.activeTime += 2;
             createFloatingText(
                 'player-hp-parent',
                 `+${formatNumber(regenAmount)}`,
@@ -4249,6 +4261,7 @@ function forceRetreat() {
 function executeCombatRound() {
    
     if (!inCombat) return;
+    player.activeTime += 2;
     if (waitingForNextMonster) return;
 
     if (!monster || monster.hp <= 0) {
@@ -4393,7 +4406,7 @@ function handleEquipmentDrop(type, rolledTier, monster, forceSell = false) {
 
     const isLegendaryDrop = monster && monster.variant === 'legendary';
         if (isLegendaryDrop) {
-            rolledTier = Math.min(125, rolledTier + 20);
+            rolledTier = Math.min(115, rolledTier + 10);
         }
 
     console.log("LEGENDARY?", isLegendaryDrop);
