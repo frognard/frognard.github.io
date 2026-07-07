@@ -2953,6 +2953,7 @@ const AREA_TYPE_COLOR = {
     let isSkillQueued = false; 
     let queuedSkill = null;
     let waitingForNextMonster = false;
+    let nextMonsterTimeoutId = null; // id του setTimeout που κάνει spawn το επόμενο τέρας (endCombat) — ώστε να μπορεί να ακυρωθεί σε forceRetreat/θάνατο
     let currentRunKills = 0
  
     const CD_DURATION = 10000; // βασική διάρκεια cooldown (ms) σε κανονική ταχύτητα (x1)
@@ -4004,7 +4005,15 @@ function updateCooldownBars() {
     inCombat = true;
     isAttemptingRetreat = false;
     isSkillQueued = false;
-    
+
+    // Άμυνα-2: αν έμεινε πίσω κάποιο "ορφανό" timeout από προηγούμενο endCombat(),
+    // ακύρωσέ το εδώ ώστε να μη μπορέσει ποτέ να κάνει spawn τέρας μέσα σε αυτό το νέο hunt.
+    if (nextMonsterTimeoutId) {
+        clearTimeout(nextMonsterTimeoutId);
+        nextMonsterTimeoutId = null;
+    }
+    waitingForNextMonster = false;
+
     spawnMonster();
     
     document.getElementById('town-interface').classList.add('hidden');
@@ -4337,6 +4346,17 @@ function forceRetreat() {
         clearInterval(combatInterval);
         combatInterval = null;
     }
+
+    // 1b. ΑΚΥΡΩΣΗ οποιουδήποτε "εκκρεμούς" setTimeout από το endCombat() που θα έκανε
+    // spawn το επόμενο τέρας. Χωρίς αυτό, σε γρήγορο auto (π.χ. x30) υπάρχει race condition:
+    // σκοτώνεις τέρας -> στήνεται timeout για spawn -> κάνεις retreat πριν χτυπήσει ->
+    // ξαναμπαίνεις σε νέο hunt -> το παλιό ορφανό timeout πυροδοτείται μέσα στο νέο context
+    // και κάνει spawn τέρας "στον τεκέ", σκοτώνοντάς σε με το 10% HP της υποχώρησης.
+    if (nextMonsterTimeoutId) {
+        clearTimeout(nextMonsterTimeoutId);
+        nextMonsterTimeoutId = null;
+    }
+    waitingForNextMonster = false;
 
     // 2. Επαναφορά του interface
     document.getElementById('monster-hp-bar').classList.remove('monster-death');
@@ -4816,19 +4836,27 @@ function showLegendaryPopup() {
                     logMessage("Περιπλανιέσαι στο λαβύρινθο...", "system");
                     updateUI();
 
-                    setTimeout(() => {
+                    if (nextMonsterTimeoutId) clearTimeout(nextMonsterTimeoutId);
+                    nextMonsterTimeoutId = setTimeout(() => {
+                        nextMonsterTimeoutId = null;
+
+                        // ΣΗΜΑΝΤΙΚΟ: αν στο μεταξύ έγινε retreat (forceRetreat) ή ξεκίνησε
+                        // εντελώς νέο hunt, το waitingForNextMonster δεν θα είναι πια true
+                        // εδώ (η forceRetreat/enterCombatFromSelector το μηδενίζουν).
+                        // Χωρίς αυτό το check, ένα "ορφανό" timeout από τον προηγούμενο
+                        // κύκλο μπορεί να κάνει spawn τέρας μέσα στο νέο/τεκέ context.
+                        if (!inCombat || !waitingForNextMonster) return;
+
                         waitingForNextMonster = false;
 
-                        if (inCombat) {
-                            spawnMonster();
-                            //  logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
-                            updateUI();
+                        spawnMonster();
+                        //  logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
+                        updateUI();
 
-                            // RESET: το ρολόι της μάχης ξεκινά ξανά από το spawn,
-                            // ώστε το τέρας να έχει πάντα 2 πλήρη δευτ. πριν τον πρώτο γύρο
-                            if (combatInterval) clearInterval(combatInterval);
-                            combatInterval = setInterval(executeCombatRound, effTick());
-                        }
+                        // RESET: το ρολόι της μάχης ξεκινά ξανά από το spawn,
+                        // ώστε το τέρας να έχει πάντα 2 πλήρη δευτ. πριν τον πρώτο γύρο
+                        if (combatInterval) clearInterval(combatInterval);
+                        combatInterval = setInterval(executeCombatRound, effTick());
                     }, effTick());
                 }
             }

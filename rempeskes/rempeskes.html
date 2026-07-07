@@ -2866,6 +2866,7 @@ const AREA_TYPE_COLOR = {
     let isSkillQueued = false; 
     let queuedSkill = null;
     let waitingForNextMonster = false;
+    let nextMonsterTimeoutId = null; // id του setTimeout που κάνει spawn το επόμενο τέρας
     let currentRunKills = 0
  
     const CD_DURATION = 10000;
@@ -3906,7 +3907,13 @@ function updateCooldownBars() {
     inCombat = true;
     isAttemptingRetreat = false;
     isSkillQueued = false;
-    
+
+    if (nextMonsterTimeoutId) {
+        clearTimeout(nextMonsterTimeoutId);
+        nextMonsterTimeoutId = null;
+    }
+    waitingForNextMonster = false;
+
     spawnMonster();
     
     document.getElementById('town-interface').classList.add('hidden');
@@ -4239,6 +4246,15 @@ function forceRetreat() {
         clearInterval(combatInterval);
         combatInterval = null;
     }
+
+    // 1b. ΑΚΥΡΩΣΗ τυχόν εκκρεμούς setTimeout από το endCombat() που θα έκανε
+    // spawn το επόμενο τέρας (race condition: kill -> στήνεται timeout -> retreat
+    // πριν προλάβει -> ξαναμπαίνεις σε hunt -> το παλιό timeout κάνει spawn εκεί).
+    if (nextMonsterTimeoutId) {
+        clearTimeout(nextMonsterTimeoutId);
+        nextMonsterTimeoutId = null;
+    }
+    waitingForNextMonster = false;
 
     // 2. Επαναφορά του interface
     document.getElementById('monster-hp-bar').classList.remove('monster-death');
@@ -4718,19 +4734,22 @@ function showLegendaryPopup() {
                     logMessage("Περιπλανιέσαι στο λαβύρινθο...", "system");
                     updateUI();
 
-                    setTimeout(() => {
+                    if (nextMonsterTimeoutId) clearTimeout(nextMonsterTimeoutId);
+                    nextMonsterTimeoutId = setTimeout(() => {
+                        nextMonsterTimeoutId = null;
+
+                        // Αν στο μεταξύ έγινε retreat ή ξεκίνησε νέο hunt, αυτό δεν θα είναι πια true
+                        if (!inCombat || !waitingForNextMonster) return;
+
                         waitingForNextMonster = false;
+                        spawnMonster();
+                        //  logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
+                        updateUI();
 
-                        if (inCombat) {
-                            spawnMonster();
-                            //  logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
-                            updateUI();
-
-                            // RESET: το ρολόι της μάχης ξεκινά ξανά από το spawn,
-                            // ώστε το τέρας να έχει πάντα 2 πλήρη δευτ. πριν τον πρώτο γύρο
-                            if (combatInterval) clearInterval(combatInterval);
-                            combatInterval = setInterval(executeCombatRound, 2000);
-                        }
+                        // RESET: το ρολόι της μάχης ξεκινά ξανά από το spawn,
+                        // ώστε το τέρας να έχει πάντα 2 πλήρη δευτ. πριν τον πρώτο γύρο
+                        if (combatInterval) clearInterval(combatInterval);
+                        combatInterval = setInterval(executeCombatRound, 2000);
                     }, 2000);
                 }
             }
