@@ -3440,6 +3440,7 @@ function importSave() {
 
         saveGame();
         updateUI();
+        applyAutoplayVisibility();
         logMessage("Το save εισήχθη επιτυχώς.", 'system');
     } catch (e) {
         alert("Ο κωδικός save είναι χαλασμένος ή άκυρος.");
