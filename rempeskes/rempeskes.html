@@ -652,6 +652,19 @@
             color: #fff;
         }
 
+        .btn-options {
+            border-color: #e67e22;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            background-color: #1a1a1a;
+            color: #e67e22;
+        }
+
+        .btn-options:hover {
+            background-color: #e67e22 !important;
+            color: #fff;
+        }
+
         .btn-showStats {
             border-color: #2d66a7; 
             padding: 4px 8px; 
@@ -918,6 +931,69 @@ body {
     animation: hpHealFlash 280ms ease-out;
 }
 
+#autoplay-panel {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    background: #171717;
+    border: 1px solid #252525;
+    border-radius: 3px;
+}
+
+.autoplay-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#autoplay-toggle-btn {
+    background-color: #2a2a2a;
+    color: var(--text-muted);
+    border: 1px solid #444;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-radius: 2px;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+#autoplay-toggle-btn:hover {
+    border-color: var(--accent-gold);
+}
+
+#autoplay-toggle-btn.on {
+    color: #121212;
+    background-color: #2ecc71;
+    border-color: #2ecc71;
+    font-weight: bold;
+}
+
+.autoplay-speed-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.autoplay-speed-wrap select {
+    background-color: #1a1a1a;
+    color: var(--text-main);
+    border: 1px solid #444;
+    border-radius: 2px;
+    padding: 3px 5px;
+    font-family: inherit;
+}
+
+.autoplay-status {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    min-height: 1em;
+}
 
     </style>
 </head>
@@ -1021,6 +1097,24 @@ body {
         </div>
     </div>
 
+<div id="autoplay-panel" style="display:none">
+    <div class="autoplay-row">
+        <button id="autoplay-toggle-btn" type="button">🤖 AutoPlay: OFF</button>
+        <button id="autoplay-settings-btn" type="button" title="AutoPlay ρυθμίσεις">⚙️</button>
+        <div class="autoplay-speed-wrap">
+            <label for="autoplay-speed-select">Ταχύτητα</label>
+            <select id="autoplay-speed-select">
+                <option value="1">1×</option>
+                <option value="5">5×</option>
+                <option value="10">10×</option>
+                <option value="20">20×</option>
+                <option value="30">30×</option>
+            </select>
+        </div>
+    </div>
+    <div id="autoplay-status" class="autoplay-status">AutoPlay ανενεργό.</div>
+</div>
+
 <div id="town-interface">
     <div class="town-header-row">
         <h3 id="teke-title" style="color: #e67e22; margin: 0; border-bottom: none;">
@@ -1052,13 +1146,12 @@ body {
     <main style="margin-top: 20px;">
         
         <div id="log"></div>
-<div style="display:flex; align-items:center; gap:8px; justify-content:flex-end;">
 
-<div class="footer-controls" style="display: flex; gap: 15px; justify-content: center; align-items: center;">
-    <label><input type="checkbox" id="sound-toggle" checked onchange="soundEnabled=this.checked">🔉</label>
-    <label><input type="checkbox" id="music-toggle" unchecked onchange="musicEnabled=this.checked; updateMusicState();">🎵</label>
-</div>
-    
+<div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; justify-content:flex-end;">
+
+    <button class="btn-options" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music').checked=musicEnabled;document.getElementById('options-modal').style.display='flex';">
+        Επ
+    </button>
 
     <button class = "btn-showStats" onclick="showStats()">
         %
@@ -1108,9 +1201,9 @@ body {
             <input type="checkbox" id="ironman-checkbox">
             Ironman mode (αν πεθάνεις, ο χαρακτήρας κλειδώνει οριστικά)
         </label>
-        <label style="display: block; margin-bottom: 18px; cursor: pointer;">
-            <input type="checkbox" id="clear-ironman-scores-checkbox">
-            Διαγραφή του Ψοφολογίου των Ironmen
+        <label style="display: block; margin-bottom: 18px; cursor: pointer; color: #666;">
+            <input type="checkbox" id="show-autoplay-checkbox">
+            <span style="color: #888;">Χαρακτήρας Κυβόργιο (autoplay mode)</span>
         </label>
         <button class="btn-showRules" onclick="confirmCharacterCreation()">Έναρξη</button>
     </div>
@@ -1341,6 +1434,9 @@ function showStats() {
     logMessage("ΣΤΑΤΙΣΤΙΚΑ","stats");
     logMessage(`Φόνοι: ${formatNumber(player.kills)}`,"stats");
     logMessage(`Θάνατοι: ${player.ironman ? 'IRONMAN' : formatNumber(player.deaths)}`,"stats");
+   // logMessage(`  ↳ από κόκκινα (Άγρια): ${formatNumber(player.deathsWeapon || 0)}`,"stats");
+   // logMessage(`  ↳ από μπλε (Θωρακισμένα): ${formatNumber(player.deathsArmor || 0)}`,"stats");
+   // logMessage(`  ↳ από μωβ (Μαγικά): ${formatNumber(player.deathsMagic || 0)}`,"stats");
     logMessage(`Χρυσάφι που γλεντήθηκε: ${formatNumber(player.goldSpent)}`,"stats");
     logMessage(`Χρυσάφι που χάθηκε: ${formatNumber(player.goldLost)}`,"stats");
     logMessage(`Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`,"stats");
@@ -1354,6 +1450,16 @@ function uploadPsofologioToCloud() {
     const scores = getIronmanHighscores();
     if (typeof syncIronmanRecordsToCloud === 'function') {
         syncIronmanRecordsToCloud(scores);
+    }
+}
+
+function clearIronmanHighscores() {
+    if (!confirm("Σίγουρα θέλεις να διαγράψεις το Ψοφολόγιο των Ironmen;")) return;
+    try {
+        localStorage.removeItem('rempeskes_ironman_highscores');
+        logMessage("Το Ψοφολόγιο των Ironmen διαγράφηκε.", 'system');
+    } catch (e) {
+        console.error('clear ironman highscores failed:', e);
     }
 }
 
@@ -1383,7 +1489,10 @@ function showIronmanHighscores() {
           });
 
     }
-         logMessageHTML(`Μέγα Ψοφολόγιον: <a href="https://frognard.github.io/rempeskes/psofologio.html" style="color: #0099ff; text-decoration: underline;">https://frognard.github.io/rempeskes/psofologio.html</a>`, "psof");
+    logMessageHTML(`<a href="#" onclick="clearIronmanHighscores(); return false;" style="color: #cc3333; text-decoration: underline; cursor: pointer;">Διαγραφή Ψοφολογίου Ironmen</a>`,
+        "psof");
+        logMessage("");
+         logMessageHTML(`<a href="https://frognard.github.io/rempeskes/psofologio.html" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Μέγα Ψοφολόγιον</a>`, "psof");
     logMessageHTML(`<a href="#" onclick="uploadPsofologioToCloud(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε Μέγα Ψοφολόγιο</a>`,
         "psof");
 
@@ -1434,6 +1543,7 @@ function getMonsterDisplayName(monster) {
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let soundEnabled = true;
+let musicEnabled = false;
 
 //  const now = audioCtx.currentTime;
 
@@ -2752,6 +2862,9 @@ function rollItemTier(monsterLevel) {
         gold: 0,
          // statistics
             deaths: 0,
+            deathsWeapon: 0, // θάνατοι από κόκκινα (Άγρια) τέρατα
+            deathsArmor: 0,  // θάνατοι από μπλε (Θωρακισμένα) τέρατα
+            deathsMagic: 0,  // θάνατοι από μωβ (Μαγικά) τέρατα
             kills: 0,
             totalGoldGained: 0,
             goldSpent: 0,
@@ -2866,11 +2979,24 @@ const AREA_TYPE_COLOR = {
     let isSkillQueued = false; 
     let queuedSkill = null;
     let waitingForNextMonster = false;
-    let nextMonsterTimeoutId = null; // id του setTimeout που κάνει spawn το επόμενο τέρας
+    let nextMonsterTimeoutId = null; // id του setTimeout που κάνει spawn το επόμενο τέρας (endCombat) — ώστε να μπορεί να ακυρωθεί σε forceRetreat/θάνατο
     let currentRunKills = 0
  
-    const CD_DURATION = 10000;
-    
+    const CD_DURATION = 10000; // βασική διάρκεια cooldown (ms) σε κανονική ταχύτητα (x1)
+    const COMBAT_TICK_MS = 2000; // βασικός χρόνος γύρου μάχης (ms) σε κανονική ταχύτητα (x1)
+
+    // === SPEED HOOK ===
+    // autoPlayEnabled / autoPlaySpeedFactor ελέγχονται από το AutoPlay panel (βλ. τέλος αρχείου).
+    // gameSpeedFactor ελέγχεται από το modal "Επιλογές".
+    // Όσο το AutoPlay είναι OFF, getSpeedFactor() γυρνάει gameSpeedFactor (default 1).
+    // Όσο το AutoPlay είναι ON, getSpeedFactor() γυρνάει autoPlaySpeedFactor.
+    let autoPlayEnabled = false;
+    let autoPlaySpeedFactor = 1;
+    let gameSpeedFactor = 1;
+    function getSpeedFactor() { return autoPlayEnabled ? autoPlaySpeedFactor : gameSpeedFactor; }
+    function effCD() { return CD_DURATION / getSpeedFactor(); }
+    function effTick() { return COMBAT_TICK_MS / getSpeedFactor(); }
+
     let potionCooldownActive = false;
     let potionCdStart = 0;
     let potionCdTimer = null;
@@ -2916,18 +3042,19 @@ const AREA_TYPE_COLOR = {
  //XP REWARD FORMULA
     function getMonsterXpReward(monsterLvl) { 
    
-   // dynamic experimental diffmod xp system
-  //  let difficultyModifier = calculateDifficulty(player, monster);
+   // dynamic difficulty xp mod
+ // let difficultyModifier = calculateDifficulty(player, monster);
  // let xp = 10 * Math.pow(monsterLvl, 2) * ((difficultyModifier+0.12 + 1)/2);
-    let xp = 10 * Math.pow(monsterLvl, 2); //SIMPLER energopoihse ayto gia to klassiko
+    let xp = 10 * Math.pow(monsterLvl, 2);
 
 
 // simpler extra lvl difference penalty
-let diff = player.level - monsterLvl;
-if (diff > 0) {   // Ο παίκτης είναι μεγαλύτερο επίπεδο: Πέναλτι ανά επίπεδο διαφοράς
+  let diff = player.level - monsterLvl;
+if (diff > 0) { // Ο παίκτης είναι μεγαλύτερο επίπεδο: Πέναλτι ανά επίπεδο διαφοράς
+        
         xp *= Math.pow(0.90, diff);
-    } else if (diff < 0) {  // Το τέρας είναι μεγαλύτερο επίπεδο: Μπόνους ανά επίπεδο διαφοράς. Χρησιμοποιούμε Math.abs(diff) για να γίνει ο εκθέτης θετικός
-        xp *= Math.pow(1.0, Math.abs(diff));
+    } else if (diff < 0) { // Το τέρας είναι μεγαλύτερο επίπεδο: Μπόνους ανά επίπεδο διαφοράς.  Χρησιμοποιούμε Math.abs(diff) για να γίνει ο εκθέτης θετικός
+       xp *= Math.pow(1.0, Math.abs(diff));
     }
     return Math.round(xp);
 }
@@ -3138,6 +3265,15 @@ function loadGame() {
     } else {
         player.hasBeatenConanos = false;
     }
+
+    applyAutoplayVisibility();
+}
+
+function applyAutoplayVisibility() {
+    const panel = document.getElementById('autoplay-panel');
+    if (panel) {
+        panel.style.display = (player.showAutoplay) ? '' : 'none';
+    }
 }
 
 function resetGame() {
@@ -3194,20 +3330,18 @@ function confirmCharacterCreation() {
 
     document.getElementById('ironman-modal').classList.add('hidden');
 
+    if (document.getElementById('show-autoplay-checkbox').checked && !chosenName.startsWith('[Κ] ')) {
+        chosenName = '[Κ] ' + chosenName;
+    }
+
     player.name = chosenName;
 
     player.ironman = document.getElementById('ironman-checkbox').checked;
+    player.showAutoplay = document.getElementById('show-autoplay-checkbox').checked;
+    applyAutoplayVisibility();
+
     if (player.ironman) {
         logMessage("Ironman mode ενεργό. Δεν υπάρχει γυρισμός.", 'system');
-    }
-
-    if (document.getElementById('clear-ironman-scores-checkbox').checked) {
-        try {
-            localStorage.removeItem('rempeskes_ironman_highscores');
-            logMessage("Το Ψοφολόγιο των Ironmen διαγράφηκε.", 'system');
-        } catch (e) {
-            console.error('clear ironman highscores failed:', e);
-        }
     }
 
     saveGame();
@@ -3784,7 +3918,7 @@ function startTownRegen() {
             saveGame();
             
          }
-    }, 2000);
+    }, effTick());
 }
 
     function stopTownRegen() { if (townRegenInterval) { clearInterval(townRegenInterval); townRegenInterval = null; } }
@@ -3798,7 +3932,7 @@ function updateCooldownBars() {
 
     if (potionCooldownActive) {
         let elapsed = now - potionCdStart;
-        let pct = Math.min(100, (elapsed / CD_DURATION) * 100);
+        let pct = Math.min(100, (elapsed / effCD()) * 100);
         btnPotion.style.setProperty('--fill', pct + '%');
     } else {
         btnPotion.style.setProperty('--fill', '100%');
@@ -3810,7 +3944,7 @@ function updateCooldownBars() {
 
     if (skillCooldownActive) {
         let elapsed = now - skillCdStart;
-        let pct = Math.min(100, (elapsed / CD_DURATION) * 100);
+        let pct = Math.min(100, (elapsed / effCD()) * 100);
         btnSkill.style.setProperty('--fill', pct + '%');
     } else {
         btnSkill.style.setProperty('--fill', '100%');
@@ -3822,7 +3956,7 @@ function updateCooldownBars() {
 
     if (preciseCooldownActive) {
         let elapsed = now - preciseCdStart;
-        let pct = Math.min(100, (elapsed / CD_DURATION) * 100);
+        let pct = Math.min(100, (elapsed / effCD()) * 100);
         btnPrecise.style.setProperty('--fill', pct + '%');
     } else {
         btnPrecise.style.setProperty('--fill', '100%');
@@ -3908,6 +4042,8 @@ function updateCooldownBars() {
     isAttemptingRetreat = false;
     isSkillQueued = false;
 
+    // Άμυνα-2: αν έμεινε πίσω κάποιο "ορφανό" timeout από προηγούμενο endCombat(),
+    // ακύρωσέ το εδώ ώστε να μη μπορέσει ποτέ να κάνει spawn τέρας μέσα σε αυτό το νέο hunt.
     if (nextMonsterTimeoutId) {
         clearTimeout(nextMonsterTimeoutId);
         nextMonsterTimeoutId = null;
@@ -3922,7 +4058,7 @@ function updateCooldownBars() {
     updateUI();
     
     if (combatInterval) clearInterval(combatInterval);
-    combatInterval = setInterval(executeCombatRound, 2000);
+    combatInterval = setInterval(executeCombatRound, effTick());
 }
 
 
@@ -4034,7 +4170,7 @@ else if (Math.random() < specialChance) {
         }
         else if (chosenVariant === 'armor') {
             variant = 'armor';
-            baseDef += 15;
+            baseDef += 14;
             baseHp = lvl * 100;
             title = randomFrom(armoredTitles);
         }
@@ -4207,7 +4343,7 @@ if (skill) {
     preciseCdTimer = setTimeout(() => {
         preciseCooldownActive = false;
         updateUI();
-    }, CD_DURATION);
+    }, effCD());
 
     resolvePlayerAttack(result);
 }
@@ -4247,9 +4383,11 @@ function forceRetreat() {
         combatInterval = null;
     }
 
-    // 1b. ΑΚΥΡΩΣΗ τυχόν εκκρεμούς setTimeout από το endCombat() που θα έκανε
-    // spawn το επόμενο τέρας (race condition: kill -> στήνεται timeout -> retreat
-    // πριν προλάβει -> ξαναμπαίνεις σε hunt -> το παλιό timeout κάνει spawn εκεί).
+    // 1b. ΑΚΥΡΩΣΗ οποιουδήποτε "εκκρεμούς" setTimeout από το endCombat() που θα έκανε
+    // spawn το επόμενο τέρας. Χωρίς αυτό, σε γρήγορο auto (π.χ. x30) υπάρχει race condition:
+    // σκοτώνεις τέρας -> στήνεται timeout για spawn -> κάνεις retreat πριν χτυπήσει ->
+    // ξαναμπαίνεις σε νέο hunt -> το παλιό ορφανό timeout πυροδοτείται μέσα στο νέο context
+    // και κάνει spawn τέρας "στον τεκέ", σκοτώνοντάς σε με το 10% HP της υποχώρησης.
     if (nextMonsterTimeoutId) {
         clearTimeout(nextMonsterTimeoutId);
         nextMonsterTimeoutId = null;
@@ -4333,7 +4471,7 @@ if (isAttemptingRetreat) {
             skillCdTimer = setTimeout(() => {
                 skillCooldownActive = false;
                 updateUI();
-            }, CD_DURATION);
+            }, effCD());
         }
         if (queuedSkill === skills.preciseStrike) {
             usedPreciseStrikeThisRound = true; // Ενεργοποιείται η ιδιότητα του skill
@@ -4342,7 +4480,7 @@ if (isAttemptingRetreat) {
             preciseCdTimer = setTimeout(() => {
                 preciseCooldownActive = false;
                 updateUI();
-            }, CD_DURATION);
+            }, effCD());
         }
         queuedSkill = null;
     } else {
@@ -4630,7 +4768,7 @@ function showLegendaryPopup() {
             let gainedXp = Math.round(
                 getMonsterXpReward(monster.level) * xpMultiplier
                 );
-          
+
             player.xp += gainedXp;
             sessionXp += gainedXp;
             logMessage(`+${formatNumber(gainedXp)} XP`, 'victory');
@@ -4690,7 +4828,7 @@ function showLegendaryPopup() {
                     monster = null;
                     isAttemptingRetreat = false;
 
-                // ← ΝΕΟ: 2 γραμμές εδώ
+                                // ← ΝΕΟ: 2 γραμμές εδώ
                     const huntBtnEarly = document.getElementById("btn-hunt-retreat");
                     if (huntBtnEarly) huntBtnEarly.disabled = true;
 
@@ -4742,10 +4880,15 @@ function showLegendaryPopup() {
                     nextMonsterTimeoutId = setTimeout(() => {
                         nextMonsterTimeoutId = null;
 
-                        // Αν στο μεταξύ έγινε retreat ή ξεκίνησε νέο hunt, αυτό δεν θα είναι πια true
+                        // ΣΗΜΑΝΤΙΚΟ: αν στο μεταξύ έγινε retreat (forceRetreat) ή ξεκίνησε
+                        // εντελώς νέο hunt, το waitingForNextMonster δεν θα είναι πια true
+                        // εδώ (η forceRetreat/enterCombatFromSelector το μηδενίζουν).
+                        // Χωρίς αυτό το check, ένα "ορφανό" timeout από τον προηγούμενο
+                        // κύκλο μπορεί να κάνει spawn τέρας μέσα στο νέο/τεκέ context.
                         if (!inCombat || !waitingForNextMonster) return;
 
                         waitingForNextMonster = false;
+
                         spawnMonster();
                         //  logMessage(`Εμφανίζεται: ${getMonsterDisplayName(monster)}!`, "system");
                         updateUI();
@@ -4753,8 +4896,8 @@ function showLegendaryPopup() {
                         // RESET: το ρολόι της μάχης ξεκινά ξανά από το spawn,
                         // ώστε το τέρας να έχει πάντα 2 πλήρη δευτ. πριν τον πρώτο γύρο
                         if (combatInterval) clearInterval(combatInterval);
-                        combatInterval = setInterval(executeCombatRound, 2000);
-                    }, 2000);
+                        combatInterval = setInterval(executeCombatRound, effTick());
+                    }, effTick());
                 }
             }
             updateUI();
@@ -4815,6 +4958,17 @@ function applyDefeatPenalties() {
        
     currentRunKills = 0;
     player.deaths++;
+
+    // Καταμέτρηση θανάτων ανά "χρώμα" τέρατος (κόκκινο=weapon, μπλε=armor, μωβ=magic).
+    // Τα legendary τέρατα δεν έχουν δικό τους variant χρώματος, αλλά ανήκουν σε τύπο
+    // μέσω του monster.lootType (weapon/armor/magic) - το χρησιμοποιούμε κι εκεί.
+    const deathColorType = (monster.variant === 'weapon' || monster.variant === 'armor' || monster.variant === 'magic')
+        ? monster.variant
+        : (monster.variant === 'legendary' ? monster.lootType : null);
+
+    if (deathColorType === 'weapon') player.deathsWeapon++;
+    else if (deathColorType === 'armor') player.deathsArmor++;
+    else if (deathColorType === 'magic') player.deathsMagic++;
 
     if (player.ironman) {
         player.ironmanDead = true;
@@ -4892,7 +5046,7 @@ function applyDefeatPenalties() {
 
         potionCooldownActive = true;
         potionCdStart = Date.now();
-        potionCdTimer = setTimeout(() => { potionCooldownActive = false; updateUI(); }, CD_DURATION);
+        potionCdTimer = setTimeout(() => { potionCooldownActive = false; updateUI(); }, effCD());
 
         saveGame();
         updateUI();
@@ -5040,6 +5194,390 @@ if (
 });
 </script>
 
+<!-- AutoPlay Settings Modal -->
+<div id="autoplay-settings-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:#2a2a2a;border:1px solid var(--accent-gold);border-radius:8px;padding:20px;max-width:400px;width:90%;color:#fff;">
+        <h3 style="margin:0 0 15px;color:var(--accent-gold);">AutoPlay Ρυθμίσεις</h3>
+        <label style="display:block;margin-bottom:12px;font-size:0.85rem;">
+            Risk Ratio: <span id="settings-ratio-val">0.45</span>
+            <input type="range" id="settings-ratio" min="0.1" max="2.0" step="0.05" value="0.45" style="width:100%;">
+        </label>
+        <label style="display:block;margin-bottom:12px;font-size:0.85rem;">
+            HP% για μπύρα: <span id="settings-beer-val">0.90</span>
+            <input type="range" id="settings-beer" min="0.3" max="1.0" step="0.05" value="0.90" style="width:100%;">
+        </label>
+        <label style="display:block;margin-bottom:12px;font-size:0.85rem;">
+            HP% για retreat: <span id="settings-retreat-val">0.70</span>
+            <input type="range" id="settings-retreat" min="0.3" max="1.0" step="0.05" value="0.70" style="width:100%;">
+        </label>
+        <label style="display:block;margin-bottom:12px;font-size:0.85rem;">
+            Beer charge% για retreat: <span id="settings-beer-charge-val">0.70</span>
+            <input type="range" id="settings-beer-charge" min="0.1" max="1.0" step="0.05" value="0.70" style="width:100%;">
+        </label>
+        <label style="display:block;margin-bottom:20px;font-size:0.85rem;">
+            Autotick (ms): <span id="settings-tick-val">150</span>
+            <input type="range" id="settings-tick" min="50" max="500" step="10" value="150" style="width:100%;">
+        </label>
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button id="settings-ok" style="background:var(--accent-gold);color:#1a1a1a;border:none;border-radius:4px;padding:6px 18px;cursor:pointer;font-weight:bold;">OK</button>
+            <button id="settings-cancel" style="background:#555;color:#fff;border:none;border-radius:4px;padding:6px 18px;cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ============================================================
+   AUTOPLAY MODULE — Ρεμπεσκές
+   ------------------------------------------------------------
+   Toggle ON/OFF, δεν αλλάζει καθόλου το κανονικό gameplay όσο
+   είναι OFF (autoPlayEnabled = false -> getSpeedFactor() = 1,
+   άρα CD_DURATION/COMBAT_TICK_MS παραμένουν στα κανονικά τους).
+
+   Ρυθμίσεις που μπορείς εύκολα να αλλάξεις παρακάτω:
+   - AUTO_DEPTH_BELOW_PLAYER : πόσα levels κάτω από τον παίκτη
+     διαλέγει αυτόματα το dungeon (default 5). Χρησιμοποιείται μόνο
+     όταν AUTO_USE_TARGET_RATIO = false.
+   - AUTO_USE_TARGET_RATIO   : true -> αγνοεί το AUTO_DEPTH_BELOW_PLAYER
+     και αντ' αυτού διαλέγει το βάθος που φέρνει το combat ratio
+     (calculateDifficulty του παιχνιδιού) όσο πιο κοντά γίνεται στο
+     AUTO_TARGET_COMBAT_RATIO.
+   - AUTO_TARGET_COMBAT_RATIO : επιθυμητό ratio δυσκολίας (π.χ. 0.9).
+     Μικρότερο ratio = πιο εύκολη/ασφαλής μάχη, μεγαλύτερο = πιο δύσκολη.
+   - AUTO_BEER_HP_PCT        : κάτω από ποιο % HP πίνει μπύρα (0.70 = 70%).
+   - AUTO_RETREAT_HP_PCT     : κάτω από ποιο % HP σκέφτεται retreat (0.50 = 50%).
+   - AUTO_RETREAT_BEER_CHARGE_PCT : πόσο "γεμάτο" (0..1) πρέπει να είναι
+     το cooldown της μπύρας ώστε να ΜΗΝ κάνει retreat (default 0.50 = 50%).
+   - AUTO_TICK_MS            : κάθε πόσα ms (σε ταχύτητα x1) σκέφτεται το bot.
+   ============================================================ */
+(function () {
+
+    // ==================== ΡΥΘΜΙΣΕΙΣ (επεξεργάσιμες) ====================
+    let AUTO_DEPTH_BELOW_PLAYER = 0;        // levels κάτω (ή πάνω, αν αρνητικό) από τον player — μόνο αν AUTO_USE_TARGET_RATIO = false
+    let AUTO_USE_TARGET_RATIO = true;       // true: επιλογή βάθους με βάση το combat ratio αντί για σταθερό offset
+    let AUTO_TARGET_COMBAT_RATIO = 0.45;      // στόχος για το calculateDifficulty(player, monster) — μόνο αν AUTO_USE_TARGET_RATIO = true
+    let AUTO_BEER_HP_PCT = 0.90;            // μπύρα όταν HP <= 70% (δηλ. έχει δεχτεί >=30% damage)
+    let AUTO_RETREAT_HP_PCT = 0.7;         // κατώφλι HP για σκέψη retreat
+    let AUTO_RETREAT_BEER_CHARGE_PCT = 0.7;// αν η μπύρα δεν είναι έστω χ% charged -> retreat
+    let AUTO_TICK_MS = 150;                 // βασικός ρυθμός σκέψης του bot σε x1 ταχύτητα
+    // =====================================================================
+
+    let autoPlayInterval = null;
+    let autoLastMonsterRef = null; // για να ξέρουμε πότε εμφανίστηκε νέο τέρας (Κατραπακιά στο 1ο χτύπημα)
+    let autoLastPlayerLevel = player.level; // για να ξέρουμε πότε ανέβηκε level ο παίκτης
+    let autoCombatTickStart = Date.now();
+    let autoEarlyPhaseFired = false;
+    let autoLatePhaseFired = false;
+    let autoRetreatAfterLevel = false;
+    let autoLastCombatTime = 0;
+
+    const toggleBtn = document.getElementById('autoplay-toggle-btn');
+    const speedSelect = document.getElementById('autoplay-speed-select');
+    const statusEl = document.getElementById('autoplay-status');
+
+    function setStatus(text) {
+        if (statusEl) statusEl.textContent = text;
+    }
+
+    // Εκτιμά τα στατιστικά ενός "κανονικού" (normal variant) τέρατος σε συγκεκριμένο level,
+    // χωρίς να χρειάζεται να το κάνουμε spawn — ίδιος τύπος στατιστικών με το spawnMonster().
+    // (Οι σπάνιες παραλλαγές weapon/armor/magic/legendary αγνοούνται εδώ σκόπιμα ως προσέγγιση.)
+    function estimateMonsterAt(lvl) {
+        const atk = lvl * 0.75 + (lvl - 1) + (lvl / 2 - 0.5);
+        const def = lvl * 0.75 + (lvl - 1) + (lvl / 2 - 0.5);
+        const maxHp = lvl * 100;
+        return { level: lvl, atk: atk, def: def, hp: maxHp, maxHp: maxHp };
+    }
+
+    // Ψάχνει, μέσα στα διαθέσιμα levels, το ΒΑΘΥΤΕΡΟ level του οποίου το calculateDifficulty()
+    // ΔΕΝ ξεπερνάει το targetRatio (είναι ένα "ceiling", όχι απλά το πιο κοντινό πάνω/κάτω).
+    // πχ βάθος 9 -> 0.70, βάθος 10 -> 0.80, βάθος 11 -> 0.88, target 0.86 => διαλέγει το 10.
+    function findDepthForTargetRatio(targetRatio, maxLevel) {
+        let bestLevel = 1;
+        let bestRatioUnderCap = -Infinity; // το μεγαλύτερο ratio που βρήκαμε ενώ ήταν <= targetRatio
+        let smallestRatioLevel = 1;
+        let smallestRatio = Infinity; // fallback αν ΚΑΝΕΝΑ level δεν πιάνει το cap (π.χ. ακόμα και το 1 το ξεπερνάει)
+
+        for (let lvl = 1; lvl <= maxLevel; lvl++) {
+            const virtualMonster = estimateMonsterAt(lvl);
+            const ratio = calculateDifficulty(player, virtualMonster);
+
+            if (ratio <= targetRatio && ratio > bestRatioUnderCap) {
+                bestRatioUnderCap = ratio;
+                bestLevel = lvl;
+            }
+
+            if (ratio < smallestRatio) {
+                smallestRatio = ratio;
+                smallestRatioLevel = lvl;
+            }
+        }
+
+        // Αν κανένα level δεν έμεινε κάτω/ίσο από το cap, πήγαινε στο πιο ασφαλές (μικρότερο ratio) διαθέσιμο.
+        if (bestRatioUnderCap === -Infinity) return smallestRatioLevel;
+
+        return bestLevel;
+    }
+
+    // Ξαναφτιάχνει το interval σκέψης του bot ανάλογα με την επιλεγμένη ταχύτητα,
+    // ΚΑΙ ξαναφτιάχνει (αν είμαστε ήδη σε μάχη) το combatInterval του παιχνιδιού
+    // ώστε να τρέξει με τη νέα ταχύτητα αμέσως, χωρίς να περιμένει τον επόμενο γύρο.
+    function rearmTimers() {
+        if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+        }
+
+        if (autoPlayEnabled) {
+            const tickMs = Math.max(10, AUTO_TICK_MS / getSpeedFactor());
+            autoPlayInterval = setInterval(autoPlayTick, tickMs);
+        }
+
+        if (typeof inCombat !== 'undefined' && inCombat) {
+            if (combatInterval) clearInterval(combatInterval);
+            combatInterval = setInterval(executeCombatRound, effTick());
+        } else if (typeof townRegenInterval !== 'undefined' && townRegenInterval) {
+            startTownRegen();
+        }
+    }
+
+    function autoPlayTick() {
+        if (!autoPlayEnabled) return;
+
+        // Ironman νεκρός -> δεν κάνει τίποτα (ο παίκτης πρέπει να ξεκινήσει νέο)
+        if (player.ironman && player.ironmanDead) {
+            setStatus("AutoPlay: ο Ironman χαρακτήρας έχει πεθάνει, δεν μπορεί να συνεχίσει.");
+            return;
+        }
+
+        // ---------- LEVEL UP: σημείωσε για retreat στην επόμενη μάχη ----------
+        if (player.level > autoLastPlayerLevel) {
+            autoLastPlayerLevel = player.level;
+            autoRetreatAfterLevel = true;
+            setStatus(`AutoPlay: ανέβηκε level (${player.level}) -> θα κάνει retreat στην επόμενη μάχη...`);
+        }
+
+        // ---------- ΕΚΤΟΣ ΜΑΧΗΣ: πρώτα γλέντι (αν υπάρχει), μετά μπες στο dungeon ----------
+        if (!inCombat) {
+            autoLastMonsterRef = null;
+            autoRetreatAfterLevel = false;
+
+            // ΑΣΦΑΛΕΙΑ: μετά από retreat+kill, το παιχνίδι θέτει inCombat=false άμεσα
+            // αλλά το HP μηδενίζεται στο 10% με setTimeout(500). Αν ξαναμπούμε σε μάχη
+            // πριν προλάβει το timeout, θα βρεθούμε mid-fight με 10% HP.
+            const msSinceCombat = Date.now() - autoLastCombatTime;
+            if (msSinceCombat < 900) {
+                setStatus(`AutoPlay: αναμονή μετά τη μάχη (${Math.round(msSinceCombat)}ms)...`);
+                return;
+            }
+
+            // Ίδια λογική με το handleHuntRetreatClick(): αν έχει ανέβει level και έχει gold
+            // που δεν έχει "γλεντήσει" ακόμα, κάνε πρώτα cash-in σε XP πριν κατέβεις ξανά.
+            if (player.level > player.lastGoldCashedLevel && player.gold > 0) {
+                setStatus("AutoPlay: γλεντάει το χρυσάφι για XP στον τεκέ...");
+                cashInGoldForXp();
+                levelUpSound();
+                return; // το επόμενο tick θα προχωρήσει στην κατάβαση
+            }
+
+            // Περίμενε να γεμίσει η υγεία στον τεκέ πριν ξανακατέβεις (ο τεκές την αναπληρώνει μόνος του).
+            const maxHpTown = getPlayerMaxHp();
+            if (player.hp < maxHpTown) {
+                setStatus(`AutoPlay: ξεκουράζεται στον τεκέ (${Math.round(player.hp / maxHpTown * 100)}% HP)...`);
+                return;
+            }
+
+            const selector = document.getElementById('area-selector');
+            if (!selector || selector.options.length === 0) return;
+
+            let targetLevel;
+            if (AUTO_USE_TARGET_RATIO) {
+                targetLevel = findDepthForTargetRatio(AUTO_TARGET_COMBAT_RATIO, selector.options.length);
+                const achievedRatio = calculateDifficulty(player, estimateMonsterAt(targetLevel));
+                setStatus(`AutoPlay: στοχεύει ratio ${AUTO_TARGET_COMBAT_RATIO} -> βάθος ${targetLevel} (εκτ. ratio ${achievedRatio.toFixed(2)})`);
+            } else {
+                // levels κάτω (ή πάνω, αν αρνητικό) από τον player, clamp σε [1, options.length]
+                targetLevel = Math.max(1, player.level - AUTO_DEPTH_BELOW_PLAYER);
+                targetLevel = Math.min(targetLevel, selector.options.length);
+                setStatus(`AutoPlay: κατεβαίνει στο βάθος ${targetLevel}...`);
+            }
+
+            selector.value = String(targetLevel);
+            currentSelectedLevel = parseFloat(selector.value);
+            updateSelectorColor(selector);
+
+            enterCombatFromSelector();
+            return;
+        }
+
+        // Ενημέρωση: είμαστε σίγουρα σε μάχη
+        autoLastCombatTime = Date.now();
+
+        // ==========================================
+        // ΦΑΣΙΚΟΣ ΧΡΟΝΙΣΜΟΣ ΕΝΤΟΛΩΝ (10% / 90% του τικ)
+        // ==========================================
+        const tickMs = effTick();
+        const phase = ((Date.now() - autoCombatTickStart) % tickMs) / tickMs;
+
+        // ---------- ΑΝΑΜΕΣΑ ΣΕ ΜΑΧΕΣ: έλεγχος υποχώρησης ----------
+        if (waitingForNextMonster || !monster) {
+            const maxHpMid = getPlayerMaxHp();
+            const hpPctMid = player.hp / maxHpMid;
+
+            if (hpPctMid <= AUTO_BEER_HP_PCT && !potionCooldownActive) {
+                usePotion();
+            } else if (hpPctMid <= AUTO_RETREAT_HP_PCT && potionCooldownActive) {
+                const elapsedMid = Date.now() - potionCdStart;
+                const chargePctMid = Math.min(1, elapsedMid / effCD());
+                if (chargePctMid < AUTO_RETREAT_BEER_CHARGE_PCT) {
+                    setStatus(`AutoPlay: HP χαμηλό ανάμεσα σε μάχες (${Math.round(hpPctMid * 100)}%) -> Retreat!`);
+                    forceRetreat();
+                    return;
+                }
+            }
+
+            setStatus("AutoPlay: περιμένει το επόμενο τέρας...");
+            return;
+        }
+
+        // Επαναφορά flags όταν ξεκινάει νέο τικ
+        // Χρήση < 0.11 για να πιάνει και περιπτώσεις όπου η phase πηδάει από 0.975 σε 0.050
+        if (phase < 0.11) {
+            autoEarlyPhaseFired = false;
+            autoLatePhaseFired = false;
+        }
+
+        // ---- ΠΡΩΙΜΗ ΦΑΣΗ (10%): Κατραπακιά, Μπύρα, Retreat ----
+        if (!autoEarlyPhaseFired && phase >= 0.10) {
+            autoEarlyPhaseFired = true;
+
+            if (monster && !skillCooldownActive && monster.hp > monster.maxHp * 0.50) {
+                queueSpecialAttack();
+            }
+
+            const maxHp = getPlayerMaxHp();
+            const hpPct = player.hp / maxHp;
+
+            if (hpPct <= AUTO_BEER_HP_PCT && !potionCooldownActive) {
+                usePotion();
+            } else if (hpPct <= AUTO_RETREAT_HP_PCT && potionCooldownActive) {
+                const elapsed = Date.now() - potionCdStart;
+                const chargePct = Math.min(1, elapsed / effCD());
+                if (chargePct < AUTO_RETREAT_BEER_CHARGE_PCT) {
+                    if (!isAttemptingRetreat) {
+                        setStatus(`AutoPlay: HP χαμηλό (${Math.round(hpPct * 100)}%) & μπύρα όχι έτοιμη -> Retreat!`);
+                        toggleRetreat();
+                    }
+                } else {
+                    setStatus(`AutoPlay: HP χαμηλό αλλά η μπύρα είναι σχεδόν έτοιμη (${Math.round(chargePct * 100)}%), περιμένει...`);
+                }
+            } else if (autoRetreatAfterLevel && !isAttemptingRetreat) {
+                setStatus(`AutoPlay: retreat λόγω level up (${player.level})...`);
+                toggleRetreat();
+            } else {
+                setStatus(`AutoPlay: μάχεται στο βάθος ${currentSelectedLevel} — HP ${Math.round(hpPct * 100)}%`);
+            }
+        }
+
+        // ---- ΟΨΙΜΗ ΦΑΣΗ (90%): Εκτέλεση ----
+        if (!autoLatePhaseFired && phase >= 0.90) {
+            autoLatePhaseFired = true;
+            queuePreciseStrike();
+        }
+
+        // Αν περάσαμε το 95% χωρίς να συμβεί τίποτα, update status
+        if (phase >= 0.95) {
+            const maxHp = getPlayerMaxHp();
+            const hpPct = player.hp / maxHp;
+            setStatus(`AutoPlay: μάχεται στο βάθος ${currentSelectedLevel} — HP ${Math.round(hpPct * 100)}%`);
+        }
+    }
+
+    function setAutoPlayEnabled(enabled) {
+        autoPlayEnabled = enabled;
+
+        if (toggleBtn) {
+            toggleBtn.textContent = enabled ? '🤖 AutoPlay: ON' : '🤖 AutoPlay: OFF';
+            toggleBtn.classList.toggle('on', enabled);
+        }
+
+        if (enabled) {
+            autoLastMonsterRef = null;
+            autoLastPlayerLevel = player.level;
+            setStatus("AutoPlay ενεργό.");
+        } else {
+            setStatus("AutoPlay ανενεργό.");
+            rearmTimers();
+            return;
+        }
+
+        rearmTimers();
+    }
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function () {
+            setAutoPlayEnabled(!autoPlayEnabled);
+        });
+    }
+
+    if (speedSelect) {
+        speedSelect.addEventListener('change', function () {
+            autoPlaySpeedFactor = parseInt(speedSelect.value, 10) || 1;
+            if (autoPlayEnabled) rearmTimers();
+        });
+    }
+
+    // AutoPlay ρυθμίσεις modal
+    const settingsBtn = document.getElementById('autoplay-settings-btn');
+    const settingsModal = document.getElementById('autoplay-settings-modal');
+
+    function openSettingsModal() {
+        if (!settingsModal) return;
+        document.getElementById('settings-ratio').value = AUTO_TARGET_COMBAT_RATIO;
+        document.getElementById('settings-ratio-val').textContent = AUTO_TARGET_COMBAT_RATIO;
+        document.getElementById('settings-beer').value = AUTO_BEER_HP_PCT;
+        document.getElementById('settings-beer-val').textContent = AUTO_BEER_HP_PCT;
+        document.getElementById('settings-retreat').value = AUTO_RETREAT_HP_PCT;
+        document.getElementById('settings-retreat-val').textContent = AUTO_RETREAT_HP_PCT;
+        document.getElementById('settings-beer-charge').value = AUTO_RETREAT_BEER_CHARGE_PCT;
+        document.getElementById('settings-beer-charge-val').textContent = AUTO_RETREAT_BEER_CHARGE_PCT;
+        document.getElementById('settings-tick').value = AUTO_TICK_MS;
+        document.getElementById('settings-tick-val').textContent = AUTO_TICK_MS;
+        settingsModal.style.display = 'flex';
+    }
+
+    function closeSettingsModal() {
+        if (!settingsModal) return;
+        settingsModal.style.display = 'none';
+    }
+
+    // Live preview στα range sliders
+    document.querySelectorAll('#autoplay-settings-modal input[type="range"]').forEach(function (input) {
+        input.addEventListener('input', function () {
+            const valSpan = this.parentElement.querySelector('span');
+            if (valSpan) valSpan.textContent = parseFloat(this.value);
+        });
+    });
+
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', openSettingsModal);
+    }
+
+    document.getElementById('settings-ok').addEventListener('click', function () {
+        AUTO_TARGET_COMBAT_RATIO = parseFloat(document.getElementById('settings-ratio').value);
+        AUTO_BEER_HP_PCT = parseFloat(document.getElementById('settings-beer').value);
+        AUTO_RETREAT_HP_PCT = parseFloat(document.getElementById('settings-retreat').value);
+        AUTO_RETREAT_BEER_CHARGE_PCT = parseFloat(document.getElementById('settings-beer-charge').value);
+        AUTO_TICK_MS = parseInt(document.getElementById('settings-tick').value, 10);
+        closeSettingsModal();
+    });
+
+    document.getElementById('settings-cancel').addEventListener('click', closeSettingsModal);
+
+    window.rearmTimers = rearmTimers;
+
+})();
+</script>
+
 <script>
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js');
@@ -5099,10 +5637,70 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 
+<script>
+function openOptionsModal() {
+    const modal = document.getElementById('options-modal');
+    if (!modal) return;
+    const speedEl = document.getElementById('options-speed');
+    if (speedEl) speedEl.value = gameSpeedFactor;
+    const soundEl = document.getElementById('options-sound');
+    if (soundEl) soundEl.checked = soundEnabled;
+    const musicEl = document.getElementById('options-music');
+    if (musicEl) musicEl.checked = musicEnabled;
+    modal.style.display = 'flex';
+}
+
+function closeOptionsModal() {
+    const modal = document.getElementById('options-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function applyOptions() {
+    const speedEl = document.getElementById('options-speed');
+    if (speedEl) gameSpeedFactor = parseInt(speedEl.value, 10) || 1;
+    const soundEl = document.getElementById('options-sound');
+    if (soundEl) soundEnabled = soundEl.checked;
+    const musicEl = document.getElementById('options-music');
+    if (musicEl) musicEnabled = musicEl.checked;
+    updateMusicState();
+    if (typeof rearmTimers === 'function') rearmTimers();
+    else     if (typeof window.rearmTimers === 'function') window.rearmTimers();
+    closeOptionsModal();
+}
+</script>
+
 <div id="legendary-popup" class="legendary-popup hidden">
     ΘΡΥΛΙΚΟ DROP!
 </div>
 
+<!-- Options Modal -->
+<div id="options-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:#2a2a2a;border:1px solid #e67e22;border-radius:8px;padding:20px;max-width:350px;width:90%;color:#fff;">
+        <h3 style="margin:0 0 15px;color:#e67e22;border-bottom:1px solid #444;padding-bottom:8px;">Επιλογές</h3>
+
+        <label style="display:block;margin-bottom:15px;font-size:0.85rem;">
+            Ταχύτητα παιχνιδιού:
+            <select id="options-speed" style="display:block;width:100%;margin-top:4px;background:#1a1a1a;color:#fff;border:1px solid var(--border-color);border-radius:3px;padding:4px;">
+                <option value="1">1× (κανονική)</option>
+                <option value="2">2× (γρήγορη)</option>
+                <option value="3">3× (πιο γρήγορη)</option>
+            </select>
+        </label>
+
+        <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
+            <input type="checkbox" id="options-sound"> 🔉 Ήχος
+        </label>
+
+        <label style="display:block;margin-bottom:20px;font-size:0.85rem;cursor:pointer;">
+            <input type="checkbox" id="options-music"> 🎵 Μουσική
+        </label>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button onclick="applyOptions()" style="background:#e67e22;color:#1a1a1a;border:none;border-radius:4px;padding:6px 18px;cursor:pointer;font-weight:bold;">OK</button>
+            <button onclick="closeOptionsModal()" style="background:#555;color:#fff;border:none;border-radius:4px;padding:6px 18px;cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
