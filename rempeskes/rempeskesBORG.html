@@ -4792,6 +4792,10 @@ function showLegendaryPopup() {
                     monster = null;
                     isAttemptingRetreat = false;
 
+                                // ← ΝΕΟ: 2 γραμμές εδώ
+                    const huntBtnEarly = document.getElementById("btn-hunt-retreat");
+                    if (huntBtnEarly) huntBtnEarly.disabled = true;
+
 
                     setTimeout(() => {
 
@@ -5183,7 +5187,7 @@ if (
     // ==================== ΡΥΘΜΙΣΕΙΣ (επεξεργάσιμες) ====================
     const AUTO_DEPTH_BELOW_PLAYER = 0;        // levels κάτω (ή πάνω, αν αρνητικό) από τον player — μόνο αν AUTO_USE_TARGET_RATIO = false
     const AUTO_USE_TARGET_RATIO = true;       // true: επιλογή βάθους με βάση το combat ratio αντί για σταθερό offset
-    const AUTO_TARGET_COMBAT_RATIO = 0.35;      // στόχος για το calculateDifficulty(player, monster) — μόνο αν AUTO_USE_TARGET_RATIO = true
+    const AUTO_TARGET_COMBAT_RATIO = 0.45;      // στόχος για το calculateDifficulty(player, monster) — μόνο αν AUTO_USE_TARGET_RATIO = true
     const AUTO_BEER_HP_PCT = 0.90;            // μπύρα όταν HP <= 70% (δηλ. έχει δεχτεί >=30% damage)
     const AUTO_RETREAT_HP_PCT = 0.7;         // κατώφλι HP για σκέψη retreat
     const AUTO_RETREAT_BEER_CHARGE_PCT = 0.7;// αν η μπύρα δεν είναι έστω χ% charged -> retreat

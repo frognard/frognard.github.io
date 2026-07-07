@@ -4690,6 +4690,10 @@ function showLegendaryPopup() {
                     monster = null;
                     isAttemptingRetreat = false;
 
+                // ← ΝΕΟ: 2 γραμμές εδώ
+                    const huntBtnEarly = document.getElementById("btn-hunt-retreat");
+                    if (huntBtnEarly) huntBtnEarly.disabled = true;
+
 
                     setTimeout(() => {
 
