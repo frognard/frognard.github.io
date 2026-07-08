@@ -1416,9 +1416,12 @@ function formatNumber(num) {
 
 
 function formatActiveTime(totalSeconds) {
-    const h = Math.floor(totalSeconds / 3600);
-    const m = Math.floor((totalSeconds % 3600) / 60);
-    const s = totalSeconds % 60;
+    const totalIntegerSeconds = Math.floor(totalSeconds);
+    
+    const h = Math.floor(totalIntegerSeconds / 3600);
+    const m = Math.floor((totalIntegerSeconds % 3600) / 60);
+    const s = totalIntegerSeconds % 60;
+    
     return `${h}ω ${m}λ ${s}δ`;
 }
 
@@ -2985,8 +2988,8 @@ const AREA_TYPE_COLOR = {
     let nextMonsterTimeoutId = null; // id του setTimeout που κάνει spawn το επόμενο τέρας (endCombat) — ώστε να μπορεί να ακυρωθεί σε forceRetreat/θάνατο
     let currentRunKills = 0
  
-    const CD_DURATION = 10000; // βασική διάρκεια cooldown (ms) σε κανονική ταχύτητα (x1)
-    const COMBAT_TICK_MS = 2000; // βασικός χρόνος γύρου μάχης (ms) σε κανονική ταχύτητα (x1)
+    const CD_DURATION = 7500; // βασική διάρκεια cooldown (ms) σε κανονική ταχύτητα (x1)
+    const COMBAT_TICK_MS = 1500; // βασικός χρόνος γύρου μάχης (ms) σε κανονική ταχύτητα (x1)
 
     // === SPEED HOOK ===
     // autoPlayEnabled / autoPlaySpeedFactor ελέγχονται από το AutoPlay panel (βλ. τέλος αρχείου).
@@ -3924,7 +3927,7 @@ function startTownRegen() {
                 maxHp - player.hp
             );
             player.hp += regenAmount;
-            player.activeTime += 2;
+            player.activeTime += 1.5;
             createFloatingText(
                 'player-hp-parent',
                 `+${formatNumber(regenAmount)}`,
@@ -4447,7 +4450,7 @@ function forceRetreat() {
 function executeCombatRound() {
    
     if (!inCombat) return;
-    player.activeTime += 2;
+    player.activeTime += 1.5;
     if (waitingForNextMonster) return;
 
     if (!monster || monster.hp <= 0) {
@@ -5727,9 +5730,9 @@ function applyOptions() {
         <label style="display:block;margin-bottom:15px;font-size:0.85rem;">
             Ταχύτητα παιχνιδιού:
             <select id="options-speed" style="display:block;width:100%;margin-top:4px;background:#1a1a1a;color:#fff;border:1px solid var(--border-color);border-radius:3px;padding:4px;">
-                <option value="1">1× (κουλ)</option>
-                <option value="1.5">1.5× (σβέλτη)</option>
-                <option value="3">2× (τούρμπο)</option>
+                <option value="0.75">Κουλ</option>
+                <option value="1">Κανονική</option>
+                <option value="1.33">Τούρμπο</option>
             </select>
         </label>
 
