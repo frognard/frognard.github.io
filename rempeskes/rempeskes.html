@@ -3741,8 +3741,13 @@ function refreshAreaSelectorAppearance() {
     document.getElementById('p-wep-bonus').innerText = `T${player.weapon.power}`;
     document.getElementById('p-arm-bonus').innerText = `T${player.armor.power}`;
     document.getElementById('p-mag-bonus').innerText = `T${player.magic.power}`;
-    document.getElementById('p-xp').innerText = formatNumber(player.xp);
-    document.getElementById('p-next-xp').innerText = formatNumber(player.nextXp);
+    if (player.level >= 100) {
+        document.getElementById('p-xp').innerText = '*';
+        document.getElementById('p-next-xp').innerText = '*';
+    } else {
+        document.getElementById('p-xp').innerText = formatNumber(player.xp);
+        document.getElementById('p-next-xp').innerText = formatNumber(player.nextXp);
+    }
     document.getElementById('p-gold').innerText = formatNumber(player.gold);
     
     
@@ -3759,25 +3764,14 @@ function refreshAreaSelectorAppearance() {
     armorEl.classList.toggle('legendary-glow-armor', player.armor.legendary === true);
     magicEl.classList.toggle('legendary-glow-magic', player.magic.legendary === true);
 
-    // xp bar percentage
-    const xpPercent = (player.xp / player.nextXp) * 100;
-    document.getElementById("p-xp-bar").style.width = `${xpPercent}%`;
-    document.getElementById("p-xp-percent").textContent = `${xpPercent.toFixed(1)}%`;    
-
-    let wCost = getWeaponUpgradeCost(player.weapon.power);
-    let aCost = getArmorUpgradeCost(player.armor.power);  
-    
-    //  const btnWep = document.getElementById('btn-upgrade-weapon');
-    //  const btnArm = document.getElementById('btn-upgrade-armor');
-    
-    //   btnWep.innerText = `Up (${wCost}g)`;
-    //   btnArm.innerText = `Up (${aCost}g)`;
-
-    //   btnWep.disabled = inCombat || player.gold < wCost;
-    //   btnArm.disabled = inCombat || player.gold < aCost;
-
-    const xpPct = Math.max(0, Math.min(100, (player.xp / player.nextXp) * 100));
-    document.getElementById('p-xp-bar').style.width = xpPct + '%';
+    if (player.level >= 100) {
+        document.getElementById('p-xp-bar').style.width = '100%';
+        document.getElementById('p-xp-percent').textContent = '*';
+    } else {
+        const xpPct = Math.max(0, Math.min(100, (player.xp / player.nextXp) * 100));
+        document.getElementById('p-xp-bar').style.width = xpPct + '%';
+        document.getElementById('p-xp-percent').textContent = `${xpPct.toFixed(1)}%`;
+    }
 
     const maxHp = getPlayerMaxHp();
     if (player.ironman && player.ironmanDead) {
