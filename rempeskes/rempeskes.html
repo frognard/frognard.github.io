@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v210</title>
+    <title>Ρεμπεσκές v212</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -3019,10 +3019,13 @@ const AREA_TYPE_COLOR = {
     const skills = {
     heavyStrike: {
         name: "Κατραπακιά",
-        multiplier: 2.0,
+        multiplier: 1.0,
     // fixedDice: 6,
+        minDice: 4,
+        maxDice: 10,
         hitChance: 90
     },
+
     preciseStrike: {
         name: "Εκτέλεση",
         multiplier: 1.0,
@@ -3030,7 +3033,8 @@ const AREA_TYPE_COLOR = {
         fixedDice: 5,
         executeThreshold: 0.25
     }
-};
+    }
+
 
   // Attack and defense formulas for player
     function getPlayerAtk() { return player.level * 0.75 + player.weapon.power + player.magic.power/2; }
@@ -4285,18 +4289,20 @@ function rollDeathPenaltyAmount() {
 }
 
 
-    function rollBaseDamage(fixedDice = null) {
-        let d6;
-        if (fixedDice !== null) {
-            d6 = fixedDice;
-        } else {
-            d6 = Math.floor(Math.random() * 6) + 1;
-        }
-        let diff = getPlayerAtk() - monster.def;
-        let dmgModifier = calcDmgModifier(diff);
-        let dmg = d6 * 5 * player.level * dmgModifier;
-        return Math.max(1, Math.round(dmg));
+function rollBaseDamage(fixedDice = null, minDice = null, maxDice = null) {
+    let d6;
+    if (fixedDice !== null) {
+        d6 = fixedDice;
+    } else if (minDice !== null && maxDice !== null) {
+        d6 = Math.floor(Math.random() * (maxDice - minDice + 1)) + minDice;
+    } else {
+        d6 = Math.floor(Math.random() * 6) + 1;
     }
+    let diff = getPlayerAtk() - monster.def;
+    let dmgModifier = calcDmgModifier(diff);
+    let dmg = d6 * 5 * player.level * dmgModifier;
+    return Math.max(1, Math.round(dmg));
+}
 
        function performPlayerAttack(skill = null) {
 
@@ -4314,7 +4320,7 @@ function rollDeathPenaltyAmount() {
             }
 
             // βασικό damage
-            let damage = rollBaseDamage(skill?.fixedDice);
+            let damage = rollBaseDamage(skill?.fixedDice, skill?.minDice, skill?.maxDice);
 
             // skill modifier
             
