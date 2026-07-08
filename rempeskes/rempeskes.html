@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v212</title>
+    <title>Ρεμπεσκές v220</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -2303,7 +2303,7 @@ const monsterFirstNames = [
 "Θουλμ",
 "Καχούρ",
 "Σούουρ",
-"Ερλίκ",
+"Χαϊβάν",
 "Ραθόγκ",
 "Μαρδάκ",
 "Σχάνταρ",
@@ -2709,40 +2709,101 @@ const legendaryStatsByType = {
 const legendaryMonstersByType = {
     weapon: [
         { min: 1,  max: 10,  name: "Γιακουμής",         itemName: "Μπαλτάς του Γιακουμή" },
-        { min: 11, max: 20,  name: "Σταύρακας",     itemName: "Σουγιάς του Σταύρακα" },
+        { min: 1,  max: 10,  name: "Κουνούπης",         itemName: "Κεντρί" },
+        { min: 1,  max: 10,  name: "Σταύρακας",     itemName: "Σουγιάς του Σταύρακα" },
+        { min: 11,  max: 20,  name: "Δερβισόμαγκας",         itemName: "Σαλίβα του Δερβίση" },
+        { min: 11,  max: 20,  name: "Λύκος Άλφα",         itemName: "Λυκοδόντειο Ρόπαλο" },
+        { min: 11,  max: 20,  name: "Μεγακόβαλος",         itemName: "Κοβαλική Ράβδος" },
         { min: 21, max: 30,  name: "Πρωτοτσίγγελος",     itemName: "Χειροτσίγγελα" },
+        { min: 21,  max: 30,  name: "Υπερμπούγαρος",         itemName: "Κωλοσφύρα" },
+        { min: 21,  max: 30,  name: "Κραταιόδοντας",         itemName: "Κυνοπέλεκυς" },
         { min: 31, max: 40, name: "Σαψάλης",         itemName: "Ο Παππούκας" },
+        { min: 31,  max: 40,  name: "Γιαγκούλας",         itemName: "Η Παρδάλα" },
+        { min: 31,  max: 40,  name: "Τρεμαντάχειλος",         itemName: "Η Μπαμπέσα" },
         { min: 41, max: 50, name: "Η Μεγίστη Μούμια",         itemName: "Οστεοθραύστης" },        
+        { min: 41,  max: 50,  name: "Ο Μονομάχος",         itemName: "Τρίαινα του Μονομάχου" },
+        { min: 41,  max: 50,  name: "Ο Κένταρχος",         itemName: "Σπάθα του Κένταρχου" },
         { min: 51, max: 60,  name: "Κωλοτερορίτα",         itemName: "ΑΚ47" },
+        { min: 51,  max: 60,  name: "Αραχνομάνα",         itemName: "Τοξική Λόγχη" },
+        { min: 51,  max: 60,  name: "Αστερίων",         itemName: "Μινωικός Πέλεκυς" },
         { min: 61, max: 70,  name: "Δημήτρης Κατής",     itemName: "Σπαθί του Νικητή" },
+        { min: 61,  max: 70,  name: "Μαμά του Σμερδαλέου",     itemName: "Η Κατσαμάγκα" },
+        { min: 61,  max: 70,  name: "Διγενής",         itemName: "Σπαθί του Διγενή" },
         { min: 71, max: 80,  name: "Ο Προφήτης",     itemName: "Ζουλφικάρι" },
+        { min: 71,  max: 80,  name: "Ο Βασιλιάς",         itemName: "Εξκάλιμπερ" },
+        { min: 71,  max: 80,  name: "Λάιονο",         itemName: "Ξίφος των Οιωνών" },
         { min: 81, max: 90, name: "Ο Χάρος",         itemName: "Τσαρόνκλο" },
-        { min: 91, max: 100, name: "Λάιονο",         itemName: "Ξίφος των Οιωνών" }       
+        { min: 81,  max: 90,  name: "Το Κυβόργιο",         itemName: "Ενεργειακό Σκήπτρο" },
+        { min: 81,  max: 90,  name: "Ο Έκπτωτος",         itemName: "Ρομφαία των Αιώνων" },
+        { min: 91, max: 100, name: "Βύθιοc Δράκων",         itemName: "Φλόγα των Βαθών" },
+        { min: 91,  max: 100,  name: "Το Πράγμα",         itemName: "Ψυχολέηζερ" },
+        { min: 91,  max: 100,  name: "Ο Γνόφος",         itemName: "Γνοφικό Ξίφος" }    
     ],
+
     armor: [
         { min: 1,  max: 10,  name: "Ριχάρδος",         itemName: "Χρυσά Κουρελια" },
-        { min: 11, max: 20,  name: "Σκύλης ο Σκουτάτος",     itemName: "Σκουτάρι του Σκύλη" },
+        { min: 1, max: 10,  name: "Σκύλης ο Σκουτάτος",     itemName: "Σκουτάρι του Σκύλη" },
+        { min: 1, max: 10,  name: "Καββάδης",     itemName: "Μαγικό Καββάδιο" },
+        { min: 11, max: 20,  name: "Τιβέριος",     itemName: "Μανδύας του Τιβέριου" },
+        { min: 11, max: 20,  name: "Βόδαλος",     itemName: "ΒουΘώραξ" },
+        { min: 11, max: 20,  name: "Αρκούντος",     itemName: "Αρκουδοτόμαρο" },
         { min: 21, max: 30,  name: "Πράσινος Πρόμαχος",     itemName: "Πράσινη Ζάβα" },
+        { min: 21, max: 30,  name: "Κόκκινος Πρόμαχος",     itemName: "Κόκκινο Λωρίκι" },
+        { min: 21, max: 30,  name: "Μαύρος Πρόμαχος",     itemName: "Μάυρο Κλιβάνιο" },
         { min: 31, max: 40, name: "Θαμβόπουλος",         itemName: "Θυρεός του Θαμβόπουλου" },
-        { min: 41, max: 50, name: "Αρμούρης",         itemName: "Λωρίκι του Αρμούρη" },        
-        { min: 51, max: 60,  name: "Θερμουθαρίν",         itemName: "Αμαζόνιο Κράνος" },
+        { min: 31, max: 40, name: "Θαμβόπουλος",         itemName: "Θώρακας του Θαμβόπουλου" },
+        { min: 31, max: 40, name: "Θαμβόπουλος",         itemName: "Θυμιατό του Θαμβόπουλου" },
+        { min: 41, max: 50, name: "Αρμούρης",         itemName: "Λωρίκι του Αρμούρη" },     
+        { min: 41, max: 50, name: "Ο Γεωμέτρης",         itemName: "Φυλακτό Προστασίας" },      
+        { min: 41, max: 50, name: "Ο Εξκουβίτωρ",         itemName: "Στοιχειωμένο Κλιβάνιο" },         
+        { min: 51, max: 60,  name: "Θερμουθαρίν",         itemName: "Αμαζόνειο Κράνος" },
+        { min: 51, max: 60,  name: "Πρίσκος ο Βράχος",         itemName: "Δέρμα από Βράχο" },
+        { min: 51, max: 60,  name: "Ο Επτάφρακτος",         itemName: "Επτάφρακτος Θώρακας" },
         { min: 61, max: 70,  name: "Ο Κυνηγός",     itemName: "Αστρικός Θώρακας" },
+        { min: 61, max: 70,  name: "Το Κυβόργιο",     itemName: "Μαύρο Κέβλαρ" },
+        { min: 61, max: 70,  name: "Ατσάλινος Πρόμαχος",     itemName: "Υπερκλιβάνιο" },
         { min: 71, max: 80,  name: "Κοσέι ο Αθάνατος",     itemName: "Σκελετικός Θώρακας" },
+        { min: 71, max: 80,  name: "Μέγας Σικάριος",     itemName: "Μανδύας Διατοπισμού" },
+        { min: 71, max: 80,  name: "Τραξ ο Τυμβολίκτωρ",     itemName: "Ρούνοι Προστασίας" },
         { min: 81, max: 90, name: "Ο Νοφιστής",         itemName: "Δρακόντειο Δέρας" },
-        { min: 91, max: 100, name: "Sol Invictus",         itemName: "Ηλιακή Πανοπλία" }       
+        { min: 81, max: 90, name: "Φοβερά Ζαλμοξία",         itemName: "Φοβερά Προστασία" },
+        { min: 81, max: 90, name: "Διαμαντένιο Γκόλεμ",         itemName: "Διαμαντένια Σκούτα" },
+        { min: 91, max: 100, name: "Στοιχειακός Άρχων",         itemName: "Στοιχειακή Πανοπλία" },       
+        { min: 91, max: 100, name: "Αστροσύννεφο",         itemName: "Ενεγειακό Πλέγμα" },  
+        { min: 91, max: 100, name: "Sol Invictus",         itemName: "Ηλιακή Πανοπλία" }  
     ],
 
     magic: [
         { min: 1,  max: 10,  name: "Πάτερ Τζατζίκιας",         itemName: "Ιερό Τζατζίκι" },
-        { min: 11, max: 20,  name: "Μπεν Μίλτον",     itemName: "Απατεών" },
-        { min: 21, max: 30,  name: "Ντερβίς-Μπαμπά",     itemName: "Καπέλο του Ντερβίς-Μπαμπά" },
+        { min: 1,  max: 10,  name: "Μπεν Μίλτον",     itemName: "Απατεών" },
+        { min: 1,  max: 10,  name: "Ο Νεκροβγάλτης",         itemName: "Λάμπα του Νεκροβγάλτη" },
+        { min: 11, max: 20,  name: "Χαμόδρακας",     itemName: "Κασέλα του Χαμόδρακα" },
+        { min: 11, max: 20,  name: "Κακοφώτης",     itemName: "Κρανίο της Ανδράγας" },
+        { min: 11, max: 20,  name: "Καλοφώτης",     itemName: "Κώδικας της Κρύπτης" },
+        { min: 21, max: 30,  name: "Θείος Πύθιος",     itemName: "Πίπα του θέιου Πύθιου" },
+        { min: 21, max: 30,  name: "Θείος Πύθιος",     itemName: "Εύχανδρο του θείου Πύθιου" },
+        { min: 21, max: 30,  name: "Θείος Πύθιος",     itemName: "MuleMaster 4000" },
         { min: 31, max: 40, name: "Μάγος Σπέκουλης",         itemName: "Φακοί Ερυθρόρασης" },
-        { min: 41, max: 50, name: "Μπαμπουράρχης",         itemName: "Υπερμπάμπουρας" },        
+        { min: 31, max: 40, name: "Μπαμπουράρχης",         itemName: "Υπερμπάμπουρας" },
+        { min: 31, max: 40,  name: "Ντερβίς-Μπαμπά",     itemName: "Καπέλο του Ντερβίς-Μπαμπά" },
+        { min: 41, max: 50, name: "Φελιξ ο Φέναξ",         itemName: "Μάσκα του Φένακα" },        
+        { min: 41, max: 50, name: "Μάγισσα Τατάνα",         itemName: "Μαύρη Γάτα" },     
+        { min: 41, max: 50, name: "Σοφός Καραθαρούτι",         itemName: "Μαγικό Τουρμπάνι" },     
         { min: 51, max: 60,  name: "Κρυπτόπραμα",         itemName: "Κράνος Τηλεμεταφοράς" },
+        { min: 51, max: 60,  name: "Φωχρίας ο Γνοφοσοφιστής",         itemName: "Ελάσσων Γνοφικός Κώδιξ" },
+        { min: 51, max: 60,  name: "Μπαλγκάν Χαϊβάν",         itemName: "Διαβολοκεμετζές" },
         { min: 61, max: 70,  name: "Κεμπεχσενούφ",     itemName: "Κλειδί του Κεμπεχσενούφ" },
-        { min: 71, max: 80,  name: "Μέγας Νεκτεναβός",     itemName: "Μέγα Γριμμόριο" },
+        { min: 61, max: 70,  name: "?????????? ? ???????",     itemName: "Μανδύας Αορατότητας" },
+        { min: 61, max: 70,  name: "Σατούρνος",     itemName: "Φυλακτήριο του Σατούρνου" },
+        { min: 71, max: 80,  name: "Μέγας Νεκτεναβός",     itemName: "Μέγα Γριμμόριον" },
+        { min: 71, max: 80,  name: "Χρυσόχειρ ο Γνοφάρχης",     itemName: "Μείζων Γνοφικός Κώδιξ"},
+        { min: 71, max: 80,  name: "Ζαφραχάν ο Ιφρίτης",     itemName: "Δαχτυλίδι του Ιφρίτη" },
         { min: 81, max: 90, name: "Αμπντούλ Αλχαζρέντ",         itemName: "Νεκρονομικόν" },
-        { min: 91, max: 100, name: "Φαλαβάρ ο Νεκυοδαίμων",         itemName: "Νεκυοδαίμων" }    
+        { min: 81, max: 90, name: "Θάο-Παν ο Μαύρος",         itemName: "Νεκρομαντική Ράβδος" },
+        { min: 81, max: 90, name: "Αμπντούλ Αλχαζρέντ",         itemName: "Νεκρονομικόν" },
+        { min: 91, max: 100, name: "Φαλαβάρ ο Νεκυοδαίμων",         itemName: "Νεκυοδαίμων" },    
+        { min: 91, max: 100, name: "Χολσόρνα",         itemName: "Μάτι του Χολσόρνα" },   
+        { min: 91, max: 100, name: "Ερλίκ-Χαν",         itemName: "Κέρατα του Ερλίκ-Χαν" }   
     ]
 };
 
