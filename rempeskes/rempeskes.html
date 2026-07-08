@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v220</title>
+    <title>Ρεμπεσκές v225</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -130,6 +130,21 @@
             width: 0%;
             background-color: #40a8ee;
             transition: width 0.28s ease;
+        }
+
+        @keyframes killstreakGlowSilver {
+            0%, 100% { box-shadow: 0 0 4px 1px rgba(200,200,205,0.45); }
+            50%      { box-shadow: 0 0 8px 2px rgba(220,220,225,0.75); }
+        }
+        @keyframes killstreakGlowGold {
+            0%, 100% { box-shadow: 0 0 6px 2px rgba(255,215,0,0.55); }
+            50%      { box-shadow: 0 0 12px 3px rgba(255,223,60,0.9); }
+        }
+        .xp-bar-container.killstreak-silver {
+            animation: killstreakGlowSilver 1.8s ease-in-out infinite;
+        }
+        .xp-bar-container.killstreak-gold {
+            animation: killstreakGlowGold 1.6s ease-in-out infinite;
         }
 
         .stats-grid {
@@ -536,6 +551,8 @@
         .log-victory { color: var(--accent-gold); font-weight: bold; }
         .log-retreat { color: #e67e22; font-weight: bold; }
         .log-konanos { color: #ffffff; font-weight: bold; }
+        .log-streak-silver { color: #e0e6eb; font-weight: bold; }
+        .log-streak-gold { color: var(--accent-gold); font-weight: bold; text-shadow: 0 0 6px rgba(255,215,0,0.5); }
 
         .area-select-container {
     margin-top: 15px;
@@ -1017,7 +1034,7 @@ body {
     
     <div>
         <div class="xp-wrapper-area" id="xp-parent">
-            <div class="xp-bar-container">
+            <div class="xp-bar-container" id="xp-bar-container">
                 <div id="p-xp-bar"></div>
                 <div id="p-xp-percent" class="xp-bar-text">0.0%</div>
             </div>
@@ -1763,6 +1780,26 @@ function itemDropSound() {
 
         osc.start(t);
         osc.stop(t + 0.10);
+    });
+}
+
+function killstreakSound() {
+    if (!soundEnabled) return;
+    const now = audioCtx.currentTime;
+    [400, 620].forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "triangle";
+        const t = now + i * 0.05;
+        osc.frequency.setValueAtTime(freq, t);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.9, t + 0.3);
+        gain.gain.setValueAtTime(0.14, t);
+        gain.gain.linearRampToValueAtTime(0.12, t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.4);
     });
 }
 
@@ -3048,6 +3085,7 @@ const AREA_TYPE_COLOR = {
     let waitingForNextMonster = false;
     let nextMonsterTimeoutId = null; // id του setTimeout που κάνει spawn το επόμενο τέρας (endCombat) — ώστε να μπορεί να ακυρωθεί σε forceRetreat/θάνατο
     let currentRunKills = 0
+    let killStreakBonus = 0; // 0 / 0.05 / 0.10 - XP bonus % από το τρέχον σερί φόνων
  
     const CD_DURATION = 10000; // βασική διάρκεια cooldown (ms) σε κανονική ταχύτητα (x1)
     const COMBAT_TICK_MS = 2000; // βασικός χρόνος γύρου μάχης (ms) σε κανονική ταχύτητα (x1)
@@ -3215,6 +3253,41 @@ function registerKillStreak() {
     if (currentSelectedLevel >= player.level &&
         currentRunKills > player.bestKillStreak) {
         player.bestKillStreak = currentRunKills;
+    }
+}
+
+// --- ΣΕΡΙ ΦΟΝΩΝ: ασημένια λάμψη στα 5, χρυσή στα 10, bonus XP στους επόμενους φόνους ---
+function updateKillStreakVisuals() {
+    const xpBarContainer = document.getElementById('xp-bar-container');
+
+    if (currentRunKills >= 10) {
+        if (killStreakBonus !== 0.10) {
+            killStreakBonus = 0.10;
+            logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-gold');
+            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ!', '#ffd700'); }, 500);
+        }
+        if (xpBarContainer) {
+            xpBarContainer.classList.remove('killstreak-silver');
+            xpBarContainer.classList.add('killstreak-gold');
+        }
+    } else if (currentRunKills >= 5) {
+        if (killStreakBonus !== 0.05) {
+            killStreakBonus = 0.05;
+            logMessage(`Σερί 5 φόνων! +5% XP!`, 'streak-silver');
+            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '5 ΣΕΡΙ!', '#e0e6eb'); }, 500);
+        }
+        if (xpBarContainer) {
+            xpBarContainer.classList.remove('killstreak-gold');
+            xpBarContainer.classList.add('killstreak-silver');
+        }
+    }
+}
+
+function resetKillStreak() {
+    killStreakBonus = 0;
+    const xpBarContainer = document.getElementById('xp-bar-container');
+    if (xpBarContainer) {
+        xpBarContainer.classList.remove('killstreak-silver', 'killstreak-gold');
     }
 }
 
@@ -4498,6 +4571,7 @@ function forceRetreat() {
         player.bestKillStreak = currentRunKills;
         }
     currentRunKills = 0; // Μηδενισμός μετά την αναφορά
+    resetKillStreak();
     logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
     if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
     createFloatingText('player-hp-parent', "ΥΠΟΧΩΡΗΣΗ", "#00d2ff");
@@ -4816,6 +4890,7 @@ function showLegendaryPopup() {
                         player.bestKillStreak = currentRunKills;
                     }
                 currentRunKills = 0;
+                resetKillStreak();
                 logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
                 if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
                 player.hp = Math.round(getPlayerMaxHp() * 0.10);
@@ -4853,13 +4928,16 @@ function showLegendaryPopup() {
                 monster.variant !== 'normal' ? 1.5 :
                 1;
             let gainedXp = Math.round(
-                getMonsterXpReward(monster.level) * xpMultiplier
+                getMonsterXpReward(monster.level) * xpMultiplier * (1 + killStreakBonus)
                 );
 
             player.xp += gainedXp;
             sessionXp += gainedXp;
             logMessage(`+${formatNumber(gainedXp)} XP`, 'victory');
             createFloatingText('xp-parent', `+${formatNumber(gainedXp)} XP`, "var(--accent-gold)");
+
+            // Ενημέρωση του σερί φόνων (γλάστρα/λάμψη + bonus για τους επόμενους φόνους)
+            updateKillStreakVisuals();
 
             
             // weaponchances
@@ -4937,6 +5015,7 @@ function showLegendaryPopup() {
                         }
 
                         currentRunKills = 0; // Μηδενισμός μετά την αναφορά
+                        resetKillStreak();
                         logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
                         if (Math.random() < 1/3) {logMessage(zaladouras[Math.floor(Math.random() * zaladouras.length)],'britalic');}
                         player.hp = Math.round(getPlayerMaxHp() * 0.10);
@@ -5044,6 +5123,7 @@ function applyDefeatPenalties() {
     };
        
     currentRunKills = 0;
+    resetKillStreak();
     player.deaths++;
 
     // Καταμέτρηση θανάτων ανά "χρώμα" τέρατος (κόκκινο=weapon, μπλε=armor, μωβ=magic).
