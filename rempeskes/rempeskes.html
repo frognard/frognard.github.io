@@ -5786,39 +5786,46 @@ if ('serviceWorker' in navigator) {
         console.error('Supabase init failed (psofologio sync off):', e);
     }
 
-    // Anevazei OLES tis kataxwriseis tou topikou psofologiou sto online database.
-    // An kapoia yparxei idi (idio name/level/depth/killer/weapon/armor/magic/date),
-    // ginetai overwrite (upsert) anti gia diplotypo.
-    window.syncIronmanRecordsToCloud = function (records) {
+    window.syncIronmanRecordsToCloud = async function (records) {
         if (!sbClient || !records || records.length === 0) return;
 
-        const rows = records.map(r => ({
-            name: r.name,
-            level: r.level,
-            depth: r.depth,
-            killer: r.killer,
-            weapon: r.weapon,
-            armor: r.armor,
-            magic: r.magic,
-            death_date: new Date(r.date).toISOString(),
-            victory: !!r.victory
-        }));
+        let uploaded = 0;
+        let skipped = 0;
 
-        try {
-            sbClient
+        for (const r of records) {
+            const name = r.name;
+            const level = r.level;
+
+            const { data: existing } = await sbClient
                 .from('ironman_deaths')
-                .upsert(rows, { onConflict: 'name,level,depth,killer,weapon,armor,magic,death_date' })
-                .then(({ error }) => {
-                    if (error) {
-                        console.error('Psofologio cloud sync error:', error);
-                        logMessage("Απέτυχε η αποστολή στο online Ψοφολόγιο.", 'system');
-                    } else {
-                        logMessage("Το Ψοφολόγιο ανέβηκε στο online database.", 'system');
-                    }
+                .select('level')
+                .eq('name', name)
+                .maybeSingle();
+
+            if (existing) {
+                if (level <= existing.level) { skipped++; continue; }
+                await sbClient.from('ironman_deaths').delete().eq('name', name);
+            }
+
+            const { error: ie } = await sbClient
+                .from('ironman_deaths')
+                .insert({
+                    name, level,
+                    depth: r.depth,
+                    killer: r.killer,
+                    weapon: r.weapon,
+                    armor: r.armor,
+                    magic: r.magic,
+                    death_date: new Date(r.date).toISOString(),
+                    victory: !!r.victory
                 });
-        } catch (e) {
-            console.error('Psofologio cloud sync exception:', e);
-            logMessage("Απέτυχε η αποστολή στο online Ψοφολόγιο.", 'system');
+
+            if (ie) { console.error('Insert error for', name, ie); }
+            else { uploaded++; }
+        }
+
+        if (uploaded > 0 || skipped > 0) {
+            logMessage(`Το Ψοφολόγιο ανέβηκε στο online database (${uploaded} upload, ${skipped} παραλείψεις).`, 'system');
         }
     };
 })();
