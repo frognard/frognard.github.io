@@ -132,20 +132,12 @@
             transition: width 0.28s ease;
         }
 
-        @keyframes killstreakGlowSilver {
-            0%, 100% { box-shadow: 0 0 4px 1px rgba(200,200,205,0.45); }
-            50%      { box-shadow: 0 0 8px 2px rgba(220,220,225,0.75); }
-        }
-        @keyframes killstreakGlowGold {
-            0%, 100% { box-shadow: 0 0 6px 2px rgba(255,215,0,0.55); }
-            50%      { box-shadow: 0 0 12px 3px rgba(255,223,60,0.9); }
-        }
-        .xp-bar-container.killstreak-silver {
-            animation: killstreakGlowSilver 1.8s ease-in-out infinite;
-        }
-        .xp-bar-container.killstreak-gold {
-            animation: killstreakGlowGold 1.6s ease-in-out infinite;
-        }
+.xp-bar-container.killstreak-silver {
+    box-shadow: 0 0 5px 2px rgba(220,220,225,0.35);
+}
+.xp-bar-container.killstreak-gold {
+    box-shadow: 0 0 7px 2px rgba(255,223,60,0.4);
+}
 
         .stats-grid {
             display: grid;
