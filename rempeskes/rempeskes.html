@@ -3263,7 +3263,7 @@ function updateKillStreakVisuals() {
     if (currentRunKills >= 10) {
         if (killStreakBonus !== 0.10) {
             killStreakBonus = 0.10;
-            logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-gold');
+            logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-silver');
             setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ!', '#ffd700'); }, 500);
         }
         if (xpBarContainer) {
