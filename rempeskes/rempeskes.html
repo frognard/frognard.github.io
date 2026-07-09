@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v225</title>
+    <title>Ρεμπεσκές v228</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1363,39 +1363,38 @@ function clearIronmanHighscores() {
     } catch (e) {
         console.error('clear ironman highscores failed:', e);
     }
+    // ξαναφτιάχνουμε το modal ώστε να δείξει την άδεια λίστα
+    showIronmanHighscores();
 }
 
 function showIronmanHighscores() {
     const scores = getIronmanHighscores();
 
-    logMessage("");
-    logMessage("ΨΟΦΟΛΟΓΙΟN", "psof");
-                
-        logMessage(``);
+    const body = openInfoModal("Ψοφολόγιον");
+
+    appendInfoLine(body, "");
     if (scores.length === 0) {
-        logMessage("Δεν υπάρχουν ακόμα νεκροί Ironmen.", "psof");
-        logMessage("");
+        appendInfoLine(body, "Δεν υπάρχουν ακόμα νεκροί Ironmen.", "psof");
+        appendInfoLine(body, "");
     } else {
         scores.forEach(s => {
             // Μετατροπή της ημερομηνίας σε μορφή ΗΗ/ΜΜ/ΕΕΕΕ
             const formattedDate = new Date(s.date).toLocaleDateString('el-GR');
 
             if (s.victory) {
-                logMessage(`★ ${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)} και έγινε ΘΕΟΣΦΑΧΤΗΣ! [${formattedDate}]`, "psof-victory");
+                appendInfoLine(body, `★ ${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)} και έγινε ΘΕΟΣΦΑΧΤΗΣ! [${formattedDate}]`, "psof-victory");
             } else {
-                logMessage(`${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer} [${formattedDate}]`, "psof");
+                appendInfoLine(body, `${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer} [${formattedDate}]`, "psof");
             }
-            logMessage(``);
-           
-           
-          });
+            appendInfoLine(body, ``);
+        });
 
     }
-    logMessageHTML(`<a href="#" onclick="clearIronmanHighscores(); return false;" style="color: #cc3333; text-decoration: underline; cursor: pointer;">Διαγραφή Ψοφολογίου Ironmen</a>`,
+    appendInfoLineHTML(body, `<a href="#" onclick="clearIronmanHighscores(); return false;" style="color: #cc3333; text-decoration: underline; cursor: pointer;">Διαγραφή Ψοφολογίου Ironmen</a>`,
         "psof");
-        logMessage("");
-         logMessageHTML(`<a href="https://frognard.github.io/rempeskes/psofologio.html" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Μέγα Ψοφολόγιον</a>`, "psof");
-    logMessageHTML(`<a href="#" onclick="uploadPsofologioToCloud(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε Μέγα Ψοφολόγιο</a>`,
+    appendInfoLine(body, "");
+    appendInfoLineHTML(body, `<a href="https://frognard.github.io/rempeskes/psofologio.html" target="_blank" rel="noopener" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Μέγα Ψοφολόγιον</a>`, "psof");
+    appendInfoLineHTML(body, `<a href="#" onclick="uploadPsofologioToCloud(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε Μέγα Ψοφολόγιο</a>`,
         "psof");
 
 }
@@ -3893,41 +3892,51 @@ function logMessageHTML(html, type = 'system') {
 
 
     function showRules() {
-    
-    logMessage("");
-    logMessage("ΡΕΜΠΕΣΚΕΣ", "help");
-    logMessage("Ηλεκτρονικό μπαρμπουτο-κομπολόι για να περνάμε την ώρα μας.", "help");
-    logMessage("Από τον Φώτη Ηλιόπουλο.", "help");
-    logMessage("");
-    logMessage("Περιγραφή παιχνιδιού:", "help");
-    logMessage("ΣΚΟΤΩΣΕ. ΓΙΝΕ ΠΑΝΙΣΧΥΡΟΣ. ΣΚΟΤΩΣΕ ΚΙ ΑΛΛΟ. ΓΙΝΕ ΑΚΟΜΑ ΠΙΟ ΠΑΝΙΣΧΥΡΟΣ.", "help");
-    logMessage("ΣΚΟΤΩΣΕ ΤΟ ΘΕΟ ΚΟΝΑΝΟ ΣΤΟ ΒΑΘΟΣ 100.", "help");
-    logMessage("");
-    logMessage("Κάθε βάθος στο λαβύρινθο έχει συγκεκριμένη δυσκολία.", "help");
-    logMessage("Τα τέρατα δίνουν XP και χρυσό. Τα XP ανεβάζουν το επίπεδό σου, και κατα συνέπεια τη ζωή και τη ζημιά σου.", "help");
-    logMessage("");
-    logMessage("Τα σπάνια τέρατα, εκτός από διπλάσιο XP, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ.", "help");
-    logMessage("Ένα σπάνιο τέρας μπορεί να ρίξει αντικείμενα επιπέδου μέχρι και 5 επίπεδα ψηλότερα από το επίπεδό του.", "help");
- // logMessage("Ο παίκτης μπορεί να χρησιμοποιήσει αντικείμενα μέχρι και 5 επίπεδα ψηλότερα από το επίπεδό του.");
-    logMessage("Τα να έχει κανείς ισχυρά αντικείμενα είναι πολύ σημαντικό!", "help");
-    logMessage("");
-    logMessage("• Τα άγρια (κόκκινα) τέρατα ρίχνουν όπλα.", "help");
-    logMessage("• Τα θωρακισμένα (γαλάζια) τέρατα ρίχνουν πανοπλίες.", "help");
-    logMessage("• Τα μαγικά (μωβ) τέρατα ρίχνουν μαγικά αντικείμενα.", "help");
-    logMessage("Κάθε επίπεδο οπλου ή θωράκισης βελτιώνει τη ζημιά ή την προστασία. Τα μαγικά αντικείμενα βελτιώνουν και τα δυο ταυτόχρονα!", "help");
-    logMessage("Υπάρχει μια πολύ μικρή πιθανότητα να βρεθούν και ΘΡΥΛΙΚΑ αντικείμενα! Αυτά είναι πανίσχυρα αλλά μόνο 1 στους 500 ονομαστούς εχθρούς θα ρίξει τέτοιο.", "help");
-    logMessage("");
-    logMessage("Ορισμένες περιοχές έχουν περισσότερα τέρατα ενός τύπου (ανάλογα το χρώμα). Άλλες έχουν απλά περισσότερα ή λιγότερα σπέσιαλ τέρατα (κίτρινες και γκρι). Οι περιοχές αυτές αλλάζουν κάθε μέρα.", "help"); 
-    logMessage("");
-    logMessage("Η ΚΑΤΡΑΠΑΚΙΑ κάνει διπλάσια ζημιά.", "help");
-    logMessage("Η ΕΚΤΕΛΕΣΗ κάνει ένα άμεσο χτύπημα σε έναν ετοιμοθάνατο εχθρό.", "help");
-    logMessage("Η ΜΠΥΡΑ δινει ζωή! (10-50%).", "help");
-    logMessage("Το ΤΡΕΞΙΜΟ δίνει μια πιθανότητα διαφυγής κάθε γύρο, μέχρι να σκοτωθεί ο εχθρός. Σε επιστρέφει στον τεκέ.", "help");
-    logMessage("Κάθε φορά που κερδίζεις ένα νέο επίπεδο θα σπαταλήσεις όλο σου το χρυσάφι σε ένα μεγάλο γλέντι κερδίζοντας 1 XP για κάθε GP.", "help");
-    logMessage("");
-    logMessage("Αν σκοτωθείς χάνεις όλο το χρυσάφι που κουβαλάς, και ένα από τα αντικείμενά σου πέφτει επίπεδο.", "help");
-    logMessage("Στον τεκέ αναπληρώνεις ζωή σταδιακά.", "help");
-    
+
+    const body = openInfoModal("Βοήθεια");
+
+    appendInfoLine(body, "");
+    appendInfoLine(body, "ΡΕΜΠΕΣΚΕΣ");
+    appendInfoLine(body, "Ηλεκτρονικό μπαρμπουτο-κομπολόι για να περνάμε την ώρα μας.", "help");
+    appendInfoLine(body, "Από τον Φώτη Ηλιόπουλο.", "help");
+    appendInfoLine(body, "");
+    appendInfoLine(body, "Περιγραφή παιχνιδιού:");
+    appendInfoLine(body, "ΣΚΟΤΩΣΕ. ΓΙΝΕ ΠΑΝΙΣΧΥΡΟΣ. ΣΚΟΤΩΣΕ ΚΙ ΑΛΛΟ. ΓΙΝΕ ΑΚΟΜΑ ΠΙΟ ΠΑΝΙΣΧΥΡΟΣ.", "help");
+    appendInfoLine(body, "ΣΚΟΤΩΣΕ ΤΟ ΘΕΟ ΚΟΝΑΝΟ ΣΤΟ ΒΑΘΟΣ 100.", "help");
+    appendInfoLine(body, "");
+    appendInfoLine(body, "Κάθε βάθος στο λαβύρινθο έχει συγκεκριμένη δυσκολία.", "help");
+    appendInfoLine(body, "Τα τέρατα δίνουν XP και χρυσό. Τα XP ανεβάζουν το επίπεδό σου, και κατα συνέπεια τη ζωή και τη ζημιά σου.", "help");
+    appendInfoLine(body, "");
+    appendInfoLine(body, "Τα σπάνια τέρατα, εκτός από διπλάσιο XP, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ.", "help");
+    appendInfoLine(body, "Ένα σπάνιο τέρας μπορεί να ρίξει αντικείμενα επιπέδου μέχρι και 5 επίπεδα ψηλότερα από το επίπεδό του.", "help");
+    appendInfoLine(body, "Τα να έχει κανείς ισχυρά αντικείμενα είναι πολύ σημαντικό!", "help");
+    appendInfoLine(body, "");
+    appendInfoLine(body, "• Τα άγρια (κόκκινα) τέρατα ρίχνουν όπλα.", "help");
+    appendInfoLine(body, "• Τα θωρακισμένα (γαλάζια) τέρατα ρίχνουν πανοπλίες.", "help");
+    appendInfoLine(body, "• Τα μαγικά (μωβ) τέρατα ρίχνουν μαγικά αντικείμενα.", "help");
+    appendInfoLine(body, "Κάθε επίπεδο οπλου ή θωράκισης βελτιώνει τη ζημιά ή την προστασία. Τα μαγικά αντικείμενα βελτιώνουν και τα δυο ταυτόχρονα!", "help");
+    appendInfoLine(body, "• Υπάρχει μια μικρή πιθανότητα να βρεθούν ΘΡΥΛΙΚΑ τέρατα που ρίχνουν ΘΡΥΛΙΚΑ αντικείμενα! Αυτά είναι πολύ δυνατά!", "help");
+    appendInfoLine(body, "");
+    appendInfoLine(body, "Ορισμένες περιοχές έχουν περισσότερα τέρατα ενός τύπου (ανάλογα το χρώμα). Άλλες έχουν απλά περισσότερα ή λιγότερα σπέσιαλ τέρατα (κίτρινες και γκρι). Οι περιοχές αυτές αλλάζουν κάθε μέρα.", "help");
+    appendInfoLine(body, "");
+    appendInfoLine(body, "Αν σκοτωθείς χάνεις όλο το χρυσάφι που κουβαλάς, και ένα από τα αντικείμενά σου φθείρεται.", "help");
+    appendInfoLine(body, "Στον τεκέ αναπληρώνεις ζωή σταδιακά.", "help");
+    appendInfoLine(body, "", "help");
+    appendInfoLine(body, "Δράσεις στη μάχη");
+    appendInfoLine(body, "• Η ΚΑΤΡΑΠΑΚΙΑ κάνει έξτρα ζημιά στην επόμενη επίθεση", "help");
+    appendInfoLine(body, "• Η ΕΚΤΕΛΕΣΗ κάνει ένα άμεσο χτύπημα σε έναν ετοιμοθάνατο εχθρό.", "help");
+    appendInfoLine(body, "• Η ΜΠΥΡΑ δινει ζωή! (10-50%).", "help");
+    appendInfoLine(body, "• Το ΤΡΕΞΙΜΟ δίνει μια πιθανότητα διαφυγής κάθε γύρο, μέχρι να σκοτωθεί ο εχθρός. Σε επιστρέφει στον τεκέ.", "help");
+    appendInfoLine(body, "Κάθε φορά που κερδίζεις ένα νέο επίπεδο θα σπαταλήσεις όλο σου το χρυσάφι σε ένα μεγάλο γλέντι κερδίζοντας 1 XP για κάθε GP.", "help");
+    appendInfoLine(body, "");
+    appendInfoLine(body, "Οι Ironman χαρακτήρες που πέθαναν ή νίκησαν τον Κόνανο θα καταχωρηθούν στο Ψοφολόγιο!", "help");
+    appendInfoLine(body, "", "help");
+    appendInfoLine(body, "TIPS:");
+    appendInfoLine(body, "• Πριν κατέβεις βαθύτερα, φρόντισε να είσαι αντίστοιχου επιπέδου, όπως και να έχεις αντίστοιχου tier εξοπλισμό! Αν μείνεις πίσω σε εξοπλισμό, πολέμισε μερικά τέρατα εκεί που μπορείς, μέχρι να σου ρίξουν.", "help");
+    appendInfoLine(body, "• Ρίχνε ΚΑΤΡΑΠΑΚΙΑ στην αρχή της μάχης, ΕΚΤΕΛΕΣΗ στο τέλος! Φρόντισε να μένεις πάντα μεθυσμένος!", "help");
+    appendInfoLine(body, "• Όταν νιώθεις οτι ρισκάρεις ψόφο, ΤΡΕΞΕ πίσω στον τεκέ!", "help");
+    appendInfoLine(body, "• Προσπάθησε να μην γίνεσαι άπληστος, ειδικά στο Ironman Mode!", "help");
+
 }
 
 
@@ -5744,6 +5753,42 @@ function closeOptionsModal() {
     if (modal) modal.style.display = 'none';
 }
 
+function openInfoModal(title) {
+    const modal = document.getElementById('info-modal');
+    const body = document.getElementById('info-modal-body');
+    const titleEl = document.getElementById('info-modal-title');
+    if (!modal || !body) return null;
+    titleEl.textContent = title;
+    body.innerHTML = '';
+    modal.style.display = 'flex';
+    return body;
+}
+
+function closeInfoModal() {
+    const modal = document.getElementById('info-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+function appendInfoLine(container, text, type = 'system') {
+    if (!container) return;
+    const entry = document.createElement('div');
+    entry.className = `log-entry log-${type}`;
+    if (text === '') {
+        entry.innerHTML = '&nbsp;';
+    } else {
+        entry.innerText = text;
+    }
+    container.append(entry);
+}
+
+function appendInfoLineHTML(container, html, type = 'system') {
+    if (!container) return;
+    const entry = document.createElement('div');
+    entry.className = `log-entry log-${type}`;
+    entry.innerHTML = html;
+    container.append(entry);
+}
+
 function applyOptions() {
     const speedEl = document.getElementById('options-speed');
   //  if (speedEl) gameSpeedFactor = parseInt(speedEl.value, 10) || 1;
@@ -5761,6 +5806,20 @@ function applyOptions() {
 
 <div id="legendary-popup" class="legendary-popup hidden">
     ΘΡΥΛΙΚΟ DROP!
+</div>
+
+<!-- Γενικό Info Modal (Βοήθεια / Ψοφολόγιο) -->
+<div id="info-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:1100;align-items:center;justify-content:center;">
+    <div style="background:#1e1e1e;border:1px solid var(--accent-gold);border-radius:8px;padding:20px;max-width:480px;width:92%;max-height:80vh;display:flex;flex-direction:column;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.8);">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #444;padding-bottom:8px;margin-bottom:10px;flex-shrink:0;">
+            <h3 id="info-modal-title" style="margin:0;color:var(--accent-gold);"></h3>
+            <button onclick="closeInfoModal()" style="background:none;border:none;color:#ccc;font-size:1.5rem;cursor:pointer;line-height:1;padding:0 4px;">&times;</button>
+        </div>
+        <div id="info-modal-body" style="overflow-y:auto;flex:1;font-size:0.85rem;line-height:1.4;"></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:15px;flex-shrink:0;">
+            <button onclick="closeInfoModal()" style="background:#e67e22;color:#1a1a1a;border:none;border-radius:4px;padding:6px 18px;cursor:pointer;font-weight:bold;">Κλείσιμο</button>
+        </div>
+    </div>
 </div>
 
 <!-- Options Modal -->
