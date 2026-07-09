@@ -4150,7 +4150,7 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
 
     // Βασική πιθανότητα Legendary (1 στις 1000). RICH/POOR areas την επηρεάζουν,
     // με δικούς της πολλαπλασιαστές ώστε να ρυθμίζεται ξεχωριστά από το specialChance.
-    let legendaryChance = 0.901;
+    let legendaryChance = 0.001;
     const legendaryRichMultiplier = 1.30;  // πόσο πιο συχνά σε RICH areas
     const legendaryPoorMultiplier = 0.70;  // πόσο πιο σπάνια σε POOR areas
     if (areaType === AREA_TYPES.RICH) legendaryChance = legendaryChance * legendaryRichMultiplier;
