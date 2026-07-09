@@ -1665,20 +1665,34 @@ function itemDropSound() {
 function killstreakSound() {
     if (!soundEnabled) return;
     const now = audioCtx.currentTime;
-    [400, 620].forEach((freq, i) => {
+    
+    // Δύο πολύ υψηλές συχνότητες που απέχουν ελάχιστα, για το μεταλλικό "τσι"
+    const frequencies = [3200, 4500]; 
+    
+    frequencies.forEach((freq, i) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = "triangle";
-        const t = now + i * 0.05;
+        
+        // Το square δίνει το απαραίτητο "σκάσιμο" (click) στην αρχή
+        osc.type = "square"; 
+        
+        // Το δεύτερο sound component έρχεται σχεδόν αμέσως (10ms μετά)
+        const t = now + (i * 0.01); 
+        
         osc.frequency.setValueAtTime(freq, t);
-        osc.frequency.exponentialRampToValueAtTime(freq * 0.9, t + 0.3);
-        gain.gain.setValueAtTime(0.14, t);
-        gain.gain.linearRampToValueAtTime(0.12, t + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+        // Απότομη πτώση της συχνότητας για να κλειδώσει το "κλικ"
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.5, t + 0.04);
+        
+        // Δυναμικό ξεκίνημα για να έχει καθαρό "attack"
+        gain.gain.setValueAtTime(0.08, t); 
+        // Ακαριαίο σβήσιμο σε μόλις 40 χιλιοστά του δευτερολέπτου
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+        
         osc.connect(gain);
         gain.connect(audioCtx.destination);
+        
         osc.start(t);
-        osc.stop(t + 0.4);
+        osc.stop(t + 0.05);
     });
 }
 
