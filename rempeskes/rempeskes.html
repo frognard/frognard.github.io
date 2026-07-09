@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v225</title>
+    <title>Ρεμπεσκές v228</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -2639,6 +2639,7 @@ const legendaryMonstersByType = {
     weapon: [
         { min: 1,  max: 10,  name: "Γιακουμής",         itemName: "Μπαλτάς του Γιακουμή" },
         { min: 1,  max: 10,  name: "Κουνούπης",         itemName: "Κεντρί" },
+        { min: 1,  max: 10,  name: "Σμερδομπαράς",         itemName: "Μαγικό Πιγκάλ" },
         { min: 1,  max: 10,  name: "Σταύρακας",     itemName: "Σουγιάς του Σταύρακα" },
         { min: 11,  max: 20,  name: "Δερβισόμαγκας",         itemName: "Σαλίβα του Δερβίση" },
         { min: 11,  max: 20,  name: "Λύκος Άλφα",         itemName: "Λυκοδόντειο Ρόπαλο" },
@@ -2686,6 +2687,7 @@ const legendaryMonstersByType = {
         { min: 41, max: 50, name: "Ο Γεωμέτρης",         itemName: "Φυλακτό Προστασίας" },      
         { min: 41, max: 50, name: "Ο Εξκουβίτωρ",         itemName: "Στοιχειωμένο Κλιβάνιο" },         
         { min: 51, max: 60,  name: "Θερμουθαρίν",         itemName: "Αμαζόνειο Κράνος" },
+        { min: 51, max: 60,  name: "Τσουκ-Τσι",         itemName: "Ανθρωπέτσι" },
         { min: 51, max: 60,  name: "Πρίσκος ο Βράχος",         itemName: "Δέρμα από Βράχο" },
         { min: 51, max: 60,  name: "Ο Επτάφρακτος",         itemName: "Επτάφρακτος Θώρακας" },
         { min: 61, max: 70,  name: "Ο Κυνηγός",     itemName: "Αστρικός Θώρακας" },
@@ -2704,7 +2706,9 @@ const legendaryMonstersByType = {
 
     magic: [
         { min: 1,  max: 10,  name: "Πάτερ Τζατζίκιας",         itemName: "Ιερό Τζατζίκι" },
-        { min: 1,  max: 10,  name: "Μπεν Μίλτον",     itemName: "Απατεών" },
+        { min: 1,  max: 10,  name: "Μπεν Μίλτον",     itemName: "''Απατεών''" },
+        { min: 1,  max: 10,  name: "Γιοτσάκης Γκαλ",     itemName: "''Κοτρώνες''" },
+        { min: 1,  max: 10,  name: "Κάπως Πιο Πονηρεμένος Σκλάβος",         itemName: "Μύσταξ της Πονηριάς" },
         { min: 1,  max: 10,  name: "Ο Νεκροβγάλτης",         itemName: "Λάμπα του Νεκροβγάλτη" },
         { min: 11, max: 20,  name: "Χαμόδρακας",     itemName: "Κασέλα του Χαμόδρακα" },
         { min: 11, max: 20,  name: "Κακοφώτης",     itemName: "Κρανίο της Ανδράγας" },
@@ -2719,10 +2723,12 @@ const legendaryMonstersByType = {
         { min: 41, max: 50, name: "Μάγισσα Τατάνα",         itemName: "Μαύρη Γάτα" },     
         { min: 41, max: 50, name: "Σοφός Καραθαρούτι",         itemName: "Μαγικό Τουρμπάνι" },     
         { min: 51, max: 60,  name: "Κρυπτόπραμα",         itemName: "Κράνος Τηλεμεταφοράς" },
+        { min: 51, max: 60,  name: "Νερτερόλης",         itemName: "Νεκροπούτσι" },
         { min: 51, max: 60,  name: "Φωχρίας ο Γνοφοσοφιστής",         itemName: "Ελάσσων Γνοφικός Κώδιξ" },
         { min: 51, max: 60,  name: "Μπαλγκάν Χαϊβάν",         itemName: "Διαβολοκεμετζές" },
         { min: 61, max: 70,  name: "Κεμπεχσενούφ",     itemName: "Κλειδί του Κεμπεχσενούφ" },
         { min: 61, max: 70,  name: "?????????? ? ???????",     itemName: "Μανδύας Αορατότητας" },
+        { min: 61, max: 70,  name: "Λεονίντ",         itemName: "Φωτο Λεφτέρη Πανταζή" },
         { min: 61, max: 70,  name: "Σατούρνος",     itemName: "Φυλακτήριο του Σατούρνου" },
         { min: 71, max: 80,  name: "Μέγας Νεκτεναβός",     itemName: "Μέγα Γριμμόριον" },
         { min: 71, max: 80,  name: "Χρυσόχειρ ο Γνοφάρχης",     itemName: "Μείζων Γνοφικός Κώδιξ"},
@@ -2732,6 +2738,7 @@ const legendaryMonstersByType = {
         { min: 81, max: 90, name: "Αμπντούλ Αλχαζρέντ",         itemName: "Νεκρονομικόν" },
         { min: 91, max: 100, name: "Φαλαβάρ ο Νεκυοδαίμων",         itemName: "Νεκυοδαίμων" },    
         { min: 91, max: 100, name: "Χολσόρνα",         itemName: "Μάτι του Χολσόρνα" },   
+        { min: 91, max: 100, name: "Τσέρνομπογκ",         itemName: "Μαύρη Βακτηρία" },   
         { min: 91, max: 100, name: "Ερλίκ-Χαν",         itemName: "Κέρατα του Ερλίκ-Χαν" }   
     ]
 };
