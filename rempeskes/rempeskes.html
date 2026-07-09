@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v228</title>
+    <title>Ρεμπεσκές v229</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -674,6 +674,40 @@
     animation: monsterDeathFlash 0.5s ease-out forwards;
 }
 
+.hp-flash-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+    background: #ffbe0d;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes hpFlashOverlayAnim {
+    0% {
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+        box-shadow:
+            0 0 10px #ffbe0d,
+            0 0 25px #ffbe0d,
+            0 0 50px #ffbe0d;
+    }
+    100% {
+        opacity: 0;
+        box-shadow: none;
+    }
+}
+
+.hp-flash-overlay.monster-death {
+    animation: hpFlashOverlayAnim 0.5s ease-out forwards;
+}
+
 .equipment-row {
     display: grid;
     grid-template-columns: 100px 1fr 100px;
@@ -1020,6 +1054,7 @@ body {
     <div class="bar-container" id="monster-hp-parent">
         <div id="monster-hp-bar" class="bar"></div>
         <div id="monster-hp-text" class="bar-text">0 / 0 HP</div>
+        <div id="monster-hp-flash" class="hp-flash-overlay"></div>
     </div>
 </div>
 
@@ -4426,9 +4461,9 @@ function resolvePlayerAttack(result) {
     updateUI();
 
     if (monster.hp <= 0) {
-        document.getElementById('monster-hp-parent').classList.add('monster-death');
+        document.getElementById('monster-hp-flash').classList.add('monster-death');
         setTimeout(() => {
-            document.getElementById('monster-hp-parent').classList.remove('monster-death');
+            document.getElementById('monster-hp-flash').classList.remove('monster-death');
         }, 500);
         endCombat('victory');
         return true;
@@ -4458,7 +4493,7 @@ function forceRetreat() {
     waitingForNextMonster = false;
 
     // 2. Επαναφορά του interface
-    document.getElementById('monster-hp-bar').classList.remove('monster-death');
+    document.getElementById('monster-hp-flash').classList.remove('monster-death');
     startTownRegen();
     document.getElementById('town-interface').classList.remove('hidden');
     document.getElementById('combat-interface').classList.add('hidden');
@@ -4587,8 +4622,8 @@ if (isAttemptingRetreat) {
     // ΣΥΓΚΕΚΡΙΜΕΝΟΣ ΕΛΕΓΧΟΣ: Αν χρησιμοποιήθηκε το Άμεσο Πλήγμα και το τέρας πέθανε,
     // η μάχη τελειώνει ΕΔΩ, κόβοντας την επίθεση του τέρατος.
     if (usedPreciseStrikeThisRound && monster.hp <= 0) {
-        document.getElementById('monster-hp-parent').classList.add('monster-death');
-        setTimeout(() => document.getElementById('monster-hp-parent').classList.remove('monster-death'), 500);
+        document.getElementById('monster-hp-flash').classList.add('monster-death');
+        setTimeout(() => document.getElementById('monster-hp-flash').classList.remove('monster-death'), 500);
         updateUI();
         endCombat('victory');
         return;
@@ -4614,16 +4649,16 @@ if (isAttemptingRetreat) {
     let monsterDied = monster.hp <= 0;
 
     if (monsterDied && playerDied) {
-        document.getElementById('monster-hp-bar').classList.add('monster-death');
-        setTimeout(() => document.getElementById('monster-hp-bar').classList.remove('monster-death'), 500);
+        document.getElementById('monster-hp-flash').classList.add('monster-death');
+        setTimeout(() => document.getElementById('monster-hp-flash').classList.remove('monster-death'), 500);
         playerDeathSound();
         endCombat('mutual_death');
         return;
     }
 
     if (monsterDied) {
-        document.getElementById('monster-hp-parent').classList.add('monster-death');
-        setTimeout(() => document.getElementById('monster-hp-parent').classList.remove('monster-death'), 500);
+        document.getElementById('monster-hp-flash').classList.add('monster-death');
+        setTimeout(() => document.getElementById('monster-hp-flash').classList.remove('monster-death'), 500);
         endCombat('victory');
         return;
     }
@@ -4745,8 +4780,8 @@ function showLegendaryPopup() {
         isSkillQueued = false;
 
         if (outcome === 'victory' || outcome === 'mutual_death') {
-            document.getElementById('monster-hp-bar').classList.add('monster-death');
-            setTimeout(() => document.getElementById('monster-hp-bar').classList.remove('monster-death'), 500);
+            document.getElementById('monster-hp-flash').classList.add('monster-death');
+            setTimeout(() => document.getElementById('monster-hp-flash').classList.remove('monster-death'), 500);
             
             logMessage(`${getMonsterDisplayName(monster)}: εξοντώθηκε.`, 'victory');
             monsterDeathSound();
@@ -4889,7 +4924,7 @@ function showLegendaryPopup() {
             if (outcome === 'victory') {
                 if (isAttemptingRetreat) {
 
-                    document.getElementById('monster-hp-bar').classList.add('monster-death');
+                    document.getElementById('monster-hp-flash').classList.add('monster-death');
 
                     if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
                     inCombat = false;
@@ -4903,7 +4938,7 @@ function showLegendaryPopup() {
 
                     setTimeout(() => {
 
-                        document.getElementById('monster-hp-bar').classList.remove('monster-death');
+                        document.getElementById('monster-hp-flash').classList.remove('monster-death');
 
                         generateAreaModifiers();
                         refreshAreaSelectorAppearance();    
