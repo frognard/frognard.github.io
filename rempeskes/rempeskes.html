@@ -258,127 +258,50 @@
         }
 
 .legendary-item {
-    color: #ffde21 !important; /* πραγματικό gold base */
+    color: #ffde21 !important;
     font-weight: 700;
-    animation: legendaryGlow 2.2s ease-in-out infinite;
+    text-shadow: 0 0 4px rgba(255,215,0,0.4), 0 0 10px rgba(255,200,0,0.2);
 }
 
-@keyframes legendaryGlow {
-    0% {
-        color: #ffde21;
-        text-shadow:
-            0 0 2px #990026,
-            0 0 5px #cc0033,
-            0 0 8px #ff1a53;
-    }
-    50% {
-        color: #ffde21;
-        text-shadow:
-            0 0 4px #ff1a53,
-            0 0 10px #ff3366,
-            0 0 17px #ff4d79,
-            0 0 25px #ff1a53;
-    }
-    100% {
-        color: #ffde21;
-        text-shadow:
-            0 0 2px #990026,
-            0 0 5px #cc0033,
-            0 0 8px #ff1a53;
-    }
-}
-
-/* Legendary τέρατα: ίδιο gold+glow στυλ όπως τα legendary items,
-   αλλά το χρώμα της λάμψης αλλάζει ανάλογα με τον τύπο (weapon/armor/magic) */
 .legendary-glow-weapon {
     color: #ffde21 !important;
     font-weight: 700;
-    animation: legendaryGlowWeapon 2.2s ease-in-out infinite;
+    animation: legendaryGlowWeapon 2.5s ease-in-out infinite;
 }
 .legendary-glow-armor {
     color: #ffde21 !important;
     font-weight: 700;
-    animation: legendaryGlowArmor 2.2s ease-in-out infinite;
+    animation: legendaryGlowArmor 2.5s ease-in-out infinite;
 }
 .legendary-glow-magic {
     color: #ffde21 !important;
     font-weight: 700;
-    animation: legendaryGlowMagic 2.2s ease-in-out infinite;
+    animation: legendaryGlowMagic 2.5s ease-in-out infinite;
+}
+
+.legendary-monster-glow {
+    color: #ffde21 !important;
+    font-weight: bold !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: legendaryMonsterGlow 2.5s ease-in-out infinite;
 }
 
 @keyframes legendaryGlowWeapon {
-    0% {
-        color: #ffde21;
-        text-shadow:
-            0 0 2px #990026,
-            0 0 5px #cc0033,
-            0 0 8px #ff1a53;
-    }
-    50% {
-        color: #fff2c2;
-        text-shadow:
-            0 0 4px #ff1a53,
-            0 0 10px #ff3366,
-            0 0 17px #ff4d79,
-            0 0 25px #ff1a53;
-    }
-    100% {
-        color: #ffde21;
-        text-shadow:
-            0 0 2px #990026,
-            0 0 5px #cc0033,
-            0 0 8px #ff1a53;
-    }
+    0%, 100% { text-shadow: 0 0 5px rgba(255,60,60,0.85), 0 0 15px rgba(255,0,0,0.55); }
+    50%      { text-shadow: 0 0 8px rgba(255,60,60,1.0), 0 0 22px rgba(255,0,0,0.75); }
 }
-
 @keyframes legendaryGlowArmor {
-    0% {
-        color: #ffde21;
-        text-shadow:
-            0 0 2px #0059b3,
-            0 0 5px #0073e6,
-            0 0 8px #1ab2ff;
-    }
-    50% {
-        color: #fff2c2;
-        text-shadow:
-            0 0 4px #1ab2ff,
-            0 0 10px #33bbff,
-            0 0 17px #66ccff,
-            0 0 25px #1ab2ff;
-    }
-    100% {
-        color: #ffde21;
-        text-shadow:
-            0 0 2px #0059b3,
-            0 0 5px #0073e6,
-            0 0 8px #1ab2ff;
-    }
+    0%, 100% { text-shadow: 0 0 5px rgba(60,150,255,0.85), 0 0 15px rgba(0,100,255,0.55); }
+    50%      { text-shadow: 0 0 8px rgba(60,150,255,1.0), 0 0 22px rgba(0,100,255,0.75); }
 }
-
 @keyframes legendaryGlowMagic {
-    0% {
-        color: #ffde21;
-        text-shadow:
-            0 0 2px #7a00cc,
-            0 0 5px #9933ff,
-            0 0 8px #cc66ff;
-    }
-    50% {
-        color: #fff2c2;
-        text-shadow:
-            0 0 4px #cc66ff,
-            0 0 10px #d966ff,
-            0 0 17px #e699ff,
-            0 0 25px #cc66ff;
-    }
-    100% {
-        color: #ffde21;
-        text-shadow:
-            0 0 2px #7a00cc,
-            0 0 5px #9933ff,
-            0 0 8px #cc66ff;
-    }
+    0%, 100% { text-shadow: 0 0 5px rgba(180,60,255,0.85), 0 0 15px rgba(120,0,255,0.55); }
+    50%      { text-shadow: 0 0 8px rgba(180,60,255,1.0), 0 0 22px rgba(120,0,255,0.75); }
+}
+@keyframes legendaryMonsterGlow {
+    0%, 100% { text-shadow: 0 0 5px rgba(255,150,0,0.85), 0 0 15px rgba(255,100,0,0.55); }
+    50%      { text-shadow: 0 0 8px rgba(255,150,0,1.0), 0 0 22px rgba(255,100,0,0.75); }
 }
 
         .legendary-popup {
@@ -419,25 +342,6 @@
     }
     100% {
         transform: translate(-50%, -50%) scale(1);
-    }
-}
-
-.legendary-monster-glow {
-    color: #000000 !important; /* htan #ffaa00 */
-    font-weight: bold !important;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    animation: legendaryMonsterPulse 1.2s infinite alternate;
-}
-
-@keyframes legendaryMonsterPulse {
-    from {
-        text-shadow: 0 0 5px #ff5500, 0 0 10px #ffaa00, 0 0 15px #ffaa00;
-        transform: scale(1);
-    }
-    to {
-        text-shadow: 0 0 15px #ff5500, 0 0 25px #ffaa00, 0 0 35px #ff0000, 0 0 50px #ff5500;
-        transform: scale(1.02);
     }
 }
 
@@ -4246,7 +4150,7 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
 
     // Βασική πιθανότητα Legendary (1 στις 1000). RICH/POOR areas την επηρεάζουν,
     // με δικούς της πολλαπλασιαστές ώστε να ρυθμίζεται ξεχωριστά από το specialChance.
-    let legendaryChance = 0.001;
+    let legendaryChance = 0.901;
     const legendaryRichMultiplier = 1.30;  // πόσο πιο συχνά σε RICH areas
     const legendaryPoorMultiplier = 0.70;  // πόσο πιο σπάνια σε POOR areas
     if (areaType === AREA_TYPES.RICH) legendaryChance = legendaryChance * legendaryRichMultiplier;
