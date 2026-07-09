@@ -1075,12 +1075,13 @@ body {
         <div class="autoplay-speed-wrap">
             <label for="autoplay-speed-select">Ταχ.</label>
             <select id="autoplay-speed-select">
-                <option value="1">Αργή</option>
-                <option value="1.5" selected>Κανονική</option>
-                <option value="3">2×</option>
-                <option value="7.5">5×</option>
-                <option value="15">10×</option>
-                <option value="30">20×</option>
+                <option value="1">Μερακλίδικη</option>
+                <option value="1.25" selected>Κανονική</option>
+                <option value="1.5">Αγχωτική</option>
+                <option value="3">Γρήγορη</option>
+                <option value="7.5">Ταχύτατη</option>
+                <option value="15">Τούρμπο</option>
+                <option value="30">Καρατούρμπο</option>
             </select>
         </div>
     </div>
@@ -3051,7 +3052,7 @@ function rollItemTier(monsterLevel) {
         armor: { name: "Μανδύας", power: 1, legendary: false },
         magic: { name: "Κόκκαλο Αρουραίου", power: 1, legendary: false },
         maxUnlockedLevel: 100,
-        gameSpeedFactor: 1.5, // αποθηκευμένη επιλογή ταχύτητας παιχνιδιού (Κανονική=1, Αγχωτική=1.5)
+        gameSpeedFactor: 1.25, // αποθηκευμένη επιλογή ταχύτητας παιχνιδιού (Μερακλίδικη=1, Κανονική=1.25, Αγχωτική=1.5)
         soundEnabled: true,   // αποθηκευμένη επιλογή ήχου
         musicEnabled: false   // αποθηκευμένη επιλογή μουσικής
     };
@@ -5924,12 +5925,14 @@ if ('serviceWorker' in navigator) {
 
             const { data: existing } = await sbClient
                 .from('ironman_deaths')
-                .select('level')
+                .select('level, death_date')
                 .eq('name', name)
                 .maybeSingle();
 
             if (existing) {
-                if (level <= existing.level) { skipped++; continue; }
+                const newDate = new Date(r.date);
+                const existDate = new Date(existing.death_date);
+                if (level < existing.level || (level === existing.level && newDate <= existDate)) { skipped++; continue; }
                 await sbClient.from('ironman_deaths').delete().eq('name', name);
             }
 
@@ -6056,8 +6059,9 @@ function applyOptions() {
         <label style="display:block;margin-bottom:15px;font-size:0.85rem;">
             Ταχύτητα παιχνιδιού:
             <select id="options-speed" style="display:block;width:100%;margin-top:4px;background:#1a1a1a;color:#fff;border:1px solid var(--border-color);border-radius:3px;padding:4px;">
-                <option value="1">Αργή</option>
-                <option value="1.5" selected>Κανονική</option>
+                <option value="1">Μερακλίδικη</option>
+                <option value="1.25" selected>Κανονική</option>
+                <option value="1.5">Αγχωτική</option>
             </select>
         </label>
 
