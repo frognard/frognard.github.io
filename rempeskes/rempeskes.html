@@ -3247,7 +3247,7 @@ function updateKillStreakVisuals() {
         if (killStreakBonus !== 0.10) {
             killStreakBonus = 0.10;
             logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-silver');
-            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ!', '#ffd700'); }, 500);
+            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ +10% XP!', '#ffd700'); }, 500);
         }
         if (xpBarContainer) {
             xpBarContainer.classList.remove('killstreak-silver');
@@ -3257,7 +3257,7 @@ function updateKillStreakVisuals() {
         if (killStreakBonus !== 0.05) {
             killStreakBonus = 0.05;
             logMessage(`Σερί 5 φόνων! +5% XP!`, 'streak-silver');
-            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '5 ΣΕΡΙ!', '#e0e6eb'); }, 500);
+            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '5 ΣΕΡΙ +5% XP!', '#e0e6eb'); }, 500);
         }
         if (xpBarContainer) {
             xpBarContainer.classList.remove('killstreak-gold');
