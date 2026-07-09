@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v230</title>
+    <title>Ρεμπεσκές v250</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1065,12 +1065,12 @@ body {
         <div class="autoplay-speed-wrap">
             <label for="autoplay-speed-select">Ταχ.</label>
             <select id="autoplay-speed-select">
-                <option value="1">1×</option>
-                <option value="2">2×</option>
-                <option value="5">5×</option>
-                <option value="10">10×</option>
-                <option value="20">20×</option>
-                <option value="30">30×</option>
+                <option value="1">Αργή</option>
+                <option value="1.5">Κανονική</option>
+                <option value="3">2×</option>
+                <option value="7.5">5×</option>
+                <option value="15">10×</option>
+                <option value="30">20×</option>
             </select>
         </div>
     </div>
@@ -1346,15 +1346,17 @@ function formatNumber(num) {
 }
 
 
-function formatActiveTime(totalSeconds) {
-    const totalIntegerSeconds = Math.floor(totalSeconds);
-    
-    const h = Math.floor(totalIntegerSeconds / 3600);
-    const m = Math.floor((totalIntegerSeconds % 3600) / 60);
-    const s = totalIntegerSeconds % 60;
-    
-    return `${h}ω ${m}λ ${s}δ`;
-}
+// ΣΧΟΛΙΟ: παλιό conversion του activeTime σε ώρες/λεπτά/δευτερόλεπτα.
+// Τώρα το activeTime μετράει απλά γύρους (κάθε γύρος μάχης/regen = +1), οπότε δεν χρειάζεται πλέον.
+// function formatActiveTime(totalSeconds) {
+//     const totalIntegerSeconds = Math.floor(totalSeconds);
+//
+//     const h = Math.floor(totalIntegerSeconds / 3600);
+//     const m = Math.floor((totalIntegerSeconds % 3600) / 60);
+//     const s = totalIntegerSeconds % 60;
+//
+//     return `${h}ω ${m}λ ${s}δ`;
+// }
 
 
 function showStats() {
@@ -1377,7 +1379,7 @@ function showStats() {
     logMessage(`Χρυσάφι που γλεντήθηκε: ${formatNumber(player.goldSpent)}`,"stats");
     logMessage(`Χρυσάφι που χάθηκε: ${formatNumber(player.goldLost)}`,"stats");
     logMessage(`Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`,"stats");
-    logMessage(`Ενεργός χρόνος: ${formatActiveTime(player.activeTime)}`,"stats");
+    logMessage(`Γύροι: ${formatNumber(player.activeTime)}`,"stats");
     // logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
     logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
     
@@ -2952,14 +2954,17 @@ function rollItemTier(monsterLevel) {
             goldSpent: 0,
             goldLost: 0,
             beersDrunk: 0,
-            activeTime: 0, // σε δευτερόλεπτα
+            activeTime: 0, // μετράει γύρους (κάθε γύρος μάχης/regen = +1), όχι πλέον δευτερόλεπτα
             legendaryDrops: 0,
             bestKillStreak: 0,
             hasBeatenConanos: false,
         weapon: { name: "Ράβδος", power: 1, legendary: false },
         armor: { name: "Μανδύας", power: 1, legendary: false },
         magic: { name: "Κόκκαλο Αρουραίου", power: 1, legendary: false },
-        maxUnlockedLevel: 100
+        maxUnlockedLevel: 100,
+        gameSpeedFactor: 1.5, // αποθηκευμένη επιλογή ταχύτητας παιχνιδιού (Κανονική=1, Αγχωτική=1.5)
+        soundEnabled: true,   // αποθηκευμένη επιλογή ήχου
+        musicEnabled: false   // αποθηκευμένη επιλογή μουσικής
     };
 
 
@@ -3071,11 +3076,11 @@ const AREA_TYPE_COLOR = {
     // === SPEED HOOK ===
     // autoPlayEnabled / autoPlaySpeedFactor ελέγχονται από το AutoPlay panel (βλ. τέλος αρχείου).
     // gameSpeedFactor ελέγχεται από το modal "Επιλογές".
-    // Όσο το AutoPlay είναι OFF, getSpeedFactor() γυρνάει gameSpeedFactor (default 1).
+    // Όσο το AutoPlay είναι OFF, getSpeedFactor() γυρνάει gameSpeedFactor (default 1.5, Αγχωτική).
     // Όσο το AutoPlay είναι ON, getSpeedFactor() γυρνάει autoPlaySpeedFactor.
     let autoPlayEnabled = false;
     let autoPlaySpeedFactor = 1;
-    let gameSpeedFactor = 1;
+    let gameSpeedFactor = 1.5;
     function getSpeedFactor() { return autoPlayEnabled ? autoPlaySpeedFactor : gameSpeedFactor; }
     function effCD() { return CD_DURATION / getSpeedFactor(); }
     function effTick() { return COMBAT_TICK_MS / getSpeedFactor(); }
@@ -3387,6 +3392,28 @@ function loadGame() {
     } else {
         player.hasBeatenConanos = false;
     }
+
+    // Συγχρονισμός της αποθηκευμένης ταχύτητας παιχνιδιού με τη global μεταβλητή
+    if (typeof player.gameSpeedFactor === 'number' && !isNaN(player.gameSpeedFactor)) {
+        gameSpeedFactor = player.gameSpeedFactor;
+    } else {
+        player.gameSpeedFactor = gameSpeedFactor;
+    }
+    const speedEl = document.getElementById('options-speed');
+    if (speedEl) speedEl.value = gameSpeedFactor;
+
+    // Συγχρονισμός των αποθηκευμένων επιλογών ήχου/μουσικής με τις global μεταβλητές
+    if (typeof player.soundEnabled === 'boolean') {
+        soundEnabled = player.soundEnabled;
+    } else {
+        player.soundEnabled = soundEnabled;
+    }
+    if (typeof player.musicEnabled === 'boolean') {
+        musicEnabled = player.musicEnabled;
+    } else {
+        player.musicEnabled = musicEnabled;
+    }
+    updateMusicState();
 
     applyAutoplayVisibility();
 }
@@ -4047,7 +4074,7 @@ function startTownRegen() {
                 maxHp - player.hp
             );
             player.hp += regenAmount;
-            player.activeTime += 2;
+            player.activeTime += 1;
             createFloatingText(
                 'player-hp-parent',
                 `+${formatNumber(regenAmount)}`,
@@ -4573,7 +4600,7 @@ function forceRetreat() {
 function executeCombatRound() {
    
     if (!inCombat) return;
-    player.activeTime += 2;
+    player.activeTime += 1;
     if (waitingForNextMonster) return;
 
     if (!monster || monster.hp <= 0) {
@@ -5696,7 +5723,7 @@ if (
     if (speedSelect) {
         speedSelect.addEventListener('change', function () {
             const oldSpeed = autoPlaySpeedFactor;
-            autoPlaySpeedFactor = parseInt(speedSelect.value, 10) || 1;
+            autoPlaySpeedFactor = parseFloat(speedSelect.value) || 1;
             if (autoPlayEnabled) {
                 recalculateCooldowns(oldSpeed);
                 rearmTimers();
@@ -5879,13 +5906,17 @@ function applyOptions() {
     const speedEl = document.getElementById('options-speed');
   //  if (speedEl) gameSpeedFactor = parseInt(speedEl.value, 10) || 1;
   if (speedEl) gameSpeedFactor = parseFloat(speedEl.value) || 1;
+  player.gameSpeedFactor = gameSpeedFactor; // αποθηκεύεται με τον χαρακτήρα
   const soundEl = document.getElementById('options-sound');
     if (soundEl) soundEnabled = soundEl.checked;
+    player.soundEnabled = soundEnabled; // αποθηκεύεται με τον χαρακτήρα
     const musicEl = document.getElementById('options-music');
     if (musicEl) musicEnabled = musicEl.checked;
+    player.musicEnabled = musicEnabled; // αποθηκεύεται με τον χαρακτήρα
     updateMusicState();
     if (typeof rearmTimers === 'function') rearmTimers();
     else     if (typeof window.rearmTimers === 'function') window.rearmTimers();
+    if (typeof saveGame === 'function') saveGame();
     closeOptionsModal();
 }
 </script>
@@ -5916,8 +5947,8 @@ function applyOptions() {
         <label style="display:block;margin-bottom:15px;font-size:0.85rem;">
             Ταχύτητα παιχνιδιού:
             <select id="options-speed" style="display:block;width:100%;margin-top:4px;background:#1a1a1a;color:#fff;border:1px solid var(--border-color);border-radius:3px;padding:4px;">
-                <option value="1">Κανονική</option>
-                <option value="1.5">Αγχωτική</option>
+                <option value="1">Αργή</option>
+                <option value="1.5" selected>Κανονική</option>
             </select>
         </label>
 
