@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v229</title>
+    <title>Ρεμπεσκές v255</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -469,7 +469,7 @@
     animation: skillCastFlash 280ms ease-out;
 }
 
-
+/*
 #teke-title {
     line-height: 1.3;
     margin-top: 10px;
@@ -477,14 +477,24 @@
 }
 
 
+@media (max-width: 600px) {
+    #teke-title {
+        font-size: 16px;
+    }
+    #stats-summary {
+        font-size: 13px;
+    }
+}
 
+*/
 
 
 /* Προσθήκη για τη μείωση του ύψους του ίδιου του drop-down κουτιού */
 .area-select-container select {
     height: 28px;       /* <-- Μειώνει το συνολικό ύψος του κουτιού (π.χ. από το default ~38px στα 28px) */
     padding: 2px 6px;   /* <-- Μικραίνει το εσωτερικό κενό πάνω-κάτω για να μην κόβεται το κείμενο */
-    font-size: 13px;    /* <-- Ελαφρώς πιο συμπαγής γραμματοσειρά για να ταιριάζει με το νέο ύψος */
+    font-size: 12.5px;    /* <-- Ελαφρώς πιο συμπαγής γραμματοσειρά για να ταιριάζει με το νέο ύψος */
+      max-width: 190px;    
     line-height: 1;
 }
 
@@ -955,12 +965,12 @@ body {
 
 
 
-<div class="stats-grid">
+<div class="stats-grid" id="stats-summary" style="grid-template-columns: 1.0fr 1fr;">
     <div class="stat-row">
         <div><b>XP:</b> <span id="p-xp" class="xp-value">0</span> / <span id="p-next-xp" class="xp-value">50</span></div>
     </div>
     <div class="stat-row" id="stat-gold-box" style="display:flex;justify-content:flex-end;">
-        <div><b>Χρυσάφι:</b> <span id="p-gold" class="gold">0</span></div>
+        <div><b>GP:</b> <span id="p-gold" class="gold">0</span></div>
     </div>
 </div>
 
@@ -1065,12 +1075,12 @@ body {
         <div class="autoplay-speed-wrap">
             <label for="autoplay-speed-select">Ταχ.</label>
             <select id="autoplay-speed-select">
-                <option value="1">1×</option>
-                <option value="2">2×</option>
-                <option value="5">5×</option>
-                <option value="10">10×</option>
-                <option value="20">20×</option>
-                <option value="30">30×</option>
+                <option value="1">Αργή</option>
+                <option value="1.5" selected>Κανονική</option>
+                <option value="3">2×</option>
+                <option value="7.5">5×</option>
+                <option value="15">10×</option>
+                <option value="30">20×</option>
             </select>
         </div>
     </div>
@@ -1346,15 +1356,17 @@ function formatNumber(num) {
 }
 
 
-function formatActiveTime(totalSeconds) {
-    const totalIntegerSeconds = Math.floor(totalSeconds);
-    
-    const h = Math.floor(totalIntegerSeconds / 3600);
-    const m = Math.floor((totalIntegerSeconds % 3600) / 60);
-    const s = totalIntegerSeconds % 60;
-    
-    return `${h}ω ${m}λ ${s}δ`;
-}
+// ΣΧΟΛΙΟ: παλιό conversion του activeTime σε ώρες/λεπτά/δευτερόλεπτα.
+// Τώρα το activeTime μετράει απλά γύρους (κάθε γύρος μάχης/regen = +1), οπότε δεν χρειάζεται πλέον.
+// function formatActiveTime(totalSeconds) {
+//     const totalIntegerSeconds = Math.floor(totalSeconds);
+//
+//     const h = Math.floor(totalIntegerSeconds / 3600);
+//     const m = Math.floor((totalIntegerSeconds % 3600) / 60);
+//     const s = totalIntegerSeconds % 60;
+//
+//     return `${h}ω ${m}λ ${s}δ`;
+// }
 
 
 function showStats() {
@@ -1377,7 +1389,7 @@ function showStats() {
     logMessage(`Χρυσάφι που γλεντήθηκε: ${formatNumber(player.goldSpent)}`,"stats");
     logMessage(`Χρυσάφι που χάθηκε: ${formatNumber(player.goldLost)}`,"stats");
     logMessage(`Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`,"stats");
-    logMessage(`Ενεργός χρόνος: ${formatActiveTime(player.activeTime)}`,"stats");
+    logMessage(`Γύροι: ${formatNumber(player.activeTime)}`,"stats");
     // logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
     logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
     
@@ -1900,7 +1912,7 @@ const weaponNames = [
   "Ταγματικό Ξίφος",
 
   // 51-60: Εξειδικευμένα Όπλα Κρούσης & Διάτρησης
-  "Μέγα Εγχειρίδιο",
+  "Μέγα Ξίφος",
   "Κεφαλοθραύστης",
   "Σαλίβα",
   "Σφύρα",
@@ -2248,7 +2260,28 @@ const levelTitles = {
 };
 
 const monsterFirstNames = [
-"Γκναχ",
+"Γκνωχ",
+"Σούκα",
+"Μπλιάτ",
+"Τσίφσα",
+"Παξ",
+"Κλασορέψ",
+"Τλακοτακοατλ",
+"Ουλγκαραθίρ",
+"Τσαραμπόκ",
+"Κραβούλναχ",
+"Γκνούρτ",
+"Θούρμα",
+"Ισκαραβάχ",
+"Αμπαχάς",
+"Όρζαλαχ",
+"Σουρμαγκάν",
+"Βούλβουλ",
+"Γκουλ",
+"Σχιραχαβάρ",
+"Ζίμα Ζούμα",
+"Ξαραζάρ",
+"Μαζοχαλούν",
 "Λασσονού",
 "Αταθαπαλάλ",
 "Μαγκρίβα",
@@ -2292,6 +2325,28 @@ const monsterFirstNames = [
 "Κερεβάρ",
 "Μπόρζιγκ",
 "Ούντορ",
+"Ιμπιρίτ",
+"Παλασίκ",
+"Τσιπάκουε",
+"Γκεντερούβο",
+"Λεάκ",
+"Θουλαθούφ",
+"Άχταρ",
+"Αταουλάμ",
+"Πασόκ",
+"Πάοκ",
+"Ρεμούτρο",
+"Ρεμουνιά",
+"Ρεπούστι",
+"Μαλάκ-Μαλίκ",
+"Σοχούμ",
+"Λούγκο",
+"Κάσλαμ",
+"Θασβάλλα",
+"Λαθμάλσα",
+"Γιομάλσα",
+"Θραοχούλμ",
+"Όρανγκ Μπάτι",
 "Μπέξα",
 "Ουράρτα",
 "Καλέντζο",
@@ -2350,13 +2405,14 @@ const wildTitles = [
 "ο Αχόρταγος",
 "ο Σουβλατζής",
 "ο Πετσοκόφτης",
+"το Αρχίδι",
 "η Σκύλα",
 "η Σφύρα",
 "η Σφήκα",
 "η Φαγάνα",
 "η Ανδροφάγος",
 "η Τρελέγκω",
-"η Μαλάκω",
+"η Τσουράπω",
 "η Γαμψονύχα",
 "η Νταρντάνα",
 "η Καριόλα"
@@ -2365,7 +2421,7 @@ const wildTitles = [
 const armoredTitles = [
 "ο Σιδηρόδερμος",
 "ο Βράχος",
-"ο Αόρατος",
+"ο Άπιαστος",
 "ο Άνιωθος",
 "ο Ατσαλάκωτος",
 "ο Τενεκές",
@@ -2455,7 +2511,7 @@ const magicTitles = [
 "η Γνοφερή",
 "η Μυστική",
 "η Τσαπερδώνα",
-"η Στρίγλα",
+"η Στρίγγλα",
 "η Μέγαιρα"
 ];
 
@@ -2594,26 +2650,106 @@ const tekeSongs = [
 ];
 
 const depthNames = [
-    "[1] Συντρίμμια", "[2] Γκρεμισμένα Προπύλαια", "[3] Ο Κοβαλώνας", "[4] Καταφύγιο", "[5] Πλημμυρισμένη Στοά",
-    "[6] Το Άσυλο", "[7] Θάλαμοι", "[8] Μνημούρια", "[9] Σφηκοφωλιές", "[10] Λημέρι του Τελώνη",
-    "[11] Άντρο του Δερβίση", "[12] Περάσματα", "[13] Κρησφύγετο", "[14] Σμερδότρυπες", "[15] Μεγασπήλαιον",
-    "[16] Λασπομέρος", "[17] Κυνοτροφείο", "[18] Μνημούρια", "[19] Οφεώνας", "[20] Λαγούμια",
-    "[21] Υπόνομος", "[22] Βάραθρο", "[23] Δρασκέλα", "[24] Μπουγαροφωλιές", "[25] Ερπετοθάλαμοι",
-    "[26] Φιδοσπηλιά", "[27] Αρουρίδα", "[28] Υπόγειο Ρέμα", "[29] Μαύρο Χάσμα", "[30] Κατσαριδοφωλιές",
-    "[31] Κατακόμβες", "[32] Ιερατείο", "[33] Σκουλκατόριο", "[34] Σπουδαστήριο", "[35] Σκορποχώρι",
-    "[36] Σαρκοφάγοι", "[37] Ογριανή", "[38] Τάφοι των Ξωτικών", "[39] Κελιά", "[40] Μολυσμένες Κρύπτες",
-    "[41] Η Λεωφόρος", "[42] Φενακίδα", "[43] Φρουραρχείο", "[44] Σταυροδρόμια", "[45] Μεδουσιανή",
-    "[46] Βουκολέων", "[47] Μαύρη Αλέα", "[48] Αγορά των Νεκρών", "[49] Φθαρμένες Αψίδες", "[50] Μαύρο Παλάτι",
-    "[51] Καταβόθρες", "[52] Περάσματα", "[53] Αδιέξοδα", "[54] Υποβρύχιοι Διάδρομοι", "[55] Μουσείο",
-    "[56] Κήπος Αγαλμάτων", "[57] Αρένα", "[58] Παγίδες", "[59] Κέντακλο", "[60] Καθρέφτες",
-    "[61] Στοά του Δούκα", "[62] Εκκλησίασμα", "[63] Μαύρη Πύλη", "[64] Πυραμίδα", "[65] Άδυτον",
-    "[66] Βεστιάριο", "[67] Εικονοστάσια", "[68] Μαύρο Ιερό", "[69] Τύμβος των Οστών", "[70] Ναός των Οστών",
-    "[71] Βασαλτική Πύλη", "[72] Ο Θόλος της Στρίγγλας", "[73] Δρακοντική Αυλή", "[74] Βασαλτική Αψίδα", "[75] Στοά του Ιφρίτη",
-    "[76] Αβυσσάλειο", "[77] Μέγα Παλάτιο", "[78] Βασαλτική Πόλη", "[79] Εχιδναϊκή Λεωφόρος", "[80] Μεταλλουργείο",
-    "[81] Πύλες της Νερτερίας", "[82] Αχέρων", "[83] Κωκυτός", "[84] Φλεγέθων", "[85] Στυξ",
-    "[86] Λήθη", "[87] Νερτέρα Χθων", "[88] Χαρόντειο Μέλαθρον", "[89] Πύλη της Αβύσσου", "[90] Άβυσσος",
-    "[91] Καταβύθιση", "[92] Άχρονα Πεδία", "[93] Παγωμένη Άβυσσος", "[94] Πυρωμένη Άβυσσος", "[95] Εξώτερος Πυρήν",
-    "[96] Εσώτερος Πυρήν", "[97] Κόλαση", "[98] Αληθής Κόλαση", "[99] Εκτυφλωτικά Πεδία", "[100] Προγενής Γνόφος"
+    "1. Συντρίμμια",
+    "2. Προπύλαια",
+    "3. Ο Κοβαλώνας",
+    "4. Καταφύγιο",
+    "5. Πλημμυρισμένη Στοά",
+    "6. Το Άσυλο",
+    "7. Θάλαμοι",
+    "8. Μνημούρια",
+    "9. Σφηκοφωλιές",
+    "10. Λημέρι του Τελώνη",
+    "11. Άντρο του Δερβίση",
+    "12. Περάσματα",
+    "13. Κρησφύγετο",
+    "14. Σμερδότρυπες",
+    "15. Μεγασπήλαιον",
+    "16. Λασπομέρος",
+    "17. Κυνοτροφείο",
+    "18. Μνημούρια",
+    "19. Οφεώνας",
+    "20. Λαγούμια",
+    "21. Υπόνομος",
+    "22. Βάραθρο",
+    "23. Δρασκέλα",
+    "24. Μπουγαροφωλιές",
+    "25. Ερπετοθάλαμοι",
+    "26. Φιδοσπηλιά",
+    "27. Αρουρίδα",
+    "28. Υπόγειο Ρέμα",
+    "29. Μαύρο Χάσμα",
+    "30. Κατσαριδοφωλιές",
+    "31. Κατακόμβες",
+    "32. Ιερατείο",
+    "33. Σκουλκατόριο",
+    "34. Σπουδαστήριο",
+    "35. Σκορποχώρι",
+    "36. Σαρκοφάγοι",
+    "37. Ογριανή",
+    "38. Τάφοι των Ξωτικών",
+    "39. Κελιά",
+    "40. Μολυσμένες Κρύπτες",
+    "41. Η Λεωφόρος",
+    "42. Φενακίδα",
+    "43. Φρουραρχείο",
+    "44. Σταυροδρόμια",
+    "45. Μεδουσιανή",
+    "46. Βουκολέων",
+    "47. Μαύρη Αλέα",
+    "48. Αγορά των Νεκρών",
+    "49. Φθαρμένες Αψίδες",
+    "50. Μαύρο Παλάτι",
+    "51. Καταβόθρες",
+    "52. Περάσματα",
+    "53. Αδιέξοδα",
+    "54. Υποβρύχιες Στοές",
+    "55. Μουσείο",
+    "56. Κήπος Αγαλμάτων",
+    "57. Αρένα",
+    "58. Παγίδες",
+    "59. Κέντακλο",
+    "60. Καθρέφτες",
+    "61. Στοά του Δούκα",
+    "62. Εκκλησίασμα",
+    "63. Μαύρη Πύλη",
+    "64. Πυραμίδα",
+    "65. Άδυτον",
+    "66. Βεστιάριο",
+    "67. Εικονοστάσια",
+    "68. Μαύρο Ιερό",
+    "69. Τύμβος των Οστών",
+    "70. Ναός των Οστών",
+    "71. Βασαλτική Πύλη",
+    "72. Θόλος της Στρίγγλας",
+    "73. Δρακοντική Αυλή",
+    "74. Βασαλτική Αψίδα",
+    "75. Στοά του Ιφρίτη",
+    "76. Αβυσσάλειο",
+    "77. Μέγα Παλάτιο",
+    "78. Βασαλτική Πόλη",
+    "79. Εχιδναϊκή Λεωφόρος",
+    "80. Μεταλλουργείο",
+    "81. Πύλες της Νερτερίας",
+    "82. Αχέρων",
+    "83. Κωκυτός",
+    "84. Φλεγέθων",
+    "85. Στυξ",
+    "86. Λήθη",
+    "87. Νερτέρα Χθων",
+    "88. Χαρόντειο Μέλαθρον",
+    "89. Πύλη της Αβύσσου",
+    "90. Άβυσσος",
+    "91. Καταβύθιση",
+    "92. Άχρονα Πεδία",
+    "93. Παγωμένη Άβυσσος",
+    "94. Πυρωμένη Άβυσσος",
+    "95. Εξώτερος Πυρήν",
+    "96. Εσώτερος Πυρήν",
+    "97. Κόλαση",
+    "98. Αληθής Κόλαση",
+    "99. Εκτυφλωτικά Πεδία",
+    "100. Προγενής Γνόφος"
 ];
 
 const zaladouras = [
@@ -2640,10 +2776,6 @@ const zaladouras = [
     "Μια παρέα από μεθυσμένους ρεμπεσκέδες παίζουν Τυχοδιωκτικόν σε μια γωνιά του τεκέ.",
     "Μια παρέα από σπασίκλες ρεμπεσκέδες παίζουν Ανδραγάθημα σε μια γωνιά του τεκέ.",
     "Σκάει στο τραπέζι σου ο Ριχάρδος, με τη χρυσή του φορεσιά. ΄΄Αγοράζω χρυσό σε τιμή κοσμήματος!''",
-    "Σκάει στο τραπέζι σου ο Ριχάρδος, με τη χρυσή του φορεσιά. ΄΄Ναι αλήθεια ειναι. Είμαι ο ιδιοκτήτης αυτού του τεκέ.''",
-    "Σκάει στο τραπέζι σου ο Ριχάρδος, με τη χρυσή του φορεσιά. ΄΄Α καλώς τον! Βλέπω δεν σε σκοτώσανε ακόμα. Έχεις να σκοτώσεις τίποτα εσύ;''",
-    "Σκάει στο τραπέζι σου ο Ριχάρδος, με τη χρυσή του φορεσιά. ΄΄Μην περιμένεις τις δύσκολες μέρες. Προετοιμάσου γι' αυτες.''",
-    "Σκάει στο τραπέζι σου ο Ριχάρδος, με τη χρυσή του φορεσιά. ΄΄Αυτό το ρολόι είναι χρυσό; Νομίζω δείχνει ώρα-να-το-πουλήσεις!''",
     "Διακρίνεις σε μιαν άκρη τον Θαμβόπουλο τον καβαλλάριο, περιτριγυρισμένο απο Θαμβοπουλίτσες." ,
     "Στον πάγκο κάθεται σκυμμένος ο Χάρος με τον μανδύα και το δρεπάνι του, κι ο Ζαλαδούρας του γεμίζει το ποτήρι. Ανοιγοκλείνεις τα μάτια σου και δεν ειναι πια εκεί." ,
     "Ανάμεσα στους θαμώνες παρατηρείς έναν πανύψηλο δερβίση. Φορά μια περίτεχνη εξωτική καπελαδούρα." ,
@@ -2687,6 +2819,7 @@ const legendaryMonstersByType = {
         { min: 31,  max: 40,  name: "Τρεμαντάχειλος",         itemName: "Η Μπαμπέσα" },
         { min: 41, max: 50, name: "Η Μεγίστη Μούμια",         itemName: "Οστεοθραύστης" },        
         { min: 41,  max: 50,  name: "Ο Μονομάχος",         itemName: "Τρίαινα του Μονομάχου" },
+        { min: 41,  max: 50,  name: "Καραφλοδαίμονας",         itemName: "Ξίφος του Διδασκάλου" },
         { min: 41,  max: 50,  name: "Ο Κένταρχος",         itemName: "Σπάθα του Κένταρχου" },
         { min: 51, max: 60,  name: "Κωλοτερορίτα",         itemName: "ΑΚ47" },
         { min: 51,  max: 60,  name: "Αραχνομάνα",         itemName: "Τοξική Λόγχη" },
@@ -2719,7 +2852,7 @@ const legendaryMonstersByType = {
         { min: 31, max: 40, name: "Θαμβόπουλος",         itemName: "Θώρακας του Θαμβόπουλου" },
         { min: 31, max: 40, name: "Θαμβόπουλος",         itemName: "Θυμιατό του Θαμβόπουλου" },
         { min: 41, max: 50, name: "Αρμούρης",         itemName: "Λωρίκι του Αρμούρη" },     
-        { min: 41, max: 50, name: "Ο Γεωμέτρης",         itemName: "Φυλακτό Προστασίας" },      
+        { min: 41, max: 50, name: "Ο Γεωμέτρης",         itemName: "Τριγωνικό Ραντάρ" },      
         { min: 41, max: 50, name: "Ο Εξκουβίτωρ",         itemName: "Στοιχειωμένο Κλιβάνιο" },         
         { min: 51, max: 60,  name: "Θερμουθαρίν",         itemName: "Αμαζόνειο Κράνος" },
         { min: 51, max: 60,  name: "Τσουκ-Τσι",         itemName: "Ανθρωπέτσι" },
@@ -2728,6 +2861,7 @@ const legendaryMonstersByType = {
         { min: 61, max: 70,  name: "Ο Κυνηγός",     itemName: "Αστρικός Θώρακας" },
         { min: 61, max: 70,  name: "Το Κυβόργιο",     itemName: "Μαύρο Κέβλαρ" },
         { min: 61, max: 70,  name: "Ατσάλινος Πρόμαχος",     itemName: "Υπερκλιβάνιο" },
+        { min: 61, max: 70,  name: "Δαίμων Νεσαπουλιάτα",     itemName: "Δαιμονική Πανιοπλία" },
         { min: 71, max: 80,  name: "Κοσέι ο Αθάνατος",     itemName: "Σκελετικός Θώρακας" },
         { min: 71, max: 80,  name: "Μέγας Σικάριος",     itemName: "Μανδύας Διατοπισμού" },
         { min: 71, max: 80,  name: "Τραξ ο Τυμβολίκτωρ",     itemName: "Ρούνοι Προστασίας" },
@@ -2751,6 +2885,7 @@ const legendaryMonstersByType = {
         { min: 21, max: 30,  name: "Θείος Πύθιος",     itemName: "Πίπα του θέιου Πύθιου" },
         { min: 21, max: 30,  name: "Θείος Πύθιος",     itemName: "Εύχανδρο του θείου Πύθιου" },
         { min: 21, max: 30,  name: "Θείος Πύθιος",     itemName: "MuleMaster 4000" },
+        { min: 21, max: 30,  name: "Κύριος Νίκος",     itemName: "Το Μάτι" },
         { min: 31, max: 40, name: "Μάγος Σπέκουλης",         itemName: "Φακοί Ερυθρόρασης" },
         { min: 31, max: 40, name: "Μπαμπουράρχης",         itemName: "Υπερμπάμπουρας" },
         { min: 31, max: 40,  name: "Ντερβίς-Μπαμπά",     itemName: "Καπέλο του Ντερβίς-Μπαμπά" },
@@ -2908,14 +3043,17 @@ function rollItemTier(monsterLevel) {
             goldSpent: 0,
             goldLost: 0,
             beersDrunk: 0,
-            activeTime: 0, // σε δευτερόλεπτα
+            activeTime: 0, // μετράει γύρους (κάθε γύρος μάχης/regen = +1), όχι πλέον δευτερόλεπτα
             legendaryDrops: 0,
             bestKillStreak: 0,
             hasBeatenConanos: false,
         weapon: { name: "Ράβδος", power: 1, legendary: false },
         armor: { name: "Μανδύας", power: 1, legendary: false },
         magic: { name: "Κόκκαλο Αρουραίου", power: 1, legendary: false },
-        maxUnlockedLevel: 100
+        maxUnlockedLevel: 100,
+        gameSpeedFactor: 1.5, // αποθηκευμένη επιλογή ταχύτητας παιχνιδιού (Κανονική=1, Αγχωτική=1.5)
+        soundEnabled: true,   // αποθηκευμένη επιλογή ήχου
+        musicEnabled: false   // αποθηκευμένη επιλογή μουσικής
     };
 
 
@@ -3027,11 +3165,11 @@ const AREA_TYPE_COLOR = {
     // === SPEED HOOK ===
     // autoPlayEnabled / autoPlaySpeedFactor ελέγχονται από το AutoPlay panel (βλ. τέλος αρχείου).
     // gameSpeedFactor ελέγχεται από το modal "Επιλογές".
-    // Όσο το AutoPlay είναι OFF, getSpeedFactor() γυρνάει gameSpeedFactor (default 1).
+    // Όσο το AutoPlay είναι OFF, getSpeedFactor() γυρνάει gameSpeedFactor (default 1.5, Αγχωτική).
     // Όσο το AutoPlay είναι ON, getSpeedFactor() γυρνάει autoPlaySpeedFactor.
     let autoPlayEnabled = false;
-    let autoPlaySpeedFactor = 1;
-    let gameSpeedFactor = 1;
+    let autoPlaySpeedFactor = 1.5;
+    let gameSpeedFactor = 1.5;
     function getSpeedFactor() { return autoPlayEnabled ? autoPlaySpeedFactor : gameSpeedFactor; }
     function effCD() { return CD_DURATION / getSpeedFactor(); }
     function effTick() { return COMBAT_TICK_MS / getSpeedFactor(); }
@@ -3198,7 +3336,7 @@ function updateKillStreakVisuals() {
         if (killStreakBonus !== 0.10) {
             killStreakBonus = 0.10;
             logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-silver');
-            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ!', '#ffd700'); }, 500);
+            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ +10% XP!', '#ffd700'); }, 500);
         }
         if (xpBarContainer) {
             xpBarContainer.classList.remove('killstreak-silver');
@@ -3208,7 +3346,7 @@ function updateKillStreakVisuals() {
         if (killStreakBonus !== 0.05) {
             killStreakBonus = 0.05;
             logMessage(`Σερί 5 φόνων! +5% XP!`, 'streak-silver');
-            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '5 ΣΕΡΙ!', '#e0e6eb'); }, 500);
+            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '5 ΣΕΡΙ +5% XP!', '#e0e6eb'); }, 500);
         }
         if (xpBarContainer) {
             xpBarContainer.classList.remove('killstreak-gold');
@@ -3344,6 +3482,28 @@ function loadGame() {
         player.hasBeatenConanos = false;
     }
 
+    // Συγχρονισμός της αποθηκευμένης ταχύτητας παιχνιδιού με τη global μεταβλητή
+    if (typeof player.gameSpeedFactor === 'number' && !isNaN(player.gameSpeedFactor)) {
+        gameSpeedFactor = player.gameSpeedFactor;
+    } else {
+        player.gameSpeedFactor = gameSpeedFactor;
+    }
+    const speedEl = document.getElementById('options-speed');
+    if (speedEl) speedEl.value = gameSpeedFactor;
+
+    // Συγχρονισμός των αποθηκευμένων επιλογών ήχου/μουσικής με τις global μεταβλητές
+    if (typeof player.soundEnabled === 'boolean') {
+        soundEnabled = player.soundEnabled;
+    } else {
+        player.soundEnabled = soundEnabled;
+    }
+    if (typeof player.musicEnabled === 'boolean') {
+        musicEnabled = player.musicEnabled;
+    } else {
+        player.musicEnabled = musicEnabled;
+    }
+    updateMusicState();
+
     applyAutoplayVisibility();
 }
 
@@ -3426,7 +3586,7 @@ function confirmCharacterCreation() {
     player.ironman = document.getElementById('ironman-checkbox').checked;
     player.showAutoplay = document.getElementById('show-autoplay-checkbox').checked;
     autoPlayEnabled = false;
-    autoPlaySpeedFactor = 1;
+    autoPlaySpeedFactor = 1.5;
     if (typeof window.rearmTimers === 'function') window.rearmTimers();
     applyAutoplayVisibility();
 
@@ -4003,7 +4163,7 @@ function startTownRegen() {
                 maxHp - player.hp
             );
             player.hp += regenAmount;
-            player.activeTime += 2;
+            player.activeTime += 1;
             createFloatingText(
                 'player-hp-parent',
                 `+${formatNumber(regenAmount)}`,
@@ -4523,13 +4683,13 @@ function forceRetreat() {
     huntBtn.disabled = true;
     setTimeout(() => {
         huntBtn.disabled = false;
-    }, 4000);
+    }, 2 * effTick());
 }
 
 function executeCombatRound() {
    
     if (!inCombat) return;
-    player.activeTime += 2;
+    player.activeTime += 1;
     if (waitingForNextMonster) return;
 
     if (!monster || monster.hp <= 0) {
@@ -4967,7 +5127,7 @@ function showLegendaryPopup() {
                             huntBtn.disabled = true;
                             setTimeout(() => {
                                 huntBtn.disabled = false;
-                            }, 4000);
+                            }, 2 * effTick());
 
                     }, 500);
 
@@ -5042,13 +5202,13 @@ function applyDefeatPenalties() {
     player.gold = 0;
     player.hp = 1;
 
-   // Απενεργοποίηση του κουμπιού ΣΦΑΞΕ για 4''
+   // Απενεργοποίηση του κουμπιού ΣΦΑΞΕ για 2 combat/regen ticks (προσαρμόζεται στην ταχύτητα)
     const huntBtn = document.getElementById("btn-hunt-retreat");
     huntBtn.disabled = true;
 
     setTimeout(() => {
         huntBtn.disabled = false;
-    }, 4000);
+    }, 2 * effTick());
 
     // xasimo eksoplismou
     const slots = ['weapon', 'armor', 'magic'];
@@ -5304,6 +5464,13 @@ if (
     <div style="background:#2a2a2a;border:1px solid var(--accent-gold);border-radius:8px;padding:20px;max-width:400px;width:90%;color:#fff;">
         <h3 style="margin:0 0 15px;color:var(--accent-gold);">AutoPlay Ρυθμίσεις</h3>
         <label style="display:block;margin-bottom:12px;font-size:0.85rem;">
+            Στόχος βάθους: <span id="settings-depth-val">-1</span>
+            <input type="range" id="settings-depth" min="-20" max="20" step="1" value="-1" style="width:100%;">
+        </label>
+        <label style="display:block;margin-bottom:12px;font-size:0.85rem;cursor:pointer;">
+            <input type="checkbox" id="settings-use-ratio"> Χρήση auto risk ratio
+        </label>
+        <label style="display:block;margin-bottom:12px;font-size:0.85rem;">
             Risk Ratio: <span id="settings-ratio-val">0.8</span>
             <input type="range" id="settings-ratio" min="0.1" max="2.0" step="0.05" value="0.8" style="width:100%;">
         </label>
@@ -5315,14 +5482,10 @@ if (
             HP% για retreat: <span id="settings-retreat-val">0.50</span>
             <input type="range" id="settings-retreat" min="0.1" max="1.0" step="0.05" value="0.50" style="width:100%;">
         </label>
-        <label style="display:block;margin-bottom:12px;font-size:0.85rem;">
+        <label style="display:block;margin-bottom:20px;font-size:0.85rem;">
             Beer charge% για retreat: <span id="settings-beer-charge-val">0.50</span>
             <input type="range" id="settings-beer-charge" min="0.1" max="1.0" step="0.05" value="0.50" style="width:100%;">
         </label>
-        <label style="display:block;margin-bottom:20px;font-size:0.85rem;">
-            Autotick (ms): <span id="settings-tick-val">150</span>
-            <input type="range" id="settings-tick" min="50" max="500" step="10" value="150" style="width:100%;">
-        </label> 
         <div style="display:flex;gap:10px;justify-content:flex-end;">
             <button id="settings-ok" style="background:var(--accent-gold);color:#1a1a1a;border:none;border-radius:4px;padding:6px 18px;cursor:pointer;font-weight:bold;">OK</button>
             <button id="settings-cancel" style="background:#555;color:#fff;border:none;border-radius:4px;padding:6px 18px;cursor:pointer;">Cancel</button>
@@ -5357,8 +5520,8 @@ if (
 (function () {
 
     // ==================== ΡΥΘΜΙΣΕΙΣ (επεξεργάσιμες) ====================
-    let AUTO_DEPTH_BELOW_PLAYER = 0;        // levels κάτω (ή πάνω, αν αρνητικό) από τον player — μόνο αν AUTO_USE_TARGET_RATIO = false
-    let AUTO_USE_TARGET_RATIO = true;       // true: επιλογή βάθους με βάση το combat ratio αντί για σταθερό offset
+    let AUTO_DEPTH_BELOW_PLAYER = -1;        // levels κάτω (ή πάνω, αν αρνητικό) από τον player — μόνο αν AUTO_USE_TARGET_RATIO = false
+    let AUTO_USE_TARGET_RATIO = false;       // true: επιλογή βάθους με βάση το combat ratio αντί για σταθερό offset
     let AUTO_TARGET_COMBAT_RATIO = 0.85;      // στόχος για το calculateDifficulty(player, monster) — μόνο αν AUTO_USE_TARGET_RATIO = true
     let AUTO_BEER_HP_PCT = 0.80;            // μπύρα όταν HP <= 70% (δηλ. έχει δεχτεί >=30% damage)
     let AUTO_RETREAT_HP_PCT = 0.5;         // κατώφλι HP για σκέψη retreat
@@ -5501,7 +5664,7 @@ if (
                 setStatus(`AutoPlay: στοχεύει ratio ${AUTO_TARGET_COMBAT_RATIO} -> βάθος ${targetLevel} (εκτ. ratio ${achievedRatio.toFixed(2)})`);
             } else {
                 // levels κάτω (ή πάνω, αν αρνητικό) από τον player, clamp σε [1, options.length]
-                targetLevel = Math.max(1, player.level - AUTO_DEPTH_BELOW_PLAYER);
+                targetLevel = Math.max(1, player.level + AUTO_DEPTH_BELOW_PLAYER);
                 targetLevel = Math.min(targetLevel, selector.options.length);
                 setStatus(`AutoPlay: κατεβαίνει στο βάθος ${targetLevel}...`);
             }
@@ -5652,7 +5815,7 @@ if (
     if (speedSelect) {
         speedSelect.addEventListener('change', function () {
             const oldSpeed = autoPlaySpeedFactor;
-            autoPlaySpeedFactor = parseInt(speedSelect.value, 10) || 1;
+            autoPlaySpeedFactor = parseFloat(speedSelect.value) || 1;
             if (autoPlayEnabled) {
                 recalculateCooldowns(oldSpeed);
                 rearmTimers();
@@ -5666,6 +5829,9 @@ if (
 
     function openSettingsModal() {
         if (!settingsModal) return;
+        document.getElementById('settings-depth').value = AUTO_DEPTH_BELOW_PLAYER;
+        document.getElementById('settings-depth-val').textContent = AUTO_DEPTH_BELOW_PLAYER;
+        document.getElementById('settings-use-ratio').checked = AUTO_USE_TARGET_RATIO;
         document.getElementById('settings-ratio').value = AUTO_TARGET_COMBAT_RATIO;
         document.getElementById('settings-ratio-val').textContent = AUTO_TARGET_COMBAT_RATIO;
         document.getElementById('settings-beer').value = AUTO_BEER_HP_PCT;
@@ -5674,14 +5840,25 @@ if (
         document.getElementById('settings-retreat-val').textContent = AUTO_RETREAT_HP_PCT;
         document.getElementById('settings-beer-charge').value = AUTO_RETREAT_BEER_CHARGE_PCT;
         document.getElementById('settings-beer-charge-val').textContent = AUTO_RETREAT_BEER_CHARGE_PCT;
-        document.getElementById('settings-tick').value = AUTO_TICK_MS;
-        document.getElementById('settings-tick-val').textContent = AUTO_TICK_MS;
+        updateRatioEnabled();
         settingsModal.style.display = 'flex';
     }
 
     function closeSettingsModal() {
         if (!settingsModal) return;
         settingsModal.style.display = 'none';
+    }
+
+    function updateRatioEnabled() {
+        const enabled = document.getElementById('settings-use-ratio').checked;
+        const ratioInput = document.getElementById('settings-ratio');
+        const ratioLabel = ratioInput.parentElement;
+        ratioInput.disabled = !enabled;
+        ratioLabel.style.opacity = enabled ? '1' : '0.4';
+        const depthInput = document.getElementById('settings-depth');
+        const depthLabel = depthInput.parentElement;
+        depthInput.disabled = enabled;
+        depthLabel.style.opacity = enabled ? '0.4' : '1';
     }
 
     // Live preview στα range sliders
@@ -5692,16 +5869,19 @@ if (
         });
     });
 
+    document.getElementById('settings-use-ratio').addEventListener('change', updateRatioEnabled);
+
     if (settingsBtn) {
         settingsBtn.addEventListener('click', openSettingsModal);
     }
 
     document.getElementById('settings-ok').addEventListener('click', function () {
+        AUTO_DEPTH_BELOW_PLAYER = parseInt(document.getElementById('settings-depth').value, 10);
+        AUTO_USE_TARGET_RATIO = document.getElementById('settings-use-ratio').checked;
         AUTO_TARGET_COMBAT_RATIO = parseFloat(document.getElementById('settings-ratio').value);
         AUTO_BEER_HP_PCT = parseFloat(document.getElementById('settings-beer').value);
         AUTO_RETREAT_HP_PCT = parseFloat(document.getElementById('settings-retreat').value);
         AUTO_RETREAT_BEER_CHARGE_PCT = parseFloat(document.getElementById('settings-beer-charge').value);
-        AUTO_TICK_MS = parseInt(document.getElementById('settings-tick').value, 10);
         closeSettingsModal();
     });
 
@@ -5835,13 +6015,17 @@ function applyOptions() {
     const speedEl = document.getElementById('options-speed');
   //  if (speedEl) gameSpeedFactor = parseInt(speedEl.value, 10) || 1;
   if (speedEl) gameSpeedFactor = parseFloat(speedEl.value) || 1;
+  player.gameSpeedFactor = gameSpeedFactor; // αποθηκεύεται με τον χαρακτήρα
   const soundEl = document.getElementById('options-sound');
     if (soundEl) soundEnabled = soundEl.checked;
+    player.soundEnabled = soundEnabled; // αποθηκεύεται με τον χαρακτήρα
     const musicEl = document.getElementById('options-music');
     if (musicEl) musicEnabled = musicEl.checked;
+    player.musicEnabled = musicEnabled; // αποθηκεύεται με τον χαρακτήρα
     updateMusicState();
     if (typeof rearmTimers === 'function') rearmTimers();
     else     if (typeof window.rearmTimers === 'function') window.rearmTimers();
+    if (typeof saveGame === 'function') saveGame();
     closeOptionsModal();
 }
 </script>
@@ -5872,8 +6056,8 @@ function applyOptions() {
         <label style="display:block;margin-bottom:15px;font-size:0.85rem;">
             Ταχύτητα παιχνιδιού:
             <select id="options-speed" style="display:block;width:100%;margin-top:4px;background:#1a1a1a;color:#fff;border:1px solid var(--border-color);border-radius:3px;padding:4px;">
-                <option value="1">Κανονική</option>
-                <option value="1.5">Αγχωτική</option>
+                <option value="1">Αργή</option>
+                <option value="1.5" selected>Κανονική</option>
             </select>
         </label>
 
