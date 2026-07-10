@@ -2618,8 +2618,6 @@ const tekeSongs = [
 "Αφού το εγεννήθηκα",
 "Αράπ ζεϊμπέκικο",
 "Μπρος στον Άγιο Σπυρίδωνα",
-"Απ' της Ζέας το λιμάνι",
-"Πιο πέρα απ' το Τζάνειο",
 "Ο μπουφετζής",
 "Επιάσανε τον Μπάτη",
 "Παντέρημος μες τον ντουνιά",
@@ -2864,6 +2862,7 @@ const legendaryMonstersByType = {
         { min: 61, max: 70,  name: "Το Κυβόργιο",     itemName: "Μαύρο Κέβλαρ" },
         { min: 61, max: 70,  name: "Ατσάλινος Πρόμαχος",     itemName: "Υπερκλιβάνιο" },
         { min: 61, max: 70,  name: "Δαίμων Νεσαπουλιάτα",     itemName: "Δαιμονική Πανιοπλία" },
+        { min: 61, max: 70,  name: "Όφις Γλύκων",     itemName: "Περούκα του Γλύκονος" },
         { min: 71, max: 80,  name: "Κοσέι ο Αθάνατος",     itemName: "Σκελετικός Θώρακας" },
         { min: 71, max: 80,  name: "Μέγας Σικάριος",     itemName: "Μανδύας Διατοπισμού" },
         { min: 71, max: 80,  name: "Τραξ ο Τυμβολίκτωρ",     itemName: "Ρούνοι Προστασίας" },
@@ -2906,7 +2905,7 @@ const legendaryMonstersByType = {
         { min: 71, max: 80,  name: "Χρυσόχειρ ο Γνοφάρχης",     itemName: "Μείζων Γνοφικός Κώδιξ"},
         { min: 71, max: 80,  name: "Ζαφραχάν ο Ιφρίτης",     itemName: "Δαχτυλίδι του Ιφρίτη" },
         { min: 81, max: 90, name: "Αμπντούλ Αλχαζρέντ",         itemName: "Νεκρονομικόν" },
-        { min: 81, max: 90, name: "Θάο-Παν ο Μαύρος",         itemName: "Νεκρομαντική Ράβδος" },
+        { min: 81, max: 90, name: "Θάο-Παν ο Μαύρος",         itemName: "Νεκρομαντικό Στέμμα" },
         { min: 81, max: 90, name: "Αμπντούλ Αλχαζρέντ",         itemName: "Νεκρονομικόν" },
         { min: 91, max: 100, name: "Φαλαβάρ ο Νεκυοδαίμων",         itemName: "Νεκυοδαίμων" },    
         { min: 91, max: 100, name: "Χολσόρνα",         itemName: "Μάτι του Χολσόρνα" },   
@@ -2976,7 +2975,7 @@ function getLegendaryItemName(type, tier) {
     // Άρα αφαιρούμε το +20 για να βρούμε ξανά το αντίστοιχο bracket επιπέδου
     // μέσα στο legendaryMonstersByType, το ίδιο table που χρησιμοποιείται
     // και τη στιγμή του drop.
-    let baseLevel = tier - 15;
+    let baseLevel = tier - 15;  //legendary bonus roll factor (arnitiko)
     baseLevel = Math.max(1, Math.min(100, baseLevel));
 
     const list = legendaryMonstersByType[type] || [];
@@ -3237,12 +3236,10 @@ const AREA_TYPE_COLOR = {
 
 
  // 1. ypologismos "effective level" lamvanontas ypopsin ta expected equip tiers tou rempeske
-let effectivePlayerLevel = Math.min(105, 1.05 * player.level);
+let effectivePlayerLevel = Math.min(103, 1.03 * player.level);
 let lvl = effectivePlayerLevel;
 
-
-// simpler extra lvl difference penalty
-  let diff = lvl - monsterLvl;
+let diff = lvl - monsterLvl;
  if (diff > 0) { // Ο παίκτης είναι μεγαλύτερο επίπεδο: Πέναλτι ανά επίπεδο διαφοράς
          xp *= Math.pow(0.90, diff);
    } else if (diff < 0) { 
@@ -3442,7 +3439,7 @@ function loadGame() {
         try {
             player = { ...player, ...JSON.parse(savedData) };
             player.level = Math.min(player.level, 100);
-            player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105);
+            player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105); //legendary bonus minmaxes 1/1
             player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
             player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
             if (!player.name) player.name = "Ρεμπεσκές";
@@ -3667,7 +3664,7 @@ function importSave() {
 
         player = { ...player, ...data.player };
         player.level = Math.min(player.level, 100);
-        player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105);
+        player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105); //legendary bonus minmaxes 2/2
         player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
         player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
         if (!player.name) player.name = "Ρεμπεσκές";
@@ -4369,7 +4366,7 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
 
     let areaType = getAreaType(lvl);
 
-    // Βασική πιθανότητα Legendary (1 στις 1000). RICH/POOR areas την επηρεάζουν,
+    // Βασική πιθανότητα Legendary (1 στις x). RICH/POOR areas την επηρεάζουν,
     // με δικούς της πολλαπλασιαστές ώστε να ρυθμίζεται ξεχωριστά από το specialChance.
     let legendaryChance = 0.001;
     const legendaryRichMultiplier = 1.30;  // πόσο πιο συχνά σε RICH areas
@@ -4847,7 +4844,7 @@ function handleEquipmentDrop(type, rolledTier, monster, forceSell = false) {
 
     const isLegendaryDrop = monster && monster.variant === 'legendary';
         if (isLegendaryDrop) {
-            rolledTier = Math.min(120, rolledTier + 15);
+            rolledTier = Math.min(120, rolledTier + 15);  //legendary bonus   max and bonus
         }
 
     console.log("LEGENDARY?", isLegendaryDrop);
