@@ -1106,7 +1106,7 @@ body {
 
 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; justify-content:flex-end;">
 
-    <button class="btn-options" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music').checked=musicEnabled;document.getElementById('options-music-volume').value=musicVolumeDb;document.getElementById('options-modal').style.display='flex';">
+    <button class="btn-options" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music-toggle').checked=musicEnabled;document.getElementById('options-music-volume').value=musicVolumeDb;document.getElementById('options-modal').style.display='flex';">
         Επ
     </button>
 
@@ -1233,22 +1233,27 @@ function getHitjazNoteForStep(step) {
     return hitjazScale[index];
 }
 
+let _musicStarting = false;
+
 function startBackgroundMusic() {
-    if (isMusicPlaying || !musicEnabled) return;
-    isMusicPlaying = true;
+    if (isMusicPlaying || _musicStarting || !musicEnabled) return;
+    _musicStarting = true;
 
     const player = document.getElementById('bg-midi-player');
-    if (!player) { isMusicPlaying = false; return; }
+    if (!player) { _musicStarting = false; return; }
 
     const tryStart = async () => {
         try {
             if (typeof player.start === 'function') {
                 await player.start();
             }
+            isMusicPlaying = true;
             setMusicVolume(musicVolumeDb);
         } catch (e) {
             console.error('Το MIDI δεν παίχτηκε:', e);
             isMusicPlaying = false;
+        } finally {
+            _musicStarting = false;
         }
     };
 
@@ -1277,6 +1282,21 @@ function updateMusicState() {
         stopBackgroundMusic();
     }
 }
+
+// Auto-start μουσικής στο πρώτο click του χρήστη (για autoplay policy του browser)
+let _musicAutoStartListener = null;
+function setupMusicAutoStart() {
+    if (_musicAutoStartListener) return;
+    _musicAutoStartListener = function () {
+        if (musicEnabled && !isMusicPlaying) {
+            startBackgroundMusic();
+        }
+        document.removeEventListener('click', _musicAutoStartListener);
+        _musicAutoStartListener = null;
+    };
+    document.addEventListener('click', _musicAutoStartListener);
+}
+
 // ==========================MUZKA---================
 
 
@@ -3460,11 +3480,6 @@ function loadGame() {
         soundEnabled = player.soundEnabled;
     } else {
         player.soundEnabled = soundEnabled;
-    }
-    if (typeof player.musicEnabled === 'boolean') {
-        musicEnabled = player.musicEnabled;
-    } else {
-        player.musicEnabled = musicEnabled;
     }
     if (typeof player.musicVolumeDb === 'number') {
         musicVolumeDb = player.musicVolumeDb;
@@ -5995,18 +6010,16 @@ function appendInfoLineHTML(container, html, type = 'system') {
 
 function applyOptions() {
     const speedEl = document.getElementById('options-speed');
-  //  if (speedEl) gameSpeedFactor = parseInt(speedEl.value, 10) || 1;
   if (speedEl) gameSpeedFactor = parseFloat(speedEl.value) || 1;
-  player.gameSpeedFactor = gameSpeedFactor; // αποθηκεύεται με τον χαρακτήρα
+  player.gameSpeedFactor = gameSpeedFactor;
   const soundEl = document.getElementById('options-sound');
     if (soundEl) soundEnabled = soundEl.checked;
-    player.soundEnabled = soundEnabled; // αποθηκεύεται με τον χαρακτήρα
-    const musicEl = document.getElementById('options-music');
-    if (musicEl) musicEnabled = musicEl.checked;
-    player.musicEnabled = musicEnabled; // αποθηκεύεται με τον χαρακτήρα
+    player.soundEnabled = soundEnabled;
+    const musicToggleEl = document.getElementById('options-music-toggle');
+    if (musicToggleEl) musicEnabled = musicToggleEl.checked;
     const musicVolEl = document.getElementById('options-music-volume');
     if (musicVolEl) setMusicVolume(parseFloat(musicVolEl.value));
-    player.musicVolumeDb = musicVolumeDb; // αποθηκεύεται με τον χαρακτήρα
+    player.musicVolumeDb = musicVolumeDb;
     updateMusicState();
     if (typeof rearmTimers === 'function') rearmTimers();
     else     if (typeof window.rearmTimers === 'function') window.rearmTimers();
@@ -6051,9 +6064,18 @@ function applyOptions() {
             <input type="checkbox" id="options-sound"> 🔉 Ήχος
         </label>
 
-        <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
-            <input type="checkbox" id="options-music"> 🎵 Μουσική
-        </label>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:0.85rem;">
+            <span>🎵 Μουσική</span>
+            <label style="position:relative;display:inline-block;width:40px;height:22px;cursor:pointer;">
+                <input type="checkbox" id="options-music-toggle" style="opacity:0;width:0;height:0;">
+                <span id="music-toggle-track" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#444;border-radius:11px;transition:background .3s;"></span>
+                <span id="music-toggle-thumb" style="position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#999;border-radius:50%;transition:transform .3s,background .3s;"></span>
+            </label>
+        </div>
+        <style>
+            #options-music-toggle:checked ~ #music-toggle-track { background: var(--accent-gold); }
+            #options-music-toggle:checked ~ #music-toggle-thumb { transform: translateX(18px); background: #fff; }
+        </style>
 
         <label style="display:block;margin-bottom:20px;font-size:0.85rem;">
             Ένταση μουσικής:
