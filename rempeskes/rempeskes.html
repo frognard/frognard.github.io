@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v260</title>
+    <title>Ρεμπεσκές v261</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -5118,7 +5118,7 @@ function showLegendaryPopup() {
                             huntBtn.disabled = true;
                             setTimeout(() => {
                                 huntBtn.disabled = false;
-                            }, 2 * effTick());
+                            }, 1 * effTick());
 
                     }, 500);
 
@@ -5199,7 +5199,7 @@ function applyDefeatPenalties() {
 
     setTimeout(() => {
         huntBtn.disabled = false;
-    }, 2 * effTick());
+    }, 1 * effTick());
 
     // xasimo eksoplismou
     const slots = ['weapon', 'armor', 'magic'];
@@ -5330,19 +5330,14 @@ function applyDefeatPenalties() {
     const code = event.code;
     const key = event.key;
 
-    // ENTER = Σφάξε / Υποχώρηση
+    // ENTER = Σφάξε / Γλέντα / Υποχώρηση
     if (
         code === 'Enter' ||
         code === 'NumpadEnter' ||
         key === 'Enter'
     ) {
         event.preventDefault();
-
-        if (!inCombat)
-            enterCombatFromSelector();
-        else
-            toggleRetreat();
-
+        handleHuntRetreatClick();
         return;
     }
 
