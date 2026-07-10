@@ -285,8 +285,8 @@ function renderEntry(s, i, isVictory) {
     const d = new Date(s.death_date);
     const formattedDate = d.toLocaleDateString('el-GR');
     const detailLine = isVictory
-        ? `Νίκησε τον <em>${escapeHtml(s.killer)}</em> στο ${escapeHtml(depthLabel(s.depth))} &middot; ${formattedDate}`
-        : `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)} &middot; ${formattedDate}`;
+        ? `Νίκησε τον <em>${escapeHtml(s.killer)}</em> στο ${escapeHtml(depthLabel(s.depth))}, σε ${s.turns ?? 0} γύρους &middot; ${formattedDate}`
+        : `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)}, το γύρο ${s.turns ?? 0} &middot; ${formattedDate}`;
     return `
         <div class="entry${isVictory ? ' victory' : ''}">
             <div class="rank-badge">${romanish(i + 1)}</div>

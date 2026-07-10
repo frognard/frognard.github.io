@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v256</title>
+    <title>Ρεμπεσκές v259</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1430,9 +1430,9 @@ function showIronmanHighscores() {
             const formattedDate = new Date(s.date).toLocaleDateString('el-GR');
 
             if (s.victory) {
-                appendInfoLine(body, `★ ${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)} και έγινε ΘΕΟΣΦΑΧΤΗΣ! [${formattedDate}]`, "psof-victory");
+                appendInfoLine(body, `★ ${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, σε ${formatNumber(s.turns || 0)} γύρους! [${formattedDate}]`, "psof-victory");
             } else {
-                appendInfoLine(body, `${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer} [${formattedDate}]`, "psof");
+                appendInfoLine(body, `${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer}, το γύρο ${formatNumber(s.turns || 0)}. [${formattedDate}]`, "psof");
             }
             appendInfoLine(body, ``);
         });
@@ -3527,6 +3527,10 @@ function applyAutoplayVisibility() {
 function resetGame() {
     if (!confirm("Διαγραφή χαρακτήρα;")) return;
 
+    if (townRegenInterval) { clearInterval(townRegenInterval); townRegenInterval = null; }
+    if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+    if (nextMonsterTimeoutId) { clearTimeout(nextMonsterTimeoutId); nextMonsterTimeoutId = null; }
+
     try {
         localStorage.removeItem('minimal_rpg_save');
         localStorage.removeItem('selectedMonsterLevel');
@@ -3606,9 +3610,9 @@ function confirmCharacterCreation() {
 
     saveGame();
     
-    logMessage(`Ο ${player.name} μπαίνει για πρώτη φορά στον Τεκέ του Ζαλαδούρα. Οι άλλοι ρεμπεσκέδες τον κοιτάνε στραβά.`, 'bright');
+    logMessage(`Μπαίνεις για πρώτη φορά στον Τεκέ του Ζαλαδούρα. Οι άλλοι ρεμπεσκέδες σε κοιτάνε στραβά.`, 'bright');
     logMessage(``);
-    logMessage(`Ο Ζαλαδούρας λέει: "Βρε βρε, ο ${player.name}! Καλώς το παιδί! Μπες στο λαβύρινθο και σφάξε ό,τι κινείται. Μετά γύρνα εδώ και ρίχτο στο πιοτό. Αυτή είναι η ζωή σου τώρα!"`, 'bright');
+    logMessage(`Ο Ζαλαδούρας λέει: "${player.name}! Βρε καλώς το παιδί! Μπες στο λαβύρινθο και σφάξε ό,τι κινείται. Μετά γύρνα εδώ και ρίχτο στο πιοτό. Αυτή είναι η ζωή σου τώρα!"`, 'bright');
     logMessage(``);
     // logMessage(`"Και μία συμβουλή: Πριν πας βαθύτερα φρόντισε να έχεις βρει και κατάλληλο εξοπλισμό. Δεν αρκεί το επίπεδό σου."`, 'bright');
 
@@ -4976,6 +4980,7 @@ function showLegendaryPopup() {
                         weapon: player.weapon.power,
                         armor: player.armor.power,
                         magic: player.magic.power,
+                        turns: player.activeTime,
                         date: Date.now(),
                         victory: true
                     });
@@ -5258,6 +5263,7 @@ function applyDefeatPenalties() {
             weapon: player.weapon.power,
             armor: player.armor.power,
             magic: player.magic.power,
+            turns: player.activeTime,
             date: Date.now()
         });
     }
@@ -5954,6 +5960,7 @@ if ('serviceWorker' in navigator) {
                     weapon: r.weapon,
                     armor: r.armor,
                     magic: r.magic,
+                    turns: r.turns || 0,
                     death_date: new Date(r.date).toISOString(),
                     victory: !!r.victory
                 });
