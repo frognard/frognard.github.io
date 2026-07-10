@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v256</title>
+    <title>Ρεμπεσκές v260</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -936,8 +936,20 @@ body {
 }
 
     </style>
+
+<!-- MIDI player library (για αναπαραγωγή του ntoutse.mid) -->
+<script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.5.0"></script>
 </head>
 <body>
+
+<midi-player
+    id="bg-midi-player"
+    src="https://raw.githubusercontent.com/frognard/frognard.github.io/refs/heads/main/rempeskes/ntoutse.mid"
+    sound-font
+    loop
+    style="display:none;">
+</midi-player>
+
 
 <div id="game-container">
     <div class="header-row">
@@ -1075,12 +1087,13 @@ body {
         <div class="autoplay-speed-wrap">
             <label for="autoplay-speed-select">Ταχ.</label>
             <select id="autoplay-speed-select">
-                <option value="1">Αργή</option>
-                <option value="1.5" selected>Κανονική</option>
-                <option value="3">2×</option>
-                <option value="7.5">5×</option>
-                <option value="15">10×</option>
-                <option value="30">20×</option>
+                <option value="1">Μερακλίδικη</option>
+                <option value="1.25" selected>Κανονική</option>
+                <option value="1.5">Αγχωτική</option>
+                <option value="3">Γρήγορη</option>
+                <option value="7.5">Ταχύτατη</option>
+                <option value="15">Τούρμπο</option>
+                <option value="30">Καρατούρμπο</option>
             </select>
         </div>
     </div>
@@ -1093,7 +1106,7 @@ body {
 
 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; justify-content:flex-end;">
 
-    <button class="btn-options" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music').checked=musicEnabled;document.getElementById('options-modal').style.display='flex';">
+    <button class="btn-options" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music-toggle').checked=musicEnabled;document.getElementById('options-music-volume').value=musicVolumeDb;document.getElementById('options-modal').style.display='flex';">
         Επ
     </button>
 
@@ -1161,6 +1174,14 @@ body {
 // --- ORIGINAL MYSTERY WITH WAVE-SWELLING ISON (120% SLOW & LOWER OCTAVE) ---
 let bgMusicInterval = null;
 let isMusicPlaying = false;
+let musicVolumeDb = -10; // ένταση μουσικής σε decibels (0 = max, -40 = σχεδόν άφωνο)
+
+function setMusicVolume(db) {
+    musicVolumeDb = db;
+    if (window.Tone && Tone.Destination) {
+        Tone.Destination.volume.value = db;
+    }
+}
 
 // Καθολικές μεταβλητές ελέγχου του αιθέριου Ίσου
 let isonOsc = null;
@@ -1185,6 +1206,7 @@ const hitjazScale = [
     174.61, // F3  (Αντί για 349.23)
     196.00  // G3  (Αντί για 392.00)
 ];
+
 
 // Παραγωγή της αρχικής μελωδίας 100 βημάτων (Η δομή παραμένει ανέπαφη)
 function getHitjazNoteForStep(step) {
@@ -1211,114 +1233,45 @@ function getHitjazNoteForStep(step) {
     return hitjazScale[index];
 }
 
+let _musicStarting = false;
+
 function startBackgroundMusic() {
-    if (isMusicPlaying || !musicEnabled) return;
-    isMusicPlaying = true;
+    if (isMusicPlaying || _musicStarting || !musicEnabled) return;
+    _musicStarting = true;
 
-    const now = audioCtx.currentTime;
+    const player = document.getElementById('bg-midi-player');
+    if (!player) { _musicStarting = false; return; }
 
-    // --- ΔΗΜΙΟΥΡΓΙΑ ΑΙΘΕΡΙΟΥ ΙΣΟΥ ---
-    isonFilter = audioCtx.createBiquadFilter();
-    isonFilter.type = "lowpass";
-    isonFilter.frequency.setValueAtTime(130, now); 
-
-    isonGain = audioCtx.createGain();
-    isonGain.gain.setValueAtTime(0, now);
-
-    isonOsc = audioCtx.createOscillator();
-    isonOsc.type = "sine";
-    isonOsc.frequency.setValueAtTime(110.00, now); 
-
-    isonLFO = audioCtx.createOscillator();
-    isonLFO.type = "sine";
-    isonLFO.frequency.setValueAtTime(0.3, now); 
-    
-    let lfoGain = audioCtx.createGain();
-    lfoGain.gain.setValueAtTime(1.2, now);
-
-    isonLFO.connect(lfoGain);
-    lfoGain.connect(isonOsc.frequency);
-    
-    isonOsc.connect(isonFilter);
-    isonFilter.connect(isonGain);
-    isonGain.connect(audioCtx.destination);
-
-    isonOsc.start(now);
-    isonLFO.start(now);
-
-    let currentStep = 0;
-    
-    // Ρυθμός: 540ms ανά βήμα
-    bgMusicInterval = setInterval(() => {
-        if (!musicEnabled) return;
-
-        const t = audioCtx.currentTime;
-        const baseFreq = getHitjazNoteForStep(currentStep);
-
-        // --- ΜΗΧΑΝΙΣΜΟΣ ΚΥΜΑΤΟΣ (SWELL & SILENCE) ---
-        const waveCycle = currentStep % 16;
-
-        if (waveCycle === 0) {
-            const currentGainVal = isonGain.gain.value;
-            isonGain.gain.cancelScheduledValues(t);
-            isonGain.gain.setValueAtTime(currentGainVal, t);
-            isonGain.gain.linearRampToValueAtTime(0.15, t + 3.6); //entash drone
-        } 
-        else if (waveCycle === 5) {
-            const currentGainVal = isonGain.gain.value;
-            isonGain.gain.cancelScheduledValues(t);
-            isonGain.gain.setValueAtTime(currentGainVal, t);
-            isonGain.gain.linearRampToValueAtTime(0.0000, t + 2.4);
+    const tryStart = async () => {
+        try {
+            if (typeof player.start === 'function') {
+                await player.start();
+            }
+            isMusicPlaying = true;
+            setMusicVolume(musicVolumeDb);
+        } catch (e) {
+            console.error('Το MIDI δεν παίχτηκε:', e);
+            isMusicPlaying = false;
+        } finally {
+            _musicStarting = false;
         }
+    };
 
-        // --- ΚΥΡΙΑ ΜΕΛΩΔΙΑ (Ghostly Pluck) ---
-        for (let i = 0; i < 2; i++) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-
-            osc.type = "sine"; 
-            osc.frequency.setValueAtTime(baseFreq, t);
-            osc.detune.setValueAtTime(i === 0 ? 7 : -7, t);
-
-            gain.gain.setValueAtTime(0, t);
-            gain.gain.linearRampToValueAtTime(0.15, t + 0.02); //entash melwdias
-            gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
-
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            osc.start(t);
-            osc.stop(t + 1.35);
-        }
-
-        currentStep = (currentStep + 1) % 100;
-    }, 540);
+    // Αν το custom element δεν έχει προλάβει να φορτώσει ακόμα, περιμένουμε
+    if (typeof customElements !== 'undefined' && customElements.get('midi-player')) {
+        tryStart();
+    } else if (typeof customElements !== 'undefined') {
+        customElements.whenDefined('midi-player').then(tryStart);
+    } else {
+        tryStart();
+    }
 }
 
 function stopBackgroundMusic() {
     isMusicPlaying = false;
-    if (bgMusicInterval) {
-        clearInterval(bgMusicInterval);
-        bgMusicInterval = null;
-    }
-
-    const now = audioCtx.currentTime;
-    if (isonGain) {
-        try {
-            isonGain.gain.cancelScheduledValues(now);
-            isonGain.gain.linearRampToValueAtTime(0, now + 0.5);
-            
-            setTimeout(() => {
-                if (isonOsc) { isonOsc.stop(); isonOsc = null; }
-                if (isonLFO) { isonLFO.stop(); isonLFO = null; }
-                if (isonFilter) { isonFilter = null; }
-                isonGain = null;
-            }, 600);
-        } catch(e) {
-            isonOsc = null;
-            isonLFO = null;
-            isonGain = null;
-        }
+    const player = document.getElementById('bg-midi-player');
+    if (player && typeof player.stop === 'function') {
+        try { player.stop(); } catch (e) {}
     }
 }
 
@@ -1329,6 +1282,21 @@ function updateMusicState() {
         stopBackgroundMusic();
     }
 }
+
+// Auto-start μουσικής στο πρώτο click του χρήστη (για autoplay policy του browser)
+let _musicAutoStartListener = null;
+function setupMusicAutoStart() {
+    if (_musicAutoStartListener) return;
+    _musicAutoStartListener = function () {
+        if (musicEnabled && !isMusicPlaying) {
+            startBackgroundMusic();
+        }
+        document.removeEventListener('click', _musicAutoStartListener);
+        _musicAutoStartListener = null;
+    };
+    document.addEventListener('click', _musicAutoStartListener);
+}
+
 // ==========================MUZKA---================
 
 
@@ -1429,9 +1397,9 @@ function showIronmanHighscores() {
             const formattedDate = new Date(s.date).toLocaleDateString('el-GR');
 
             if (s.victory) {
-                appendInfoLine(body, `★ ${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)} και έγινε ΘΕΟΣΦΑΧΤΗΣ! [${formattedDate}]`, "psof-victory");
+                appendInfoLine(body, `★ ${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, σε ${formatNumber(s.turns || 0)} γύρους! [${formattedDate}]`, "psof-victory");
             } else {
-                appendInfoLine(body, `${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer} [${formattedDate}]`, "psof");
+                appendInfoLine(body, `${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer}, το γύρο ${formatNumber(s.turns || 0)}. [${formattedDate}]`, "psof");
             }
             appendInfoLine(body, ``);
         });
@@ -2617,8 +2585,6 @@ const tekeSongs = [
 "Αφού το εγεννήθηκα",
 "Αράπ ζεϊμπέκικο",
 "Μπρος στον Άγιο Σπυρίδωνα",
-"Απ' της Ζέας το λιμάνι",
-"Πιο πέρα απ' το Τζάνειο",
 "Ο μπουφετζής",
 "Επιάσανε τον Μπάτη",
 "Παντέρημος μες τον ντουνιά",
@@ -2826,6 +2792,7 @@ const legendaryMonstersByType = {
         { min: 51,  max: 60,  name: "Αστερίων",         itemName: "Μινωικός Πέλεκυς" },
         { min: 61, max: 70,  name: "Δημήτρης Κατής",     itemName: "Σπαθί του Νικητή" },
         { min: 61,  max: 70,  name: "Μαμά του Σμερδαλέου",     itemName: "Η Κατσαμάγκα" },
+        { min: 61,  max: 70,  name: "Η Παλιοκασέλα",     itemName: "Το Γκρα" },
         { min: 61,  max: 70,  name: "Διγενής",         itemName: "Σπαθί του Διγενή" },
         { min: 71, max: 80,  name: "Ο Προφήτης",     itemName: "Ζουλφικάρι" },
         { min: 71,  max: 80,  name: "Ο Βασιλιάς",         itemName: "Εξκάλιμπερ" },
@@ -2861,11 +2828,12 @@ const legendaryMonstersByType = {
         { min: 61, max: 70,  name: "Ο Κυνηγός",     itemName: "Αστρικός Θώρακας" },
         { min: 61, max: 70,  name: "Το Κυβόργιο",     itemName: "Μαύρο Κέβλαρ" },
         { min: 61, max: 70,  name: "Ατσάλινος Πρόμαχος",     itemName: "Υπερκλιβάνιο" },
-        { min: 61, max: 70,  name: "Δαίμων Νεσαπουλιάτα",     itemName: "Δαιμονική Πανιοπλία" },
+        { min: 61, max: 70,  name: "Δαίμων Νεσαπουλιάτα",     itemName: "Δαιμονική Πανοπλία" },
+        { min: 61, max: 70,  name: "Όφις Γλύκων",     itemName: "Περούκα του Γλύκονος" },
         { min: 71, max: 80,  name: "Κοσέι ο Αθάνατος",     itemName: "Σκελετικός Θώρακας" },
         { min: 71, max: 80,  name: "Μέγας Σικάριος",     itemName: "Μανδύας Διατοπισμού" },
         { min: 71, max: 80,  name: "Τραξ ο Τυμβολίκτωρ",     itemName: "Ρούνοι Προστασίας" },
-        { min: 81, max: 90, name: "Ο Νοφιστής",         itemName: "Δρακόντειο Δέρας" },
+        { min: 81, max: 90, name: "Ο Νοσφιστής",         itemName: "Δρακόντειο Δέρας" },
         { min: 81, max: 90, name: "Φοβερά Ζαλμοξία",         itemName: "Φοβερά Προστασία" },
         { min: 81, max: 90, name: "Διαμαντένιο Γκόλεμ",         itemName: "Διαμαντένια Σκούτα" },
         { min: 91, max: 100, name: "Στοιχειακός Άρχων",         itemName: "Στοιχειακή Πανοπλία" },       
@@ -2890,21 +2858,22 @@ const legendaryMonstersByType = {
         { min: 31, max: 40, name: "Μπαμπουράρχης",         itemName: "Υπερμπάμπουρας" },
         { min: 31, max: 40,  name: "Ντερβίς-Μπαμπά",     itemName: "Καπέλο του Ντερβίς-Μπαμπά" },
         { min: 41, max: 50, name: "Φελιξ ο Φέναξ",         itemName: "Μάσκα του Φένακα" },        
+        { min: 41, max: 50, name: "Νεκρόπουλος",         itemName: "Κρανίο με Μαλλούρα" },    
         { min: 41, max: 50, name: "Μάγισσα Τατάνα",         itemName: "Μαύρη Γάτα" },     
         { min: 41, max: 50, name: "Σοφός Καραθαρούτι",         itemName: "Μαγικό Τουρμπάνι" },     
         { min: 51, max: 60,  name: "Κρυπτόπραμα",         itemName: "Κράνος Τηλεμεταφοράς" },
         { min: 51, max: 60,  name: "Νερτερόλης",         itemName: "Νεκροπούτσι" },
         { min: 51, max: 60,  name: "Φωχρίας ο Γνοφοσοφιστής",         itemName: "Ελάσσων Γνοφικός Κώδιξ" },
-        { min: 51, max: 60,  name: "Μπαλγκάν Χαϊβάν",         itemName: "Διαβολοκεμετζές" },
+        { min: 51, max: 60,  name: "Μπαλγκάν Γεκ Χαϊβάν",         itemName: "Διαβολοκεμετζές" },
         { min: 61, max: 70,  name: "Κεμπεχσενούφ",     itemName: "Κλειδί του Κεμπεχσενούφ" },
         { min: 61, max: 70,  name: "?????????? ? ???????",     itemName: "Μανδύας Αορατότητας" },
-        { min: 61, max: 70,  name: "Λεονίντ",         itemName: "Φωτο Λεφτέρη Πανταζή" },
+        { min: 61, max: 70,  name: "Λεονίντ",         itemName: "Φωτό Λεφτέρη Πανταζή" },
         { min: 61, max: 70,  name: "Σατούρνος",     itemName: "Φυλακτήριο του Σατούρνου" },
         { min: 71, max: 80,  name: "Μέγας Νεκτεναβός",     itemName: "Μέγα Γριμμόριον" },
         { min: 71, max: 80,  name: "Χρυσόχειρ ο Γνοφάρχης",     itemName: "Μείζων Γνοφικός Κώδιξ"},
         { min: 71, max: 80,  name: "Ζαφραχάν ο Ιφρίτης",     itemName: "Δαχτυλίδι του Ιφρίτη" },
         { min: 81, max: 90, name: "Αμπντούλ Αλχαζρέντ",         itemName: "Νεκρονομικόν" },
-        { min: 81, max: 90, name: "Θάο-Παν ο Μαύρος",         itemName: "Νεκρομαντική Ράβδος" },
+        { min: 81, max: 90, name: "Θάο-Παν ο Μαύρος",         itemName: "Νεκρομαντικό Στέμμα" },
         { min: 81, max: 90, name: "Αμπντούλ Αλχαζρέντ",         itemName: "Νεκρονομικόν" },
         { min: 91, max: 100, name: "Φαλαβάρ ο Νεκυοδαίμων",         itemName: "Νεκυοδαίμων" },    
         { min: 91, max: 100, name: "Χολσόρνα",         itemName: "Μάτι του Χολσόρνα" },   
@@ -2974,7 +2943,7 @@ function getLegendaryItemName(type, tier) {
     // Άρα αφαιρούμε το +20 για να βρούμε ξανά το αντίστοιχο bracket επιπέδου
     // μέσα στο legendaryMonstersByType, το ίδιο table που χρησιμοποιείται
     // και τη στιγμή του drop.
-    let baseLevel = tier - 15;
+    let baseLevel = tier - 15;  //legendary bonus roll factor (arnitiko)
     baseLevel = Math.max(1, Math.min(100, baseLevel));
 
     const list = legendaryMonstersByType[type] || [];
@@ -2991,28 +2960,29 @@ function rollItemTier(monsterLevel) {
     let modifier = 0;
     // Έλεγχος των ορίων βάσει των ποσοστών:
     if (roll <= 1) {
-        modifier = -5;  // 1% (1)
+        modifier = -5;          // 1% (1)
     } else if (roll <= 4) {
-        modifier = -4;  // 3% (2 έως 4)
+        modifier = -4;          // 3% (2-4)
     } else if (roll <= 12) {
-        modifier = -3;  // 8% (5 έως 12)
-    } else if (roll <= 24) {
-        modifier = -2;  // 12% (13 έως 24)
-    } else if (roll <= 40) {
-        modifier = -1;  // 16% (25 έως 40)
-    } else if (roll <= 58) {
-        modifier = 0;   // 18% (41 έως 58)
-    } else if (roll <= 74) {
-        modifier = +1;  // 16% (59 έως 74)
-    } else if (roll <= 87) {
-        modifier = +2;  // 13% (75 έως 87)
-    } else if (roll <= 95) {
-        modifier = +3;  // 8% (88 έως 95)
-    } else if (roll <= 98) {
-        modifier = +4;  // 3% (96 έως 98)
+        modifier = -3;          // 8% (5-12)
+    } else if (roll <= 25) {
+        modifier = -2;          // 13% (13-25)
+    } else if (roll <= 41) {
+        modifier = -1;          // 16% (26-41)
+    } else if (roll <= 59) {
+        modifier = 0;           // 18% (42-59)
+    } else if (roll <= 75) {
+        modifier = +1;          // 16% (60-75)
+    } else if (roll <= 88) {
+        modifier = +2;          // 13% (76-88)
+    } else if (roll <= 96) {
+        modifier = +3;          // 8% (89-96)
+    } else if (roll <= 99) {
+        modifier = +4;          // 3% (97-99)
     } else {
-        modifier = +5;  // 1% (99 έως 100)
+        modifier = +5;          // 1% (100)
     }
+
     let tier = monsterLevel + modifier;
     tier = Math.max(2, Math.min(105, tier));
     return tier;
@@ -3051,9 +3021,10 @@ function rollItemTier(monsterLevel) {
         armor: { name: "Μανδύας", power: 1, legendary: false },
         magic: { name: "Κόκκαλο Αρουραίου", power: 1, legendary: false },
         maxUnlockedLevel: 100,
-        gameSpeedFactor: 1.5, // αποθηκευμένη επιλογή ταχύτητας παιχνιδιού (Κανονική=1, Αγχωτική=1.5)
+        gameSpeedFactor: 1.25, // αποθηκευμένη επιλογή ταχύτητας παιχνιδιού (Μερακλίδικη=1, Κανονική=1.25, Αγχωτική=1.5)
         soundEnabled: true,   // αποθηκευμένη επιλογή ήχου
-        musicEnabled: false   // αποθηκευμένη επιλογή μουσικής
+        musicEnabled: false,  // αποθηκευμένη επιλογή μουσικής
+        musicVolumeDb: -12    // αποθηκευμένη ένταση μουσικής (dB, 0 = max, -40 = πολύ χαμηλά)
     };
 
 
@@ -3224,19 +3195,27 @@ const AREA_TYPE_COLOR = {
     function getMonsterXpReward(monsterLvl) { 
    
    // dynamic difficulty xp mod
- // let difficultyModifier = calculateDifficulty(player, monster);
- // let xp = 10 * Math.pow(monsterLvl, 2) * ((difficultyModifier+0.12 + 1)/2);
-    let xp = 10 * Math.pow(monsterLvl, 2);
+//  let difficultyModifier = calculateDifficulty(player, monster);
+ // let xp = 10 * Math.pow(monsterLvl, 2) * ((difficultyModifier + 1)/2); // half effect on xp
+ //  let xp = 10 * Math.pow(monsterLvl, 2) * difficultyModifier * 1.8 ;  //1:1 xp modifier :: apply final modifier to match normal center value
+            // let xp = 10 * Math.pow(monsterLvl, 2) * ((difficultyModifier + 1)/2); // half effect on xp
+      
+     let xp = 10 * Math.pow(monsterLvl, 2);
 
 
-// simpler extra lvl difference penalty
-  let diff = player.level - monsterLvl;
-if (diff > 0) { // Ο παίκτης είναι μεγαλύτερο επίπεδο: Πέναλτι ανά επίπεδο διαφοράς
-        
-        xp *= Math.pow(0.90, diff);
-    } else if (diff < 0) { // Το τέρας είναι μεγαλύτερο επίπεδο: Μπόνους ανά επίπεδο διαφοράς.  Χρησιμοποιούμε Math.abs(diff) για να γίνει ο εκθέτης θετικός
-       xp *= Math.pow(1.0, Math.abs(diff));
+
+ // 1. ypologismos "effective level" lamvanontas ypopsin ta expected equip tiers tou rempeske
+let effectivePlayerLevel = Math.min(103, 1.03 * player.level);
+let lvl = effectivePlayerLevel;
+
+let diff = lvl - monsterLvl;
+ if (diff > 0) { // Ο παίκτης είναι μεγαλύτερο επίπεδο: Πέναλτι ανά επίπεδο διαφοράς
+         xp *= Math.pow(0.90, diff);
+   } else if (diff < 0) { 
+    // Το τέρας είναι μεγαλύτερο επίπεδο: Μπόνους ανά επίπεδο διαφοράς.  Χρησιμοποιούμε (diff) για να γίνει ο εκθέτης θετικός
+       xp *= Math.pow(1.1, Math.abs(diff));
     }
+
     return Math.round(xp);
 }
 
@@ -3252,7 +3231,7 @@ function calculateDifficulty(player, monster) {
     const playerDps = player.level * playerDmgMod;
     const monsterDps = monster.level * monsterDmgMod;
 
-    const playerTTK = monster.maxHp * 1.5 / playerDps;
+    const playerTTK = monster.maxHp / playerDps;
     const monsterTTK = playerMaxHp / monsterDps;
 
     return playerTTK / monsterTTK;
@@ -3331,26 +3310,31 @@ function registerKillStreak() {
 // --- ΣΕΡΙ ΦΟΝΩΝ: ασημένια λάμψη στα 5, χρυσή στα 10, bonus XP στους επόμενους φόνους ---
 function updateKillStreakVisuals() {
     const xpBarContainer = document.getElementById('xp-bar-container');
+    const depthAppropriate = currentSelectedLevel >= player.level;
 
     if (currentRunKills >= 10) {
         if (killStreakBonus !== 0.10) {
-            killStreakBonus = 0.10;
-            logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-silver');
-            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ +10% XP!', '#ffd700'); }, 500);
+            killStreakBonus = depthAppropriate ? 0.10 : 0;
+            if (depthAppropriate) {
+                logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-silver');
+                setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ +10% XP!', '#ffd700'); }, 500);
+            }
         }
         if (xpBarContainer) {
             xpBarContainer.classList.remove('killstreak-silver');
-            xpBarContainer.classList.add('killstreak-gold');
+            if (depthAppropriate) xpBarContainer.classList.add('killstreak-gold');
         }
     } else if (currentRunKills >= 5) {
         if (killStreakBonus !== 0.05) {
-            killStreakBonus = 0.05;
-            logMessage(`Σερί 5 φόνων! +5% XP!`, 'streak-silver');
-            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '5 ΣΕΡΙ +5% XP!', '#e0e6eb'); }, 500);
+            killStreakBonus = depthAppropriate ? 0.05 : 0;
+            if (depthAppropriate) {
+                logMessage(`Σερί 5 φόνων! +5% XP!`, 'streak-silver');
+                setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '5 ΣΕΡΙ +5% XP!', '#e0e6eb'); }, 500);
+            }
         }
         if (xpBarContainer) {
             xpBarContainer.classList.remove('killstreak-gold');
-            xpBarContainer.classList.add('killstreak-silver');
+            if (depthAppropriate) xpBarContainer.classList.add('killstreak-silver');
         }
     }
 }
@@ -3381,7 +3365,7 @@ function checkLevelUp() {
 
         logMessage(`*** ΑΠΟΚΤΗΣΗ ΕΠΙΠΕΔΟΥ: Level ${player.level}! ***`, 'victory');
         levelUpSound();
-        triggerSmoothTransition('#997a00');
+        triggerSmoothTransition('#7a6201');
         createFloatingText(
             'xp-parent',
             'LEVEL UP!',
@@ -3429,7 +3413,7 @@ function loadGame() {
         try {
             player = { ...player, ...JSON.parse(savedData) };
             player.level = Math.min(player.level, 100);
-            player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105);
+            player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105); //legendary bonus minmaxes 1/1
             player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
             player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
             if (!player.name) player.name = "Ρεμπεσκές";
@@ -3497,11 +3481,12 @@ function loadGame() {
     } else {
         player.soundEnabled = soundEnabled;
     }
-    if (typeof player.musicEnabled === 'boolean') {
-        musicEnabled = player.musicEnabled;
+    if (typeof player.musicVolumeDb === 'number') {
+        musicVolumeDb = player.musicVolumeDb;
     } else {
-        player.musicEnabled = musicEnabled;
+        player.musicVolumeDb = musicVolumeDb;
     }
+    setMusicVolume(musicVolumeDb);
     updateMusicState();
 
     applyAutoplayVisibility();
@@ -3516,6 +3501,10 @@ function applyAutoplayVisibility() {
 
 function resetGame() {
     if (!confirm("Διαγραφή χαρακτήρα;")) return;
+
+    if (townRegenInterval) { clearInterval(townRegenInterval); townRegenInterval = null; }
+    if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+    if (nextMonsterTimeoutId) { clearTimeout(nextMonsterTimeoutId); nextMonsterTimeoutId = null; }
 
     try {
         localStorage.removeItem('minimal_rpg_save');
@@ -3596,9 +3585,9 @@ function confirmCharacterCreation() {
 
     saveGame();
     
-    logMessage(`Ο ${player.name} μπαίνει για πρώτη φορά στον Τεκέ του Ζαλαδούρα. Οι άλλοι ρεμπεσκέδες τον κοιτάνε στραβά.`, 'bright');
+    logMessage(`Μπαίνεις για πρώτη φορά στον Τεκέ του Ζαλαδούρα. Οι άλλοι ρεμπεσκέδες σε κοιτάνε στραβά.`, 'bright');
     logMessage(``);
-    logMessage(`Ο Ζαλαδούρας λέει: "Βρε βρε, ο ${player.name}! Καλώς το παιδί! Μπες στο λαβύρινθο και σφάξε ό,τι κινείται. Μετά γύρνα εδώ και ρίχτο στο πιοτό. Αυτή είναι η ζωή σου τώρα!"`, 'bright');
+    logMessage(`Ο Ζαλαδούρας λέει: "${player.name}! Βρε καλώς το παιδί! Μπες στο λαβύρινθο και σφάξε ό,τι κινείται. Μετά γύρνα εδώ και ρίχτο στο πιοτό. Αυτή είναι η ζωή σου τώρα!"`, 'bright');
     logMessage(``);
     // logMessage(`"Και μία συμβουλή: Πριν πας βαθύτερα φρόντισε να έχεις βρει και κατάλληλο εξοπλισμό. Δεν αρκεί το επίπεδό σου."`, 'bright');
 
@@ -3654,7 +3643,7 @@ function importSave() {
 
         player = { ...player, ...data.player };
         player.level = Math.min(player.level, 100);
-        player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105);
+        player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105); //legendary bonus minmaxes 2/2
         player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
         player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
         if (!player.name) player.name = "Ρεμπεσκές";
@@ -4356,7 +4345,7 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
 
     let areaType = getAreaType(lvl);
 
-    // Βασική πιθανότητα Legendary (1 στις 1000). RICH/POOR areas την επηρεάζουν,
+    // Βασική πιθανότητα Legendary (1 στις x). RICH/POOR areas την επηρεάζουν,
     // με δικούς της πολλαπλασιαστές ώστε να ρυθμίζεται ξεχωριστά από το specialChance.
     let legendaryChance = 0.001;
     const legendaryRichMultiplier = 1.30;  // πόσο πιο συχνά σε RICH areas
@@ -4683,7 +4672,7 @@ function forceRetreat() {
     huntBtn.disabled = true;
     setTimeout(() => {
         huntBtn.disabled = false;
-    }, 2 * effTick());
+    }, 1 * effTick());
 }
 
 function executeCombatRound() {
@@ -4834,7 +4823,7 @@ function handleEquipmentDrop(type, rolledTier, monster, forceSell = false) {
 
     const isLegendaryDrop = monster && monster.variant === 'legendary';
         if (isLegendaryDrop) {
-            rolledTier = Math.min(120, rolledTier + 15);
+            rolledTier = Math.min(120, rolledTier + 15);  //legendary bonus   max and bonus
         }
 
     console.log("LEGENDARY?", isLegendaryDrop);
@@ -4966,6 +4955,7 @@ function showLegendaryPopup() {
                         weapon: player.weapon.power,
                         armor: player.armor.power,
                         magic: player.magic.power,
+                        turns: player.activeTime,
                         date: Date.now(),
                         victory: true
                     });
@@ -5025,8 +5015,9 @@ function showLegendaryPopup() {
                 monster.variant === 'legendary' ? 2 :
                 monster.variant !== 'normal' ? 1.5 :
                 1;
+            let effectiveStreakBonus = (currentSelectedLevel >= player.level) ? killStreakBonus : 0;
             let gainedXp = Math.round(
-                getMonsterXpReward(monster.level) * xpMultiplier * (1 + killStreakBonus)
+                getMonsterXpReward(monster.level) * xpMultiplier * (1 + effectiveStreakBonus)
                 );
 
             player.xp += gainedXp;
@@ -5127,7 +5118,7 @@ function showLegendaryPopup() {
                             huntBtn.disabled = true;
                             setTimeout(() => {
                                 huntBtn.disabled = false;
-                            }, 2 * effTick());
+                            }, 1 * effTick());
 
                     }, 500);
 
@@ -5208,7 +5199,7 @@ function applyDefeatPenalties() {
 
     setTimeout(() => {
         huntBtn.disabled = false;
-    }, 2 * effTick());
+    }, 1 * effTick());
 
     // xasimo eksoplismou
     const slots = ['weapon', 'armor', 'magic'];
@@ -5248,6 +5239,7 @@ function applyDefeatPenalties() {
             weapon: player.weapon.power,
             armor: player.armor.power,
             magic: player.magic.power,
+            turns: player.activeTime,
             date: Date.now()
         });
     }
@@ -5924,12 +5916,14 @@ if ('serviceWorker' in navigator) {
 
             const { data: existing } = await sbClient
                 .from('ironman_deaths')
-                .select('level')
+                .select('level, death_date')
                 .eq('name', name)
                 .maybeSingle();
 
             if (existing) {
-                if (level <= existing.level) { skipped++; continue; }
+                const newDate = new Date(r.date);
+                const existDate = new Date(existing.death_date);
+                if (level < existing.level || (level === existing.level && newDate <= existDate)) { skipped++; continue; }
                 await sbClient.from('ironman_deaths').delete().eq('name', name);
             }
 
@@ -5942,6 +5936,7 @@ if ('serviceWorker' in navigator) {
                     weapon: r.weapon,
                     armor: r.armor,
                     magic: r.magic,
+                    turns: r.turns || 0,
                     death_date: new Date(r.date).toISOString(),
                     victory: !!r.victory
                 });
@@ -5967,6 +5962,8 @@ function openOptionsModal() {
     if (soundEl) soundEl.checked = soundEnabled;
     const musicEl = document.getElementById('options-music');
     if (musicEl) musicEl.checked = musicEnabled;
+    const musicVolEl = document.getElementById('options-music-volume');
+    if (musicVolEl) musicVolEl.value = musicVolumeDb;
     modal.style.display = 'flex';
 }
 
@@ -6013,15 +6010,16 @@ function appendInfoLineHTML(container, html, type = 'system') {
 
 function applyOptions() {
     const speedEl = document.getElementById('options-speed');
-  //  if (speedEl) gameSpeedFactor = parseInt(speedEl.value, 10) || 1;
   if (speedEl) gameSpeedFactor = parseFloat(speedEl.value) || 1;
-  player.gameSpeedFactor = gameSpeedFactor; // αποθηκεύεται με τον χαρακτήρα
+  player.gameSpeedFactor = gameSpeedFactor;
   const soundEl = document.getElementById('options-sound');
     if (soundEl) soundEnabled = soundEl.checked;
-    player.soundEnabled = soundEnabled; // αποθηκεύεται με τον χαρακτήρα
-    const musicEl = document.getElementById('options-music');
-    if (musicEl) musicEnabled = musicEl.checked;
-    player.musicEnabled = musicEnabled; // αποθηκεύεται με τον χαρακτήρα
+    player.soundEnabled = soundEnabled;
+    const musicToggleEl = document.getElementById('options-music-toggle');
+    if (musicToggleEl) musicEnabled = musicToggleEl.checked;
+    const musicVolEl = document.getElementById('options-music-volume');
+    if (musicVolEl) setMusicVolume(parseFloat(musicVolEl.value));
+    player.musicVolumeDb = musicVolumeDb;
     updateMusicState();
     if (typeof rearmTimers === 'function') rearmTimers();
     else     if (typeof window.rearmTimers === 'function') window.rearmTimers();
@@ -6056,8 +6054,9 @@ function applyOptions() {
         <label style="display:block;margin-bottom:15px;font-size:0.85rem;">
             Ταχύτητα παιχνιδιού:
             <select id="options-speed" style="display:block;width:100%;margin-top:4px;background:#1a1a1a;color:#fff;border:1px solid var(--border-color);border-radius:3px;padding:4px;">
-                <option value="1">Αργή</option>
-                <option value="1.5" selected>Κανονική</option>
+                <option value="1">Μερακλίδικη</option>
+                <option value="1.25" selected>Κανονική</option>
+                <option value="1.5">Αγχωτική</option>
             </select>
         </label>
 
@@ -6065,8 +6064,22 @@ function applyOptions() {
             <input type="checkbox" id="options-sound"> 🔉 Ήχος
         </label>
 
-        <label style="display:block;margin-bottom:20px;font-size:0.85rem;cursor:pointer;">
-            <input type="checkbox" id="options-music"> 🎵 Μουσική
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:0.85rem;">
+            <span>🎵 Μουσική</span>
+            <label style="position:relative;display:inline-block;width:40px;height:22px;cursor:pointer;">
+                <input type="checkbox" id="options-music-toggle" style="opacity:0;width:0;height:0;">
+                <span id="music-toggle-track" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#444;border-radius:11px;transition:background .3s;"></span>
+                <span id="music-toggle-thumb" style="position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#999;border-radius:50%;transition:transform .3s,background .3s;"></span>
+            </label>
+        </div>
+        <style>
+            #options-music-toggle:checked ~ #music-toggle-track { background: var(--accent-gold); }
+            #options-music-toggle:checked ~ #music-toggle-thumb { transform: translateX(18px); background: #fff; }
+        </style>
+
+        <label style="display:block;margin-bottom:20px;font-size:0.85rem;">
+            Ένταση μουσικής:
+            <input type="range" id="options-music-volume" min="-40" max="0" step="1" style="width:100%;margin-top:4px;">
         </label>
 
         <div style="display:flex;gap:10px;justify-content:flex-end;">
