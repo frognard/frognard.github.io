@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v259</title>
+    <title>Ρεμπεσκές v260</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -3341,26 +3341,31 @@ function registerKillStreak() {
 // --- ΣΕΡΙ ΦΟΝΩΝ: ασημένια λάμψη στα 5, χρυσή στα 10, bonus XP στους επόμενους φόνους ---
 function updateKillStreakVisuals() {
     const xpBarContainer = document.getElementById('xp-bar-container');
+    const depthAppropriate = currentSelectedLevel >= player.level;
 
     if (currentRunKills >= 10) {
         if (killStreakBonus !== 0.10) {
-            killStreakBonus = 0.10;
-            logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-silver');
-            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ +10% XP!', '#ffd700'); }, 500);
+            killStreakBonus = depthAppropriate ? 0.10 : 0;
+            if (depthAppropriate) {
+                logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-silver');
+                setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ +10% XP!', '#ffd700'); }, 500);
+            }
         }
         if (xpBarContainer) {
             xpBarContainer.classList.remove('killstreak-silver');
-            xpBarContainer.classList.add('killstreak-gold');
+            if (depthAppropriate) xpBarContainer.classList.add('killstreak-gold');
         }
     } else if (currentRunKills >= 5) {
         if (killStreakBonus !== 0.05) {
-            killStreakBonus = 0.05;
-            logMessage(`Σερί 5 φόνων! +5% XP!`, 'streak-silver');
-            setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '5 ΣΕΡΙ +5% XP!', '#e0e6eb'); }, 500);
+            killStreakBonus = depthAppropriate ? 0.05 : 0;
+            if (depthAppropriate) {
+                logMessage(`Σερί 5 φόνων! +5% XP!`, 'streak-silver');
+                setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '5 ΣΕΡΙ +5% XP!', '#e0e6eb'); }, 500);
+            }
         }
         if (xpBarContainer) {
             xpBarContainer.classList.remove('killstreak-gold');
-            xpBarContainer.classList.add('killstreak-silver');
+            if (depthAppropriate) xpBarContainer.classList.add('killstreak-silver');
         }
     }
 }
@@ -5040,8 +5045,9 @@ function showLegendaryPopup() {
                 monster.variant === 'legendary' ? 2 :
                 monster.variant !== 'normal' ? 1.5 :
                 1;
+            let effectiveStreakBonus = (currentSelectedLevel >= player.level) ? killStreakBonus : 0;
             let gainedXp = Math.round(
-                getMonsterXpReward(monster.level) * xpMultiplier * (1 + killStreakBonus)
+                getMonsterXpReward(monster.level) * xpMultiplier * (1 + effectiveStreakBonus)
                 );
 
             player.xp += gainedXp;
