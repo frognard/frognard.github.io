@@ -2827,6 +2827,7 @@ const legendaryMonstersByType = {
         { min: 51,  max: 60,  name: "Αστερίων",         itemName: "Μινωικός Πέλεκυς" },
         { min: 61, max: 70,  name: "Δημήτρης Κατής",     itemName: "Σπαθί του Νικητή" },
         { min: 61,  max: 70,  name: "Μαμά του Σμερδαλέου",     itemName: "Η Κατσαμάγκα" },
+        { min: 61,  max: 70,  name: "Η Παλιοκασέλα",     itemName: "Το Γκρα" },
         { min: 61,  max: 70,  name: "Διγενής",         itemName: "Σπαθί του Διγενή" },
         { min: 71, max: 80,  name: "Ο Προφήτης",     itemName: "Ζουλφικάρι" },
         { min: 71,  max: 80,  name: "Ο Βασιλιάς",         itemName: "Εξκάλιμπερ" },
@@ -2992,28 +2993,29 @@ function rollItemTier(monsterLevel) {
     let modifier = 0;
     // Έλεγχος των ορίων βάσει των ποσοστών:
     if (roll <= 1) {
-        modifier = -5;  // 1% (1)
+        modifier = -5;          // 1% (1)
     } else if (roll <= 4) {
-        modifier = -4;  // 3% (2 έως 4)
+        modifier = -4;          // 3% (2-4)
     } else if (roll <= 12) {
-        modifier = -3;  // 8% (5 έως 12)
-    } else if (roll <= 24) {
-        modifier = -2;  // 12% (13 έως 24)
-    } else if (roll <= 40) {
-        modifier = -1;  // 16% (25 έως 40)
-    } else if (roll <= 58) {
-        modifier = 0;   // 18% (41 έως 58)
-    } else if (roll <= 74) {
-        modifier = +1;  // 16% (59 έως 74)
-    } else if (roll <= 87) {
-        modifier = +2;  // 13% (75 έως 87)
-    } else if (roll <= 95) {
-        modifier = +3;  // 8% (88 έως 95)
-    } else if (roll <= 98) {
-        modifier = +4;  // 3% (96 έως 98)
+        modifier = -3;          // 8% (5-12)
+    } else if (roll <= 25) {
+        modifier = -2;          // 13% (13-25)
+    } else if (roll <= 41) {
+        modifier = -1;          // 16% (26-41)
+    } else if (roll <= 59) {
+        modifier = 0;           // 18% (42-59)
+    } else if (roll <= 75) {
+        modifier = +1;          // 16% (60-75)
+    } else if (roll <= 88) {
+        modifier = +2;          // 13% (76-88)
+    } else if (roll <= 96) {
+        modifier = +3;          // 8% (89-96)
+    } else if (roll <= 99) {
+        modifier = +4;          // 3% (97-99)
     } else {
-        modifier = +5;  // 1% (99 έως 100)
+        modifier = +5;          // 1% (100)
     }
+
     let tier = monsterLevel + modifier;
     tier = Math.max(2, Math.min(105, tier));
     return tier;
@@ -3225,19 +3227,29 @@ const AREA_TYPE_COLOR = {
     function getMonsterXpReward(monsterLvl) { 
    
    // dynamic difficulty xp mod
- // let difficultyModifier = calculateDifficulty(player, monster);
- // let xp = 10 * Math.pow(monsterLvl, 2) * ((difficultyModifier+0.12 + 1)/2);
-    let xp = 10 * Math.pow(monsterLvl, 2);
+//  let difficultyModifier = calculateDifficulty(player, monster);
+ // let xp = 10 * Math.pow(monsterLvl, 2) * ((difficultyModifier + 1)/2); // half effect on xp
+ //  let xp = 10 * Math.pow(monsterLvl, 2) * difficultyModifier * 1.8 ;  //1:1 xp modifier :: apply final modifier to match normal center value
+            // let xp = 10 * Math.pow(monsterLvl, 2) * ((difficultyModifier + 1)/2); // half effect on xp
+      
+     let xp = 10 * Math.pow(monsterLvl, 2);
+
+
+
+ // 1. ypologismos "effective level" lamvanontas ypopsin ta expected equip tiers tou rempeske
+let effectivePlayerLevel = Math.min(105, 1.05 * player.level);
+let lvl = effectivePlayerLevel;
 
 
 // simpler extra lvl difference penalty
-  let diff = player.level - monsterLvl;
-if (diff > 0) { // Ο παίκτης είναι μεγαλύτερο επίπεδο: Πέναλτι ανά επίπεδο διαφοράς
-        
-        xp *= Math.pow(0.90, diff);
-    } else if (diff < 0) { // Το τέρας είναι μεγαλύτερο επίπεδο: Μπόνους ανά επίπεδο διαφοράς.  Χρησιμοποιούμε Math.abs(diff) για να γίνει ο εκθέτης θετικός
-       xp *= Math.pow(1.0, Math.abs(diff));
+  let diff = lvl - monsterLvl;
+ if (diff > 0) { // Ο παίκτης είναι μεγαλύτερο επίπεδο: Πέναλτι ανά επίπεδο διαφοράς
+         xp *= Math.pow(0.90, diff);
+   } else if (diff < 0) { 
+    // Το τέρας είναι μεγαλύτερο επίπεδο: Μπόνους ανά επίπεδο διαφοράς.  Χρησιμοποιούμε (diff) για να γίνει ο εκθέτης θετικός
+       xp *= Math.pow(1.1, Math.abs(diff));
     }
+
     return Math.round(xp);
 }
 
@@ -3253,7 +3265,7 @@ function calculateDifficulty(player, monster) {
     const playerDps = player.level * playerDmgMod;
     const monsterDps = monster.level * monsterDmgMod;
 
-    const playerTTK = monster.maxHp * 1.5 / playerDps;
+    const playerTTK = monster.maxHp / playerDps;
     const monsterTTK = playerMaxHp / monsterDps;
 
     return playerTTK / monsterTTK;
