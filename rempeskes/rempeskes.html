@@ -3383,7 +3383,7 @@ function updateKillStreakVisuals() {
             }
         }
         if (xpBarContainer) {
-            xpBarContainer.classList.remove('killstreak-silver');
+            xpBarContainer.classList.remove('killstreak-gold', 'killstreak-silver');
             if (depthAppropriate) xpBarContainer.classList.add('killstreak-gold');
         }
     } else if (currentRunKills >= 5) {
@@ -3395,7 +3395,7 @@ function updateKillStreakVisuals() {
             }
         }
         if (xpBarContainer) {
-            xpBarContainer.classList.remove('killstreak-gold');
+            xpBarContainer.classList.remove('killstreak-gold', 'killstreak-silver');
             if (depthAppropriate) xpBarContainer.classList.add('killstreak-silver');
         }
     }
