@@ -128,10 +128,13 @@
 
         #p-xp-bar {
             height: 100%;
-            width: 0%;
+            width: 100%;
+            transform: scaleX(0);
+            transform-origin: left;
             background-color: #40a8ee;
             background-image: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.05) 45%, rgba(0,0,0,0.2) 100%);
-            transition: width 0.28s ease;
+            transition: transform 0.28s ease;
+            will-change: transform;
         }
 
 .xp-bar-container.killstreak-silver {
@@ -221,7 +224,10 @@
         .bar {
             height: 100%;
             width: 100%;
-            transition: width 0.28s ease;
+            transform: scaleX(1);
+            transform-origin: left;
+            transition: transform 0.28s ease;
+            will-change: transform;
             border-radius: 3px;
             background-image: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.04) 45%, rgba(0,0,0,0.2) 100%);
         }
@@ -3892,21 +3898,21 @@ function refreshAreaSelectorAppearance() {
     magicEl.classList.toggle('legendary-glow-magic', player.magic.legendary === true);
 
     if (player.level >= 100) {
-        document.getElementById('p-xp-bar').style.width = '100%';
+        document.getElementById('p-xp-bar').style.transform = 'scaleX(1)';
         document.getElementById('p-xp-percent').textContent = '*';
     } else {
         const xpPct = Math.max(0, Math.min(100, (player.xp / player.nextXp) * 100));
-        document.getElementById('p-xp-bar').style.width = xpPct + '%';
+        document.getElementById('p-xp-bar').style.transform = `scaleX(${xpPct / 100})`;
         document.getElementById('p-xp-percent').textContent = `${xpPct.toFixed(1)}%`;
     }
 
     const maxHp = getPlayerMaxHp();
     if (player.ironman && player.ironmanDead) {
-        document.getElementById('player-hp-bar').style.width = '0%';
+        document.getElementById('player-hp-bar').style.transform = 'scaleX(0)';
         document.getElementById('player-hp-text').innerText = '-';
     } else {
         const pPct = Math.max(0, (player.hp / maxHp) * 100);
-        document.getElementById('player-hp-bar').style.width = pPct + '%';
+        document.getElementById('player-hp-bar').style.transform = `scaleX(${pPct / 100})`;
         document.getElementById('player-hp-text').innerText = `${formatNumber(Math.ceil(player.hp))} / ${formatNumber(maxHp)} HP`;
     }
 
@@ -3982,7 +3988,7 @@ function refreshAreaSelectorAppearance() {
         }
  
         const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
-        document.getElementById('monster-hp-bar').style.width = mPct + '%';
+        document.getElementById('monster-hp-bar').style.transform = `scaleX(${mPct / 100})`;
         document.getElementById('monster-hp-text').innerText = `${formatNumber(Math.ceil(monster.hp))} / ${formatNumber(monster.maxHp)} HP`;
         
     } else {
@@ -3993,7 +3999,7 @@ function refreshAreaSelectorAppearance() {
             mNameEl.innerText = depthNames[currentSelectedLevel - 1] + "...";
             mNameEl.style.color = "#888";
         }
-        document.getElementById('monster-hp-bar').style.width = '0%';
+        document.getElementById('monster-hp-bar').style.transform = 'scaleX(0)';
         document.getElementById('monster-hp-text').innerText = '-';
         
         const title = document.getElementById("battle-title");
