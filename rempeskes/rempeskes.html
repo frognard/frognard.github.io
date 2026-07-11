@@ -2912,7 +2912,7 @@ const legendaryMonstersByType = {
         { min: 11, max: 20,  name: "Χαμόδρακας",     itemName: "Κασέλα του Χαμόδρακα" },
         { min: 11, max: 20,  name: "Κακοφώτης",     itemName: "Κρανίο της Ανδράγας" },
         { min: 11, max: 20,  name: "Καλοφώτης",     itemName: "Κώδικας της Κρύπτης" },
-        { min: 21, max: 30,  name: "Θείος Πύθιος",     itemName: "Πίπα του θέιου Πύθιου" },
+        { min: 21, max: 30,  name: "Θείος Πύθιος",     itemName: "Πίπα του θείου Πύθιου" },
         { min: 21, max: 30,  name: "Θείος Πύθιος",     itemName: "Εύχανδρο του θείου Πύθιου" },
         { min: 21, max: 30,  name: "Θείος Πύθιος",     itemName: "MuleMaster 4000" },
         { min: 21, max: 30,  name: "Κύριος Νίκος",     itemName: "Το Μάτι" },
@@ -5570,11 +5570,11 @@ if (
 
     // ==================== ΡΥΘΜΙΣΕΙΣ (επεξεργάσιμες) ====================
     let AUTO_DEPTH_BELOW_PLAYER = -1;        // levels κάτω (ή πάνω, αν αρνητικό) από τον player — μόνο αν AUTO_USE_TARGET_RATIO = false
-    let AUTO_USE_TARGET_RATIO = false;       // true: επιλογή βάθους με βάση το combat ratio αντί για σταθερό offset
-    let AUTO_TARGET_COMBAT_RATIO = 0.85;      // στόχος για το calculateDifficulty(player, monster) — μόνο αν AUTO_USE_TARGET_RATIO = true
-    let AUTO_BEER_HP_PCT = 0.80;            // μπύρα όταν HP <= 70% (δηλ. έχει δεχτεί >=30% damage)
-    let AUTO_RETREAT_HP_PCT = 0.5;         // κατώφλι HP για σκέψη retreat
-    let AUTO_RETREAT_BEER_CHARGE_PCT = 0.5;// αν η μπύρα δεν είναι έστω χ% charged -> retreat
+    let AUTO_USE_TARGET_RATIO = true;       // true: επιλογή βάθους με βάση το combat ratio αντί για σταθερό offset
+    let AUTO_TARGET_COMBAT_RATIO = 0.45;      // στόχος για το calculateDifficulty(player, monster) — μόνο αν AUTO_USE_TARGET_RATIO = true
+    let AUTO_BEER_HP_PCT = 0.90;            // μπύρα όταν HP <= 70% (δηλ. έχει δεχτεί >=30% damage)
+    let AUTO_RETREAT_HP_PCT = 0.65;         // κατώφλι HP για σκέψη retreat
+    let AUTO_RETREAT_BEER_CHARGE_PCT = 1.0;// αν η μπύρα δεν είναι έστω χ% charged -> retreat
     let AUTO_TICK_MS = 150;                 // βασικός ρυθμός σκέψης του bot σε x1 ταχύτητα
     // =====================================================================
 
@@ -5763,14 +5763,23 @@ if (
             autoLatePhaseFired = false;
         }
 
-        // ---- ΠΡΩΙΜΗ ΦΑΣΗ (10%): Κατραπακιά, Μπύρα, Retreat ----
+        // ---- ΠΡΩΙΜΗ ΦΑΣΗ (10%): Κατραπακιά (μόνο attack timing, μία φορά ανά γύρο) ----
         if (!autoEarlyPhaseFired && phase >= 0.10) {
             autoEarlyPhaseFired = true;
 
             if (monster && !skillCooldownActive && monster.hp > monster.maxHp * 0.50) {
                 queueSpecialAttack();
             }
+        }
 
+        // ---- ΚΑΘΕ ΤΙΚ (όχι πια φασικά): Μπύρα / Retreat ----
+        // Πριν, αυτός ο έλεγχος γινόταν μόνο μία φορά ανά "γύρο" (φασικό gate autoEarlyPhaseFired),
+        // πράγμα που σήμαινε ότι μια απότομη πτώση HP ανάμεσα σε δύο πρώιμες φάσεις μπορούσε να
+        // μείνει απαρατήρητη έως και έναν ολόκληρο γύρο. Τώρα ελέγχεται σε κάθε tick του autoplay
+        // (κάθε AUTO_TICK_MS / speed), ώστε η αντίδραση να είναι όσο πιο άμεση γίνεται.
+        // Οι ίδιες οι συναρτήσεις (usePotion/toggleRetreat) έχουν ήδη δικά τους guards
+        // (cooldown / isAttemptingRetreat), οπότε είναι ασφαλές να καλούνται κάθε tick.
+        {
             const maxHp = getPlayerMaxHp();
             const hpPct = player.hp / maxHp;
 
