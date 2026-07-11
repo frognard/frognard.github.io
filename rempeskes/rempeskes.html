@@ -543,7 +543,7 @@
 }
 
         select {
-            background-color: #1d1d1d;
+            background-color: #333;
             color: var(--text-main);
             border: 1px solid var(--border-color);
             padding: 8px;
@@ -915,35 +915,6 @@ body {
     font-size: 1.2rem;
 }
 
-.bar-container::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 3px;
-    pointer-events: none;
-    opacity: 0;
-    will-change: opacity;
-    box-shadow: 0 0 8px 3px var(--flash-color, transparent);
-}
-
-.bar-container.hp-damage-flash::after {
-    --flash-color: rgba(231, 76, 60, 0.75);
-    animation: hpFlashOpacity 280ms ease-out;
-}
-
-.bar-container.hp-heal-flash::after {
-    --flash-color: rgba(46, 204, 113, 0.75);
-    animation: hpFlashOpacity 280ms ease-out;
-}
-
-@keyframes hpFlashOpacity {
-    0%   { opacity: 0; }
-    25%  { opacity: 1; }
-    100% { opacity: 0; }
-}
 
 #autoplay-panel {
     margin-top: 10px;
@@ -1376,19 +1347,11 @@ function setupMusicAutoStart() {
 
 
 function flashHpBar(containerId) {
-    const el = document.getElementById(containerId);
-    if (!el) return;
-    el.classList.remove("hp-damage-flash", "hp-heal-flash");
-    void el.offsetWidth;
-    el.classList.add("hp-damage-flash");
+    // Το κόκκινο flash effect αφαιρέθηκε (επιβάρυνε την απόδοση σε κινητά).
 }
 
 function flashHpBarHeal(containerId) {
-    const el = document.getElementById(containerId);
-    if (!el) return;
-    el.classList.remove("hp-damage-flash", "hp-heal-flash");
-    void el.offsetWidth;
-    el.classList.add("hp-heal-flash");
+    // Το πράσινο flash effect αφαιρέθηκε (επιβάρυνε την απόδοση σε κινητά).
 }
 
 
@@ -4217,7 +4180,7 @@ function logMessageHTML(html, type = 'system') {
         container.style.backgroundColor = colorHex;
         void container.offsetHeight;
         container.style.transition = 'background-color 1.0s ease';
-        container.style.backgroundColor = '#2b2b2e';
+        container.style.backgroundColor = 'var(--panel-bg)';
     }
 
 function startTownRegen() {
