@@ -1138,10 +1138,10 @@ body {
             <label for="autoplay-speed-select">Ταχ.</label>
             <select id="autoplay-speed-select">
                 <option value="1">Μερακλίδικη</option>
-                <option value="1.25" selected>Κανονική</option>
-                <option value="1.5">Αγχωτική</option>
-                <option value="3">Γρήγορη</option>
-                <option value="7.5">Ταχύτατη</option>
+                <option value="1.25" selected>Μέτρια</option>
+                <option value="1.5">Σβέλτη</option>
+                <option value="3">Ταχύτατη</option>
+                <option value="7.5">Αστραπιαία</option>
                 <option value="15">Τούρμπο</option>
                 <option value="30">Καρατούρμπο</option>
             </select>
@@ -3083,7 +3083,7 @@ function rollItemTier(monsterLevel) {
         armor: { name: "Μανδύας", power: 1, legendary: false },
         magic: { name: "Κόκκαλο Αρουραίου", power: 1, legendary: false },
         maxUnlockedLevel: 100,
-        gameSpeedFactor: 1.25, // αποθηκευμένη επιλογή ταχύτητας παιχνιδιού (Μερακλίδικη=1, Κανονική=1.25, Αγχωτική=1.5)
+        gameSpeedFactor: 1.5, // αποθηκευμένη επιλογή ταχύτητας παιχνιδιού (Μερακλίδικη=1, Κανονική=1.25, Αγχωτική=1.5)
         soundEnabled: true,   // αποθηκευμένη επιλογή ήχου
         musicEnabled: false,  // αποθηκευμένη επιλογή μουσικής
         musicVolumeDb: -12    // αποθηκευμένη ένταση μουσικής (dB, 0 = max, -40 = πολύ χαμηλά)
@@ -6112,8 +6112,8 @@ function applyOptions() {
             Ταχύτητα παιχνιδιού:
             <select id="options-speed" style="display:block;width:100%;margin-top:4px;background:#1a1a1a;color:#fff;border:1px solid var(--border-color);border-radius:3px;padding:4px;">
                 <option value="1">Μερακλίδικη</option>
-                <option value="1.25" selected>Κανονική</option>
-                <option value="1.5">Αγχωτική</option>
+                <option value="1.25" >Μέτρια</option>
+                <option value="1.5" selected>Σβέλτη</option>
             </select>
         </label>
 
