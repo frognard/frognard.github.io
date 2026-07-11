@@ -915,36 +915,34 @@ body {
     font-size: 1.2rem;
 }
 
-@keyframes hpDamageFlash {
-    0% {
-        box-shadow: 0 0 0 rgba(231, 76, 60, 0);
-    }
-    25% {
-        box-shadow: 0 0 8px 3px rgba(231, 76, 60, 0.75);
-    }
-    100% {
-        box-shadow: 0 0 0 rgba(231, 76, 60, 0);
-    }
+.bar-container::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 3px;
+    pointer-events: none;
+    opacity: 0;
+    will-change: opacity;
+    box-shadow: 0 0 8px 3px var(--flash-color, transparent);
 }
 
-.hp-damage-flash {
-    animation: hpDamageFlash 280ms ease-out;
+.bar-container.hp-damage-flash::after {
+    --flash-color: rgba(231, 76, 60, 0.75);
+    animation: hpFlashOpacity 280ms ease-out;
 }
 
-@keyframes hpHealFlash {
-    0% {
-        box-shadow: 0 0 0 rgba(46, 204, 113, 0);
-    }
-    25% {
-        box-shadow: 0 0 8px 3px rgba(46, 204, 113, 0.75);
-    }
-    100% {
-        box-shadow: 0 0 0 rgba(46, 204, 113, 0);
-    }
+.bar-container.hp-heal-flash::after {
+    --flash-color: rgba(46, 204, 113, 0.75);
+    animation: hpFlashOpacity 280ms ease-out;
 }
 
-.hp-heal-flash {
-    animation: hpHealFlash 280ms ease-out;
+@keyframes hpFlashOpacity {
+    0%   { opacity: 0; }
+    25%  { opacity: 1; }
+    100% { opacity: 0; }
 }
 
 #autoplay-panel {
