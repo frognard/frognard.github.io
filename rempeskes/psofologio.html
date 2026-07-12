@@ -265,7 +265,7 @@ const depthNames = [
     "[56] Κήπος Αγαλμάτων", "[57] Αρένα", "[58] Παγίδες", "[59] Κέντακλο", "[60] Καθρέφτες",
     "[61] Στοά του Δούκα", "[62] Εκκλησίασμα", "[63] Μαύρη Πύλη", "[64] Πυραμίδα", "[65] Άδυτον",
     "[66] Βεστιάριο", "[67] Εικονοστάσια", "[68] Μαύρο Ιερό", "[69] Τύμβος των Οστών", "[70] Ναός των Οστών",
-    "[71] Βασαλτική Πύλη", "[72] Ο Θόλος της Στρίγγλας", "[73] Δρακοντική Αυλή", "[74] Βασαλτική Αψίδα", "[75] Στοά του Ιφρίτη",
+    "[71] Βασαλτική Πύλη", "[72] Ο Θόλος της Στρίγγλας", "[73] Δρακοντική Αυλή", "[74] Βασαλτικές Αψίδες", "[75] Στοά του Ιφρίτη",
     "[76] Αβυσσάλειο", "[77] Μέγα Παλάτιο", "[78] Βασαλτική Πόλη", "[79] Εχιδναϊκή Λεωφόρος", "[80] Μεταλλουργείο",
     "[81] Πύλες της Νερτερίας", "[82] Αχέρων", "[83] Κωκυτός", "[84] Φλεγέθων", "[85] Στυξ",
     "[86] Λήθη", "[87] Νερτέρα Χθων", "[88] Χαρόντειο Μέλαθρον", "[89] Πύλη της Αβύσσου", "[90] Άβυσσος",
@@ -353,6 +353,7 @@ async function load() {
         .from('ironman_deaths')
         .select('*')
         .order('level', { ascending: false })
+        .order('turns', { ascending: true })
         .order('death_date', { ascending: false });
 
     if (error) {
@@ -399,7 +400,8 @@ function deduplicate(arr) {
         if (seen.has(name)) {
             const existing = seen.get(name);
             const replace = entry.level > existing.level ||
-                (entry.level === existing.level && new Date(entry.death_date) > new Date(existing.death_date));
+                (entry.level === existing.level && (entry.turns ?? Infinity) < (existing.turns ?? Infinity)) ||
+                (entry.level === existing.level && (entry.turns ?? Infinity) === (existing.turns ?? Infinity) && new Date(entry.death_date) > new Date(existing.death_date));
             if (replace) {
                 seen.set(name, entry);
             }

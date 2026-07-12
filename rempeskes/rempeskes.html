@@ -3675,7 +3675,11 @@ function getIronmanHighscores() {
     } catch (e) {
         scores = [];
     }
-    return scores.sort((a, b) => b.level - a.level);
+    return scores.sort((a, b) => {
+        if (b.level !== a.level) return b.level - a.level;
+        if ((a.turns ?? Infinity) !== (b.turns ?? Infinity)) return (a.turns ?? Infinity) - (b.turns ?? Infinity);
+        return new Date(b.date) - new Date(a.date);
+    });
 }
 
 
