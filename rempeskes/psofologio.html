@@ -294,7 +294,7 @@ function renderEntry(s, i, isVictory) {
             <div class="line2">
                 ${detailLine}
                 <br>
-                <span class="gear">εξοπλισμός: ${s.weapon} / ${s.armor} / ${s.magic}</span>
+                <span class="gear">εξοπλισμός: ${s.weapon} / ${s.armor} / ${s.magic} — Μαγκιά: ${s.magkia ?? 0}</span>
             </div>
         </div>
     `;
@@ -353,6 +353,7 @@ async function load() {
         .from('ironman_deaths')
         .select('*')
         .order('level', { ascending: false })
+        .order('magkia', { ascending: false })
         .order('turns', { ascending: true })
         .order('death_date', { ascending: false });
 
@@ -400,8 +401,9 @@ function deduplicate(arr) {
         if (seen.has(name)) {
             const existing = seen.get(name);
             const replace = entry.level > existing.level ||
-                (entry.level === existing.level && (entry.turns ?? Infinity) < (existing.turns ?? Infinity)) ||
-                (entry.level === existing.level && (entry.turns ?? Infinity) === (existing.turns ?? Infinity) && new Date(entry.death_date) > new Date(existing.death_date));
+                (entry.level === existing.level && (entry.magkia ?? 0) > (existing.magkia ?? 0)) ||
+                (entry.level === existing.level && (entry.magkia ?? 0) === (existing.magkia ?? 0) && (entry.turns ?? Infinity) < (existing.turns ?? Infinity)) ||
+                (entry.level === existing.level && (entry.magkia ?? 0) === (existing.magkia ?? 0) && (entry.turns ?? Infinity) === (existing.turns ?? Infinity) && new Date(entry.death_date) > new Date(existing.death_date));
             if (replace) {
                 seen.set(name, entry);
             }

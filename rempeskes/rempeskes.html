@@ -1458,9 +1458,9 @@ function showIronmanHighscores() {
             const formattedDate = new Date(s.date).toLocaleDateString('el-GR');
 
             if (s.victory) {
-                appendInfoLine(body, `★ ${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, σε ${formatNumber(s.turns || 0)} γύρους! [${formattedDate}]`, "psof-victory");
+                appendInfoLine(body, `★ ${s.name}, επίπεδο ${s.level}, μαγκιά: ${s.magkia ?? 0}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, σε ${formatNumber(s.turns || 0)} γύρους! [${formattedDate}]`, "psof-victory");
             } else {
-                appendInfoLine(body, `${s.name}, επίπεδο ${s.level}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer}, το γύρο ${formatNumber(s.turns || 0)}. [${formattedDate}]`, "psof");
+                appendInfoLine(body, `${s.name}, επίπεδο ${s.level}, μαγκιά: ${s.magkia ?? 0}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer}, το γύρο ${formatNumber(s.turns || 0)}. [${formattedDate}]`, "psof");
             }
             appendInfoLine(body, ``);
         });
@@ -3734,6 +3734,7 @@ function getIronmanHighscores() {
     }
     return scores.sort((a, b) => {
         if (b.level !== a.level) return b.level - a.level;
+        if ((b.magkia ?? 0) !== (a.magkia ?? 0)) return (b.magkia ?? 0) - (a.magkia ?? 0);
         if ((a.turns ?? Infinity) !== (b.turns ?? Infinity)) return (a.turns ?? Infinity) - (b.turns ?? Infinity);
         return new Date(b.date) - new Date(a.date);
     });
@@ -5102,6 +5103,7 @@ function showAnnouncementPopup(text, styleClass) {
                     saveIronmanHighscore({
                         name: player.name,
                         level: player.level,
+                        magkia: player.magkia,
                         depth: currentSelectedLevel,
                         killer: "Θεός Κόνανος",
                         weapon: player.weapon.power,
@@ -5386,6 +5388,7 @@ function applyDefeatPenalties() {
         saveIronmanHighscore({
             name: player.name,
             level: player.level,
+            magkia: player.magkia,
             depth: deathDepth,
             killer: killerName,
             weapon: player.weapon.power,
@@ -6100,6 +6103,7 @@ if ('serviceWorker' in navigator) {
                 .from('ironman_deaths')
                 .insert({
                     name, level,
+                    magkia: r.magkia || 0,
                     depth: r.depth,
                     killer: r.killer,
                     weapon: r.weapon,
