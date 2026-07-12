@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v264</title>
+    <title>Ρεμπεσκές v270</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -4384,6 +4384,10 @@ setInterval(function () {
 
 function spawnMonster() {
 
+    // Cross-closure marker: κάθε φορά που γεννιέται νέο τέρας, ενημερώνουμε αυτό
+    // ώστε το AutoPlay module (ξεχωριστό IIFE πιο κάτω) να μπορεί να
+    // ξανασυγχρονίσει το φασικό του ρολόι με τον πραγματικό γύρο μάχης.
+    window.__combatRoundStartTime = Date.now();
 
     let isBossConanos = false;
 
@@ -5592,6 +5596,7 @@ if (
     let autoLastMonsterRef = null; // για να ξέρουμε πότε εμφανίστηκε νέο τέρας (Κατραπακιά στο 1ο χτύπημα)
     let autoLastPlayerLevel = player.level; // για να ξέρουμε πότε ανέβηκε level ο παίκτης
     let autoCombatTickStart = Date.now();
+    let autoLastSyncedSpawnTime = null; // για να ξέρουμε αν το window.__combatRoundStartTime άλλαξε
     let autoEarlyPhaseFired = false;
     let autoLatePhaseFired = false;
     let autoRetreatAfterLevel = false;
@@ -5655,7 +5660,7 @@ if (
         }
 
         if (autoPlayEnabled) {
-            const tickMs = Math.max(10, AUTO_TICK_MS / getSpeedFactor());
+            const tickMs = Math.max(4, AUTO_TICK_MS / getSpeedFactor());
             autoPlayInterval = setInterval(autoPlayTick, tickMs);
         }
 
@@ -5742,6 +5747,18 @@ if (
         // ==========================================
         // ΦΑΣΙΚΟΣ ΧΡΟΝΙΣΜΟΣ ΕΝΤΟΛΩΝ (10% / 90% του τικ)
         // ==========================================
+        // Επανασυγχρονισμός με τον πραγματικό γύρο μάχης: αν έχει γεννηθεί νέο
+        // τέρας (spawnMonster() ενημέρωσε το window.__combatRoundStartTime),
+        // ξαναρχίζουμε το φασικό ρολόι από εκεί αντί να μένει κολλημένο στο
+        // αρχικό load-time της σελίδας (Bug #1 — desync ρολόι).
+        if (typeof window.__combatRoundStartTime === 'number' &&
+            window.__combatRoundStartTime !== autoLastSyncedSpawnTime) {
+            autoCombatTickStart = window.__combatRoundStartTime;
+            autoLastSyncedSpawnTime = window.__combatRoundStartTime;
+            autoEarlyPhaseFired = false;
+            autoLatePhaseFired = false;
+        }
+
         const tickMs = effTick();
         const phase = ((Date.now() - autoCombatTickStart) % tickMs) / tickMs;
 
