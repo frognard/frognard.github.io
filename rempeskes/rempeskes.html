@@ -2330,6 +2330,7 @@ const monsterFirstNames = [
 "Κοσχάι",
 "Υμεάλογο-Ίμε",
 "Μαρντούκ",
+"Τριμπόκ",
 "Χάττα",
 "Χεμπάτ",
 "Νακτάρ",
@@ -5571,9 +5572,9 @@ if (
     // ==================== ΡΥΘΜΙΣΕΙΣ (επεξεργάσιμες) ====================
     let AUTO_DEPTH_BELOW_PLAYER = -1;        // levels κάτω (ή πάνω, αν αρνητικό) από τον player — μόνο αν AUTO_USE_TARGET_RATIO = false
     let AUTO_USE_TARGET_RATIO = true;       // true: επιλογή βάθους με βάση το combat ratio αντί για σταθερό offset
-    let AUTO_TARGET_COMBAT_RATIO = 0.45;      // στόχος για το calculateDifficulty(player, monster) — μόνο αν AUTO_USE_TARGET_RATIO = true
+    let AUTO_TARGET_COMBAT_RATIO = 0.35;      // στόχος για το calculateDifficulty(player, monster) — μόνο αν AUTO_USE_TARGET_RATIO = true
     let AUTO_BEER_HP_PCT = 0.90;            // μπύρα όταν HP <= 70% (δηλ. έχει δεχτεί >=30% damage)
-    let AUTO_RETREAT_HP_PCT = 0.65;         // κατώφλι HP για σκέψη retreat
+    let AUTO_RETREAT_HP_PCT = 0.6;         // κατώφλι HP για σκέψη retreat
     let AUTO_RETREAT_BEER_CHARGE_PCT = 1.0;// αν η μπύρα δεν είναι έστω χ% charged -> retreat
     let AUTO_TICK_MS = 150;                 // βασικός ρυθμός σκέψης του bot σε x1 ταχύτητα
     // =====================================================================
