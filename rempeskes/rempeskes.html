@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v270</title>
+    <title>Ρεμπεσκές v280</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -325,6 +325,15 @@
     animation: popGlow 0.8s ease;
 }
 
+/* Ξεχωριστό χρώμα για τα μηνύματα ΜΑΓΚΙΑ/ΔΙΜΑΓΚΙΑ/... — άλλαξε εδώ το χρώμα, χωρίς να πειράξεις το θρυλικό drop */
+.legendary-popup.magkia-popup {
+    color: #ffffff;
+    text-shadow:
+        0 0 10px #ffffff,
+        0 0 25px #cccccc,
+        0 0 40px #ffffff;
+}
+
 .hidden {
     display: none;
 }
@@ -481,6 +490,7 @@
         .log-konanos { color: #ffffff; font-weight: bold; }
         .log-streak-silver { color: #e0e6eb; font-weight: bold; }
         .log-streak-gold { color: var(--accent-gold); font-weight: bold; text-shadow: 0 0 6px rgba(255,215,0,0.5); }
+        .log-magkia { color: #ffffff; font-weight: bold; }
 
     .area-select-container {
     margin-top: 15px;
@@ -543,7 +553,7 @@
     height: 28px;       /* <-- Μειώνει το συνολικό ύψος του κουτιού (π.χ. από το default ~38px στα 28px) */
     padding: 2px 6px;   /* <-- Μικραίνει το εσωτερικό κενό πάνω-κάτω για να μην κόβεται το κείμενο */
     font-size: 12.5px;    /* <-- Ελαφρώς πιο συμπαγής γραμματοσειρά για να ταιριάζει με το νέο ύψος */
-      max-width: 190px;    
+      max-width: 210px;    
     line-height: 1;
 }
 
@@ -1365,6 +1375,14 @@ function formatNumber(num) {
     return Number(num).toLocaleString('el-GR');
 }
 
+// Ανιχνεύει κινητό/tablet (Android/iOS), ΟΧΙ Windows — ρητή εξαίρεση, ώστε ακόμα
+// και το Chrome app (PWA) πάνω σε Windows να μετράει σαν desktop, όχι σαν κινητό.
+function isMobileDevice() {
+    const ua = (navigator.userAgent || '') + ' ' + (navigator.platform || '');
+    if (/Windows/i.test(ua)) return false;
+    return /Android|iPhone|iPad|iPod|Mobile|Tablet/i.test(ua);
+}
+
 
 // ΣΧΟΛΙΟ: παλιό conversion του activeTime σε ώρες/λεπτά/δευτερόλεπτα.
 // Τώρα το activeTime μετράει απλά γύρους (κάθε γύρος μάχης/regen = +1), οπότε δεν χρειάζεται πλέον.
@@ -1400,6 +1418,7 @@ function showStats() {
     logMessage(`Χρυσάφι που χάθηκε: ${formatNumber(player.goldLost)}`,"stats");
     logMessage(`Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`,"stats");
     logMessage(`Γύροι: ${formatNumber(player.activeTime)}`,"stats");
+    logMessage(`Μαγκιά: ${formatNumber(player.magkia)}`,"stats");
     // logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
     logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
     
@@ -3085,6 +3104,8 @@ function rollItemTier(monsterLevel) {
             legendaryDrops: 0,
             bestKillStreak: 0,
             hasBeatenConanos: false,
+            magkia: 0,
+            magkiaEarnedDepths: [], // ποια βάθη έχουν ήδη δώσει μαγκιά — δεν ξαναδίνουν
         weapon: { name: "Ράβδος", power: 1, legendary: false },
         armor: { name: "Μανδύας", power: 1, legendary: false },
         magic: { name: "Κόκκαλο Αρουραίου", power: 1, legendary: false },
@@ -3375,6 +3396,39 @@ function registerKillStreak() {
     }
 }
 
+// --- ΜΑΓΚΙΑ: πρώτο χρυσό σερί σε ένα βάθος -> πόντοι μαγκιάς, μια φορά ανά βάθος για πάντα ---
+function getMagkiaLabel(points) {
+    const namesByPoints = {
+        1: "ΜΑΓΚΙΑ",
+        2: "ΔΙΜΑΓΚΙΑ",
+        3: "ΤΡΙΜΑΓΚΙΑ",
+        4: "ΤΕΤΡΑΜΑΓΚΙΑ",
+        5: "ΚΑΡΑΜΑΓΚΙΑ"
+    };
+    if (namesByPoints[points]) return namesByPoints[points];
+    if (points >= 6 && points <= 10) return `ΚΑΡΑΜΑΓΚΙΑ+${points - 5}`;
+    return "ΘΕΟΜΑΓΚΙΑ!!!";
+}
+
+function awardMagkiaForDepth(depth) {
+    if (player.magkiaEarnedDepths.includes(depth)) return; // ήδη μαγκεύτηκε αυτό το βάθος
+
+    const points = depth - player.level + 1;
+    if (points <= 0) return; // ασφάλεια, δεν θα έπρεπε να συμβεί αφού το σερί είναι ήδη depthAppropriate
+
+    player.magkiaEarnedDepths.push(depth);
+    player.magkia += points;
+
+    const label = getMagkiaLabel(points);
+    logMessage(`${label} Πρώτο χρυσό σερί στο βάθος ${depth} -> +${points} μαγκιά!`, 'magkia');
+    showAnnouncementPopup(label, 'magkia-popup');
+    levelUpSound();
+
+    refreshAreaSelectorAppearance();
+    updateUI();
+    saveGame();
+}
+
 // --- ΣΕΡΙ ΦΟΝΩΝ: ασημένια λάμψη στα 5, χρυσή στα 10, bonus XP στους επόμενους φόνους ---
 function updateKillStreakVisuals() {
     const xpBarContainer = document.getElementById('xp-bar-container');
@@ -3386,6 +3440,7 @@ function updateKillStreakVisuals() {
             if (depthAppropriate) {
                 logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-silver');
                 setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ +10% XP!', '#ffd700'); }, 500);
+                awardMagkiaForDepth(currentSelectedLevel);
             }
         }
         if (xpBarContainer) {
@@ -3485,6 +3540,8 @@ function loadGame() {
             player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
             player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
             if (!player.name) player.name = "Ρεμπεσκές";
+            if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
+            if (typeof player.magkia !== 'number') player.magkia = 0;
             player.maxUnlockedLevel = 100;
 
             player.nextXp = calculateNextXpRequirement(player.level);
@@ -3719,6 +3776,8 @@ function importSave() {
         player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
         player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
         if (!player.name) player.name = "Ρεμπεσκές";
+        if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
+        if (typeof player.magkia !== 'number') player.magkia = 0;
         player.maxUnlockedLevel = 100;
         player.nextXp = calculateNextXpRequirement(player.level);
 
@@ -3812,6 +3871,11 @@ if (savedMonsterLevel) {
     updateSelectorColor(areaSelectorEl);
 }
 
+const tekeTitleEl = document.getElementById('teke-title');
+if (tekeTitleEl) {
+    tekeTitleEl.innerHTML = isMobileDevice() ? 'Τεκές' : 'Τεκές του<br>Ζαλαδούρα';
+}
+
 updateUI();
 startTownRegen();
 updateCooldownBars();
@@ -3832,7 +3896,8 @@ function updateAreaSelector() {
         let icon = AREA_TYPE_ICON[areaType];
         
         // Αντικατάσταση της ονοματοδοσίας των τεράτων με την απλή ένδειξη βάθους
-        opt.innerText = `${icon ? icon + ' ' : ''}${depthNames[i - 1]}`;
+        const magkiaStar = (player.magkiaEarnedDepths && player.magkiaEarnedDepths.includes(i)) ? ' ⭐' : '';
+        opt.innerText = `${icon ? icon + ' ' : ''}${depthNames[i - 1]}${magkiaStar}`;
         
         // Δίνουμε ΠΑΝΤΑ χρώμα στο option, ακόμα και αν είναι NORMAL
         opt.style.color = AREA_TYPE_COLOR[areaType];
@@ -3877,7 +3942,8 @@ function refreshAreaSelectorAppearance() {
         const lvl = parseInt(opt.value);
         const areaType = getAreaType(lvl);
         const icon = AREA_TYPE_ICON[areaType];
-        opt.innerText = `${icon ? icon + ' ' : ''}${depthNames[lvl - 1]}`;
+        const magkiaStar = (player.magkiaEarnedDepths && player.magkiaEarnedDepths.includes(lvl)) ? ' ⭐' : '';
+        opt.innerText = `${icon ? icon + ' ' : ''}${depthNames[lvl - 1]}${magkiaStar}`;
         opt.style.color = AREA_TYPE_COLOR[areaType];
     }
     updateSelectorColor(selector);
@@ -4986,8 +5052,18 @@ let finalType = type;
 }
 
 function showLegendaryPopup() {
-    const popup = document.getElementById('legendary-popup');
+    showAnnouncementPopup('ΘΡΥΛΙΚΟ DROP!');
+}
 
+// Γενική εκδοχή του θρυλικού popup — ίδια εμφάνιση/διάρκεια, διαφορετικό κείμενο κάθε φορά.
+// styleClass (προαιρετικό): π.χ. 'magkia-popup' για διαφορετικό χρώμα από το θρυλικό drop.
+function showAnnouncementPopup(text, styleClass) {
+    const popup = document.getElementById('legendary-popup');
+    if (!popup) return;
+
+    popup.textContent = text;
+    popup.classList.remove('magkia-popup');
+    if (styleClass) popup.classList.add(styleClass);
     popup.classList.remove('hidden');
     popup.classList.add('show');
 
