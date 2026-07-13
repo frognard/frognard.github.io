@@ -4499,7 +4499,7 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     if (areaType === AREA_TYPES.RICH) legendaryChance = legendaryChance * legendaryRichMultiplier;
     else if (areaType === AREA_TYPES.POOR) legendaryChance = legendaryChance * legendaryPoorMultiplier;
 
-    // Κάθε πόντος μαγκιάς αυξάνει το legendary chance κατά 1% (0.01), μέχρι 100%
+    // Bonus magkias sto legendary chance. me 100 magkia exeis diplasio chance
     legendaryChance *= (1 + (player.magkia || 0) * 0.01);
     legendaryChance = Math.min(legendaryChance, 1);
 
