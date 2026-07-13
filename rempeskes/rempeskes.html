@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v287</title>
+    <title>Ρεμπεσκές v290</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1381,7 +1381,7 @@ function showStats() {
     logMessage(`Χρυσάφι που χάθηκε: ${formatNumber(player.goldLost)}`,"stats");
     logMessage(`Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`,"stats");
     logMessage(`Γύροι: ${formatNumber(player.activeTime)}`,"stats");
-    logMessage(`Μαγκιά: ${formatNumber(player.magkia)}%`,"stats");
+    logMessage(`Μαγκιά: ${(player.magkia || 0) > 0 ? '+' : ''}${(player.magkia || 0).toFixed(3)}`,"stats");
     // logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
     logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
     
@@ -1421,9 +1421,9 @@ function showIronmanHighscores() {
             const formattedDate = new Date(s.date).toLocaleDateString('el-GR');
 
             if (s.victory) {
-                appendInfoLine(body, `★ ${s.name}, επίπεδο ${s.level}, μαγκιά: ${s.magkia ?? 0}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, σε ${formatNumber(s.turns || 0)} γύρους! [${formattedDate}]`, "psof-victory");
+                appendInfoLine(body, `★ ${s.name}, επίπεδο ${s.level}, μαγκιά: ${(s.magkia ?? 0).toFixed(3)}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, σε ${formatNumber(s.turns || 0)} γύρους! [${formattedDate}]`, "psof-victory");
             } else {
-                appendInfoLine(body, `${s.name}, επίπεδο ${s.level}, μαγκιά: ${s.magkia ?? 0}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer}, το γύρο ${formatNumber(s.turns || 0)}. [${formattedDate}]`, "psof");
+                appendInfoLine(body, `${s.name}, επίπεδο ${s.level}, μαγκιά: ${(s.magkia ?? 0).toFixed(3)}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer}, το γύρο ${formatNumber(s.turns || 0)}. [${formattedDate}]`, "psof");
             }
             appendInfoLine(body, ``);
         });
@@ -2774,8 +2774,6 @@ const zaladouras = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''ΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑ!!!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όσο πιο μάγκας είσαι, τόσο πιο τυχερός εισαι!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως αν κάνεις πολλούς φόνους σερί σε μία κατάβαση στο επίπεδό σου ή βαθύτερα, κερδίζεις περισσότερα XP!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως αν κάνεις σερι 10 φόνους στο επίπεδό σου είσαι μάγκας. Και αν το κάνεις βαθύτερα είσαι ακόμα πιο μάγκας!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι άπαξ και μάγκεψες ένα βάθος, δεν μπορείς να το ξαναμαγκέψεις.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Παλουκώσου λιγάκι, κι άκουσε...''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όταν ψοφολογάς, τα αντικείμενά σου φθείρονται!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι ο λόρδος Φίρκραχος ήταν ο πρώτος Θεοσφάχτης.''" ,
@@ -3071,8 +3069,9 @@ function rollItemTier(monsterLevel) {
             legendaryDrops: 0,
             bestKillStreak: 0,
             hasBeatenConanos: false,
-            magkia: 0,
-            magkiaEarnedDepths: [], // ποια βάθη έχουν ήδη δώσει μαγκιά — δεν ξαναδίνουν
+            magkia: 0, // τώρα: μέσος όρος (επίπεδο τέρατος - επίπεδο παίκτη) σε όλους τους φόνους της καριέρας — δείχνει πόσο ρισκάρει ο παίκτης
+            magkiaKillCount: 0, // πόσοι φόνοι έχουν μετρήσει στον παραπάνω μέσο όρο
+            magkiaEarnedDepths: [], // (legacy, δεν χρησιμοποιείται πια) ποια βάθη είχαν δώσει μαγκιά με τον παλιό μηχανισμό σερί
         weapon: { name: "Ράβδος", power: 1, legendary: false },
         armor: { name: "Μανδύας", power: 1, legendary: false },
         magic: { name: "Κόκκαλο Αρουραίου", power: 1, legendary: false },
@@ -3364,6 +3363,10 @@ function registerKillStreak() {
 }
 
 // --- ΜΑΓΚΙΑ: πρώτο χρυσό σερί σε ένα βάθος -> πόντοι μαγκιάς, μια φορά ανά βάθος για πάντα ---
+// ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΟ (σχολιασμένο): η μαγκιά δεν δίνεται πλέον από σερί φόνων.
+// Το στατιστικό "μαγκιά" τώρα υπολογίζεται αλλού, ως μέσος όρος ρίσκου (βλ. endCombat).
+// Κρατάμε τον κώδικα εδώ σε περίπτωση που χρειαστεί να ξαναενεργοποιηθεί ο παλιός μηχανισμός.
+/*
 function getMagkiaLabel(points) {
     const namesByPoints = {
         1: "ΜΑΓΚΑΣ!",
@@ -3394,6 +3397,7 @@ function awardMagkiaForDepth(depth) {
     updateUI();
     saveGame();
 }
+*/
 
 // --- ΣΕΡΙ ΦΟΝΩΝ: ασημένια λάμψη στα 5, χρυσή στα 10, bonus XP στους επόμενους φόνους ---
 function updateKillStreakVisuals() {
@@ -3406,7 +3410,7 @@ function updateKillStreakVisuals() {
             if (depthAppropriate) {
                 logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-silver');
                 setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ +10% XP!', '#ffd700'); }, 500);
-                awardMagkiaForDepth(currentSelectedLevel);
+                // awardMagkiaForDepth(currentSelectedLevel); // ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΟ: η μαγκιά δεν δίνεται πια από σερί
             }
         }
         if (xpBarContainer) {
@@ -3508,6 +3512,7 @@ function loadGame() {
             if (!player.name) player.name = "Ρεμπεσκές";
             if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
             if (typeof player.magkia !== 'number') player.magkia = 0;
+            if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
             player.maxUnlockedLevel = 100;
 
             player.nextXp = calculateNextXpRequirement(player.level);
@@ -3745,6 +3750,7 @@ function importSave() {
         if (!player.name) player.name = "Ρεμπεσκές";
         if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
         if (typeof player.magkia !== 'number') player.magkia = 0;
+        if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
         player.maxUnlockedLevel = 100;
         player.nextXp = calculateNextXpRequirement(player.level);
 
@@ -4064,7 +4070,7 @@ function refreshAreaSelectorAppearance() {
             mNameEl.style.color = "#888";
         }
         document.getElementById('monster-hp-bar').style.transform = 'scaleX(0)';
-        document.getElementById('monster-hp-text').innerText = '—';
+        document.getElementById('monster-hp-text').innerText = '-';
         document.getElementById('monster-kills-text').innerText = `Σερί: ${currentRunKills}`;
         
         const title = document.getElementById("battle-title");
@@ -4228,11 +4234,6 @@ function logMessageHTML(html, type = 'system') {
     appendInfoLine(body, "• Η ΜΠΥΡΑ δινει ζωή! (10-50%).", "help");
     appendInfoLine(body, "• Το ΤΡΕΞΙΜΟ δίνει μια πιθανότητα διαφυγής κάθε γύρο, μέχρι να σκοτωθεί ο εχθρός. Σε επιστρέφει στον τεκέ.", "help");
     appendInfoLine(body, "Κάθε φορά που κερδίζεις ένα νέο επίπεδο θα σπαταλήσεις όλο σου το χρυσάφι σε ένα μεγάλο γλέντι κερδίζοντας 1 XP για κάθε GP.", "help");
-    appendInfoLine(body, "");
-    appendInfoLine(body, "ΣΕΡΙ και ΜΑΓΚΙΑ");
-    appendInfoLine(body, "Όταν σκοτώνεις πολλούς εχθρούς μονομιάς στο επίπεδό σου ή βαθύτερα, πετυχαίνεις ασημένια (5) και χρυσά (10) ΣΕΡΙ. Αυτά σου δίνουν εξτρα XP όσο συνεχίζεις τους φόνους!", "help");
-    appendInfoLine(body, "Την πρώτη φορά που κάνεις ΧΡΥΣΟ σερί σε ένα επίπεδο, κερδίζεις ΜΑΓΚΙΑ, ανάλογα το βάθος του επιπέδου. Τα βάθη μαγκεύονται μόνο μια φορά, και σημαδεύονται με ένα αστέρι.", "help");
-    appendInfoLine(body, "Όσο πιο ΜΑΓΚΑΣ είσαι, τόσο περισσότερους θρυλικούς εχθρούς θα συναντάς: αυτοί, όταν σκοτωθούν ρίχνουν πανίσχυρα αντικείμενα!", "help");
     appendInfoLine(body, "");
     appendInfoLine(body, "Οι Ironman χαρακτήρες που πέθαναν ή νίκησαν τον Κόνανο θα καταχωρηθούν στο Ψοφολόγιο!", "help");
     appendInfoLine(body, "", "help");
@@ -4472,7 +4473,8 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     else if (areaType === AREA_TYPES.POOR) legendaryChance = legendaryChance * legendaryPoorMultiplier;
 
     // Bonus magkias sto legendary chance. me 100 magkia exeis diplasio chance
-    legendaryChance *= (1 + (player.magkia || 0) * 0.01);
+    // ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΟ: η μαγκιά δεν επηρεάζει πια το legendary chance (η μαγκιά είναι πλέον ενδεικτικό ρίσκου, όχι bonus)
+    // legendaryChance *= (1 + (player.magkia || 0) * 0.01);
     
 
     const isLegendary = Math.random() < legendaryChance;
@@ -5068,6 +5070,12 @@ function showAnnouncementPopup(text, styleClass) {
             monsterDeathSound();
             player.kills++;
             currentRunKills++;
+
+            // --- ΜΑΓΚΙΑ (ρίσκο): μέσος όρος της διαφοράς (επίπεδο τέρατος - επίπεδο παίκτη) σε όλους τους φόνους ---
+            if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
+            player.magkiaKillCount++;
+            const magkiaLevelDiff = monster.level - player.level;
+            player.magkia += (magkiaLevelDiff - player.magkia) / player.magkiaKillCount;
             
             // --- ΕΛΕΓΧΟΣ ΓΙΑ ΘΕΟ ΚΟΝΑΝΟ ---
          if (monster && monster.name === "Θεός Κόνανος") {
