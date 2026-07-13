@@ -3406,11 +3406,12 @@ function getMagkiaLabel(points) {
         1: "ΜΑΓΚΑΣ",
         2: "ΚΑΡΑΜΑΓΚΑΣ",
         3: "ΚΑΤΣΑΜΑΓΚΑΣ",
-        4: "ΑΛΟΓΟ, ΑΙθΕΡΑΣ",
+        4: "ΑΛΟΓΟ, ΑΙΘΕΡΑΣ",
         5: "ΚΑΡΑΜΑΝΗΣ"
     };
     if (points >= 6) return `ΤΑ ΣΚΑΜΠΩ ΜΟΥ ΚΑΙ Τ'ΑΡΧΙΔΙΑ ΜΟΥ`;
-    }
+    return namesByPoints[points] || namesByPoints[5];
+}
 
 function awardMagkiaForDepth(depth) {
     if (player.magkiaEarnedDepths.includes(depth)) return; // ήδη μαγκεύτηκε αυτό το βάθος
@@ -4497,6 +4498,10 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     const legendaryPoorMultiplier = 0.70;  // πόσο πιο σπάνια σε POOR areas
     if (areaType === AREA_TYPES.RICH) legendaryChance = legendaryChance * legendaryRichMultiplier;
     else if (areaType === AREA_TYPES.POOR) legendaryChance = legendaryChance * legendaryPoorMultiplier;
+
+    // Κάθε πόντος μαγκιάς αυξάνει το legendary chance κατά 1% (0.01), μέχρι 100%
+    legendaryChance += (player.magkia || 0) * 0.01;
+    legendaryChance = Math.min(legendaryChance, 1);
 
     const isLegendary = Math.random() < legendaryChance;
 
