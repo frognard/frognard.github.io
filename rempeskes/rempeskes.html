@@ -2336,7 +2336,7 @@ const monsterFirstNames = [
 "Τερ-Μπατ-Μαχράκ",
 "Βαλεφάρ",
 "Γίρσα",
-"Φαλαβάρ",
+"Μάλεμ-Κις",
 "Ουνέγκε",
 "Ουτουκκού",
 "Πόνμ",
@@ -3399,16 +3399,14 @@ function registerKillStreak() {
 // --- ΜΑΓΚΙΑ: πρώτο χρυσό σερί σε ένα βάθος -> πόντοι μαγκιάς, μια φορά ανά βάθος για πάντα ---
 function getMagkiaLabel(points) {
     const namesByPoints = {
-        1: "ΜΑΓΚΙΑ",
-        2: "ΔΙΜΑΓΚΙΑ",
-        3: "ΤΡΙΜΑΓΚΙΑ",
-        4: "ΤΕΤΡΑΜΑΓΚΙΑ",
-        5: "ΚΑΡΑΜΑΓΚΙΑ"
+        1: "ΜΑΓΚΑΣ",
+        2: "ΚΑΡΑΜΑΓΚΑΣ",
+        3: "ΚΑΤΣΑΜΑΓΚΑΣ",
+        4: "ΑΛΟΓΟ, ΑΙθΕΡΑΣ",
+        5: "ΚΑΡΑΜΑΝΗΣ"
     };
-    if (namesByPoints[points]) return namesByPoints[points];
-    if (points >= 6 && points <= 10) return `ΚΑΡΑΜΑΓΚΙΑ+${points - 5}`;
-    return "ΘΕΟΜΑΓΚΙΑ!!!";
-}
+    if (points >= 6) return `ΤΑ ΣΚΑΜΠΩ ΜΟΥ ΚΑΙ Τ'ΑΡΧΙΔΙΑ ΜΟΥ`;
+    }
 
 function awardMagkiaForDepth(depth) {
     if (player.magkiaEarnedDepths.includes(depth)) return; // ήδη μαγκεύτηκε αυτό το βάθος
@@ -3420,7 +3418,7 @@ function awardMagkiaForDepth(depth) {
     player.magkia += points;
 
     const label = getMagkiaLabel(points);
-    logMessage(`${label} Πρώτο χρυσό σερί στο βάθος ${depth} -> +${points} μαγκιά!`, 'magkia');
+    logMessage(`${label} Πρώτο χρυσό σερί στο βάθος ${depth} → +${points} μαγκιά!`, 'magkia');
     showAnnouncementPopup(label, 'magkia-popup');
     levelUpSound();
 
