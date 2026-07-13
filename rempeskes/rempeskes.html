@@ -4500,7 +4500,7 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     else if (areaType === AREA_TYPES.POOR) legendaryChance = legendaryChance * legendaryPoorMultiplier;
 
     // Κάθε πόντος μαγκιάς αυξάνει το legendary chance κατά 1% (0.01), μέχρι 100%
-    legendaryChance += (player.magkia || 0) * 0.01;
+    legendaryChance += (player.magkia || 0) * 0.0001;
     legendaryChance = Math.min(legendaryChance, 1);
 
     const isLegendary = Math.random() < legendaryChance;
