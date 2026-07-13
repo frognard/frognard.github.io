@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v284</title>
+    <title>Ρεμπεσκές v287</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -243,6 +243,18 @@
             line-height: 20px;
             color: #fff;
             font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+            pointer-events: none;
+        }
+
+        .bar-kills-text {
+            position: absolute;
+            top: 0;
+            right: 6px;
+            font-size: 0.7rem;
+            line-height: 20px;
+            color: #fff;
+            font-weight: normal;
             text-shadow: 1px 1px 2px #000;
             pointer-events: none;
         }
@@ -1086,6 +1098,7 @@ body {
     <div class="bar-container" id="monster-hp-parent">
         <div id="monster-hp-bar" class="bar"></div>
         <div id="monster-hp-text" class="bar-text">0 / 0 HP</div>
+        <div id="monster-kills-text" class="bar-kills-text">Σερί: 0</div>
         <div id="monster-hp-flash" class="hp-flash-overlay"></div>
     </div>
 </div>
@@ -4032,7 +4045,7 @@ function refreshAreaSelectorAppearance() {
             else if (areaType === AREA_TYPES.ARMOR) areaColor = '#6fa8e0';
             else if (areaType === AREA_TYPES.MAGIC) areaColor = '#b37ed9';
 
-            title.innerText = `Μάχη:`;
+            title.innerText = `${(player.magkiaEarnedDepths && player.magkiaEarnedDepths.includes(currentSelectedLevel)) ? '⭐ ' : ''}Μάχη:`;
             title.style.color = areaColor;
             title.style.fontSize = "1.2rem";
         }
@@ -4040,6 +4053,7 @@ function refreshAreaSelectorAppearance() {
         const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
         document.getElementById('monster-hp-bar').style.transform = `scaleX(${mPct / 100})`;
         document.getElementById('monster-hp-text').innerText = `${formatNumber(Math.ceil(monster.hp))} / ${formatNumber(monster.maxHp)} HP`;
+        document.getElementById('monster-kills-text').innerText = `Σερί: ${currentRunKills}`;
         
     } else {
         const mNameEl = document.getElementById('m-name');
@@ -4050,11 +4064,12 @@ function refreshAreaSelectorAppearance() {
             mNameEl.style.color = "#888";
         }
         document.getElementById('monster-hp-bar').style.transform = 'scaleX(0)';
-        document.getElementById('monster-hp-text').innerText = 'Φόνοι: ' + currentRunKills;
+        document.getElementById('monster-hp-text').innerText = '—';
+        document.getElementById('monster-kills-text').innerText = `Σερί: ${currentRunKills}`;
         
         const title = document.getElementById("battle-title");
         if (title) {
-            title.innerText = "Μάχη:";
+            title.innerText = `${(player.magkiaEarnedDepths && player.magkiaEarnedDepths.includes(currentSelectedLevel)) ? '⭐ ' : ''}Μάχη:`;
           //  title.style.color = "#888";
         }
     }
