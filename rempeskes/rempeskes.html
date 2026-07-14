@@ -2136,13 +2136,13 @@ const magicNames = [
   "Κομπολογάκι",
   "Χάλκινο Δαχτυλίδι",
   "Μικρό Φυλακτό Τύχης",
-  "Κομπολόι",
+  "Μπεγλέρι",
   "Κεχριμπάρι",
   "Ορειχάλκινο Φυλακτό",
   "Αχάτης",
 
   // 11-20: Απλές Προστασίες & Λαϊκά Γιατροσόφια
-  "Μπεγλέρι",
+  "Κομπολόι",
   "Φυλακτό Βασκανίας",
   "Δαχτυλίδι με Ίασπι",
   "Πέτρινο Εγκόλπιο",
@@ -2203,7 +2203,7 @@ const magicNames = [
 
   // 61-70: Κειμήλια Μεγάλης Αξίας (Πατρίκιοι & Μονές)
   "Δάκρυ των Βαθών",
-  "Κομπολόι του Τάγματος",
+  "Κομπολόι του Δούκα",
   "Σφραγίδα του Αρχιστράτηγου",
   "Ηλιακό Περίαπτο",
   "Αστρικό Φυλακτό",
@@ -3275,6 +3275,17 @@ const AREA_TYPE_COLOR = {
     
    // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to equipment
     function calculateNextXpRequirement(lvl) { return Math.round(80 * Math.pow(lvl, 2.6)); }
+
+    // Πόσο XP θα χρειαζόταν ακόμα ο παίκτης (από το τρέχον level/xp του) για να έφτανε level 100.
+    // Χρησιμοποιείται ΜΟΝΟ για το σκορ (πρόωρος Κόνανος), όχι για πραγματικό level up.
+    function calculateXpNeededForLevel100() {
+        if (player.level >= 100) return 0;
+        let remaining = player.nextXp - player.xp;
+        for (let lvl = player.level + 1; lvl < 100; lvl++) {
+            remaining += calculateNextXpRequirement(lvl);
+        }
+        return Math.max(0, Math.round(remaining));
+    }
   
     // cost armor kai weapon: ligo pio megalos ek8eths apo to gold gain, giati ta levels megalwnoun se xrono
     function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
@@ -5112,12 +5123,14 @@ function showAnnouncementPopup(text, styleClass) {
             if (!player.hasBeatenConanos) {
                 player.hasBeatenConanos = true;
 
-                // --- ΣΚΟΡ: εικονικό level για τον υπολογισμό του σκορ, αν νικήθηκε ο Κόνανος κάτω απο level 100 ---
-                // πχ level 92 → μετράει σαν level 100 + (100-92) = 108 στο σκορ
+                // --- ΣΚΟΡ: αν νικήθηκε ο Κόνανος κάτω από level 100, δίνεται ΑΜΕΣΑ (μόνο για το σκορ) όλο
+                // το XP που θα χρειαζόταν ακόμα ο παίκτης για να έφτανε level 100 -- χωρίς να γίνεται
+                // πραγματικά level 100, απλά μετράει σαν XP. Ο πραγματικός χαρακτήρας/level δεν αλλάζει.
                 if (player.level < 100) {
-                    player.scoreEffectiveLevel = 100 + (100 - player.level);
-                } else {
-                    player.scoreEffectiveLevel = player.level;
+                    const conanosBonusXp = calculateXpNeededForLevel100();
+                    player.totalXpGained = (player.totalXpGained || 0) + conanosBonusXp;
+                    player.conanosEarlyBonusXp = conanosBonusXp;
+                    logMessage(`Ο πρόωρος θάνατος του Κόνανου σου χαρίζει ${formatNumber(conanosBonusXp)} XP για το σκορ, σαν να είχες φτάσει level 100!`, 'victory');
                 }
                 
                // logMessage(`Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΠΕΘΑΝΕ! Το παιχνίδι νικήθηκε! Αιώνια δόξα στον ${player.name}! Απο δω και πέρα θα είναι γνωστός ως ΘΕΟΣΦΑΧΤΗΣ.`, 'victory');
