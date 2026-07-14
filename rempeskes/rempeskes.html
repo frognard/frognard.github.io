@@ -1383,7 +1383,7 @@ function computeScore() {
     const turns = player.activeTime || 0;
 
     const xpPower = totalXp / 100;
-    const riskFactor = Math.max(0, 5 + risk * SCORE_RISK_WEIGHT);
+    const riskFactor = Math.max(0, 6 + risk * SCORE_RISK_WEIGHT);
     const deathFactor = player.ironman ? 1 : (1 / (1 + deaths * SCORE_DEATH_WEIGHT));
     const turnFactor = 1 / (1 + Math.pow(turns / 80000, 1.8));
 
