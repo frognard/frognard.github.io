@@ -1377,7 +1377,7 @@ const SCORE_DEATH_WEIGHT = 0.05;
 const SCORE_CONANOS_MULTIPLIER = 2;
 const SCORE_IRONMAN_MULTIPLIER = 2;
 function computeScore() {
-    const totalXp = player.totalXpGained || 0;
+    const totalXp = (player.level >= 100) ? (player.totalXpAtLevel100 || 0) : (player.totalXpGained || 0);
     const risk = player.risk || 0;
     const deaths = player.deaths || 0;
     const turns = player.activeTime || 0;
@@ -3098,6 +3098,7 @@ function rollItemTier(monsterLevel) {
             activeTime: 0, // μετράει γύρους (κάθε γύρος μάχης/regen = +1), όχι πλέον δευτερόλεπτα
             legendaryDrops: 0,
             totalXpGained: 0,
+            totalXpAtLevel100: 0,
             bestKillStreak: 0,
             hasBeatenConanos: false,
             risk: 0, // τώρα: μέσος όρος (επίπεδο τέρατος - επίπεδο παίκτη) σε όλους τους φόνους της καριέρας — δείχνει πόσο ρισκάρει ο παίκτης
@@ -3479,6 +3480,10 @@ function checkLevelUp() {
         player.level++;
         player.xp -= player.nextXp;
 
+        if (player.level === 100) {
+            player.totalXpAtLevel100 = player.totalXpGained || 0;
+        }
+
         if (player.level > player.maxUnlockedLevel) {
             player.maxUnlockedLevel = player.level;
             refreshAreaSelectorAppearance();
@@ -3810,6 +3815,15 @@ function importSave() {
             event.preventDefault();
             document.getElementById('p-name').blur();
         }
+    }
+
+    let _pendingLogScroll = null;
+    function requestScrollLog(logDiv) {
+        if (_pendingLogScroll) return;
+        _pendingLogScroll = requestAnimationFrame(() => {
+            logDiv.scrollTop = logDiv.scrollHeight;
+            _pendingLogScroll = null;
+        });
     }
 
     loadGame();
@@ -4178,11 +4192,11 @@ function logMessage(text, type = 'system') {
 
     logDiv.append(entry);
 
-    while (logDiv.children.length > 1000) {
+    while (logDiv.children.length > 500) {
         logDiv.removeChild(logDiv.firstChild);
     }
 
-    logDiv.scrollTop = logDiv.scrollHeight;
+    requestScrollLog(logDiv);
 }
 
 function logMessageHTML(html, type = 'system') {
@@ -4193,13 +4207,12 @@ function logMessageHTML(html, type = 'system') {
 
     logDiv.append(entry);
 
-    while (logDiv.children.length > 1000) {
+    while (logDiv.children.length > 500) {
         logDiv.removeChild(logDiv.firstChild);
     }
 
-    logDiv.scrollTop = logDiv.scrollHeight;
+    requestScrollLog(logDiv);
 }
-
 
 
     function showRules() {
@@ -4390,7 +4403,11 @@ setInterval(function () {
     document.getElementById('p-name').blur();
     stopTownRegen(); 
     currentSelectedLevel = parseFloat(document.getElementById('area-selector').value);
-    
+    if (isNaN(currentSelectedLevel) || currentSelectedLevel < 1) {
+        currentSelectedLevel = 1;
+        document.getElementById('area-selector').value = "1";
+    }
+
     // === ΠΡΟΣΘΗΚΗ: ΚΑΤΑΓΡΑΦΗ ΠΕΡΙΟΧΗΣ ΣΤΟ LOG ===
     const level = currentSelectedLevel;
     const areaType = getAreaType(level);
@@ -5467,12 +5484,13 @@ function applyDefeatPenalties() {
     const code = event.code;
     const key = event.key;
 
-    // ENTER = Σφάξε / Γλέντα / Υποχώρηση
+    // ENTER = Σφάξε / Γλέντα / Υποχώρηση (όχι στο "Τρέξε")
     if (
         code === 'Enter' ||
         code === 'NumpadEnter' ||
         key === 'Enter'
     ) {
+        if (inCombat && !isAttemptingRetreat) return;
         event.preventDefault();
         handleHuntRetreatClick();
         return;
