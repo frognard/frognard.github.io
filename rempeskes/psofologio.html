@@ -161,6 +161,26 @@
         letter-spacing: 1px;
     }
 
+    .entry.dead {
+        background: linear-gradient(90deg, rgba(160,40,40,0.10), transparent 70%);
+        border-bottom: 1px solid #8b2020;
+    }
+
+    .entry.dead .rank-badge {
+        background: #8b2020;
+        color: var(--parchment);
+    }
+
+    .entry.alive {
+        background: linear-gradient(90deg, rgba(40,140,60,0.10), transparent 70%);
+        border-bottom: 1px solid #2d8b3a;
+    }
+
+    .entry.alive .rank-badge {
+        background: #2d8b3a;
+        color: var(--parchment);
+    }
+
     #victors-heading {
         text-align: center;
         font-family: 'Old Standard TT', serif;
@@ -232,13 +252,17 @@
     </header>
 
     <div id="tab-bar">
-        <button class="tab-btn active" data-tab="general">Γενικό</button>
-        <button class="tab-btn" data-tab="cyborg">Κυβόργια [Κ]</button>
+        <button class="tab-btn active" data-tab="normal">Normal</button>
+        <button class="tab-btn" data-tab="ironmen">Ironmen</button>
+        <button class="tab-btn" data-tab="cyborg-normal">[K] Normal</button>
+        <button class="tab-btn" data-tab="cyborg-ironmen">[K] Ironmen</button>
     </div>
 
     <div id="tally"></div>
     <div id="entries"></div>
-    <div id="entries-k" style="display:none;"></div>
+    <div id="entries-ironmen" style="display:none;"></div>
+    <div id="entries-k-normal" style="display:none;"></div>
+    <div id="entries-k-ironmen" style="display:none;"></div>
     <div id="empty" style="display:none;">Το κατάστιχο είναι άδειο... ακόμα κανείς δεν ψόφησε.</div>
     <div id="err" style="display:none;">Δεν κατάφερα να διαβάσω το κατάστιχο αυτή τη στιγμή.</div>
 
@@ -281,20 +305,30 @@ function romanish(n) {
     return `${n}`;
 }
 
+function formatScore(n) {
+    return Number(n).toLocaleString('el-GR');
+}
+
 function renderEntry(s, i, isVictory) {
     const d = new Date(s.death_date);
     const formattedDate = d.toLocaleDateString('el-GR');
-    const detailLine = isVictory
-        ? `Νίκησε τον <em>${escapeHtml(s.killer)}</em> στο ${escapeHtml(depthLabel(s.depth))}, σε ${s.turns ?? 0} γύρους &middot; ${formattedDate}`
-        : `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)}, το γύρο ${s.turns ?? 0} &middot; ${formattedDate}`;
+    const isAlive = !s.killer;
+    let detailLine;
+    if (isVictory) {
+        detailLine = `Νίκησε τον <em>${escapeHtml(s.killer)}</em> στο ${escapeHtml(depthLabel(s.depth))} &middot; ${formattedDate}`;
+    } else if (isAlive) {
+        detailLine = `Ζωντανός στο ${escapeHtml(depthLabel(s.depth))} &middot; ${formattedDate}`;
+    } else {
+        detailLine = `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)} &middot; ${formattedDate}`;
+    }
     return `
-        <div class="entry${isVictory ? ' victory' : ''}">
+        <div class="entry${isVictory ? ' victory' : isAlive ? ' alive' : ' dead'}">
             <div class="rank-badge">${romanish(i + 1)}</div>
             <div class="line1"><span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level}</div>
             <div class="line2">
                 ${detailLine}
                 <br>
-                <span class="gear">εξοπλισμός: ${s.weapon} / ${s.armor} / ${s.magic} — Μαγκιά: ${s.magkia ?? 0}</span>
+                <span class="gear">εξοπλισμός: ${s.weapon} / ${s.armor} / ${s.magic} — Μαγκιά: ${s.score ?? 0}</span>
             </div>
         </div>
     `;
@@ -302,14 +336,21 @@ function renderEntry(s, i, isVictory) {
 
 function renderTabContent(data, entriesEl) {
     const victors = data.filter(s => s.victory);
-    const deaths = data.filter(s => !s.victory);
+    const alive = data.filter(s => !s.victory && !s.killer);
+    const deaths = data.filter(s => !s.victory && s.killer);
     let html = '';
     if (victors.length > 0) {
         html += `<div id="victors-heading">Θεοσφάχτες</div>`;
         html += victors.map((s, i) => renderEntry(s, i, true)).join('');
     }
-    if (deaths.length > 0) {
+    if (alive.length > 0) {
         if (victors.length > 0) {
+            html += `<div id="victors-heading">Ζωντανοί</div>`;
+        }
+        html += alive.map((s, i) => renderEntry(s, i, false)).join('');
+    }
+    if (deaths.length > 0) {
+        if (victors.length > 0 || alive.length > 0) {
             html += `<div id="victors-heading">Ψοφολόγιον</div>`;
         }
         html += deaths.map((s, i) => renderEntry(s, i, false)).join('');
@@ -318,27 +359,34 @@ function renderTabContent(data, entriesEl) {
 }
 
 let normalData = [];
-let kData = [];
+let ironmenData = [];
+let kNormalData = [];
+let kIronmenData = [];
 
 function switchTab(tab) {
-    const isK = tab === 'cyborg';
-    document.getElementById('entries').style.display = isK ? 'none' : '';
-    document.getElementById('entries-k').style.display = isK ? '' : 'none';
+    document.getElementById('entries').style.display = tab === 'normal' ? '' : 'none';
+    document.getElementById('entries-ironmen').style.display = tab === 'ironmen' ? '' : 'none';
+    document.getElementById('entries-k-normal').style.display = tab === 'cyborg-normal' ? '' : 'none';
+    document.getElementById('entries-k-ironmen').style.display = tab === 'cyborg-ironmen' ? '' : 'none';
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
-    const data = isK ? kData : normalData;
+    const data = tab === 'normal' ? normalData : tab === 'ironmen' ? ironmenData : tab === 'cyborg-normal' ? kNormalData : kIronmenData;
     const victors = data.filter(s => s.victory);
-    const deaths = data.filter(s => !s.victory);
-    const topLevel = data.length > 0 ? data[0].level : 0;
+    const alive = data.filter(s => !s.victory && !s.killer);
+    const deaths = data.filter(s => !s.victory && s.killer);
+    const topScore = data.length > 0 ? Math.max(...data.map(s => s.score ?? 0)) : 0;
+    const deathMaxScore = deaths.length > 0 ? Math.max(...deaths.map(s => s.score ?? 0)) : 0;
+    const victorMaxScore = victors.length > 0 ? Math.max(...victors.map(s => s.score ?? 0)) : 0;
+    const aliveMaxScore = alive.length > 0 ? Math.max(...alive.map(s => s.score ?? 0)) : 0;
     document.getElementById('tally').innerHTML = `
-        <div><strong>${deaths.length}</strong>νεκροί</div>
-        <div><strong>${victors.length}</strong>θεοσφάχτες</div>
-        <div><strong>${topLevel}</strong>ανώτερο επίπεδο</div>
+        <div><strong>${deaths.length}</strong>νεκροί ${deaths.length > 0 ? `<span style="font-size:0.7em;opacity:0.7">(${formatScore(deathMaxScore)})</span>` : ''}</div>
+        <div><strong>${victors.length}</strong>θεοσφάχτες ${victors.length > 0 ? `<span style="font-size:0.7em;opacity:0.7">(${formatScore(victorMaxScore)})</span>` : ''}</div>
+        <div><strong>${alive.length}</strong>ζωντανοί ${alive.length > 0 ? `<span style="font-size:0.7em;opacity:0.7">(${formatScore(aliveMaxScore)})</span>` : ''}</div>
+        <div><strong>${formatScore(topScore)}</strong>μέγιστη μαγκιά</div>
     `;
 }
 
 async function load() {
     const entriesEl = document.getElementById('entries');
-    const entriesKEl = document.getElementById('entries-k');
     const errEl = document.getElementById('err');
 
     let client;
@@ -352,9 +400,8 @@ async function load() {
     const { data, error } = await client
         .from('ironman_deaths')
         .select('*')
+        .order('score', { ascending: false })
         .order('level', { ascending: false })
-        .order('magkia', { ascending: false })
-        .order('turns', { ascending: true })
         .order('death_date', { ascending: false });
 
     if (error) {
@@ -374,14 +421,21 @@ async function load() {
         return;
     }
 
+    deduped.sort((a, b) => (b.score ?? 0) - (a.score ?? 0) || (b.level ?? 0) - (a.level ?? 0));
+
     const isK = n => n.name.startsWith('[K]') || n.name.startsWith('[Κ]');
-    normalData = deduped.filter(s => !isK(s));
-    kData = deduped.filter(s => isK(s));
+    const isIronman = n => n.ironman === true;
+    normalData = deduped.filter(s => !isIronman(s) && !isK(s));
+    ironmenData = deduped.filter(s => isIronman(s) && !isK(s));
+    kNormalData = deduped.filter(s => !isIronman(s) && isK(s));
+    kIronmenData = deduped.filter(s => isIronman(s) && isK(s));
 
     renderTabContent(normalData, entriesEl);
-    renderTabContent(kData, entriesKEl);
+    renderTabContent(ironmenData, document.getElementById('entries-ironmen'));
+    renderTabContent(kNormalData, document.getElementById('entries-k-normal'));
+    renderTabContent(kIronmenData, document.getElementById('entries-k-ironmen'));
 
-    switchTab('general');
+    switchTab('normal');
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
@@ -400,10 +454,9 @@ function deduplicate(arr) {
         const name = entry.name;
         if (seen.has(name)) {
             const existing = seen.get(name);
-            const replace = entry.level > existing.level ||
-                (entry.level === existing.level && (entry.magkia ?? 0) > (existing.magkia ?? 0)) ||
-                (entry.level === existing.level && (entry.magkia ?? 0) === (existing.magkia ?? 0) && (entry.turns ?? Infinity) < (existing.turns ?? Infinity)) ||
-                (entry.level === existing.level && (entry.magkia ?? 0) === (existing.magkia ?? 0) && (entry.turns ?? Infinity) === (existing.turns ?? Infinity) && new Date(entry.death_date) > new Date(existing.death_date));
+            const replace = (entry.score ?? 0) > (existing.score ?? 0) ||
+                ((entry.score ?? 0) === (existing.score ?? 0) && entry.level > existing.level) ||
+                ((entry.score ?? 0) === (existing.score ?? 0) && entry.level === existing.level && new Date(entry.death_date) > new Date(existing.death_date));
             if (replace) {
                 seen.set(name, entry);
             }
