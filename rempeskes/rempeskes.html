@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v302</title>
+    <title>Ρεμπεσκές v303</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -6105,7 +6105,7 @@ if ('serviceWorker' in navigator) {
                 if (r.ironman) entryScore *= 2;
             }
 
-            console.log('[Upload] name:', name, 'newScore:', entryScore);
+            console.log('[Upload] name:', name, 'newScore:', entryScore, 'killer:', r.killer || '(alive)');
 
             const { data: existingRows, error: selErr } = await sbClient
                 .from('ironman_deaths')
@@ -6125,16 +6125,9 @@ if ('serviceWorker' in navigator) {
                 continue;
             }
 
-            if (existingList.length > 0) {
-                console.log('[Upload] Deleting', existingList.length, 'old rows for', name);
-                const { data: delData, error: delErr } = await sbClient.from('ironman_deaths').delete().eq('name', name);
-                if (delErr) { console.error('[Upload] Delete error:', delErr); }
-                else { console.log('[Upload] Delete result:', delData); }
-            }
-
             const { data: insData, error: ie } = await sbClient
                 .from('ironman_deaths')
-                .insert({
+                .upsert({
                     name, level: entryLevel,
                     depth: r.depth,
                     killer: r.killer,
@@ -6146,7 +6139,7 @@ if ('serviceWorker' in navigator) {
                     victory: !!r.victory,
                     score: entryScore,
                     ironman: !!r.ironman
-                });
+                }, { onConflict: 'name' });
 
             if (ie) { console.error('[Upload] Insert error:', ie); dbErrors = ie.message || 'insert failed'; }
             else { console.log('[Upload] Insert OK:', insData); uploaded++; }
