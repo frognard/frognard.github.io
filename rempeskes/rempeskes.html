@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v290</title>
+    <title>Ρεμπεσκές v301</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -124,6 +124,36 @@
             color:white;
             text-shadow:1px 1px 2px #000;
             pointer-events:none;
+        }
+
+        .xp-bar-detail{
+            position:absolute;
+            top:0;
+            left:6px;
+            height:100%;
+            display:flex;
+            align-items:center;
+            font-size:9px;
+            font-weight:bold;
+            color:white;
+            text-shadow:1px 1px 2px #000;
+            pointer-events:none;
+            white-space:nowrap;
+        }
+
+        .xp-bar-required{
+            position:absolute;
+            top:0;
+            right:6px;
+            height:100%;
+            display:flex;
+            align-items:center;
+            font-size:9px;
+            font-weight:bold;
+            color:white;
+            text-shadow:1px 1px 2px #000;
+            pointer-events:none;
+            white-space:nowrap;
         }
 
         #p-xp-bar {
@@ -336,7 +366,7 @@
 }
 
 /* Ξεχωριστό χρώμα για τα μηνύματα ΜΑΓΚΙΑ/ΔΙΜΑΓΚΙΑ/... — άλλαξε εδώ το χρώμα, χωρίς να πειράξεις το θρυλικό drop */
-.legendary-popup.magkia-popup {
+.legendary-popup.risk-popup {
     color: #ffffff;
     text-shadow:
         0 0 10px #ffffff,
@@ -479,7 +509,7 @@
         .log-konanos { color: #ffffff; font-weight: bold; }
         .log-streak-silver { color: #e0e6eb; font-weight: bold; }
         .log-streak-gold { color: var(--accent-gold); font-weight: bold; text-shadow: 0 0 6px rgba(255,215,0,0.5); }
-        .log-magkia { color: #ffffff; font-weight: bold; }
+        .log-risk { color: #ffffff; font-weight: bold; }
 
     .area-select-container {
     margin-top: 15px;
@@ -630,19 +660,6 @@
             font-size: 0.75rem;
             background-color: #1a1a1a;
             color: #2d66a7;
-        }
-
-        .btn-psofo {
-            border-color: #9b69b3; 
-            padding: 4px 8px; 
-            font-size: 0.75rem;
-            background-color: #1a1a1a;
-            color: #9b69b3;
-        }
-
-        .btn-psofo:hover {
-            background-color: #2d66a7 !important;
-            color: #fff;
         }
 
         .btn-showStats:hover {
@@ -993,7 +1010,9 @@ body {
         <div class="xp-wrapper-area" id="xp-parent">
             <div class="xp-bar-container" id="xp-bar-container">
                 <div id="p-xp-bar"></div>
+                <div id="p-xp-detail" class="xp-bar-detail">0</div>
                 <div id="p-xp-percent" class="xp-bar-text">0.0%</div>
+                <div id="p-xp-required" class="xp-bar-required">0</div>
             </div>
         </div>
 
@@ -1001,7 +1020,7 @@ body {
 
 <div class="stats-grid" id="stats-summary" style="grid-template-columns: 1.0fr 1fr;">
     <div class="stat-row">
-        <div><b>XP:</b> <span id="p-xp" class="xp-value">0</span> / <span id="p-next-xp" class="xp-value">50</span></div>
+        <div><b>Μαγκιά:</b> <span id="p-score" class="xp-value">0</span></div>
     </div>
     <div class="stat-row" id="stat-gold-box" style="display:flex;justify-content:flex-end;">
         <div><b>Χρυσάφι:</b> <span id="p-gold" class="gold">0</span></div>
@@ -1135,10 +1154,6 @@ body {
 
     <button class = "btn-showStats" onclick="showStats()">
         %
-    </button>
-
-    <button class = "btn-psofo" onclick="showIronmanHighscores()">
-        Ψ
     </button>
 
     <button class = "btn-showRules" onclick="showRules()">
@@ -1338,6 +1353,34 @@ function formatNumber(num) {
     return Number(num).toLocaleString('el-GR');
 }
 
+// ΣΚΟΡ: lvl^2*5 x (5 + risk*riskWeight) x 1/(1 + deaths*deathWeight)
+// risk = player.risk (μέσος όρος ρίσκου/μαγκιάς σε όλους τους φόνους της καριέρας)
+// x2 αν έχει νικήσει τον Θεό Κόνανο, x2 αν είναι Ironman (πολλαπλασιαστικά μεταξύ τους)
+const SCORE_RISK_WEIGHT = 2;
+const SCORE_DEATH_WEIGHT = 0.05;
+const SCORE_CONANOS_MULTIPLIER = 2;
+const SCORE_IRONMAN_MULTIPLIER = 2;
+function computeScore() {
+    let level = player.level || 0;
+    // αν νίκησε τον Κόνανο κάτω απο level 100, μετράει το εικονικό (boosted) level αντί του πραγματικού
+    if (typeof player.scoreEffectiveLevel === 'number' && player.scoreEffectiveLevel > level) {
+        level = player.scoreEffectiveLevel;
+    }
+    const risk = player.risk || 0;
+    const deaths = player.deaths || 0;
+
+    const levelPower = Math.pow(level, 2) * 5;
+    const riskFactor = Math.max(0, 5 + risk * SCORE_RISK_WEIGHT);
+    const deathFactor = player.ironman ? 1 : (1 / (1 + deaths * SCORE_DEATH_WEIGHT));
+
+    let score = levelPower * riskFactor * deathFactor;
+
+    if (player.hasBeatenConanos) score *= SCORE_CONANOS_MULTIPLIER;
+    if (player.ironman) score *= SCORE_IRONMAN_MULTIPLIER;
+
+    return Math.round(score);
+}
+
 // Ανιχνεύει κινητό/tablet (Android/iOS), ΟΧΙ Windows — ρητή εξαίρεση, ώστε ακόμα
 // και το Chrome app (PWA) πάνω σε Windows να μετράει σαν desktop, όχι σαν κινητό.
 function isMobileDevice() {
@@ -1377,65 +1420,38 @@ function showStats() {
    // logMessage(`  ↳ από κόκκινα (Άγρια): ${formatNumber(player.deathsWeapon || 0)}`,"stats");
    // logMessage(`  ↳ από μπλε (Θωρακισμένα): ${formatNumber(player.deathsArmor || 0)}`,"stats");
    // logMessage(`  ↳ από μωβ (Μαγικά): ${formatNumber(player.deathsMagic || 0)}`,"stats");
-    logMessage(`Χρυσάφι που γλεντήθηκε: ${formatNumber(player.goldSpent)}`,"stats");
-    logMessage(`Χρυσάφι που χάθηκε: ${formatNumber(player.goldLost)}`,"stats");
+  //  logMessage(`Χρυσάφι που γλεντήθηκε: ${formatNumber(player.goldSpent)}`,"stats");
+  //  logMessage(`Χρυσάφι που χάθηκε: ${formatNumber(player.goldLost)}`,"stats");
     logMessage(`Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`,"stats");
     logMessage(`Γύροι: ${formatNumber(player.activeTime)}`,"stats");
-    logMessage(`Μαγκιά: ${(player.magkia || 0) > 0 ? '+' : ''}${(player.magkia || 0).toFixed(3)}`,"stats");
-    // logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
+    logMessage(`Ρίσκο: ${(player.risk || 0) > 0 ? '+' : ''}${(player.risk || 0).toFixed(3)}`,"stats");
+    logMessage(`Μαγκιά: ${formatNumber(computeScore())}`,"stats");
+     // logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
     logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
+    logMessage("");
+    logMessageHTML(`<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε Hi-Scores</a>`, "stats");
     
 }
 
-function uploadPsofologioToCloud() {
-    const scores = getIronmanHighscores();
+function uploadCurrentPlayerToHiScores() {
+    logMessage('Ανέβασμα στο Hi-Scores...', 'system');
+    const record = {
+        name: player.name,
+        level: player.level,
+        depth: currentSelectedLevel || player.level,
+        killer: "",
+        weapon: player.weapon.power,
+        armor: player.armor.power,
+        magic: player.magic.power,
+        turns: player.activeTime || 0,
+        date: Date.now(),
+        victory: player.hasBeatenConanos || false,
+        ironman: player.ironman || false,
+        precomputedScore: computeScore()
+    };
     if (typeof syncIronmanRecordsToCloud === 'function') {
-        syncIronmanRecordsToCloud(scores);
+        syncIronmanRecordsToCloud([record]);
     }
-}
-
-function clearIronmanHighscores() {
-    if (!confirm("Σίγουρα θέλεις να διαγράψεις το Ψοφολόγιο των Ironmen;")) return;
-    try {
-        localStorage.removeItem('rempeskes_ironman_highscores');
-        logMessage("Το Ψοφολόγιο των Ironmen διαγράφηκε.", 'system');
-    } catch (e) {
-        console.error('clear ironman highscores failed:', e);
-    }
-    // ξαναφτιάχνουμε το modal ώστε να δείξει την άδεια λίστα
-    showIronmanHighscores();
-}
-
-function showIronmanHighscores() {
-    const scores = getIronmanHighscores();
-
-    const body = openInfoModal("Ψοφολόγιον");
-
-    appendInfoLine(body, "");
-    if (scores.length === 0) {
-        appendInfoLine(body, "Δεν υπάρχουν ακόμα νεκροί Ironmen.", "psof");
-        appendInfoLine(body, "");
-    } else {
-        scores.forEach(s => {
-            // Μετατροπή της ημερομηνίας σε μορφή ΗΗ/ΜΜ/ΕΕΕΕ
-            const formattedDate = new Date(s.date).toLocaleDateString('el-GR');
-
-            if (s.victory) {
-                appendInfoLine(body, `★ ${s.name}, επίπεδο ${s.level}, μαγκιά: ${(s.magkia ?? 0).toFixed(3)}, (${s.weapon}/${s.armor}/${s.magic}), ΝΙΚΗΣΕ τον Θεό Κόνανο στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, σε ${formatNumber(s.turns || 0)} γύρους! [${formattedDate}]`, "psof-victory");
-            } else {
-                appendInfoLine(body, `${s.name}, επίπεδο ${s.level}, μαγκιά: ${(s.magkia ?? 0).toFixed(3)}, (${s.weapon}/${s.armor}/${s.magic}), σκοτώθηκε στο ${depthNames[s.depth - 1] || ('Βάθος ' + s.depth)}, από ${s.killer}, το γύρο ${formatNumber(s.turns || 0)}. [${formattedDate}]`, "psof");
-            }
-            appendInfoLine(body, ``);
-        });
-
-    }
-    appendInfoLineHTML(body, `<a href="#" onclick="clearIronmanHighscores(); return false;" style="color: #cc3333; text-decoration: underline; cursor: pointer;">Διαγραφή Ψοφολογίου Ironmen</a>`,
-        "psof");
-    appendInfoLine(body, "");
-    appendInfoLineHTML(body, `<a href="https://frognard.github.io/rempeskes/psofologio.html" target="_blank" rel="noopener" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Μέγα Ψοφολόγιον</a>`, "psof");
-    appendInfoLineHTML(body, `<a href="#" onclick="uploadPsofologioToCloud(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε Μέγα Ψοφολόγιο</a>`,
-        "psof");
-
 }
 
 
@@ -2772,7 +2788,7 @@ const zaladouras = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Έκαν' το σκιτάλι κώλο, κι έχεσε τον κόσμο όλο!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως στο εκατοστό βάθος του λαβυρίνθου κάθεται φωλιασμένος ο Θεός Κόνανος, γελαστός και παγκάκιστος, ο μισός παγωμένος κι ο μισός πυρωμένος, με κέρατα, με δόντια, με νύχια ματωμένα, με τα πλεμόνια του απ'όξω από το στήθος!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''ΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑ!!!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όσο πιο μάγκας είσαι, τόσο πιο τυχερός εισαι!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όσο πιο πολυ ρισκάρεις και όσο σπανιότερα ψοφάς, τόσο πιο μάγκας εισαι!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως αν κάνεις πολλούς φόνους σερί σε μία κατάβαση στο επίπεδό σου ή βαθύτερα, κερδίζεις περισσότερα XP!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Παλουκώσου λιγάκι, κι άκουσε...''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όταν ψοφολογάς, τα αντικείμενά σου φθείρονται!''" ,
@@ -3069,7 +3085,7 @@ function rollItemTier(monsterLevel) {
             legendaryDrops: 0,
             bestKillStreak: 0,
             hasBeatenConanos: false,
-            magkia: 0, // τώρα: μέσος όρος (επίπεδο τέρατος - επίπεδο παίκτη) σε όλους τους φόνους της καριέρας — δείχνει πόσο ρισκάρει ο παίκτης
+            risk: 0, // τώρα: μέσος όρος (επίπεδο τέρατος - επίπεδο παίκτη) σε όλους τους φόνους της καριέρας — δείχνει πόσο ρισκάρει ο παίκτης
             magkiaKillCount: 0, // πόσοι φόνοι έχουν μετρήσει στον παραπάνω μέσο όρο
             magkiaEarnedDepths: [], // (legacy, δεν χρησιμοποιείται πια) ποια βάθη είχαν δώσει μαγκιά με τον παλιό μηχανισμό σερί
         weapon: { name: "Ράβδος", power: 1, legendary: false },
@@ -3386,11 +3402,11 @@ function awardMagkiaForDepth(depth) {
     if (points <= 0) return; // ασφάλεια, δεν θα έπρεπε να συμβεί αφού το σερί είναι ήδη depthAppropriate
 
     player.magkiaEarnedDepths.push(depth);
-    player.magkia += points;
+    player.risk += points;
 
     const label = getMagkiaLabel(points);
-    logMessage(`${label} Πρώτο χρυσό σερί στο βάθος ${depth} → +${points} μαγκιά!`, 'magkia');
-    showAnnouncementPopup(label, 'magkia-popup');
+    logMessage(`${label} Πρώτο χρυσό σερί στο βάθος ${depth} → +${points} μαγκιά!`, 'risk');
+    showAnnouncementPopup(label, 'risk-popup');
     levelUpSound();
 
     refreshAreaSelectorAppearance();
@@ -3511,7 +3527,7 @@ function loadGame() {
             player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
             if (!player.name) player.name = "Ρεμπεσκές";
             if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
-            if (typeof player.magkia !== 'number') player.magkia = 0;
+            if (typeof player.risk !== 'number') player.risk = 0;
             if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
             player.maxUnlockedLevel = 100;
 
@@ -3628,17 +3644,6 @@ function resetGame() {
     }
 }
 
-function saveIronmanHighscore(record) {
-    let scores = [];
-    try {
-        scores = JSON.parse(localStorage.getItem('rempeskes_ironman_highscores')) || [];
-    } catch (e) {
-        scores = [];
-    }
-    scores.push(record);
-    localStorage.setItem('rempeskes_ironman_highscores', JSON.stringify(scores));
-}
-
 function confirmCharacterCreation() {
     const nameInput = document.getElementById('char-name-input');
     const errorEl = document.getElementById('char-name-error');
@@ -3696,21 +3701,6 @@ function confirmCharacterCreation() {
     updateUI();
 }
 
-function getIronmanHighscores() {
-    let scores = [];
-    try {
-        scores = JSON.parse(localStorage.getItem('rempeskes_ironman_highscores')) || [];
-    } catch (e) {
-        scores = [];
-    }
-    return scores.sort((a, b) => {
-        if (b.level !== a.level) return b.level - a.level;
-        if ((b.magkia ?? 0) !== (a.magkia ?? 0)) return (b.magkia ?? 0) - (a.magkia ?? 0);
-        if ((a.turns ?? Infinity) !== (b.turns ?? Infinity)) return (a.turns ?? Infinity) - (b.turns ?? Infinity);
-        return new Date(b.date) - new Date(a.date);
-    });
-}
-
 
 function exportSave() {
     const exportData = {
@@ -3749,7 +3739,7 @@ function importSave() {
         player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
         if (!player.name) player.name = "Ρεμπεσκές";
         if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
-        if (typeof player.magkia !== 'number') player.magkia = 0;
+        if (typeof player.risk !== 'number') player.risk = 0;
         if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
         player.maxUnlockedLevel = 100;
         player.nextXp = calculateNextXpRequirement(player.level);
@@ -3944,13 +3934,14 @@ function refreshAreaSelectorAppearance() {
     document.getElementById('p-arm-bonus').innerText = `T${player.armor.power}`;
     document.getElementById('p-mag-bonus').innerText = `T${player.magic.power}`;
     if (player.level >= 100) {
-        document.getElementById('p-xp').innerText = '*';
-        document.getElementById('p-next-xp').innerText = '*';
+        document.getElementById('p-xp-detail').innerText = '*';
+        document.getElementById('p-xp-required').innerText = '';
     } else {
-        document.getElementById('p-xp').innerText = formatNumber(player.xp);
-        document.getElementById('p-next-xp').innerText = formatNumber(player.nextXp);
+        document.getElementById('p-xp-detail').innerText = formatNumber(player.xp);
+        document.getElementById('p-xp-required').innerText = formatNumber(player.nextXp);
     }
     document.getElementById('p-gold').innerText = formatNumber(player.gold);
+    document.getElementById('p-score').innerText = formatNumber(computeScore());
     
     
     
@@ -4472,9 +4463,9 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     if (areaType === AREA_TYPES.RICH) legendaryChance = legendaryChance * legendaryRichMultiplier;
     else if (areaType === AREA_TYPES.POOR) legendaryChance = legendaryChance * legendaryPoorMultiplier;
 
-    // Bonus magkias sto legendary chance. me 100 magkia exeis diplasio chance
+    // Bonus magkias sto legendary chance. me 100 risk exeis diplasio chance
     // ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΟ: η μαγκιά δεν επηρεάζει πια το legendary chance (η μαγκιά είναι πλέον ενδεικτικό ρίσκου, όχι bonus)
-    // legendaryChance *= (1 + (player.magkia || 0) * 0.01);
+    // legendaryChance *= (1 + (player.risk || 0) * 0.01);
     
 
     const isLegendary = Math.random() < legendaryChance;
@@ -5038,13 +5029,13 @@ function showLegendaryPopup() {
 }
 
 // Γενική εκδοχή του θρυλικού popup — ίδια εμφάνιση/διάρκεια, διαφορετικό κείμενο κάθε φορά.
-// styleClass (προαιρετικό): π.χ. 'magkia-popup' για διαφορετικό χρώμα από το θρυλικό drop.
+// styleClass (προαιρετικό): π.χ. 'risk-popup' για διαφορετικό χρώμα από το θρυλικό drop.
 function showAnnouncementPopup(text, styleClass) {
     const popup = document.getElementById('legendary-popup');
     if (!popup) return;
 
     popup.textContent = text;
-    popup.classList.remove('magkia-popup');
+    popup.classList.remove('risk-popup');
     if (styleClass) popup.classList.add(styleClass);
     popup.classList.remove('hidden');
     popup.classList.add('show');
@@ -5075,31 +5066,27 @@ function showAnnouncementPopup(text, styleClass) {
             if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
             player.magkiaKillCount++;
             const magkiaLevelDiff = monster.level - player.level;
-            player.magkia += (magkiaLevelDiff - player.magkia) / player.magkiaKillCount;
+            player.risk += (magkiaLevelDiff - player.risk) / player.magkiaKillCount;
             
             // --- ΕΛΕΓΧΟΣ ΓΙΑ ΘΕΟ ΚΟΝΑΝΟ ---
          if (monster && monster.name === "Θεός Κόνανος") {
             // Όλα τα παρακάτω εκτελούνται ΜΟΝΟ αν είναι η πρώτη φορά που νικιέται ο Θεός
             if (!player.hasBeatenConanos) {
                 player.hasBeatenConanos = true;
+
+                // --- ΣΚΟΡ: εικονικό level για τον υπολογισμό του σκορ, αν νικήθηκε ο Κόνανος κάτω απο level 100 ---
+                // πχ level 92 → μετράει σαν level 100 + (100-92) = 108 στο σκορ
+                if (player.level < 100) {
+                    player.scoreEffectiveLevel = 100 + (100 - player.level);
+                } else {
+                    player.scoreEffectiveLevel = player.level;
+                }
                 
                // logMessage(`Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΠΕΘΑΝΕ! Το παιχνίδι νικήθηκε! Αιώνια δόξα στον ${player.name}! Απο δω και πέρα θα είναι γνωστός ως ΘΕΟΣΦΑΧΤΗΣ.`, 'victory');
 
-                // --- Καταχώρηση της ΝΙΚΗΣ στο Ψοφολόγιο (μόνο για Ironman, ίδια διαδικασία με τους θανάτους) ---
+                // --- Καταχώρηση της ΝΙΚΗΣ στο Ψοφολόγιο (μόνο για Ironman) ---
                 if (player.ironman) {
-                    saveIronmanHighscore({
-                        name: player.name,
-                        level: player.level,
-                        magkia: player.magkia,
-                        depth: currentSelectedLevel,
-                        killer: "Θεός Κόνανος",
-                        weapon: player.weapon.power,
-                        armor: player.armor.power,
-                        magic: player.magic.power,
-                        turns: player.activeTime,
-                        date: Date.now(),
-                        victory: true
-                    });
+                    // upload μόνο μέσω manual button
                 }
                 
                 if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
@@ -5372,18 +5359,6 @@ function applyDefeatPenalties() {
         const killerName = getMonsterDisplayName(monster);
         const deathDepth = monster.level;
         logMessage(`ΥΣΤΑΤΗ ΠΝΟΗ: ${player.name}, επίπεδο ${player.level}, σκοτώθηκε στο βάθος ${deathDepth} από ${killerName}.`, 'monster');
-        saveIronmanHighscore({
-            name: player.name,
-            level: player.level,
-            magkia: player.magkia,
-            depth: deathDepth,
-            killer: killerName,
-            weapon: player.weapon.power,
-            armor: player.armor.power,
-            magic: player.magic.power,
-            turns: player.activeTime,
-            date: Date.now()
-        });
     }
 
     if (player[lostSlot].power > 1) {
@@ -6064,33 +6039,61 @@ if ('serviceWorker' in navigator) {
     }
 
     window.syncIronmanRecordsToCloud = async function (records) {
-        if (!sbClient || !records || records.length === 0) return;
+        if (!sbClient || !records || records.length === 0) {
+            logMessage('Αποτυχία σύνδεσης με το database.', 'system');
+            return;
+        }
 
         let uploaded = 0;
         let skipped = 0;
 
         for (const r of records) {
             const name = r.name;
-            const level = r.level;
 
-            const { data: existing } = await sbClient
-                .from('ironman_deaths')
-                .select('level, death_date')
-                .eq('name', name)
-                .maybeSingle();
-
-            if (existing) {
-                const newDate = new Date(r.date);
-                const existDate = new Date(existing.death_date);
-                if (level < existing.level || (level === existing.level && newDate <= existDate)) { skipped++; continue; }
-                await sbClient.from('ironman_deaths').delete().eq('name', name);
+            const entryLevel = r.level || 1;
+            let entryScore;
+            if (typeof r.precomputedScore === 'number') {
+                entryScore = r.precomputedScore;
+            } else {
+                const lp = Math.pow(entryLevel, 2) * 5;
+                const rf = Math.max(0, 5 + (r.risk || 0) * 2);
+                const df = 1 / (1 + 1 * 0.05);
+                entryScore = Math.round(lp * rf * df);
+                if (r.victory) entryScore *= 2;
+                if (r.ironman) entryScore *= 2;
             }
 
-            const { error: ie } = await sbClient
+            console.log('[Upload] name:', name, 'newScore:', entryScore);
+
+            const { data: existingRows, error: selErr } = await sbClient
+                .from('ironman_deaths')
+                .select('score')
+                .eq('name', name);
+
+            if (selErr) { console.error('[Upload] Select error:', selErr); }
+
+            const existingList = existingRows || [];
+            const bestExistScore = existingList.reduce((max, row) => Math.max(max, row.score ?? 0), -1);
+
+            console.log('[Upload] existingCount:', existingList.length, 'bestExistScore:', bestExistScore);
+
+            if (bestExistScore >= 0 && entryScore <= bestExistScore) {
+                console.log('[Upload] SKIPPED — not better than existing');
+                skipped++;
+                continue;
+            }
+
+            if (existingList.length > 0) {
+                console.log('[Upload] Deleting', existingList.length, 'old rows for', name);
+                const { data: delData, error: delErr } = await sbClient.from('ironman_deaths').delete().eq('name', name);
+                if (delErr) { console.error('[Upload] Delete error:', delErr); }
+                else { console.log('[Upload] Delete result:', delData); }
+            }
+
+            const { data: insData, error: ie } = await sbClient
                 .from('ironman_deaths')
                 .insert({
-                    name, level,
-                    magkia: r.magkia || 0,
+                    name, level: entryLevel,
                     depth: r.depth,
                     killer: r.killer,
                     weapon: r.weapon,
@@ -6098,15 +6101,19 @@ if ('serviceWorker' in navigator) {
                     magic: r.magic,
                     turns: r.turns || 0,
                     death_date: new Date(r.date).toISOString(),
-                    victory: !!r.victory
+                    victory: !!r.victory,
+                    score: entryScore,
+                    ironman: !!r.ironman
                 });
 
-            if (ie) { console.error('Insert error for', name, ie); }
-            else { uploaded++; }
+            if (ie) { console.error('[Upload] Insert error:', ie); }
+            else { console.log('[Upload] Insert OK:', insData); uploaded++; }
         }
 
         if (uploaded > 0 || skipped > 0) {
-            logMessage(`Το Ψοφολόγιο ανέβηκε στο online database (${uploaded} upload, ${skipped} παραλείψεις).`, 'system');
+            logMessage(`O Χαρακτήρας ανέβηκε στο online database (${uploaded} upload, ${skipped} παραλείψεις).`, 'system');
+        } else {
+            logMessage('Κάτι πήγε στραβά. Δοκίμασε ξανά.', 'system');
         }
     };
 })();
