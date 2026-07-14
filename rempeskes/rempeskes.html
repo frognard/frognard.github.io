@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v301</title>
+    <title>Ρεμπεσκές v302</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1452,8 +1452,8 @@ function uploadCurrentPlayerToHiScores() {
     const record = {
         name: player.name,
         level: player.level,
-        depth: currentSelectedLevel || player.level,
-        killer: "",
+        depth: Math.round(currentSelectedLevel) || player.level,
+        killer: (player.ironmanDead && player.lastKillerName) ? player.lastKillerName : "",
         weapon: player.weapon.power,
         armor: player.armor.power,
         magic: player.magic.power,
@@ -3102,6 +3102,7 @@ function rollItemTier(monsterLevel) {
             totalXpAtLevel100: 0,
             bestKillStreak: 0,
             hasBeatenConanos: false,
+            lastKillerName: "",
             risk: 0, // τώρα: μέσος όρος (επίπεδο τέρατος - επίπεδο παίκτη) σε όλους τους φόνους της καριέρας — δείχνει πόσο ρισκάρει ο παίκτης
             magkiaKillCount: 0, // πόσοι φόνοι έχουν μετρήσει στον παραπάνω μέσο όρο
             magkiaEarnedDepths: [], // (legacy, δεν χρησιμοποιείται πια) ποια βάθη είχαν δώσει μαγκιά με τον παλιό μηχανισμό σερί
@@ -5395,6 +5396,7 @@ function applyDefeatPenalties() {
     if (player.ironman) {
         player.ironmanDead = true;
         const killerName = getMonsterDisplayName(monster);
+        player.lastKillerName = killerName;
         const deathDepth = monster.level;
         logMessage(`ΥΣΤΑΤΗ ΠΝΟΗ: ${player.name}, επίπεδο ${player.level}, σκοτώθηκε στο βάθος ${deathDepth} από ${killerName}.`, 'monster');
     }
@@ -6085,6 +6087,7 @@ if ('serviceWorker' in navigator) {
 
         let uploaded = 0;
         let skipped = 0;
+        let dbErrors = false;
 
         for (const r of records) {
             const name = r.name;
@@ -6109,14 +6112,14 @@ if ('serviceWorker' in navigator) {
                 .select('score')
                 .eq('name', name);
 
-            if (selErr) { console.error('[Upload] Select error:', selErr); }
+            if (selErr) { console.error('[Upload] Select error:', selErr); dbErrors = selErr.message || 'select failed'; }
 
             const existingList = existingRows || [];
             const bestExistScore = existingList.reduce((max, row) => Math.max(max, row.score ?? 0), -1);
 
             console.log('[Upload] existingCount:', existingList.length, 'bestExistScore:', bestExistScore);
 
-            if (bestExistScore >= 0 && entryScore <= bestExistScore) {
+            if (bestExistScore >= 0 && entryScore <= bestExistScore && !r.killer) {
                 console.log('[Upload] SKIPPED — not better than existing');
                 skipped++;
                 continue;
@@ -6145,14 +6148,16 @@ if ('serviceWorker' in navigator) {
                     ironman: !!r.ironman
                 });
 
-            if (ie) { console.error('[Upload] Insert error:', ie); }
+            if (ie) { console.error('[Upload] Insert error:', ie); dbErrors = ie.message || 'insert failed'; }
             else { console.log('[Upload] Insert OK:', insData); uploaded++; }
         }
 
         if (uploaded > 0 || skipped > 0) {
             logMessage(`O Χαρακτήρας ανέβηκε στο online database (${uploaded} upload, ${skipped} παραλείψεις).`, 'system');
+        } else if (dbErrors) {
+            logMessage(`Αποτυχία σύνδεσης: ${dbErrors}`, 'system');
         } else {
-            logMessage('Κάτι πήγε στραβά. Δοκίμασε ξανά.', 'system');
+            logMessage('Το score δεν είναι υψηλότερο από το υπάρχον. Δεν ανέβηκε.', 'system');
         }
     };
 })();
