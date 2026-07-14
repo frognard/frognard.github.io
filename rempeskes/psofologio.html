@@ -315,7 +315,7 @@ function renderEntry(s, i, isVictory) {
     const isAlive = !s.killer;
     let detailLine;
     if (isVictory) {
-        detailLine = `Νίκησε τον θεό Κόνανο <em>${escapeHtml(s.killer)}</em> στο ${escapeHtml(depthLabel(s.depth))} &middot; ${formattedDate}`;
+        detailLine = `Νίκησε τον θεό Κόνανο στο ${escapeHtml(depthLabel(s.depth))} &middot; ${formattedDate}`;
     } else if (isAlive) {
         detailLine = `Ζωντανός στο ${escapeHtml(depthLabel(s.depth))} &middot; ${formattedDate}`;
     } else {
