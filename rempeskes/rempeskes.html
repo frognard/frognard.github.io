@@ -1353,27 +1353,24 @@ function formatNumber(num) {
     return Number(num).toLocaleString('el-GR');
 }
 
-// ΣΚΟΡ: lvl^2*5 x (5 + risk*riskWeight) x 1/(1 + deaths*deathWeight)
-// risk = player.risk (μέσος όρος ρίσκου/μαγκιάς σε όλους τους φόνους της καριέρας)
-// x2 αν έχει νικήσει τον Θεό Κόνανο, x2 αν είναι Ironman (πολλαπλασιαστικά μεταξύ τους)
+// ΣΚΟΡ: totalXpGained/100 x riskFactor x deathFactor x turnFactor
+// x2 αν έχει νικήσει τον Θεό Κόνανο, x2 αν είναι Ironman
 const SCORE_RISK_WEIGHT = 2;
 const SCORE_DEATH_WEIGHT = 0.05;
 const SCORE_CONANOS_MULTIPLIER = 2;
 const SCORE_IRONMAN_MULTIPLIER = 2;
 function computeScore() {
-    let level = player.level || 0;
-    // αν νίκησε τον Κόνανο κάτω απο level 100, μετράει το εικονικό (boosted) level αντί του πραγματικού
-    if (typeof player.scoreEffectiveLevel === 'number' && player.scoreEffectiveLevel > level) {
-        level = player.scoreEffectiveLevel;
-    }
+    const totalXp = player.totalXpGained || 0;
     const risk = player.risk || 0;
     const deaths = player.deaths || 0;
+    const turns = player.activeTime || 0;
 
-    const levelPower = Math.pow(level, 2) * 5;
+    const xpPower = totalXp / 100;
     const riskFactor = Math.max(0, 5 + risk * SCORE_RISK_WEIGHT);
     const deathFactor = player.ironman ? 1 : (1 / (1 + deaths * SCORE_DEATH_WEIGHT));
+    const turnFactor = 1 / (1 + Math.pow(turns / 80000, 1.8));
 
-    let score = levelPower * riskFactor * deathFactor;
+    let score = xpPower * riskFactor * deathFactor * turnFactor;
 
     if (player.hasBeatenConanos) score *= SCORE_CONANOS_MULTIPLIER;
     if (player.ironman) score *= SCORE_IRONMAN_MULTIPLIER;
@@ -3083,6 +3080,7 @@ function rollItemTier(monsterLevel) {
             beersDrunk: 0,
             activeTime: 0, // μετράει γύρους (κάθε γύρος μάχης/regen = +1), όχι πλέον δευτερόλεπτα
             legendaryDrops: 0,
+            totalXpGained: 0,
             bestKillStreak: 0,
             hasBeatenConanos: false,
             risk: 0, // τώρα: μέσος όρος (επίπεδο τέρατος - επίπεδο παίκτη) σε όλους τους φόνους της καριέρας — δείχνει πόσο ρισκάρει ο παίκτης
@@ -3335,6 +3333,7 @@ function cashInGoldForXp() {
     const bankedGold = player.gold;
 
     player.xp += bankedGold;
+    player.totalXpGained = (player.totalXpGained || 0) + bankedGold;
     player.goldSpent += player.gold;
     player.gold = 0;
     
@@ -5149,6 +5148,7 @@ function showAnnouncementPopup(text, styleClass) {
                 );
 
             player.xp += gainedXp;
+            player.totalXpGained = (player.totalXpGained || 0) + gainedXp;
             sessionXp += gainedXp;
             logMessage(`+${formatNumber(gainedXp)} XP`, 'victory');
             createFloatingText('xp-parent', `+${formatNumber(gainedXp)} XP`, "var(--accent-gold)");
