@@ -5621,6 +5621,16 @@ function applyDefeatPenalties() {
         return;
     }
 
+    // * (Numpad) = Στατιστικά
+    if (
+        code === 'NumpadMultiply' ||
+        key === '*'
+    ) {
+        event.preventDefault();
+        showStats();
+        return;
+    }
+
     // τα παρακάτω μόνο εκτός μάχης
     if (inCombat) return;
 
