@@ -2835,7 +2835,6 @@ function getRandomItemName() {
 function getZaladourasMessages() {
 const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Το καζάνι βράζει, του κόβαλου ο κώλος γιορτάζει!''" ,
-    `Ένας ρεμπεσκές ανεβαίνει σε ένα τραπέζι, σηκώνει κάτι ψηλά και φωνάζει: ''${getRandomItemName()} σε τιμή ευκαιρίας! Μόνο ${player.gold + 1} χρυσά!''`,
     `Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''${getRandomMonsterFullName()}! Δεν έχεις ακούσει τίποτα; Λένε πως έχει κατασφάξει πολύ κόσμο στα πιο βαθιά!''`,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: Αν νιώθεις ότι το τέρας πρόκειται να σε φάει, πάτα έγκαιρα το ''ΤΡΕΞΕ''! Του χέστη η μάνα δεν έκλαψε ποτέ!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Δώσε βάση στο χρώμα του κάθε βάθους στο λαβύρινθο: δείχνει τι είδους ή τι πλήθους ονομαστά τέρατα κυκλοφορούν εκεί.''",
@@ -2886,8 +2885,16 @@ const msgs = [
     if (player.magic.legendary) legendaryItems.push(player.magic.name);
     if (legendaryItems.length > 0) {
         const item = legendaryItems[Math.floor(Math.random() * legendaryItems.length)];
-        msgs.push(`Ο Ζαλαδούρας γουρλώνει τα μάτια: ''Τι είναι αυτό; ${item};! Απίστευτο!''`);
+        msgs.push(`Ο Ζαλαδούρας γουρλώνει τα μάτια: ''Τι είναι αυτό; ${item}?!! Απίστευτο!''`);
     }
+
+    const allLegendaryNames = [
+        ...legendaryMonstersByType.weapon.map(e => e.itemName),
+        ...legendaryMonstersByType.armor.map(e => e.itemName),
+        ...legendaryMonstersByType.magic.map(e => e.itemName)
+    ];
+    const randomLegendary = allLegendaryNames[Math.floor(Math.random() * allLegendaryNames.length)];
+    msgs.push(`Ένας ρεμπεσκές ανεβαίνει στο τραπέζι, σηκώνει κάτι ψηλά και φωνάζει: ''${randomLegendary} σε τιμή ευκαιρίας! Μόνο ${player.gold + 1} χρυσά!''`);
 
     const allItems = [player.weapon, player.armor, player.magic];
     const riItems = [player.weapon, player.armor, player.magic];
