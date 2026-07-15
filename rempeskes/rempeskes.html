@@ -4205,7 +4205,7 @@ function refreshAreaSelectorAppearance() {
             btnHuntRetreat.classList.add('retreat-ready');
         }
         else {
-            btnHuntRetreat.innerHTML = "<span>Τρέξε [0]</span>";
+            btnHuntRetreat.innerHTML = "<span>Τρέξε [↵]</span>";
             btnHuntRetreat.classList.remove('skill-queued');
         }
     }
@@ -5577,29 +5577,14 @@ function applyDefeatPenalties() {
     const code = event.code;
     const key = event.key;
 
-    // ENTER = Σφάξε / Γλέντα / Υποχώρηση (όχι στο "Τρέξε")
+    // ENTER = Σφάξε / Γλέντα / Υποχώρηση
     if (
         code === 'Enter' ||
         code === 'NumpadEnter' ||
         key === 'Enter'
     ) {
-        if (inCombat && !isAttemptingRetreat) return;
         event.preventDefault();
         handleHuntRetreatClick();
-        return;
-    }
-
-    // 0 = Υποχώρηση
-    if (
-        code === 'Digit0' ||
-        code === 'Numpad0' ||
-        key === '0'
-    ) {
-        event.preventDefault();
-
-        if (inCombat)
-            toggleRetreat();
-
         return;
     }
 
