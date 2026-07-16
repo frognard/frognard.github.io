@@ -1389,7 +1389,8 @@ function computeScore() {
     const xpPower = (totalXp) ** 0.6;
     const riskFactor = Math.max(0, 6 + risk * SCORE_RISK_WEIGHT);
     const deathFactor = player.ironman ? 1 : (1 / (1 + deaths * SCORE_DEATH_WEIGHT));
-    const turnFactor = 1 / (1 + Math.pow(turns / 80000, 1.8));
+    // const turnFactor = 1 / (1 + Math.pow(turns / 80000, 1.8));  //ek8etiko me polyonimikh oura - miso sto 80k
+    const turnFactor = Math.max(0, 1 - turns / 200000);  //flat - miso sto 100k - midenizei sto 200k
 
     let score = xpPower * riskFactor * deathFactor * turnFactor;
 
