@@ -313,13 +313,14 @@ function renderEntry(s, i, isVictory) {
     const d = new Date(s.death_date);
     const formattedDate = d.toLocaleDateString('el-GR');
     const isAlive = !s.killer;
+    const turnsStr = s.turns ? formatScore(s.turns) : '';
     let detailLine;
     if (isVictory) {
-        detailLine = `Νίκησε τον θεό Κόνανο στο ${escapeHtml(depthLabel(s.depth))} &middot; ${formattedDate}`;
+        detailLine = `Νίκησε τον θεό Κόνανο στο ${escapeHtml(depthLabel(s.depth))}, το γυρο ${turnsStr} &middot; ${formattedDate}`;
     } else if (isAlive) {
-        detailLine = `Ζωντανός στο ${escapeHtml(depthLabel(s.depth))} &middot; ${formattedDate}`;
+        detailLine = `Ζωντανός στο ${escapeHtml(depthLabel(s.depth))}, γυρος ${turnsStr} &middot; ${formattedDate}`;
     } else {
-        detailLine = `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)} &middot; ${formattedDate}`;
+        detailLine = `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)}, το γυρο ${turnsStr} &middot; ${formattedDate}`;
     }
     return `
         <div class="entry${isVictory ? ' victory' : isAlive ? ' alive' : ' dead'}">
