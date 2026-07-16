@@ -885,9 +885,13 @@
 
 
 .xp-value {
-    color: #40a8ee; /* Το γαλάζιο χρώμα της επιλογής σας */
-    font-weight: bold; /* Προαιρετικό, για να ξεχωρίζουν οι αριθμοί */
+    color: #2ecc71;
+    font-weight: bold;
+    cursor: pointer;
 }
+
+.log-milestone { color: #2ecc71; }
+.log-milestone-title { color: #2ecc71; font-weight: bold; }
 
 .label-gold {
     color: #f5d142; /* χρυσό */
@@ -1033,7 +1037,7 @@ body {
 
 <div class="stats-grid" id="stats-summary" style="grid-template-columns: 1.0fr 1fr;">
     <div class="stat-row">
-        <div><b>Μαγκιά:</b> <span id="p-score" class="xp-value">0</span></div>
+        <div><b>Μαγκιά:</b> <span id="p-score" class="xp-value" onclick="showMagkiaMilestones()">0</span></div>
     </div>
     <div class="stat-row" id="stat-gold-box" style="display:flex;justify-content:flex-end;">
         <div><b>Χρυσάφι:</b> <span id="p-gold" class="gold">0</span></div>
@@ -1445,6 +1449,25 @@ function showStats() {
     logMessage("");
     logMessageHTML(`<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε online rankings</a>`, "stats");
     
+}
+
+function showMagkiaMilestones() {
+    if (!player.magkiaMilestones || player.magkiaMilestones.length === 0) {
+        logMessage("Δεν υπάρχουν ακόμη ορόσημα μαγκιάς.", 'milestone');
+        return;
+    }
+    logMessage("");
+    logMessage("Ορόσημα μαγκιάς", 'milestone-title');
+    for (const m of player.magkiaMilestones) {
+        if (m.level === 'death') {
+            logMessage(`Τελική μαγκιά: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`, 'milestone');
+        } else if (m.level === 'conanos') {
+            logMessage(`Τελική μαγκιά: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`, 'milestone');
+        } else {
+            logMessage(`Επίπεδο ${m.level}: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`, 'milestone');
+        }
+    }
+    // logMessage("");
 }
 
 function uploadCurrentPlayerToHiScores() {
@@ -2404,6 +2427,7 @@ const wildTitles = [
 "ο Σφαγέας",
 "ο Κυνηγός",
 "ο Θεριστής",
+"ο Γαμιάς",
 "ο Ξεντεριαστής",
 "ο Μουχλοφάγος",
 "ο Σπλαχνοφάγος",
@@ -2452,6 +2476,7 @@ const armoredTitles = [
 "ο Παχύδερμος",
 "ο Βράχος",
 "ο Άπιαστος",
+"ο Πετροτράχηλος",
 "ο Άνιωθος",
 "ο Ατσαλάκωτος",
 "ο Τενεκές",
@@ -2484,7 +2509,7 @@ const armoredTitles = [
 "ο Σιδηρόγναθος",
 "ο Κατάφρακτος",
 "το Κάστρο",
-"το Άλογο",
+"ο Μούλος",
 "το Αμόνι",
 "η Άλειωτη",
 "η Πλατφόρμα",
@@ -2493,6 +2518,7 @@ const armoredTitles = [
 "η Φακλάνα",
 "η Άθραυστη",
 "η Σιδερένια",
+"η Πετροκώλα",
 "η Θωρακισμένη",
 "η Άτρωτη"
 ];
@@ -3183,6 +3209,7 @@ function rollItemTier(monsterLevel) {
             risk: 0, // τώρα: μέσος όρος (επίπεδο τέρατος - επίπεδο παίκτη) σε όλους τους φόνους της καριέρας — δείχνει πόσο ρισκάρει ο παίκτης
             magkiaKillCount: 0, // πόσοι φόνοι έχουν μετρήσει στον παραπάνω μέσο όρο
             magkiaEarnedDepths: [], // (legacy, δεν χρησιμοποιείται πια) ποια βάθη είχαν δώσει μαγκιά με τον παλιό μηχανισμό σερί
+            magkiaMilestones: [],
         weapon: { name: "Ράβδος", power: 1, legendary: false },
         armor: { name: "Μανδύας", power: 1, legendary: false },
         magic: { name: "Κόκκαλο Αρουραίου", power: 1, legendary: false },
@@ -3570,6 +3597,11 @@ function checkLevelUp() {
         player.level++;
         player.xp -= player.nextXp;
 
+        if (player.level % 5 === 0) {
+            if (!player.magkiaMilestones) player.magkiaMilestones = [];
+            player.magkiaMilestones.push({ level: player.level, score: computeScore(), turns: player.activeTime || 0, deaths: player.deaths || 0 });
+        }
+
         if (player.level === 100) {
             player.totalXpAtLevel100 = player.totalXpGained || 0;
         }
@@ -3638,6 +3670,7 @@ function loadGame() {
             player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
             if (!player.name) player.name = "Ρεμπεσκές";
             if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
+            if (!Array.isArray(player.magkiaMilestones)) player.magkiaMilestones = [];
             if (typeof player.risk !== 'number') player.risk = 0;
             if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
             player.maxUnlockedLevel = 100;
@@ -3850,6 +3883,7 @@ function importSave() {
         player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
         if (!player.name) player.name = "Ρεμπεσκές";
         if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
+        if (!Array.isArray(player.magkiaMilestones)) player.magkiaMilestones = [];
         if (typeof player.risk !== 'number') player.risk = 0;
         if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
         player.maxUnlockedLevel = 100;
@@ -5199,6 +5233,8 @@ function showAnnouncementPopup(text, styleClass) {
             // Όλα τα παρακάτω εκτελούνται ΜΟΝΟ αν είναι η πρώτη φορά που νικιέται ο Θεός
             if (!player.hasBeatenConanos) {
                 player.hasBeatenConanos = true;
+                if (!player.magkiaMilestones) player.magkiaMilestones = [];
+                player.magkiaMilestones.push({ level: 'conanos', score: computeScore(), turns: player.activeTime || 0, deaths: player.deaths || 0 });
 
                 // --- ΣΚΟΡ: αν νικήθηκε ο Κόνανος κάτω από level 100, δίνεται ΑΜΕΣΑ (μόνο για το σκορ) όλο
                 // το XP που θα χρειαζόταν ακόμα ο παίκτης για να έφτανε level 100 -- χωρίς να γίνεται
@@ -5441,6 +5477,11 @@ function showAnnouncementPopup(text, styleClass) {
     }
 
 function applyDefeatPenalties() {
+    if (player.ironman) {
+        if (!player.magkiaMilestones) player.magkiaMilestones = [];
+        player.magkiaMilestones.push({ level: 'death', score: computeScore(), deathLevel: player.level, turns: player.activeTime || 0, deaths: player.deaths || 0 });
+    }
+
     generateAreaModifiers();
     refreshAreaSelectorAppearance();
     logMessage(
