@@ -5234,8 +5234,6 @@ function showAnnouncementPopup(text, styleClass) {
             // Όλα τα παρακάτω εκτελούνται ΜΟΝΟ αν είναι η πρώτη φορά που νικιέται ο Θεός
             if (!player.hasBeatenConanos) {
                 player.hasBeatenConanos = true;
-                if (!player.magkiaMilestones) player.magkiaMilestones = [];
-                player.magkiaMilestones.push({ level: 'conanos', score: computeScore(), turns: player.activeTime || 0, deaths: player.deaths || 0 });
 
                 // --- ΣΚΟΡ: αν νικήθηκε ο Κόνανος κάτω από level 100, δίνεται ΑΜΕΣΑ (μόνο για το σκορ) όλο
                 // το XP που θα χρειαζόταν ακόμα ο παίκτης για να έφτανε level 100 -- χωρίς να γίνεται
@@ -5246,6 +5244,9 @@ function showAnnouncementPopup(text, styleClass) {
                     player.conanosEarlyBonusXp = conanosBonusXp;
                     logMessage(`Ο πρόωρος θάνατος του Κόνανου σου χαρίζει ${formatNumber(conanosBonusXp)} XP για το σκορ, σαν να είχες φτάσει level 100!`, 'victory');
                 }
+
+                if (!player.magkiaMilestones) player.magkiaMilestones = [];
+                player.magkiaMilestones.push({ level: 'conanos', score: computeScore(), turns: player.activeTime || 0, deaths: player.deaths || 0 });
                 
                // logMessage(`Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΠΕΘΑΝΕ! Το παιχνίδι νικήθηκε! Αιώνια δόξα στον ${player.name}! Απο δω και πέρα θα είναι γνωστός ως ΘΕΟΣΦΑΧΤΗΣ.`, 'victory');
 
