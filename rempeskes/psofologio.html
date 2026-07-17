@@ -121,9 +121,16 @@
 
     .entry .name {
         font-family: 'Old Standard TT', serif;
-        font-size: 1.4rem; /* Αυξήθηκε από 1.25rem */
+        font-size: 1.4rem;
         color: var(--brass);
         letter-spacing: 0.5px;
+    }
+
+    .ironman-skull {
+        color: var(--wine-bright);
+        font-size: 1rem;
+        margin-right: 4px;
+        filter: drop-shadow(0 0 4px rgba(168, 57, 74, 0.5));
     }
 
     .entry .line2 {
@@ -309,7 +316,7 @@ function formatScore(n) {
     return Number(n).toLocaleString('el-GR');
 }
 
-function renderEntry(s, i, isVictory) {
+function renderEntry(s, i, isVictory, isIronman) {
     const d = new Date(s.death_date);
     const formattedDate = d.toLocaleDateString('el-GR');
     const isAlive = !s.killer;
@@ -322,10 +329,11 @@ function renderEntry(s, i, isVictory) {
     } else {
         detailLine = `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)}, το γυρο ${turnsStr} &middot; ${formattedDate}`;
     }
+    const skull = isIronman ? '<span class="ironman-skull">&#128128;</span> ' : '';
     return `
         <div class="entry${isVictory ? ' victory' : isAlive ? ' alive' : ' dead'}">
             <div class="rank-badge">${romanish(i + 1)}</div>
-            <div class="line1"><span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level}</div>
+            <div class="line1">${skull}<span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level}</div>
             <div class="line2">
                 ${detailLine}
                 <br>
@@ -342,19 +350,19 @@ function renderTabContent(data, entriesEl) {
     let html = '';
     if (victors.length > 0) {
         html += `<div id="victors-heading">Θεοσφάχτες</div>`;
-        html += victors.map((s, i) => renderEntry(s, i, true)).join('');
+        html += victors.map((s, i) => renderEntry(s, i, true, s.ironman)).join('');
     }
     if (alive.length > 0) {
         if (victors.length > 0) {
             html += `<div id="victors-heading">Ζωντανοί</div>`;
         }
-        html += alive.map((s, i) => renderEntry(s, i, false)).join('');
+        html += alive.map((s, i) => renderEntry(s, i, false, s.ironman)).join('');
     }
     if (deaths.length > 0) {
         if (victors.length > 0 || alive.length > 0) {
             html += `<div id="victors-heading">Ψοφολόγιον</div>`;
         }
-        html += deaths.map((s, i) => renderEntry(s, i, false)).join('');
+        html += deaths.map((s, i) => renderEntry(s, i, false, s.ironman)).join('');
     }
     entriesEl.innerHTML = html || '<div style="text-align:center;color:var(--parchment-dim);font-style:italic;padding:40px 10px;font-size:1.1rem;">Το κατάστιχο είναι άδειο...</div>';
 }
