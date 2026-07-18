@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v305</title>
+    <title>Ρεμπεσκές v315</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1044,6 +1044,14 @@ body {
     </div>
 </div>
 
+<!-- 
+<div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
+    <div class="stat-row" style="justify-content:center; cursor:pointer;" onclick="resetXpPerTurn()">
+        <div style="font-size:0.85rem;">XP/γύρο: <span id="p-xp-per-turn" style="color:#2ecc71; font-weight:bold;">0</span></div>
+    </div>
+</div>  
+\-->
+
 <div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
     <div class="stat-row equipment-row" id="stat-atk-box">
         <!-- Αφαιρέθηκε το font-weight:bold; -->
@@ -1374,30 +1382,14 @@ function formatNumber(num) {
     return Number(num).toLocaleString('el-GR');
 }
 
-// ΣΚΟΡ: totalXpGained/100 x riskFactor x deathFactor x turnFactor
-// x2 αν έχει νικήσει τον Θεό Κόνανο, x2 αν είναι Ironman
-const SCORE_RISK_WEIGHT = 2;
-const SCORE_DEATH_WEIGHT = 0.05;
-const SCORE_CONANOS_MULTIPLIER = 2;
-const SCORE_IRONMAN_MULTIPLIER = 2;
+// ΣΚΟΡ: totalXpGained * 100 / totalTurns * deathFactor (2.5% penalty ανά θάνατο)
 function computeScore() {
     const totalXp = (player.level >= 100) ? (player.totalXpAtLevel100 || 0) : (player.totalXpGained || 0);
-    const risk = player.risk || 0;
-    const deaths = player.deaths || 0;
     const turns = player.activeTime || 0;
-
-    const xpPower = (totalXp) ** 0.6;
-    const riskFactor = Math.max(0, 6 + risk * SCORE_RISK_WEIGHT);
-    const deathFactor = player.ironman ? 1 : (1 / (1 + deaths * SCORE_DEATH_WEIGHT));
-     const turnFactor = 1 / (1 + Math.pow(turns / 80000, 1.8));  //ek8etiko me polyonimikh oura - miso sto 80k
-   // const turnFactor = Math.max(0, 1 - turns / 200000);  //flat - miso sto 100k - midenizei sto 200k
-
-    let score = xpPower * riskFactor * deathFactor * turnFactor;
-
-    if (player.hasBeatenConanos) score *= SCORE_CONANOS_MULTIPLIER;
-    if (player.ironman) score *= SCORE_IRONMAN_MULTIPLIER;
-
-    return Math.round(score);
+    const deaths = player.ironman ? 0 : (player.deaths || 0);
+    const deathFactor = Math.pow(0.975, deaths);
+    const raw = (turns === 0) ? totalXp : totalXp * 100 / turns;
+    return Math.round(raw * deathFactor);
 }
 
 // Ανιχνεύει κινητό/tablet (Android/iOS), ΟΧΙ Windows — ρητή εξαίρεση, ώστε ακόμα
@@ -1444,10 +1436,10 @@ function showStats() {
     logMessage(`Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`,"stats");
     logMessage(`Γύροι: ${formatNumber(player.activeTime)}`,"stats");
     logMessage(`Ρίσκο: ${(player.risk || 0) > 0 ? '+' : ''}${(player.risk || 0).toFixed(3)}`,"stats");
-    logMessage(`Μαγκιά: ${formatNumber(computeScore())}`,"stats");
+    logMessage(`Μαγκιά: ${formatNumber(player._displayedScore || 0)}`,"stats");
      // logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
     logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
-    logMessage("");
+  //  logMessage("");
     logMessageHTML(`<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε online rankings</a>`, "stats");
     
 }
@@ -1485,7 +1477,7 @@ function uploadCurrentPlayerToHiScores() {
         date: Date.now(),
         victory: player.hasBeatenConanos || false,
         ironman: player.ironman || false,
-        precomputedScore: computeScore()
+        precomputedScore: player._displayedScore || 0
     };
     if (typeof syncIronmanRecordsToCloud === 'function') {
         syncIronmanRecordsToCloud([record]);
@@ -2874,7 +2866,7 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Έκαν' το σκιτάλι κώλο, κι έχεσε τον κόσμο όλο!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως στο εκατοστό βάθος του λαβυρίνθου κάθεται φωλιασμένος ο Θεός Κόνανος, γελαστός και παγκάκιστος, ο μισός παγωμένος κι ο μισός πυρωμένος, με κέρατα, με δόντια, με νύχια ματωμένα, με τα πλεμόνια του απ'όξω από το στήθος!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''ΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑ!!!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όσο πιο πολυ ρισκάρεις, όσο σπανιότερα ψοφάς, και όσο πιο σβέλτος είσαι, τόσο πιο μάγκας εισαι!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όσο πιο αποτελεσματικά παίζεις και όσο λιγότερο ψοφάς, τόσο πιο μάγκας εισαι!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως αν κάνεις πολλούς φόνους σερί σε μία κατάβαση στο επίπεδό σου ή βαθύτερα, κερδίζεις περισσότερα XP!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Παλουκώσου λιγάκι, κι άκουσε...''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι οι απλές επιθέσεις εχουν 80% ευστοχία. Αλλά οι κατραπακιές και οι εκτελέσεις έχουν 90%.''" ,
@@ -3120,7 +3112,7 @@ function getMonsterName(lvl) {
         if (power === 0) return type === 'weapon' ? "Γυμνά Χέρια" : (type === 'armor' ? "Κουρέλια" : "Κανένα");
         let arr = type === 'weapon' ? weaponNames : (type === 'armor' ? armorNames : magicNames);
         let idx = Math.min(power - 1, arr.length - 1);
-        return `${arr[idx]} `;
+        return `${arr[idx]}`;
     }
 
 // ψοφιος κωδικας
@@ -3418,7 +3410,7 @@ let diff = lvl - monsterLvl;
          xp *= Math.pow(0.90, diff);
    } else if (diff < 0) { 
     // Το τέρας είναι μεγαλύτερο επίπεδο: Μπόνους ανά επίπεδο διαφοράς.  Χρησιμοποιούμε (diff) για να γίνει ο εκθέτης θετικός
-       xp *= Math.pow(1.1, Math.abs(diff));
+       xp *= Math.pow(1.10, Math.abs(diff));
     }
 
     return Math.round(xp);
@@ -3600,7 +3592,7 @@ function checkLevelUp() {
 
         if (player.level % 5 === 0) {
             if (!player.magkiaMilestones) player.magkiaMilestones = [];
-            player.magkiaMilestones.push({ level: player.level, score: computeScore(), turns: player.activeTime || 0, deaths: player.deaths || 0 });
+            player.magkiaMilestones.push({ level: player.level, score: Math.max(computeScore(), player._displayedScore || 0), turns: player.activeTime || 0, deaths: player.deaths || 0 });
         }
 
         if (player.level === 100) {
@@ -3674,6 +3666,7 @@ function loadGame() {
             if (!Array.isArray(player.magkiaMilestones)) player.magkiaMilestones = [];
             if (typeof player.risk !== 'number') player.risk = 0;
             if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
+            if (typeof player._displayedScore !== 'number') player._displayedScore = 0;
             player.maxUnlockedLevel = 100;
 
             player.nextXp = calculateNextXpRequirement(player.level);
@@ -3956,6 +3949,24 @@ function importSave() {
 let rateStartTime = Date.now();
 let sessionXp = 0;
 let sessionGold = 0;
+let xpTurnSessionStart = 0;
+let xpTurnSessionXp = 0;
+
+function resetXpPerTurn() {
+    xpTurnSessionStart = player.activeTime || 0;
+    xpTurnSessionXp = player.totalXpGained || 0;
+    updateXpPerTurn();
+}
+
+function updateXpPerTurn() {
+    const turns = (player.activeTime || 0) - xpTurnSessionStart;
+    const rawXp = (player.totalXpGained || 0) - xpTurnSessionXp;
+    const deathFactor = player.ironman ? 1 : Math.pow(0.975, player.deaths || 0);
+    const xp = rawXp * deathFactor;
+    const el = document.getElementById('p-xp-per-turn');
+    if (!el) return;
+    el.textContent = turns > 0 ? formatNumber(Math.round(xp / turns)) : '0';
+}
 
 function updateRates(){
     let mins = Math.max((Date.now()-rateStartTime)/60000,0.001);
@@ -4096,7 +4107,10 @@ function refreshAreaSelectorAppearance() {
         document.getElementById('p-xp-required').innerText = formatNumber(player.nextXp);
     }
     document.getElementById('p-gold').innerText = formatNumber(player.gold);
-    document.getElementById('p-score').innerText = formatNumber(computeScore());
+    const currentScore = computeScore();
+    if (currentScore > (player._displayedScore || 0)) player._displayedScore = currentScore;
+    document.getElementById('p-score').innerText = formatNumber(player._displayedScore || 0);
+    updateXpPerTurn();
     
     
     
@@ -4374,7 +4388,7 @@ function logMessageHTML(html, type = 'system') {
     appendInfoLine(body, "Στον τεκέ αναπληρώνεις ζωή σταδιακά.", "help");
     appendInfoLine(body, "", "help");
     appendInfoLine(body, "Μαγκιά");
-    appendInfoLine(body, "Η μαγκιά είναι το σκορ σου. Όσο πιο πολύ ρισκάρεις, όσο λιγότερο πεθαίνεις και όσο πιο γρήγορος είσαι, τόσο πιο μάγκας είσαι. Γκέγκε;", "help");
+    appendInfoLine(body, "Η μαγκιά είναι το σκορ σου. Όσο πιο γρήγορα προοδεύεις χωρίς να πεθαίνεις, τόσο πιο μάγκας είσαι. Το να σκοτώσεις τον Κόνανο νωρίς είναι μεγάλη μαγκιά. Γκέγκε;", "help");
     appendInfoLine(body, "", "help");
     appendInfoLine(body, "Δράσεις στη μάχη");
     appendInfoLine(body, "• Η ΚΑΤΡΑΠΑΚΙΑ κάνει έξτρα ζημιά στην επόμενη επίθεση", "help");
@@ -4423,7 +4437,7 @@ function startTownRegen() {
                  );
                  flashHpBarHeal('player-hp-parent');
             updateUI();
-            saveGame();
+          //  saveGame();
             
          }
     }, effTick());
@@ -4593,11 +4607,11 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     // Στατιστικά Θεού Κόνανου (Επίπεδο 110 για τα drops/XP)
     monster = {
         name: "Θεός Κόνανος",
-        level: 105,
+        level: 108,
         hp: 16666,       // Βάλε όση ζωή θες για να είναι ζόρικος
         maxHp: 16666,
-        atk: 234.5,     // Δυνατό χτύπημα
-        def: 234.5,    // Σκληρή άμυνα
+        atk: 241.5,     // Δυνατό χτύπημα
+        def: 241.5,    // Σκληρή άμυνα
         isBoss: true,
         firstName: '',
         title: '',
@@ -5246,7 +5260,7 @@ function showAnnouncementPopup(text, styleClass) {
                 }
 
                 if (!player.magkiaMilestones) player.magkiaMilestones = [];
-                player.magkiaMilestones.push({ level: 'conanos', score: computeScore(), turns: player.activeTime || 0, deaths: player.deaths || 0 });
+                player.magkiaMilestones.push({ level: 'conanos', score: Math.max(computeScore(), player._displayedScore || 0), turns: player.activeTime || 0, deaths: player.deaths || 0 });
                 
                // logMessage(`Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΠΕΘΑΝΕ! Το παιχνίδι νικήθηκε! Αιώνια δόξα στον ${player.name}! Απο δω και πέρα θα είναι γνωστός ως ΘΕΟΣΦΑΧΤΗΣ.`, 'victory');
 
@@ -5481,7 +5495,7 @@ function showAnnouncementPopup(text, styleClass) {
 function applyDefeatPenalties() {
     if (player.ironman) {
         if (!player.magkiaMilestones) player.magkiaMilestones = [];
-        player.magkiaMilestones.push({ level: 'death', score: computeScore(), deathLevel: player.level, turns: player.activeTime || 0, deaths: player.deaths || 0 });
+        player.magkiaMilestones.push({ level: 'death', score: Math.max(computeScore(), player._displayedScore || 0), deathLevel: player.level, turns: player.activeTime || 0, deaths: player.deaths || 0 });
     }
 
     generateAreaModifiers();
@@ -5514,6 +5528,7 @@ function applyDefeatPenalties() {
     currentRunKills = 0;
     resetKillStreak();
     player.deaths++;
+    player._displayedScore = computeScore();
 
     // Καταμέτρηση θανάτων ανά "χρώμα" τέρατος (κόκκινο=weapon, μπλε=armor, μωβ=magic).
     // Τα legendary τέρατα δεν έχουν δικό τους variant χρώματος, αλλά ανήκουν σε τύπο
