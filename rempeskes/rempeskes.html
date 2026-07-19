@@ -489,7 +489,6 @@
         }
 
         #log .log-entry {
-            text-shadow: 2px 2px 2px rgba(31, 31, 32, 0.9); /* Μαύρη σκιά για να "πετάγονται" τα γράμματα */
             margin-bottom: 3px;                          /* 3 εικονοστοιχεία κενό ανάμεσα στις γραμμές */
             line-height: 1.3;                            /* Ύψος γραμμής για σωστή απόσταση */
         }
@@ -2990,7 +2989,7 @@ const legendaryMonstersByType = {
         { min: 11, max: 20,  name: "Αρκούντος",     itemName: "Αρκουδοτόμαρο" },
         { min: 21, max: 30,  name: "Πράσινος Πρόμαχος",     itemName: "Πράσινη Ζάβα" },
         { min: 21, max: 30,  name: "Κόκκινος Πρόμαχος",     itemName: "Κόκκινο Λωρίκι" },
-        { min: 21, max: 30,  name: "Μαύρος Πρόμαχος",     itemName: "Μάυρο Κλιβάνιο" },
+        { min: 21, max: 30,  name: "Μαύρος Πρόμαχος",     itemName: "Μαύρο Κλιβάνιο" },
         { min: 31, max: 40, name: "Θαμβόπουλος",         itemName: "Θυρεός του Θαμβόπουλου" },
         { min: 31, max: 40, name: "Θαμβόπουλος",         itemName: "Θώρακας του Θαμβόπουλου" },
         { min: 31, max: 40, name: "Θαμβόπουλος",         itemName: "Θυμιατό του Θαμβόπουλου" },
@@ -3987,8 +3986,6 @@ function resetRates(){
 
 setInterval(updateRates,1000);
 
-setInterval(updateRates,1000);
-
 updateAreaSelector();
 
 const savedMonsterLevel = localStorage.getItem('selectedMonsterLevel');
@@ -4331,7 +4328,7 @@ function logMessage(text, type = 'system') {
 
     logDiv.append(entry);
 
-    while (logDiv.children.length > 500) {
+    while (logDiv.children.length > 250) {
         logDiv.removeChild(logDiv.firstChild);
     }
 
@@ -4346,7 +4343,7 @@ function logMessageHTML(html, type = 'system') {
 
     logDiv.append(entry);
 
-    while (logDiv.children.length > 500) {
+    while (logDiv.children.length > 150) {
         logDiv.removeChild(logDiv.firstChild);
     }
 
@@ -4437,7 +4434,7 @@ function startTownRegen() {
                  );
                  flashHpBarHeal('player-hp-parent');
             updateUI();
-          //  saveGame();
+            saveGame();
             
          }
     }, effTick());
@@ -4619,7 +4616,7 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     };
     
     // Ειδικό μήνυμα με κόκκινο glow στο log σου
-    logMessage("Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΕΜΦΑΝΙΣΤΗΚΕ ΑΠΟ ΤΑ ΒΑΘΗ ΤΗΣ ΚΑΤΑΒΥΘΥΣΗΣ! ΠΡΟΣΚΥΝΗΣΤΕ!", 'konanos');
+    logMessage("Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΕΜΦΑΝΙΣΤΗΚΕ ΑΠΟ ΤΑ ΒΑΘΗ ΤΗΣ ΚΑΤΑΒΥΘΙΣΗΣ! ΠΡΟΣΚΥΝΗΣΤΕ!", 'konanos');
 } else {
 
 
