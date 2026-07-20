@@ -29,7 +29,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -815,7 +815,7 @@
 
 .equipment-row {
     display: grid;
-    grid-template-columns: 100px 1fr 100px;
+    grid-template-columns: 40px 1fr 40px;
     align-items: center;
     background-color: #1a1a1a !important;   /* Σκούρο υπόβαθρο για το slot */
     border: 1px solid #333333 !important;   /* Διακριτικό περίγραμμα γύρω από το κουτάκι */
@@ -825,6 +825,7 @@
 
 .equip-label{
     text-align:center;
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
   /*  border-right: 1px solid #555; */
 }
 
@@ -1067,7 +1068,7 @@ body {
 <div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
     <div class="stat-row equipment-row" id="stat-atk-box">
         <!-- Αφαιρέθηκε το font-weight:bold; -->
-        <div class="equip-label">Όπλο</div>
+        <div class="equip-label">🗡</div>
         <div class="equip-name">
             <span id="eq-weapon" style="color: #ec6868; font-weight: bold;">Γυμνά Χέρια</span>
         </div>
@@ -1078,7 +1079,7 @@ body {
     
     <div class="stat-row equipment-row" id="stat-def-box">
         <!-- Αφαιρέθηκε το font-weight:bold; -->
-        <div class="equip-label">Θωράκιση</div>
+        <div class="equip-label">🛡</div>
         <div class="equip-name">
             <span id="eq-armor" style="color: #1ab2ff; font-weight: bold;">Κουρέλια</span>
         </div>
@@ -1089,7 +1090,7 @@ body {
     
     <div class="stat-row equipment-row" id="stat-magic-box">
         <!-- Αφαιρέθηκε το font-weight:bold; -->
-        <div class="equip-label">Μαγικό</div>
+        <div class="equip-label">✨</div>
         <div class="equip-name">
             <span id="eq-magic" style="color: #cc66ff; font-weight: bold;">Χωρίς Φυλαχτό</span>
         </div>
@@ -2083,10 +2084,10 @@ const armorNames = [
   "Ακριτικό Λωρίκιο",
   "Σιδηρούν Κλιβάνιο",
   "Βαριά Ζάβα",
-  "Επιθεωρημένο Σκουτάρι",
-  "Ανατολικό Κλιβάνιο",
+  "Διαλεχτό Σκουτάρι",
+  "Σκοθικό Κλιβάνιο",
   "Συμπαγής Ζάβα",
-  "Ενισχυμένος Θυρεός του Σκουτάτου",
+  "Ενισχυμένος Θυρεός",
   "Κλιβάνιο Αξιωματικού",
   "Λωρίκιο Κένταρχου",
 
@@ -3300,12 +3301,12 @@ function getAreaType(lvl) {
 
 // Οπτική ένδειξη τύπου κυνηγότοπου στο dropdown (emoji = πάντα ορατό, color = bonus όπου υποστηρίζεται)
 const AREA_TYPE_ICON = {
-    [AREA_TYPES.NORMAL]: '⚪',
-    [AREA_TYPES.RICH]:   '🟡',
-    [AREA_TYPES.POOR]:   '⚫',
-    [AREA_TYPES.WEAPON]: '🔴',
-    [AREA_TYPES.ARMOR]:  '🔵',
-    [AREA_TYPES.MAGIC]:  '🟣'
+    [AREA_TYPES.NORMAL]: '',
+    [AREA_TYPES.RICH]:   '★',
+    [AREA_TYPES.POOR]:   '°',
+    [AREA_TYPES.WEAPON]: '▲',
+    [AREA_TYPES.ARMOR]:  '■',
+    [AREA_TYPES.MAGIC]:  '◆'
 };
 
 const AREA_TYPE_COLOR = {
