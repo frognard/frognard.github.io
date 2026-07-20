@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v315</title>
+    <title>Ρεμπεσκές v320</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -287,6 +287,19 @@
             font-weight: normal;
             text-shadow: 1px 1px 2px #000;
             pointer-events: none;
+        }
+
+        .bar-variant-text {
+            position: absolute;
+            top: 0;
+            left: 6px;
+            font-size: 0.7rem;
+            line-height: 20px;
+            color: #fff;
+            font-weight: normal;
+            text-shadow: 1px 1px 2px #000;
+            pointer-events: none;
+        }
         }
 
         .cd-wrapper {
@@ -1043,13 +1056,13 @@ body {
     </div>
 </div>
 
-<!-- 
+
 <div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
     <div class="stat-row" style="justify-content:center; cursor:pointer;" onclick="resetXpPerTurn()">
         <div style="font-size:0.85rem;">XP/γύρο: <span id="p-xp-per-turn" style="color:#2ecc71; font-weight:bold;">0</span></div>
     </div>
 </div>  
-\-->
+
 
 <div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
     <div class="stat-row equipment-row" id="stat-atk-box">
@@ -1142,6 +1155,7 @@ body {
         <div id="monster-hp-bar" class="bar"></div>
         <div id="monster-hp-text" class="bar-text">0 / 0 HP</div>
         <div id="monster-kills-text" class="bar-kills-text">Σερί: 0</div>
+        <div id="monster-variant-text" class="bar-variant-text">Σπάνιο: 1%</div>
         <div id="monster-hp-flash" class="hp-flash-overlay"></div>
     </div>
 </div>
@@ -2870,6 +2884,7 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Παλουκώσου λιγάκι, κι άκουσε...''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι οι απλές επιθέσεις εχουν 80% ευστοχία. Αλλά οι κατραπακιές και οι εκτελέσεις έχουν 90%.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όταν ψοφολογάς, τα αντικείμενά σου φθείρονται!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όσο πιο πολύ χρόνο ξοδεύεις σε μία κατάβαση, τόσο αυξάνει και η πιθανότητα να συναντήσεις σπάνια τέρατα!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι ο λόρδος Φίρκραχος ήταν ο πρώτος Θεοσφάχτης.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Ε, ψιτ! Αηντέντιφάη ότι θες, τζάμπα!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Του λαγού ο λαιμός είναι ένας ωραίος λαιμός.''" ,
@@ -3574,6 +3589,15 @@ function updateKillStreakVisuals() {
     }
 }
 
+function getStreakVariantChance() {
+    const streakChanceTable = [0.01, 0.02, 0.04, 0.08, 0.16, 0.23];
+    let chance = streakChanceTable[Math.min(currentRunKills, streakChanceTable.length - 1)];
+    const areaType = getAreaType(currentSelectedLevel);
+    if (areaType === AREA_TYPES.RICH) chance *= 1.30;
+    else if (areaType === AREA_TYPES.POOR) chance *= 0.70;
+    return chance;
+}
+
 function resetKillStreak() {
     killStreakBonus = 0;
     const xpBarContainer = document.getElementById('xp-bar-container');
@@ -4217,6 +4241,7 @@ function refreshAreaSelectorAppearance() {
         document.getElementById('monster-hp-bar').style.transform = `scaleX(${mPct / 100})`;
         document.getElementById('monster-hp-text').innerText = `${formatNumber(Math.ceil(monster.hp))} / ${formatNumber(monster.maxHp)} HP`;
         document.getElementById('monster-kills-text').innerText = `Σερί: ${currentRunKills}`;
+        document.getElementById('monster-variant-text').innerText = `Σπάνιο: ${Math.round(getStreakVariantChance() * 100)}%`;
         
     } else {
         const mNameEl = document.getElementById('m-name');
@@ -4229,6 +4254,7 @@ function refreshAreaSelectorAppearance() {
         document.getElementById('monster-hp-bar').style.transform = 'scaleX(0)';
         document.getElementById('monster-hp-text').innerText = '-';
         document.getElementById('monster-kills-text').innerText = `Σερί: ${currentRunKills}`;
+        document.getElementById('monster-variant-text').innerText = `Σπάνιο: ${Math.round(getStreakVariantChance() * 100)}%`;
         
         const title = document.getElementById("battle-title");
         if (title) {
@@ -4648,10 +4674,8 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     let legendaryLootType = null;
     let legendaryItemName = null;
 
-    // BASE RARE MONSTER CHANCE RICH/POOR αλλάζουν το βασικό chance εμφάνισης special τέρατος
-    let specialChance = 0.17;
-    if (areaType === AREA_TYPES.RICH) specialChance = specialChance * 1.30;
-    else if (areaType === AREA_TYPES.POOR) specialChance = specialChance * 0.70;
+    // SPECIAL MONSTER CHANCE: κλιμακούμενο με βάση το σερί φόνων + area modifier
+    let specialChance = getStreakVariantChance();
 
     if (isLegendary) {
 
@@ -5169,7 +5193,7 @@ let finalType = type;
 
     } else {
         // timh magikwn antikeimenon
-        let sellValue = rollGoldForLevel(rolledTier) * 1;
+        let sellValue = rollGoldForLevel(rolledTier) * 3;
 
         player.gold += sellValue;
         player.totalGoldGained += sellValue;
