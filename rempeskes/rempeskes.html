@@ -3590,7 +3590,7 @@ function updateKillStreakVisuals() {
 }
 
 function getStreakVariantChance() {
-    const streakChanceTable = [0.01, 0.02, 0.04, 0.08, 0.16, 0.23];
+    const streakChanceTable = [0.01, 0.02, 0.04, 0.08, 0.16, 0.18, 0.20, 0.21, 0.21, 0.22, 0.22, 0.22, 0.23, 0.23, 0.23, 0.23, 0.24, 0.24, 0.24, 0.24, 0.24, 0.25];
     let chance = streakChanceTable[Math.min(currentRunKills, streakChanceTable.length - 1)];
     const areaType = getAreaType(currentSelectedLevel);
     if (areaType === AREA_TYPES.RICH) chance *= 1.30;
