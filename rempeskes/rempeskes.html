@@ -1154,8 +1154,8 @@ body {
     <div class="bar-container" id="monster-hp-parent">
         <div id="monster-hp-bar" class="bar"></div>
         <div id="monster-hp-text" class="bar-text">0 / 0 HP</div>
-        <div id="monster-kills-text" class="bar-kills-text">Σερί: 0</div>
-        <div id="monster-variant-text" class="bar-variant-text">Σπάνιο: 1%</div>
+        <div id="monster-kills-text" class="bar-variant-text">Θάλαμος: 1</div>
+        <div id="monster-variant-text" class="bar-kills-text">Σπάνιο: 1%</div>
         <div id="monster-hp-flash" class="hp-flash-overlay"></div>
     </div>
 </div>
@@ -1454,7 +1454,7 @@ function showStats() {
     logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
   //  logMessage("");
     logMessageHTML(`<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε online rankings</a>`, "stats");
-    
+    logMessage("");
 }
 
 function showMagkiaMilestones() {
@@ -2880,11 +2880,11 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως στο εκατοστό βάθος του λαβυρίνθου κάθεται φωλιασμένος ο Θεός Κόνανος, γελαστός και παγκάκιστος, ο μισός παγωμένος κι ο μισός πυρωμένος, με κέρατα, με δόντια, με νύχια ματωμένα, με τα πλεμόνια του απ'όξω από το στήθος!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''ΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑ!!!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όσο πιο αποτελεσματικά παίζεις και όσο λιγότερο ψοφάς, τόσο πιο μάγκας εισαι!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως αν κάνεις πολλούς φόνους σερί σε μία κατάβαση στο επίπεδό σου ή βαθύτερα, κερδίζεις περισσότερα XP!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως αν κάνεις πολλούς φόνους σε μία κατάβαση στο επίπεδό σου ή βαθύτερα, αυξάνεις τις πιθανότητας για σπάνια τέρατα!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Παλουκώσου λιγάκι, κι άκουσε...''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι οι απλές επιθέσεις εχουν 80% ευστοχία. Αλλά οι κατραπακιές και οι εκτελέσεις έχουν 90%.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όταν ψοφολογάς, τα αντικείμενά σου φθείρονται!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όσο πιο πολύ χρόνο ξοδεύεις σε μία κατάβαση, τόσο αυξάνει και η πιθανότητα να συναντήσεις σπάνια τέρατα!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όσο πιο πολλούς θαλάμους ψάχνεις σε μία κατάβαση, τόσο αυξάνει και η πιθανότητα να συναντήσεις σπάνια τέρατα!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι ο λόρδος Φίρκραχος ήταν ο πρώτος Θεοσφάχτης.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Ε, ψιτ! Αηντέντιφάη ότι θες, τζάμπα!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Του λαγού ο λαιμός είναι ένας ωραίος λαιμός.''" ,
@@ -3328,7 +3328,7 @@ const AREA_TYPE_COLOR = {
     let waitingForNextMonster = false;
     let nextMonsterTimeoutId = null; // id του setTimeout που κάνει spawn το επόμενο τέρας (endCombat) — ώστε να μπορεί να ακυρωθεί σε forceRetreat/θάνατο
     let currentRunKills = 0
-    let killStreakBonus = 0; // 0 / 0.05 / 0.10 - XP bonus % από το τρέχον σερί φόνων
+    let killStreakBonus = 0; // ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΟ: δεν δίνει πλέον XP bonus
  
     const CD_DURATION = 10000; // βασική διάρκεια cooldown (ms) σε κανονική ταχύτητα (x1)
     const COMBAT_TICK_MS = 2000; // βασικός χρόνος γύρου μάχης (ms) σε κανονική ταχύτητα (x1)
@@ -3556,36 +3556,11 @@ function awardMagkiaForDepth(depth) {
 }
 */
 
-// --- ΣΕΡΙ ΦΟΝΩΝ: ασημένια λάμψη στα 5, χρυσή στα 10, bonus XP στους επόμενους φόνους ---
+// --- ΘΑΛΑΜΟΣ ΦΟΝΩΝ: ασημένια λάμψη στα 5, χρυσή στα 10 ---
 function updateKillStreakVisuals() {
     const xpBarContainer = document.getElementById('xp-bar-container');
-    const depthAppropriate = currentSelectedLevel >= player.level;
-
-    if (currentRunKills >= 10) {
-        if (killStreakBonus !== 0.10) {
-            killStreakBonus = depthAppropriate ? 0.10 : 0;
-            if (depthAppropriate) {
-                logMessage(`Σερί 10 φόνων! +10% XP στους επόμενους φόνους!`, 'streak-silver');
-                setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '10 ΣΕΡΙ +10% XP!', '#ffd700'); }, 500);
-                // awardMagkiaForDepth(currentSelectedLevel); // ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΟ: η μαγκιά δεν δίνεται πια από σερί
-            }
-        }
-        if (xpBarContainer) {
-            xpBarContainer.classList.remove('killstreak-gold', 'killstreak-silver');
-            if (depthAppropriate) xpBarContainer.classList.add('killstreak-gold');
-        }
-    } else if (currentRunKills >= 5) {
-        if (killStreakBonus !== 0.05) {
-            killStreakBonus = depthAppropriate ? 0.05 : 0;
-            if (depthAppropriate) {
-                logMessage(`Σερί 5 φόνων! +5% XP!`, 'streak-silver');
-                setTimeout(() => { killstreakSound(); createFloatingText('monster-hp-parent', '5 ΣΕΡΙ +5% XP!', '#e0e6eb'); }, 500);
-            }
-        }
-        if (xpBarContainer) {
-            xpBarContainer.classList.remove('killstreak-gold', 'killstreak-silver');
-            if (depthAppropriate) xpBarContainer.classList.add('killstreak-silver');
-        }
+    if (xpBarContainer) {
+        xpBarContainer.classList.remove('killstreak-gold', 'killstreak-silver');
     }
 }
 
@@ -4240,7 +4215,7 @@ function refreshAreaSelectorAppearance() {
         const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
         document.getElementById('monster-hp-bar').style.transform = `scaleX(${mPct / 100})`;
         document.getElementById('monster-hp-text').innerText = `${formatNumber(Math.ceil(monster.hp))} / ${formatNumber(monster.maxHp)} HP`;
-        document.getElementById('monster-kills-text').innerText = `Σερί: ${currentRunKills}`;
+        document.getElementById('monster-kills-text').innerText = `Θάλαμος: ${currentRunKills + 1}`;
         document.getElementById('monster-variant-text').innerText = `Σπάνιο: ${Math.round(getStreakVariantChance() * 100)}%`;
         
     } else {
@@ -4253,7 +4228,7 @@ function refreshAreaSelectorAppearance() {
         }
         document.getElementById('monster-hp-bar').style.transform = 'scaleX(0)';
         document.getElementById('monster-hp-text').innerText = '-';
-        document.getElementById('monster-kills-text').innerText = `Σερί: ${currentRunKills}`;
+        document.getElementById('monster-kills-text').innerText = `Θάλαμος: ${currentRunKills + 1}`;
         document.getElementById('monster-variant-text').innerText = `Σπάνιο: ${Math.round(getStreakVariantChance() * 100)}%`;
         
         const title = document.getElementById("battle-title");
@@ -4394,9 +4369,10 @@ function logMessageHTML(html, type = 'system') {
     appendInfoLine(body, "Τα τέρατα δίνουν XP και χρυσό. Τα XP ανεβάζουν το επίπεδό σου, και κατα συνέπεια τη ζωή και τη ζημιά σου.", "help");
     appendInfoLine(body, "Το χρυσάφι το ξοδεύεις στον τεκέ κάθε φορά που ανεβαίνεις επίπεδο, για extra XP!", "help")
     appendInfoLine(body, "");
-    appendInfoLine(body, "Τα σπάνια τέρατα, εκτός από διπλάσιο XP, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ.", "help");
+    appendInfoLine(body, "Τα σπάνια τέρατα, εκτός από έξτρα XP, ρίχνουν και ΑΝΤΙΚΕΙΜΕΝΑ.", "help");
     appendInfoLine(body, "Ένα σπάνιο τέρας μπορεί να ρίξει αντικείμενα επιπέδου μέχρι και 5 επίπεδα ψηλότερα από το επίπεδό του.", "help");
     appendInfoLine(body, "Τα να έχει κανείς ισχυρά αντικείμενα είναι πολύ σημαντικό!", "help");
+    appendInfoLine(body, "Όσο περισσότερους θαλάμους εξερευνείς σε μία κατάβαση, τόσο αυξάνει η πιθανότητα να εντοπίσεις σπάνια τέρατα.", "help");
     appendInfoLine(body, "");
     appendInfoLine(body, "• Τα άγρια (κόκκινα) τέρατα ρίχνουν όπλα.", "help");
     appendInfoLine(body, "• Τα θωρακισμένα (γαλάζια) τέρατα ρίχνουν πανοπλίες.", "help");
