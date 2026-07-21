@@ -3380,8 +3380,8 @@ const AREA_TYPE_COLOR = {
 
 
   // Attack and defense formulas for player
-    function getPlayerAtk() { return player.level * 0.75 + player.weapon.power + player.magic.power/2; }
-    function getPlayerDef() { return player.level * 0.75 + player.armor.power + player.magic.power/2; }
+    function getPlayerAtk() { return player.level * 0.5 + player.weapon.power + player.magic.power/2; }
+    function getPlayerDef() { return player.level * 0.5 + player.armor.power + player.magic.power/2; }
 
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
@@ -4610,8 +4610,8 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
         level: 108,
         hp: 16666,       // Βάλε όση ζωή θες για να είναι ζόρικος
         maxHp: 16666,
-        atk: 241.5,     // Δυνατό χτύπημα
-        def: 241.5,    // Σκληρή άμυνα
+        atk: 216,     // Δυνατό χτύπημα
+        def: 216,    // Σκληρή άμυνα
         isBoss: true,
         firstName: '',
         title: '',
@@ -4624,8 +4624,8 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
 
 
     let lvl = currentSelectedLevel;
-    let baseAtk = lvl * 0.75 + (lvl - 1) + (lvl/2 - 0.5);
-    let baseDef = lvl * 0.75 + (lvl - 1) + (lvl/2 - 0.5);
+    let baseAtk = lvl * 0.5 + (lvl - 1) + (lvl/2 - 0.5);
+    let baseDef = lvl * 0.5 + (lvl - 1) + (lvl/2 - 0.5);
     let baseHp = lvl * 100;
 
     let areaType = getAreaType(lvl);
@@ -5837,8 +5837,8 @@ if (
     // χωρίς να χρειάζεται να το κάνουμε spawn — ίδιος τύπος στατιστικών με το spawnMonster().
     // (Οι σπάνιες παραλλαγές weapon/armor/magic/legendary αγνοούνται εδώ σκόπιμα ως προσέγγιση.)
     function estimateMonsterAt(lvl) {
-        const atk = lvl * 0.75 + (lvl - 1) + (lvl / 2 - 0.5);
-        const def = lvl * 0.75 + (lvl - 1) + (lvl / 2 - 0.5);
+        const atk = lvl * 0.5 + (lvl - 1) + (lvl / 2 - 0.5);
+        const def = lvl * 0.5 + (lvl - 1) + (lvl / 2 - 0.5);
         const maxHp = lvl * 100;
         return { level: lvl, atk: atk, def: def, hp: maxHp, maxHp: maxHp };
     }
