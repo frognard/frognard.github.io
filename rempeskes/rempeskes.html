@@ -1438,7 +1438,7 @@ function showStats() {
         ).toFixed(1);
     }
 
-    logMessage("");
+   logMessage("");
     logMessage("ΣΤΑΤΙΣΤΙΚΑ","stats");
     logMessage(`Φόνοι: ${formatNumber(player.kills)}`,"stats");
     logMessage(`Θάνατοι: ${player.ironman ? 'IRONMAN' : formatNumber(player.deaths)}`,"stats");
@@ -1455,7 +1455,7 @@ function showStats() {
     logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
   //  logMessage("");
     logMessageHTML(`<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε online rankings</a>`, "stats");
-    logMessage("");
+   // logMessage("");
 }
 
 function showMagkiaMilestones() {
@@ -3417,7 +3417,7 @@ const AREA_TYPE_COLOR = {
 
 
  // 1. ypologismos "effective level" lamvanontas ypopsin ta expected equip tiers tou rempeske
-let effectivePlayerLevel = Math.min(103, 1.02 * player.level);
+let effectivePlayerLevel = Math.min(103, 1.00 * player.level);
 let lvl = effectivePlayerLevel;
 
 let diff = lvl - monsterLvl;
