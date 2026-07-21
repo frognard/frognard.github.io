@@ -6246,22 +6246,23 @@ if ('serviceWorker' in navigator) {
                 if (r.ironman) entryScore *= 2;
             }
 
-            console.log('[Upload] name:', name, 'newScore:', entryScore, 'killer:', r.killer || '(alive)');
+            const entryTurns = r.turns || 0;
+            console.log('[Upload] name:', name, 'newTurns:', entryTurns, 'newScore:', entryScore, 'killer:', r.killer || '(alive)');
 
             const { data: existingRows, error: selErr } = await sbClient
                 .from('ironman_deaths')
-                .select('score')
+                .select('turns')
                 .eq('name', name);
 
             if (selErr) { console.error('[Upload] Select error:', selErr); dbErrors = selErr.message || 'select failed'; }
 
             const existingList = existingRows || [];
-            const bestExistScore = existingList.reduce((max, row) => Math.max(max, row.score ?? 0), -1);
+            const bestExistTurns = existingList.reduce((max, row) => Math.max(max, row.turns ?? 0), -1);
 
-            console.log('[Upload] existingCount:', existingList.length, 'bestExistScore:', bestExistScore);
+            console.log('[Upload] existingCount:', existingList.length, 'bestExistTurns:', bestExistTurns);
 
-            if (bestExistScore >= 0 && entryScore <= bestExistScore && !r.killer) {
-                console.log('[Upload] SKIPPED — not better than existing');
+            if (bestExistTurns >= 0 && entryTurns <= bestExistTurns && !r.killer) {
+                console.log('[Upload] SKIPPED — not more turns than existing');
                 skipped++;
                 continue;
             }
