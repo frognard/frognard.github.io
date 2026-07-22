@@ -6013,12 +6013,30 @@ if (
             autoLatePhaseFired = false;
         }
 
-        // ---- ΠΡΩΙΜΗ ΦΑΣΗ (10%): Κατραπακιά (μόνο attack timing, μία φορά ανά γύρο) ----
+        // ---- ΠΡΩΙΜΗ ΦΑΣΗ (10%): Κατραπακιά (μία φορά ανά γύρο) ----
         if (!autoEarlyPhaseFired && phase >= 0.10) {
             autoEarlyPhaseFired = true;
 
-            if (monster && !skillCooldownActive && monster.hp > monster.maxHp * 0.50) {
-                queueSpecialAttack();
+            if (monster && !skillCooldownActive) {
+                let useKatrapakia = false;
+
+                // 1) Αν περιμένει ΤΡΕΞΕ: πάνταΚατραπακιά αν είναι διαθέσιμη
+                if (isAttemptingRetreat) {
+                    useKatrapakia = true;
+                } else {
+                    // 2) Εκτίμηση ζημιάς Κατραπακιάς: avgDice=7, formula = d6 * 5 * level * dmgMod
+                    const avgDice = (skills.heavyStrike.minDice + skills.heavyStrike.maxDice) / 2;
+                    const diff = getPlayerAtk() - monster.def;
+                    const dmgMod = calcDmgModifier(diff);
+                    const estimatedDmg = avgDice * 5 * player.level * dmgMod * skills.heavyStrike.multiplier;
+
+                    // 3) Αν η ζωή του εχθρού >= 50% της ζημιάς Κατραπακιάς:Κατραπακιά
+                    if (monster.hp >= estimatedDmg * 1.00) {
+                        useKatrapakia = true;
+                    }
+                }
+
+                if (useKatrapakia) queueSpecialAttack();
             }
         }
 
