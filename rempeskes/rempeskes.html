@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html>v325
 <html lang="el">
 <head>
 
@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v320</title>
+    <title>Ρεμπεσκές v325</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -4630,9 +4630,10 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
 
     let areaType = getAreaType(lvl);
 
-    // Βασική πιθανότητα Legendary (1 στις x). RICH/POOR areas την επηρεάζουν,
-    // με δικούς της πολλαπλασιαστές ώστε να ρυθμίζεται ξεχωριστά από το specialChance.
-    let legendaryChance = 0.001;
+    // Βασική πιθανότητα Legendary (1 στις x). Σκαλάρει με το βάθος λαβυρίνθου
+    // (διπλάσια στο βάθος 100 σε σχέση με το βάθος 0). RICH/POOR areas την
+    // επηρεάζουν, με δικούς της πολλαπλασιαστές ώστε να ρυθμίζεται ξεχωριστά από το specialChance.
+    let legendaryChance = 0.001 + 0.001 * (lvl / 100) * 1.0;
     const legendaryRichMultiplier = 1.30;  // πόσο πιο συχνά σε RICH areas
     const legendaryPoorMultiplier = 0.70;  // πόσο πιο σπάνια σε POOR areas
     if (areaType === AREA_TYPES.RICH) legendaryChance = legendaryChance * legendaryRichMultiplier;
