@@ -904,6 +904,7 @@
 }
 
 .log-milestone { color: #2ecc71; }
+.log-milestone-legendary { color: #ffde21; }
 .log-milestone-title { color: #2ecc71; font-weight: bold; }
 
 .label-gold {
@@ -1471,6 +1472,8 @@ function showMagkiaMilestones() {
             logMessage(`Τελική μαγκιά: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`, 'milestone');
         } else if (m.level === 'conanos') {
             logMessage(`Τελική μαγκιά: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`, 'milestone');
+        } else if (m.legendaryKill) {
+            logMessage(`Επίπεδο ${m.level}: Σκότωσε: ${m.legendaryKill} και βρήκε: ${m.legendaryDrop}!`, 'milestone-legendary');
         } else {
             logMessage(`Επίπεδο ${m.level}: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`, 'milestone');
         }
@@ -4713,7 +4716,7 @@ if (currentSelectedLevel === 100 && Math.random() < 0.01 && !player.hasBeatenCon
     // Βασική πιθανότητα Legendary (1 στις x). Σκαλάρει με το βάθος λαβυρίνθου
     // (διπλάσια στο βάθος 100 σε σχέση με το βάθος 0). RICH/POOR areas την
     // επηρεάζουν, με δικούς της πολλαπλασιαστές ώστε να ρυθμίζεται ξεχωριστά από το specialChance.
-    let legendaryChance = 0.001 + 0.001 * (lvl / 100) * 1.0;
+    let legendaryChance = 0.901 + 0.001 * (lvl / 100) * 1.0;
     const legendaryRichMultiplier = 1.30;  // πόσο πιο συχνά σε RICH areas
     const legendaryPoorMultiplier = 0.70;  // πόσο πιο σπάνια σε POOR areas
     if (areaType === AREA_TYPES.RICH) legendaryChance = legendaryChance * legendaryRichMultiplier;
@@ -5464,6 +5467,18 @@ function showAnnouncementPopup(text, styleClass, color) {
             if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower, monster, forceSell);
             if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower, monster, forceSell);
             if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, monster, forceSell);
+
+            if (monster.variant === 'legendary') {
+                if (!player.magkiaMilestones) player.magkiaMilestones = [];
+                player.magkiaMilestones.push({
+                    level: player.level,
+                    legendaryKill: getMonsterDisplayName(monster),
+                    legendaryDrop: monster.lootItemName || '?',
+                    score: Math.max(computeScore(), player._displayedScore || 0),
+                    turns: player.activeTime || 0,
+                    deaths: player.deaths || 0
+                });
+            }
 
             if (droppedSomething) { triggerSmoothTransition('#3e3200'); }
 
