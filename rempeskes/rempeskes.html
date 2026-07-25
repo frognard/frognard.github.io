@@ -1401,7 +1401,7 @@ function computeScore() {
     const totalXp = (player.level >= 100) ? (player.totalXpAtLevel100 || 0) : (player.totalXpGained || 0);
     const turns = player.activeTime || 0;
     const deaths = player.ironman ? 0 : (player.deaths || 0);
-    const deathFactor = Math.pow(0.975, deaths);
+    const deathFactor = Math.pow(0.99, deaths);
     const raw = (turns === 0) ? totalXp : totalXp * 100 / turns;
     return Math.round(raw* deathFactor);
 }
