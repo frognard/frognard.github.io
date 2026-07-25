@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v329</title>
+    <title>Ρεμπεσκές v330</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -3893,74 +3893,108 @@ function exportSave() {
     };
     const json = JSON.stringify(exportData);
     const encoded = "RMPK1-" + btoa(unescape(encodeURIComponent(json)));
-    prompt("Αντίγραψε αυτόν τον κωδικό (Ctrl+C) και αποθήκευσέ τον κάπου:", encoded);
+
+    const overlay = document.createElement('div');
+    overlay.id = 'save-modal-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = `
+        <div style="background:#1b160f;border:1px solid #35291a;border-radius:8px;padding:20px;max-width:500px;width:90%;text-align:center;">
+            <div style="color:#d9c9a0;margin-bottom:10px;font-family:'PT Serif',serif;">Αντίγραψε τον κωδικό (Ctrl+C):</div>
+            <textarea id="export-code-area" readonly style="width:100%;height:120px;background:#120e0a;color:#c9a227;border:1px solid #35291a;border-radius:4px;padding:8px;font-family:monospace;font-size:13px;resize:vertical;">${encoded}</textarea>
+            <div style="margin-top:12px;">
+                <button onclick="document.getElementById('export-code-area').select();document.execCommand('copy');" style="background:#c9a227;color:#1b160f;border:none;padding:6px 18px;border-radius:4px;cursor:pointer;font-family:'PT Serif',serif;margin-right:6px;">Αντιγραφή</button>
+                <button onclick="document.getElementById('save-modal-overlay').remove();" style="background:transparent;color:#9c8c6a;border:1px solid #35291a;padding:6px 18px;border-radius:4px;cursor:pointer;font-family:'PT Serif',serif;">Κλείσιμο</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    document.getElementById('export-code-area').select();
 }
 
 function importSave() {
-    const encoded = prompt("Επικόλλησε εδώ τον κωδικό save:");
-    if (!encoded) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'save-modal-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = `
+        <div style="background:#1b160f;border:1px solid #35291a;border-radius:8px;padding:20px;max-width:500px;width:90%;text-align:center;">
+            <div style="color:#d9c9a0;margin-bottom:10px;font-family:'PT Serif',serif;">Επικόλλησε τον κωδικό save:</div>
+            <textarea id="import-code-area" style="width:100%;height:120px;background:#120e0a;color:#c9a227;border:1px solid #35291a;border-radius:4px;padding:8px;font-family:monospace;font-size:13px;resize:vertical;" placeholder="RMPK1-..."></textarea>
+            <div id="import-error" style="color:#a8394a;margin-top:8px;font-family:'PT Serif',serif;font-size:0.9rem;display:none;"></div>
+            <div style="margin-top:12px;">
+                <button id="import-ok-btn" style="background:#c9a227;color:#1b160f;border:none;padding:6px 18px;border-radius:4px;cursor:pointer;font-family:'PT Serif',serif;margin-right:6px;">Εισαγωγή</button>
+                <button onclick="document.getElementById('save-modal-overlay').remove();" style="background:transparent;color:#9c8c6a;border:1px solid #35291a;padding:6px 18px;border-radius:4px;cursor:pointer;font-family:'PT Serif',serif;">Κλείσιμο</button>
+            </div>
+        </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 
-    const trimmed = encoded.trim();
-    if (!trimmed.startsWith("RMPK1-")) {
-        alert("Μη έγκυρος κωδικός save.");
-        return;
-    }
+    document.getElementById('import-ok-btn').addEventListener('click', function() {
+        const encoded = document.getElementById('import-code-area').value.trim();
+        const errEl = document.getElementById('import-error');
+        if (!encoded) { errEl.textContent = 'Δεν εισήγαγες κωδικό.'; errEl.style.display = 'block'; return; }
+        if (!encoded.startsWith("RMPK1-")) { errEl.textContent = 'Μη έγκυρος κωδικός save.'; errEl.style.display = 'block'; return; }
 
-    try {
-        const json = decodeURIComponent(escape(atob(trimmed.slice(6))));
-        const data = JSON.parse(json);
-        if (!data || !data.player) throw new Error("invalid");
+        try {
+            const json = decodeURIComponent(escape(atob(encoded.slice(6))));
+            const data = JSON.parse(json);
+            if (!data || !data.player) throw new Error("invalid");
 
-        if (!confirm("Αυτό θα αντικαταστήσει τον τρέχοντα χαρακτήρα σου. Συνέχεια;")) return;
+            if (!confirm("Αυτό θα αντικαταστήσει τον τρέχοντα χαρακτήρα σου. Συνέχεια;")) return;
 
-        player = { ...player, ...data.player };
-        player.level = Math.min(player.level, 100);
-        player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105); //legendary bonus minmaxes 2/2
-        player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
-        player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
-        if (!player.name) player.name = "Ρεμπεσκές";
-        if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
-        if (!Array.isArray(player.magkiaMilestones)) player.magkiaMilestones = [];
-        if (typeof player.risk !== 'number') player.risk = 0;
-        if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
-        if (typeof player.totalDescents !== 'number') player.totalDescents = 0;
-        player.maxUnlockedLevel = 100;
-        player.nextXp = calculateNextXpRequirement(player.level);
+            player = { ...player, ...data.player };
+            player.level = Math.min(player.level, 100);
+            player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105);
+            player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
+            player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
+            if (!player.name) player.name = "Ρεμπεσκές";
+            if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
+            if (!Array.isArray(player.magkiaMilestones)) player.magkiaMilestones = [];
+            if (typeof player.risk !== 'number') player.risk = 0;
+            if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
+            if (typeof player.totalDescents !== 'number') player.totalDescents = 0;
+            player.maxUnlockedLevel = 100;
+            player.nextXp = calculateNextXpRequirement(player.level);
 
-        // ΔΙΟΡΘΩΣΗ: Εξασφάλιση ότι η ιδιότητα legendary υπάρχει, ακόμα και σε παλιά saves
-        if (player.weapon.legendary === undefined) player.weapon.legendary = false;
-        if (player.armor.legendary === undefined) player.armor.legendary = false;
-        if (player.magic.legendary === undefined) player.magic.legendary = false;
+            if (player.weapon.legendary === undefined) player.weapon.legendary = false;
+            if (player.armor.legendary === undefined) player.armor.legendary = false;
+            if (player.magic.legendary === undefined) player.magic.legendary = false;
 
-        // Σωστή ανάκτηση ονομάτων κατά το Import (τα legendary κρατούν πάντα το όνομά τους)
-        if (!player.weapon.legendary) {
-            player.weapon.name = getItemName('weapon', player.weapon.power);
-        }
-
-        if (!player.armor.legendary) {
-            player.armor.name = getItemName('armor', player.armor.power);
-        }
-
-        if (!player.magic.legendary) {
-            player.magic.name = getItemName('magic', player.magic.power);
-        }
-
-        if (data.selectedMonsterLevel) {
-            const selector = document.getElementById('area-selector');
-            if (selector) {
-                selector.value = data.selectedMonsterLevel;
-                currentSelectedLevel = parseFloat(data.selectedMonsterLevel);
-                updateSelectorColor(selector);
+            if (!player.weapon.legendary) {
+                player.weapon.name = getItemName('weapon', player.weapon.power);
             }
-        }
 
-        saveGame();
-        updateUI();
-        applyAutoplayVisibility();
-        logMessage("Το save εισήχθη επιτυχώς.", 'system');
-    } catch (e) {
-        alert("Ο κωδικός save είναι χαλασμένος ή άκυρος.");
-    }
+            if (!player.armor.legendary) {
+                player.armor.name = getItemName('armor', player.armor.power);
+            }
+
+            if (!player.magic.legendary) {
+                player.magic.name = getItemName('magic', player.magic.power);
+            }
+
+            if (data.selectedMonsterLevel) {
+                const selector = document.getElementById('area-selector');
+                if (selector) {
+                    selector.value = data.selectedMonsterLevel;
+                    currentSelectedLevel = parseFloat(data.selectedMonsterLevel);
+                    updateSelectorColor(selector);
+                }
+            }
+
+            const cb = document.getElementById('show-autoplay-checkbox');
+            if (cb) {
+                cb.checked = !!player.showAutoplay;
+            }
+
+            saveGame();
+            updateUI();
+            applyAutoplayVisibility();
+            overlay.remove();
+            logMessage("Το save εισήχθη επιτυχώς.", 'system');
+        } catch (e) {
+            errEl.textContent = 'Ο κωδικός save είναι χαλασμένος ή άκυρος.';
+            errEl.style.display = 'block';
+        }
+    });
 }
 
     function savePlayerName() {
