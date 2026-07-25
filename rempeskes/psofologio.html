@@ -142,7 +142,8 @@
 
     .entry .gear {
         color: var(--parchment-dim);
-        font-size: 0.85rem; /* Αυξήθηκε από 0.75rem */
+        font-size: 0.85rem;
+        font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', 'PT Serif', serif;
     }
 
     .entry.victory {
@@ -335,9 +336,9 @@ function renderEntry(s, i, isVictory, isIronman) {
     const armorColor = s.armor_legendary ? '#ffde21' : '#1ab2ff';
     const magicColor = s.magic_legendary ? '#ffde21' : '#cc66ff';
 
-    const weaponLabel = escapeHtml(s.weapon_name || '???');
-    const armorLabel = escapeHtml(s.armor_name || '???');
-    const magicLabel = escapeHtml(s.magic_name || '???');
+    const weaponLabel = escapeHtml(s.weapon_name || 'Όπλο');
+    const armorLabel = escapeHtml(s.armor_name || 'Θωράκιση');
+    const magicLabel = escapeHtml(s.magic_name || 'Μαγικό');
 
     return `
         <div class="entry${isVictory ? ' victory' : isAlive ? ' alive' : ' dead'}">
@@ -347,9 +348,9 @@ function renderEntry(s, i, isVictory, isIronman) {
                 ${detailLine}
             </div>
             <div class="gear" style="margin-top:4px;">
-                <div style="color:${weaponColor};">${weaponLabel} ${s.weapon || '?'}</div>
-                <div style="color:${armorColor};">${armorLabel} ${s.armor || '?'}</div>
-                <div style="color:${magicColor};">${magicLabel} ${s.magic || '?'}</div>
+                <div style="color:${weaponColor};">🗡 ${weaponLabel} T${s.weapon || '?'}</div>
+                <div style="color:${armorColor};">🛡 ${armorLabel} T${s.armor || '?'}</div>
+                <div style="color:${magicColor};">✨ ${magicLabel} T${s.magic || '?'}</div>
             </div>
         </div>
     `;
