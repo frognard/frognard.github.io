@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v326</title>
+    <title>Ρεμπεσκές v327</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -3154,29 +3154,29 @@ function rollItemTier(monsterLevel) {
     let roll = Math.floor(Math.random() * 100) + 1;
     let modifier = 0;
     // Έλεγχος των ορίων βάσει των ποσοστών:
-    if (roll <= 1) {
-        modifier = -5;          // 1% (1)
-    } else if (roll <= 4) {
-        modifier = -4;          // 3% (2-4)
-    } else if (roll <= 12) {
-        modifier = -3;          // 8% (5-12)
-    } else if (roll <= 25) {
-        modifier = -2;          // 13% (13-25)
-    } else if (roll <= 41) {
-        modifier = -1;          // 16% (26-41)
-    } else if (roll <= 59) {
-        modifier = 0;           // 18% (42-59)
-    } else if (roll <= 75) {
-        modifier = +1;          // 16% (60-75)
-    } else if (roll <= 88) {
-        modifier = +2;          // 13% (76-88)
-    } else if (roll <= 96) {
-        modifier = +3;          // 8% (89-96)
-    } else if (roll <= 99) {
-        modifier = +4;          // 3% (97-99)
-    } else {
-        modifier = +5;          // 1% (100)
-    }
+if (roll <= 1) {
+    modifier = -5;          //1%
+} else if (roll <= 3) {
+    modifier = -4;          //2%
+} else if (roll <= 8) {
+    modifier = -3;          //5%
+} else if (roll <= 18) {
+    modifier = -2;          //10%
+} else if (roll <= 30) {
+    modifier = -1;          //12%
+} else if (roll <= 50) {
+    modifier = 0;           //20%
+} else if (roll <= 74) {
+    modifier = +1;          //24%
+} else if (roll <= 88) {
+    modifier = +2;          //14%
+} else if (roll <= 96) {
+    modifier = +3;          //8%
+} else if (roll <= 99) {
+    modifier = +4;          //3%
+} else {
+    modifier = +5;          //1%
+}
 
     let tier = monsterLevel + modifier;
     tier = Math.max(2, Math.min(105, tier));
@@ -3650,6 +3650,40 @@ function checkLevelUp() {
         parent.appendChild(fText);
         setTimeout(() => { fText.remove(); }, 1400);
     }
+
+function getDropQualityText(diff) {
+    const clamp = Math.max(-5, Math.min(5, Math.round(diff)));
+    const messages = {
+        '-5': "ΣΚΟΥΠΙΔΙ...",
+        '-4': "ΜΙΖΕΡΟ DROP...",
+        '-3': "ΧΑΛΙΑ DROP...",
+        '-2': "ΚΑΚΟ DROP...",
+        '-1': "ΜΕΤΡΙΟ DROP...",
+        '0': "ΚΟΙΝΟ DROP",
+        '1': "ΚΑΛΟΥΤΣΙΚΟ DROP!",
+        '2': "ΚΑΛΟ DROP!!",
+        '3': "ΑΣΗΜΕΝΙΟ DROP!!!",
+        '4': "ΧΡΥΣΟ DROP!!!!",
+        '5': "ΠΑΤΙΝΕΝΙΟ DROP!!!!!"
+    };
+    return messages[String(clamp)] || "ΚΟΙΝΟ DROP";
+}
+
+function getDropQualityColor(type) {
+    switch (type) {
+        case 'weapon': return '#ff4444';
+        case 'armor': return '#1ab2ff';
+        case 'magic': return '#cc66ff';
+        default: return '#ffffff';
+    }
+}
+
+function showDropQualityFloatingText(type, rolledTier, monsterLevel) {
+    const diff = rolledTier - monsterLevel;
+    const text = getDropQualityText(diff);
+    const color = getDropQualityColor(type);
+    logMessageHTML(`<span style="color:${color}; font-weight:bold;">${text}</span>`, 'victory');
+}
 
 function loadGame() {
     generateAreaModifiers();
@@ -5138,10 +5172,12 @@ if (isLegendaryDrop && monster.lootItemName) {
     }
 
     logMessage(`[DROP] Στον εχθρό βρέθηκε: ${itemName} (T${rolledTier})!`, 'victory');
+
 let finalType = type;
 
     if (!forceSell && rolledTier > player[finalType].power) {
         let oldTier = player[type].power;
+        let tierGain = rolledTier - oldTier;
         player[finalType] = {
             name: itemName,
             power: rolledTier,
@@ -5149,7 +5185,7 @@ let finalType = type;
         };
         itemDropSound();
         logMessage(
-            `[EQUIP] Αναβάθμιση εξοπλισμού! (T${oldTier} → T${rolledTier})`,
+            `[EQUIP] Αναβάθμιση εξοπλισμού! (T${oldTier} → T${rolledTier}) (+${tierGain})`,
             'victory'
         );
 
@@ -5205,19 +5241,27 @@ function showLegendaryPopup() {
 
 // Γενική εκδοχή του θρυλικού popup — ίδια εμφάνιση/διάρκεια, διαφορετικό κείμενο κάθε φορά.
 // styleClass (προαιρετικό): π.χ. 'risk-popup' για διαφορετικό χρώμα από το θρυλικό drop.
-function showAnnouncementPopup(text, styleClass) {
+function showAnnouncementPopup(text, styleClass, color) {
     const popup = document.getElementById('legendary-popup');
     if (!popup) return;
 
     popup.textContent = text;
     popup.classList.remove('risk-popup');
+    popup.style.color = '';
+    popup.style.textShadow = '';
     if (styleClass) popup.classList.add(styleClass);
+    if (color) {
+        popup.style.color = color;
+        popup.style.textShadow = `0 0 10px ${color}, 0 0 25px ${color}, 0 0 40px ${color}`;
+    }
     popup.classList.remove('hidden');
     popup.classList.add('show');
 
     setTimeout(() => {
         popup.classList.remove('show');
         popup.classList.add('hidden');
+        popup.style.color = '';
+        popup.style.textShadow = '';
     }, 900);
 }
 
