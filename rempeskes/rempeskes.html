@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v327</title>
+    <title>Ρεμπεσκές v329</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1396,14 +1396,14 @@ function formatNumber(num) {
     return Number(num).toLocaleString('el-GR');
 }
 
-// ΣΚΟΡ: totalXpGained * 100 / totalTurns * deathFactor (2.5% penalty ανά θάνατο)
+// ΣΚΟΡ: totalXpGained * 100 / totalTurns * deathFactor (2.5% penalty ανά θάνατο) --- PROS TO PARON DE METRAEI
 function computeScore() {
     const totalXp = (player.level >= 100) ? (player.totalXpAtLevel100 || 0) : (player.totalXpGained || 0);
     const turns = player.activeTime || 0;
     const deaths = player.ironman ? 0 : (player.deaths || 0);
     const deathFactor = Math.pow(0.975, deaths);
     const raw = (turns === 0) ? totalXp : totalXp * 100 / turns;
-    return Math.round(raw * deathFactor);
+    return Math.round(raw);
 }
 
 // Ανιχνεύει κινητό/tablet (Android/iOS), ΟΧΙ Windows — ρητή εξαίρεση, ώστε ακόμα
@@ -1450,7 +1450,8 @@ function showStats() {
     logMessage(`Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`,"stats");
     logMessage(`Γύροι: ${formatNumber(player.activeTime)}`,"stats");
     logMessage(`Ρίσκο: ${(player.risk || 0) > 0 ? '+' : ''}${(player.risk || 0).toFixed(3)}`,"stats");
-    logMessage(`Μαγκιά: ${formatNumber(player._displayedScore || 0)}`,"stats");
+    logMessage(`Φόνοι/κατάβαση: ${player.totalDescents > 0 ? (player.kills / player.totalDescents).toFixed(1) : '0'}`,"stats");
+  //  logMessage(`Μαγκιά: ${formatNumber(player._displayedScore || 0)}`,"stats");
      // logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
     logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
   //  logMessage("");
@@ -1487,6 +1488,12 @@ function uploadCurrentPlayerToHiScores() {
         weapon: player.weapon.power,
         armor: player.armor.power,
         magic: player.magic.power,
+        weapon_name: player.weapon.name,
+        armor_name: player.armor.name,
+        magic_name: player.magic.name,
+        weapon_legendary: player.weapon.legendary || false,
+        armor_legendary: player.armor.legendary || false,
+        magic_legendary: player.magic.legendary || false,
         turns: player.activeTime || 0,
         date: Date.now(),
         victory: player.hasBeatenConanos || false,
@@ -2880,7 +2887,7 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Έκαν' το σκιτάλι κώλο, κι έχεσε τον κόσμο όλο!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως στο εκατοστό βάθος του λαβυρίνθου κάθεται φωλιασμένος ο Θεός Κόνανος, γελαστός και παγκάκιστος, ο μισός παγωμένος κι ο μισός πυρωμένος, με κέρατα, με δόντια, με νύχια ματωμένα, με τα πλεμόνια του απ'όξω από το στήθος!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''ΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑ!!!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όσο πιο αποτελεσματικά παίζεις και όσο λιγότερο ψοφάς, τόσο πιο μάγκας εισαι!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όσο πιο αποτελεσματικά παίζεις, τόσο πιο μάγκας εισαι!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Παλουκώσου λιγάκι, κι άκουσε...''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι οι απλές επιθέσεις εχουν 80% ευστοχία. Αλλά οι κατραπακιές και οι εκτελέσεις έχουν 90%.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όταν ψοφολογάς, τα αντικείμενά σου φθείρονται!''" ,
@@ -3217,6 +3224,7 @@ if (roll <= 1) {
             lastKillerName: "",
             risk: 0, // τώρα: μέσος όρος (επίπεδο τέρατος - επίπεδο παίκτη) σε όλους τους φόνους της καριέρας — δείχνει πόσο ρισκάρει ο παίκτης
             magkiaKillCount: 0, // πόσοι φόνοι έχουν μετρήσει στον παραπάνω μέσο όρο
+            totalDescents: 0,
             magkiaEarnedDepths: [], // (legacy, δεν χρησιμοποιείται πια) ποια βάθη είχαν δώσει μαγκιά με τον παλιό μηχανισμό σερί
             magkiaMilestones: [],
         weapon: { name: "Ράβδος", power: 1, legendary: false },
@@ -3701,6 +3709,7 @@ function loadGame() {
             if (typeof player.risk !== 'number') player.risk = 0;
             if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
             if (typeof player._displayedScore !== 'number') player._displayedScore = 0;
+            if (typeof player.totalDescents !== 'number') player.totalDescents = 0;
             player.maxUnlockedLevel = 100;
 
             player.nextXp = calculateNextXpRequirement(player.level);
@@ -3914,6 +3923,7 @@ function importSave() {
         if (!Array.isArray(player.magkiaMilestones)) player.magkiaMilestones = [];
         if (typeof player.risk !== 'number') player.risk = 0;
         if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
+        if (typeof player.totalDescents !== 'number') player.totalDescents = 0;
         player.maxUnlockedLevel = 100;
         player.nextXp = calculateNextXpRequirement(player.level);
 
@@ -3995,8 +4005,8 @@ function resetXpPerTurn() {
 function updateXpPerTurn() {
     const turns = (player.activeTime || 0) - xpTurnSessionStart;
     const rawXp = (player.totalXpGained || 0) - xpTurnSessionXp;
-    const deathFactor = player.ironman ? 1 : Math.pow(0.975, player.deaths || 0);
-    const xp = rawXp * deathFactor;
+   // const deathFactor = player.ironman ? 1 : Math.pow(0.975, player.deaths || 0);
+    const xp = rawXp // * deathFactor;
     const el = document.getElementById('p-xp-per-turn');
     if (!el) return;
     el.textContent = turns > 0 ? formatNumber(Math.round(xp / turns)) : '0';
@@ -4577,6 +4587,7 @@ setInterval(function () {
     document.getElementById('p-name').blur();
     stopTownRegen(); 
     currentSelectedLevel = parseFloat(document.getElementById('area-selector').value);
+    player.totalDescents++;
     if (isNaN(currentSelectedLevel) || currentSelectedLevel < 1) {
         currentSelectedLevel = 1;
         document.getElementById('area-selector').value = "1";
@@ -6340,6 +6351,12 @@ if ('serviceWorker' in navigator) {
                     weapon: r.weapon,
                     armor: r.armor,
                     magic: r.magic,
+                    weapon_name: r.weapon_name || '',
+                    armor_name: r.armor_name || '',
+                    magic_name: r.magic_name || '',
+                    weapon_legendary: !!r.weapon_legendary,
+                    armor_legendary: !!r.armor_legendary,
+                    magic_legendary: !!r.magic_legendary,
                     turns: r.turns || 0,
                     death_date: new Date(r.date).toISOString(),
                     victory: !!r.victory,
