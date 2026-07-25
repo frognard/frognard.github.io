@@ -330,14 +330,26 @@ function renderEntry(s, i, isVictory, isIronman) {
         detailLine = `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)}, το γυρο ${turnsStr} &middot; ${formattedDate}`;
     }
     const skull = isIronman ? '<span class="ironman-skull">&#128128;</span> ' : '';
+
+    const weaponColor = s.weapon_legendary ? '#ffde21' : '#ec6868';
+    const armorColor = s.armor_legendary ? '#ffde21' : '#1ab2ff';
+    const magicColor = s.magic_legendary ? '#ffde21' : '#cc66ff';
+
+    const weaponLabel = escapeHtml(s.weapon_name || '???');
+    const armorLabel = escapeHtml(s.armor_name || '???');
+    const magicLabel = escapeHtml(s.magic_name || '???');
+
     return `
         <div class="entry${isVictory ? ' victory' : isAlive ? ' alive' : ' dead'}">
             <div class="rank-badge">${romanish(i + 1)}</div>
-            <div class="line1">${skull}<span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level}</div>
+            <div class="line1">${skull}<span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level} — Μαγκιά: ${formatScore(s.score ?? 0)}</div>
             <div class="line2">
                 ${detailLine}
-                <br>
-                <span class="gear">εξοπλισμός: ${s.weapon} / ${s.armor} / ${s.magic} — Μαγκιά: ${formatScore(s.score ?? 0)}</span>
+            </div>
+            <div class="gear" style="margin-top:4px;">
+                <div style="color:${weaponColor};">${weaponLabel} ${s.weapon || '?'}</div>
+                <div style="color:${armorColor};">${armorLabel} ${s.armor || '?'}</div>
+                <div style="color:${magicColor};">${magicLabel} ${s.magic || '?'}</div>
             </div>
         </div>
     `;
