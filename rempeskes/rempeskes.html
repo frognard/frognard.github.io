@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v330</title>
+    <title>Ρεμπεσκές v333</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -3398,7 +3398,7 @@ const AREA_TYPE_COLOR = {
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
    // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to equipment
-    function calculateNextXpRequirement(lvl) { return Math.round(80 * Math.pow(lvl, 2.6)); }
+    function calculateNextXpRequirement(lvl) { return Math.round(100 * Math.pow(lvl, 2.53)); }
 
     // Πόσο XP θα χρειαζόταν ακόμα ο παίκτης (από το τρέχον level/xp του) για να έφτανε level 100.
     // Χρησιμοποιείται ΜΟΝΟ για το σκορ (πρόωρος Κόνανος), όχι για πραγματικό level up.
@@ -3428,7 +3428,7 @@ const AREA_TYPE_COLOR = {
 
 
 
- // 1. ypologismos "effective level" lamvanontas ypopsin ta expected equip tiers tou rempeske
+ // 1. ypologismos "effective level" lamvanontas ypopsin ta expected equip tiers tou rempeske -- to 1.00 einai normal / no effective level mod.
 let effectivePlayerLevel = Math.min(103, 1.00 * player.level);
 let lvl = effectivePlayerLevel;
 
