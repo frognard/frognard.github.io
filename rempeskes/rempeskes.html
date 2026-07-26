@@ -1404,7 +1404,10 @@ function computeScore() {
     const deaths = player.ironman ? 0 : (player.deaths || 0);
     const deathFactor = Math.pow(0.99, deaths);
     const raw = (turns === 0) ? totalXp : totalXp * 100 / turns;
-    return Math.round(raw* deathFactor);
+    let score = raw * deathFactor;
+    if (player.ironman) score *= 1.5;
+    if (player.hasBeatenConanos) score *= 1.5;
+    return Math.round(score);
 }
 
 // Ανιχνεύει κινητό/tablet (Android/iOS), ΟΧΙ Windows — ρητή εξαίρεση, ώστε ακόμα
