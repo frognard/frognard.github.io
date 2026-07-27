@@ -5955,8 +5955,8 @@ if (
     // χωρίς να χρειάζεται να το κάνουμε spawn — ίδιος τύπος στατιστικών με το spawnMonster().
     // (Οι σπάνιες παραλλαγές weapon/armor/magic/legendary αγνοούνται εδώ σκόπιμα ως προσέγγιση.)
     function estimateMonsterAt(lvl) {
-        const atk = lvl * 0.75 + (lvl - 1) + (lvl / 2 - 0.5);
-        const def = lvl * 0.75 + (lvl - 1) + (lvl / 2 - 0.5);
+        const atk = lvl * 0.75 + (lvl) + (lvl / 2);
+        const def = lvl * 0.75 + (lvl) + (lvl / 2);
         const maxHp = lvl * 100;
         return { level: lvl, atk: atk, def: def, hp: maxHp, maxHp: maxHp };
     }
