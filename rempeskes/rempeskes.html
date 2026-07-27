@@ -2891,9 +2891,10 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Μπουγαρομαζώματα, κοβαλοσκορπίσματα!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Είναι καλό να τολμάς να μπαίνεις όσο πιο βαθιά μπορείς στο λαβύρινθο, αφού εκεί βρίσκονται τα δυνατότερα αντικείμενα. Πρόσεχε όμως πόσο ρισκάρεις, γιατί η απληστία τιμωρείται!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Έκαν' το σκιτάλι κώλο, κι έχεσε τον κόσμο όλο!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως στο εκατοστό βάθος του λαβυρίνθου κάθεται φωλιασμένος ο Θεός Κόνανος, γελαστός και παγκάκιστος, ο μισός παγωμένος κι ο μισός πυρωμένος, με κέρατα, με δόντια, με νύχια ματωμένα, με τα πλεμόνια του απ'όξω από το στήθος!''",
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι στο εκατοστό βάθος του λαβυρίνθου κάθεται φωλιασμένος ο Θεός Κόνανος, γελαστός και παγκάκιστος, ο μισός παγωμένος κι ο μισός πυρωμένος, με κέρατα, με δόντια, με νύχια ματωμένα, με τα πλεμόνια του απ'όξω από το στήθος!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''ΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑ!!!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όσο πιο αποτελεσματικά παίζεις, τόσο πιο μάγκας εισαι!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όσο πιο αποτελεσματικά παίζεις, τόσο πιο μάγκας εισαι!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι το επίπεδο πολλαπλασιάζει τη ζωή και τη ζημιά. Επίσης, λένε ότι ενώ στην αρχή το επίπεδο είναι πολύ σημαντικό, αργότερα δεν μετράει τόσο όσο ο εξοπλισμός.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Παλουκώσου λιγάκι, κι άκουσε...''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι οι απλές επιθέσεις εχουν 80% ευστοχία. Αλλά οι κατραπακιές και οι εκτελέσεις έχουν 90%.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όταν ψοφολογάς, τα αντικείμενά σου φθείρονται!''" ,
@@ -3402,7 +3403,7 @@ const AREA_TYPE_COLOR = {
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
    // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to equipment
-    function calculateNextXpRequirement(lvl) { return Math.round(100 * Math.pow(lvl, 2.53)); }
+    function calculateNextXpRequirement(lvl) { return Math.round(100 * Math.pow(lvl, 1.6)); }
 
     // Πόσο XP θα χρειαζόταν ακόμα ο παίκτης (από το τρέχον level/xp του) για να έφτανε level 100.
     // Χρησιμοποιείται ΜΟΝΟ για το σκορ (πρόωρος Κόνανος), όχι για πραγματικό level up.
@@ -3416,8 +3417,8 @@ const AREA_TYPE_COLOR = {
     }
   
     // cost armor kai weapon: ligo pio megalos ek8eths apo to gold gain, giati ta levels megalwnoun se xrono
-    function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
-    function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
+ //   function getWeaponUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
+  //  function getArmorUpgradeCost(currentPower) { return Math.round(((Math.pow(currentPower, 1.3)) + 1) * 50 + 0); }
     
  //XP REWARD FORMULA
     function getMonsterXpReward(monsterLvl) { 
@@ -3428,7 +3429,7 @@ const AREA_TYPE_COLOR = {
  //  let xp = 10 * Math.pow(monsterLvl, 2) * difficultyModifier * 1.8 ;  //1:1 xp modifier :: apply final modifier to match normal center value
             // let xp = 10 * Math.pow(monsterLvl, 2) * ((difficultyModifier + 1)/2); // half effect on xp
       
-     let xp = 10 * Math.pow(monsterLvl, 2);
+     let xp = 7 * Math.pow(monsterLvl, 1.05);
 
 
 
@@ -3470,8 +3471,9 @@ function calculateDifficulty(player, monster) {
 
 //GOLD roll: 8eloume kata vash na einai to 10% twn monster xp !!tou!! next level == afou to main xm einai level tetragwno x10
 function rollGoldForLevel(level) {
-    const averageGold = Math.pow(level+1, 2) * 1.0 ;
-    const randomFactor = 0.1 + Math.random() * 1.8;   // 0.1 - 1.9
+    const nextLevelXp = getMonsterXpReward(level + 1);
+    const averageGold = nextLevelXp / 10;
+    const randomFactor = 0.1 + Math.random() * 1.8;
 
     return Math.max(
         2,
