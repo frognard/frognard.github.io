@@ -4713,8 +4713,8 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
 
 
     let lvl = currentSelectedLevel;
-    let baseAtk = lvl * 0.75 + (lvl - 1) + (lvl/2 - 0.5);
-    let baseDef = lvl * 0.75 + (lvl - 1) + (lvl/2 - 0.5);
+    let baseAtk = lvl * 0.75 + (lvl) + (lvl/2);
+    let baseDef = lvl * 0.75 + (lvl) + (lvl/2);
     let baseHp = lvl * 100;
 
     let areaType = getAreaType(lvl);
@@ -4904,7 +4904,7 @@ function rollBaseDamage(fixedDice = null, minDice = null, maxDice = null) {
     }
     let diff = getPlayerAtk() - monster.def;
     let dmgModifier = calcDmgModifier(diff);
-    let dmg = d6 * 5 * player.level * dmgModifier;
+    let dmg = d6 * 5 * player.level * dmgModifier * 1.06;
     return Math.max(1, Math.round(dmg));
 }
 
@@ -5131,7 +5131,7 @@ if (isAttemptingRetreat) {
         let d6 = Math.floor(Math.random() * 6) + 1;
         let diff = monster.atk - getPlayerDef();
         let dmgModifier = calcDmgModifier(diff);
-        let dmg = d6 * 5 * monster.level * dmgModifier;
+        let dmg = d6 * 5 * monster.level * dmgModifier * 0.94;
         monsterDamageCalculated = Math.max(1, Math.round(dmg));
         monsterActionLog = `${getMonsterDisplayName(monster)}: σου έκανε ${formatNumber(monsterDamageCalculated)} ζημιά.`;
     }
@@ -6142,7 +6142,7 @@ if (
                 if (isAttemptingRetreat) {
                     useKatrapakia = true;
                 } else {
-                    // 2) Εκτίμηση ζημιάς Κατραπακιάς: avgDice=7, formula = d6 * 5 * level * dmgMod
+                    // 2) Εκτίμηση ζημιάς Κατραπακιάς: avgDice=7, formula = d6 x 5 x level x dmgMod x player mod
                     const avgDice = (skills.heavyStrike.minDice + skills.heavyStrike.maxDice) / 2;
                     const diff = getPlayerAtk() - monster.def;
                     const dmgMod = calcDmgModifier(diff);
