@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v334</title>
+    <title>Ρεμπεσκές v335</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1856,7 +1856,7 @@ function playerHitSound() {
     const now = audioCtx.currentTime;
 
     osc.frequency.setValueAtTime(200, now);
-    osc.frequency.exponentialRampToValueAtTime(170, now + 0.04);
+    osc.frequency.exponentialRampToValueAtTime(160, now + 0.04);
 
     // ΔΙΠΛΑΣΙΑΣΜΟΣ: Από 0.16 σε 0.32
     gain.gain.setValueAtTime(0.32, now);
@@ -3206,7 +3206,7 @@ if (roll <= 1) {
         level: 1,
         baseAtk: 10,
         baseDef: 10,
-        hp: 170, 
+        hp: 160, 
         xp: 0,
         nextXp: 100,
         lastGoldCashedLevel: 1,
@@ -3399,7 +3399,7 @@ const AREA_TYPE_COLOR = {
     function getPlayerAtk() { return player.level * 0.75 + player.weapon.power + player.magic.power/2; }
     function getPlayerDef() { return player.level * 0.75 + player.armor.power + player.magic.power/2; }
 // player hp per level
-    function getPlayerMaxHp() { return Math.floor(player.level * 170); }
+    function getPlayerMaxHp() { return Math.floor(player.level * 160); }
     
    // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to equipment
     function calculateNextXpRequirement(lvl) { return Math.round(100 * Math.pow(lvl, 2.53)); }
