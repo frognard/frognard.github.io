@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v340</title>
+    <title>Ρεμπεσκές v341</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1403,7 +1403,7 @@ function computeScore() {
     const turns = player.activeTime || 0;
     const deaths = player.ironman ? 0 : (player.deaths || 0);
     const deathFactor = Math.pow(0.99, deaths);
-    const raw = (turns === 0) ? totalXp : totalXp * 1000 / turns;
+    const raw = (turns === 0) ? totalXp : totalXp * 5000 / turns;
     let score = raw * deathFactor;
     if (player.ironman) score *= 1.5;
     if (player.hasBeatenConanos) score *= 1.5;
