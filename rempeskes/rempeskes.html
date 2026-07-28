@@ -3668,39 +3668,6 @@ function checkLevelUp() {
         setTimeout(() => { fText.remove(); }, 1400);
     }
 
-function getDropQualityText(diff) {
-    const clamp = Math.max(-5, Math.min(5, Math.round(diff)));
-    const messages = {
-        '-5': "ΣΚΟΥΠΙΔΙ...",
-        '-4': "ΜΙΖΕΡΟ DROP...",
-        '-3': "ΧΑΛΙΑ DROP...",
-        '-2': "ΚΑΚΟ DROP...",
-        '-1': "ΜΕΤΡΙΟ DROP...",
-        '0': "ΚΟΙΝΟ DROP",
-        '1': "ΚΑΛΟΥΤΣΙΚΟ DROP!",
-        '2': "ΚΑΛΟ DROP!!",
-        '3': "ΑΣΗΜΕΝΙΟ DROP!!!",
-        '4': "ΧΡΥΣΟ DROP!!!!",
-        '5': "ΠΑΤΙΝΕΝΙΟ DROP!!!!!"
-    };
-    return messages[String(clamp)] || "ΚΟΙΝΟ DROP";
-}
-
-function getDropQualityColor(type) {
-    switch (type) {
-        case 'weapon': return '#ff4444';
-        case 'armor': return '#1ab2ff';
-        case 'magic': return '#cc66ff';
-        default: return '#ffffff';
-    }
-}
-
-function showDropQualityFloatingText(type, rolledTier, monsterLevel) {
-    const diff = rolledTier - monsterLevel;
-    const text = getDropQualityText(diff);
-    const color = getDropQualityColor(type);
-    logMessageHTML(`<span style="color:${color}; font-weight:bold;">${text}</span>`, 'victory');
-}
 
 function loadGame() {
     generateAreaModifiers();
@@ -5232,6 +5199,16 @@ if (isLegendaryDrop && monster.lootItemName) {
         player.legendaryDrops++;
         showLegendaryPopup();
     }
+
+    else if (rolledTier >= monster.level + 5) {
+
+    const color =
+        type === 'weapon' ? '#ff4444' :
+        type === 'armor'  ? '#1ab2ff' :
+                            '#cc66ff';
+
+    showAnnouncementPopup("+5 DROP!", "", color);
+}
 
     logMessage(`[DROP] Στον εχθρό βρέθηκε: ${itemName} (T${rolledTier})!`, 'victory');
 
