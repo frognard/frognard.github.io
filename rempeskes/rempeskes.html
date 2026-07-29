@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v360</title>
+    <title>Ρεμπεσκές v352</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -2894,6 +2894,7 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι στο εκατοστό βάθος του λαβυρίνθου κάθεται φωλιασμένος ο Θεός Κόνανος, γελαστός και παγκάκιστος, ο μισός παγωμένος κι ο μισός πυρωμένος, με κέρατα, με δόντια, με νύχια ματωμένα, με τα πλεμόνια του απ'όξω από το στήθος!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''ΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑ!!!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όσο πιο αποτελεσματικά παίζεις, τόσο πιο μάγκας εισαι!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι το επίπεδο πολλαπλασιάζει τη ζωή και τη ζημιά. Επίσης, λένε ότι ενώ στην αρχή το επίπεδο είναι πολύ σημαντικό, αργότερα δεν μετράει τόσο όσο ο εξοπλισμός.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Παλουκώσου λιγάκι, κι άκουσε...''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι οι απλές επιθέσεις εχουν 80% ευστοχία. Αλλά οι κατραπακιές και οι εκτελέσεις έχουν 90%.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όταν ψοφολογάς, τα αντικείμενά σου φθείρονται!''" ,
@@ -2975,14 +2976,10 @@ const legendaryStatsByType = {
 // Monster HP - βασικά νούμερα, ΟΛΑ εδώ. hp = lvl * (η ανάλογη σταθερά).
 // Αλλαξε αυτά τα 4 νούμερα για να αλλάξεις το HP των τεράτων.
 // ==========================================================================
-const monsterHpGrowth = 1.05;        // κοινός εκθετικός ρυθμός για όλα τα monster HP
 const monsterBaseHpPerLevel = 100;   // normal monster
 const variantBaseHpPerLevel = 100;   // weapon/armor/magic variant monster (τώρα ίδιο με normal)
-const legendaryBaseHpPerLevel = 100; // legendary monster (τώρα ίδιο και για weapon/armor/magic legendary)
+const legendaryBaseHpPerLevel = 120; // legendary monster (τώρα ίδιο και για weapon/armor/magic legendary)
 const konanosMaxHp = 16666;          // fixed HP boss Θεός Κόνανος (δεν είναι lvl-based)
-function getMonsterMaxHp(lvl) { return Math.floor(monsterBaseHpPerLevel * Math.pow(monsterHpGrowth, lvl - 1)); }
-function getVariantMonsterMaxHp(lvl) { return Math.floor(variantBaseHpPerLevel * Math.pow(monsterHpGrowth, lvl - 1)); }
-function getLegendaryMonsterMaxHp(lvl) { return Math.floor(legendaryBaseHpPerLevel * Math.pow(monsterHpGrowth, lvl - 1)); }
 
 const legendaryMonstersByType = {
     weapon: [
@@ -3164,7 +3161,7 @@ function getLegendaryItemName(type, tier) {
     // Άρα αφαιρούμε το +20 για να βρούμε ξανά το αντίστοιχο bracket επιπέδου
     // μέσα στο legendaryMonstersByType, το ίδιο table που χρησιμοποιείται
     // και τη στιγμή του drop.
-    let baseLevel = tier - 15;  //legendary bonus roll factor (arnitiko)
+    let baseLevel = tier - 13;  //legendary bonus roll factor (arnitiko)
     baseLevel = Math.max(1, Math.min(100, baseLevel));
 
     const list = legendaryMonstersByType[type] || [];
@@ -3409,10 +3406,10 @@ const AREA_TYPE_COLOR = {
 
 
   // Attack and defense formulas for player
-    function getPlayerAtk() { return player.weapon.power + player.magic.power/2; }
-    function getPlayerDef() { return player.armor.power + player.magic.power/2; }
+    function getPlayerAtk() { return player.level * 0.50 + player.weapon.power + player.magic.power/2; }
+    function getPlayerDef() { return player.level * 0.50 + player.armor.power + player.magic.power/2; }
 // player hp per level
-    function getPlayerMaxHp() { return Math.floor(150 * Math.pow(1.05, player.level - 1)); }
+    function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
    // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to equipment
     function calculateNextXpRequirement(lvl) { return Math.round(100 * Math.pow(lvl, 1.5)); }
@@ -3707,8 +3704,6 @@ function loadGame() {
             player.maxUnlockedLevel = 100;
 
             player.nextXp = calculateNextXpRequirement(player.level);
-
-            // Τα ονόματα σώζονται πάντα ξεχωριστά από τα tiers — δεν αλλάζουν στο load
 
             const savedMonsterLevel = localStorage.getItem('selectedMonsterLevel');
 
@@ -4559,10 +4554,7 @@ setInterval(function () {
         if (player.gold >= cost) {
             player.gold -= cost;
             player[type].power++;
-            // Τα legendary κρατάνε το όνομά τους
-            if (!player[type].legendary) {
-                player[type].name = getItemName(type, player[type].power);
-            }
+            player[type].name = getItemName(type, player[type].power);
             logMessage(`Αναβάθμιση αντικειμένου: ${player[type].name}.`, 'victory');
             buyItemSound();
             
@@ -4678,9 +4670,9 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
 
 
     let lvl = currentSelectedLevel;
-    let baseAtk = (lvl) + (lvl/2);
-    let baseDef = (lvl) + (lvl/2);
-    let baseHp = getMonsterMaxHp(lvl);
+    let baseAtk = lvl * 0.50 + (lvl) + (lvl/2);
+    let baseDef = lvl * 0.50 + (lvl) + (lvl/2);
+    let baseHp = lvl * monsterBaseHpPerLevel;
 
     let areaType = getAreaType(lvl);
 
@@ -4729,7 +4721,7 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
     const legendaryStats = legendaryStatsByType[legendaryLootType];
     baseAtk += legendaryStats.atkBonus;
     baseDef += legendaryStats.defBonus;
-    baseHp = getLegendaryMonsterMaxHp(lvl);
+    baseHp = lvl * legendaryBaseHpPerLevel;
 
 }
 else if (Math.random() < specialChance) {
@@ -4753,20 +4745,20 @@ else if (Math.random() < specialChance) {
         if (chosenVariant === 'weapon') {
             variant = 'weapon';
             baseAtk += 9;
-            baseHp = getVariantMonsterMaxHp(lvl);
+            baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(wildTitles);
         }
         else if (chosenVariant === 'armor') {
             variant = 'armor';
             baseDef += 14;
-            baseHp = getVariantMonsterMaxHp(lvl);
+            baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(armoredTitles);
         }
         else {
             variant = 'magic';
             baseAtk += 5.5;
             baseDef += 5.5;
-            baseHp = getVariantMonsterMaxHp(lvl);
+            baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(magicTitles);
         }
     }
@@ -4838,8 +4830,8 @@ function handleHuntRetreatClick() {
 // Global finetune multipliers - flat πολλαπλασιαστές ΕΞΩ απο το calcDmgModifier.
 // Χρησιμοποιούνται και στις πραγματικές damage formulas και στο TTK estimation
 // (calculateDifficulty), ωστε να μενουν παντα συγχρονισμενα.
-const playerDmgFinetune = 1.08;
-const monsterDmgFinetune = 0.92;
+const playerDmgFinetune = 1.06;
+const monsterDmgFinetune = 0.94;
 
 //complex εκθετικος modifier
     function calcDmgModifier(diff) {
@@ -4876,7 +4868,7 @@ function rollBaseDamage(fixedDice = null, minDice = null, maxDice = null) {
     }
     let diff = getPlayerAtk() - monster.def;
     let dmgModifier = calcDmgModifier(diff);
-    let dmg = (d6 / 3.5) * getPlayerMaxHp() / 5.7 / 1.5 * dmgModifier * playerDmgFinetune;
+    let dmg = d6 * 5 * player.level * dmgModifier * playerDmgFinetune;
     return Math.max(1, Math.round(dmg));
 }
 
@@ -5103,7 +5095,7 @@ if (isAttemptingRetreat) {
         let d6 = Math.floor(Math.random() * 6) + 1;
         let diff = monster.atk - getPlayerDef();
         let dmgModifier = calcDmgModifier(diff);
-        let dmg = (d6 / 3.5) * monster.maxHp / 5.7 * dmgModifier * monsterDmgFinetune;
+        let dmg = d6 * 5 * monster.level * dmgModifier * monsterDmgFinetune;
         monsterDamageCalculated = Math.max(1, Math.round(dmg));
         monsterActionLog = `${getMonsterDisplayName(monster)}: σου έκανε ${formatNumber(monsterDamageCalculated)} ζημιά.`;
     }
@@ -5178,7 +5170,7 @@ function handleEquipmentDrop(type, rolledTier, monster, forceSell = false) {
 
     const isLegendaryDrop = monster && monster.variant === 'legendary';
         if (isLegendaryDrop) {
-            rolledTier = Math.min(118, rolledTier + 15);  //legendary bonus   max and bonus
+            rolledTier = Math.min(118, rolledTier + 13);  //legendary bonus   max and bonus
         }
 
     console.log("LEGENDARY?", isLegendaryDrop);
@@ -5940,9 +5932,9 @@ if (
     // χωρίς να χρειάζεται να το κάνουμε spawn — ίδιος τύπος στατιστικών με το spawnMonster().
     // (Οι σπάνιες παραλλαγές weapon/armor/magic/legendary αγνοούνται εδώ σκόπιμα ως προσέγγιση.)
     function estimateMonsterAt(lvl) {
-        const atk = (lvl) + (lvl / 2);
-        const def = (lvl) + (lvl / 2);
-        const maxHp = getMonsterMaxHp(lvl);
+        const atk = lvl * 0.50 + (lvl) + (lvl / 2);
+        const def = lvl * 0.50 + (lvl) + (lvl / 2);
+        const maxHp = lvl * monsterBaseHpPerLevel;
         return { level: lvl, atk: atk, def: def, hp: maxHp, maxHp: maxHp };
     }
 
