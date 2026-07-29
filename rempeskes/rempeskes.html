@@ -2965,12 +2965,21 @@ const msgs = [
 // Στατιστικά ανά τύπο legendary τέρατος. Άλλαξε ελεύθερα τα νούμερα εδώ
 // για να πειράξεις πόσο δυνατό είναι κάθε "χρώμα" τέρατος.
 // atkBonus/defBonus προστίθενται πάνω στο κανονικό atk/def του επιπέδου.
-// hpMultiplier πολλαπλασιάζεται με το επίπεδο (lvl * hpMultiplier) για να βγει το HP.
+// Το HP των legendary τεράτων υπολογίζεται ξεχωριστά, βλ. legendaryBaseHpPerLevel παρακάτω.
 const legendaryStatsByType = {
-    weapon: { atkBonus: 12, defBonus: 0,  hpMultiplier: 120 }, // κόκκινα: επιθετικά, λιγότερη ζωή
-    armor:  { atkBonus: 0,  defBonus: 18, hpMultiplier: 120 }, // μπλε: αμυντικά, πολλή ζωή
-    magic:  { atkBonus: 7.5, defBonus: 7.5, hpMultiplier: 120 }  // μωβ: ισορροπημένα
+    weapon: { atkBonus: 12, defBonus: 0 },  // κόκκινα: επιθετικά, λιγότερη ζωή
+    armor:  { atkBonus: 0,  defBonus: 18 }, // μπλε: αμυντικά, πολλή ζωή
+    magic:  { atkBonus: 7.5, defBonus: 7.5 } // μωβ: ισορροπημένα
 };
+
+// ==========================================================================
+// Monster HP - βασικά νούμερα, ΟΛΑ εδώ. hp = lvl * (η ανάλογη σταθερά).
+// Αλλαξε αυτά τα 4 νούμερα για να αλλάξεις το HP των τεράτων.
+// ==========================================================================
+const monsterBaseHpPerLevel = 100;   // normal monster
+const variantBaseHpPerLevel = 100;   // weapon/armor/magic variant monster (τώρα ίδιο με normal)
+const legendaryBaseHpPerLevel = 120; // legendary monster (τώρα ίδιο και για weapon/armor/magic legendary)
+const konanosMaxHp = 16666;          // fixed HP boss Θεός Κόνανος (δεν είναι lvl-based)
 
 const legendaryMonstersByType = {
     weapon: [
@@ -3457,8 +3466,8 @@ function calculateDifficulty(player, monster) {
     const playerDmgMod = calcDmgModifier(playerAtk - monster.def);
     const monsterDmgMod = calcDmgModifier(monster.atk - playerDef);
 
-    const playerDps = player.level * playerDmgMod * 1.1;
-    const monsterDps = monster.level * monsterDmgMod * 0.9;
+    const playerDps = player.level * playerDmgMod * playerDmgFinetune;
+    const monsterDps = monster.level * monsterDmgMod * monsterDmgFinetune;
 
     const playerTTK = monster.maxHp / playerDps;
     const monsterTTK = playerMaxHp / monsterDps;
@@ -4666,8 +4675,8 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
     monster = {
         name: "Θεός Κόνανος",
         level: 106,
-        hp: 16666,       // Βάλε όση ζωή θες για να είναι ζόρικος
-        maxHp: 16666,
+        hp: konanosMaxHp,       // Βάλε όση ζωή θες για να είναι ζόρικος (μεταβλητή konanosMaxHp)
+        maxHp: konanosMaxHp,
         atk: 237,     // Δυνατό χτύπημα
         def: 237,    // Σκληρή άμυνα
         isBoss: true,
@@ -4684,7 +4693,7 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
     let lvl = currentSelectedLevel;
     let baseAtk = lvl * 0.75 + (lvl) + (lvl/2);
     let baseDef = lvl * 0.75 + (lvl) + (lvl/2);
-    let baseHp = lvl * 100;
+    let baseHp = lvl * monsterBaseHpPerLevel;
 
     let areaType = getAreaType(lvl);
 
@@ -4733,7 +4742,7 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
     const legendaryStats = legendaryStatsByType[legendaryLootType];
     baseAtk += legendaryStats.atkBonus;
     baseDef += legendaryStats.defBonus;
-    baseHp = lvl * legendaryStats.hpMultiplier;
+    baseHp = lvl * legendaryBaseHpPerLevel;
 
 }
 else if (Math.random() < specialChance) {
@@ -4757,20 +4766,20 @@ else if (Math.random() < specialChance) {
         if (chosenVariant === 'weapon') {
             variant = 'weapon';
             baseAtk += 9;
-            baseHp = lvl * 100;
+            baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(wildTitles);
         }
         else if (chosenVariant === 'armor') {
             variant = 'armor';
             baseDef += 14;
-            baseHp = lvl * 100;
+            baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(armoredTitles);
         }
         else {
             variant = 'magic';
             baseAtk += 5.5;
             baseDef += 5.5;
-            baseHp = lvl * 100;
+            baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(magicTitles);
         }
     }
@@ -4839,6 +4848,12 @@ function handleHuntRetreatClick() {
 
 //attack/defense damage modifier
 
+// Global finetune multipliers - flat πολλαπλασιαστές ΕΞΩ απο το calcDmgModifier.
+// Χρησιμοποιούνται και στις πραγματικές damage formulas και στο TTK estimation
+// (calculateDifficulty), ωστε να μενουν παντα συγχρονισμενα.
+const playerDmgFinetune = 1.1;
+const monsterDmgFinetune = 0.90;
+
 //complex εκθετικος modifier
     function calcDmgModifier(diff) {
     return diff >= 0
@@ -4874,7 +4889,7 @@ function rollBaseDamage(fixedDice = null, minDice = null, maxDice = null) {
     }
     let diff = getPlayerAtk() - monster.def;
     let dmgModifier = calcDmgModifier(diff);
-    let dmg = d6 * 5 * player.level * dmgModifier * 1.1;
+    let dmg = d6 * 5 * player.level * dmgModifier * playerDmgFinetune;
     return Math.max(1, Math.round(dmg));
 }
 
@@ -5101,7 +5116,7 @@ if (isAttemptingRetreat) {
         let d6 = Math.floor(Math.random() * 6) + 1;
         let diff = monster.atk - getPlayerDef();
         let dmgModifier = calcDmgModifier(diff);
-        let dmg = d6 * 5 * monster.level * dmgModifier * 0.90;
+        let dmg = d6 * 5 * monster.level * dmgModifier * monsterDmgFinetune;
         monsterDamageCalculated = Math.max(1, Math.round(dmg));
         monsterActionLog = `${getMonsterDisplayName(monster)}: σου έκανε ${formatNumber(monsterDamageCalculated)} ζημιά.`;
     }
@@ -5937,7 +5952,7 @@ if (
     function estimateMonsterAt(lvl) {
         const atk = lvl * 0.75 + (lvl) + (lvl / 2);
         const def = lvl * 0.75 + (lvl) + (lvl / 2);
-        const maxHp = lvl * 100;
+        const maxHp = lvl * monsterBaseHpPerLevel;
         return { level: lvl, atk: atk, def: def, hp: maxHp, maxHp: maxHp };
     }
 
