@@ -3457,8 +3457,8 @@ function calculateDifficulty(player, monster) {
     const playerDmgMod = calcDmgModifier(playerAtk - monster.def);
     const monsterDmgMod = calcDmgModifier(monster.atk - playerDef);
 
-    const playerDps = player.level * playerDmgMod;
-    const monsterDps = monster.level * monsterDmgMod;
+    const playerDps = player.level * playerDmgMod * 1.1;
+    const monsterDps = monster.level * monsterDmgMod * 0.9;
 
     const playerTTK = monster.maxHp / playerDps;
     const monsterTTK = playerMaxHp / monsterDps;
