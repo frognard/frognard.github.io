@@ -2896,7 +2896,7 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όσο πιο αποτελεσματικά παίζεις, τόσο πιο μάγκας εισαι!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι το επίπεδο πολλαπλασιάζει τη ζωή και τη ζημιά. Επίσης, λένε ότι ενώ στην αρχή το επίπεδο είναι πολύ σημαντικό, αργότερα δεν μετράει τόσο όσο ο εξοπλισμός.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Παλουκώσου λιγάκι, κι άκουσε...''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι οι απλές επιθέσεις εχουν 80% ευστοχία. Αλλά οι κατραπακιές και οι εκτελέσεις έχουν 90%.''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι οι απλές επιθέσεις εχουν 80% ευστοχία. Αλλά οι κατραπακιές και οι εκτελέσεις έχουν 95%.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όταν ψοφολογάς, τα αντικείμενά σου φθείρονται!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όσο περισσότερους θαλάμους ψάχνεις σε μία κατάβαση, τόσο αυξάνει και η πιθανότητα να συναντήσεις σπάνια τέρατα!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι ο λόρδος Φίρκραχος ήταν ο πρώτος Θεοσφάχτης.''" ,
@@ -3152,7 +3152,7 @@ function getLegendaryItemName(type, tier) {
     // Άρα αφαιρούμε το +20 για να βρούμε ξανά το αντίστοιχο bracket επιπέδου
     // μέσα στο legendaryMonstersByType, το ίδιο table που χρησιμοποιείται
     // και τη στιγμή του drop.
-    let baseLevel = tier - 15;  //legendary bonus roll factor (arnitiko)
+    let baseLevel = tier - 13;  //legendary bonus roll factor (arnitiko)
     baseLevel = Math.max(1, Math.min(100, baseLevel));
 
     const list = legendaryMonstersByType[type] || [];
@@ -3381,15 +3381,15 @@ const AREA_TYPE_COLOR = {
         name: "Κατραπακιά",
         multiplier: 1.0,
     // fixedDice: 6,
-        minDice: 4,
-        maxDice: 10,
-        hitChance: 90
+        minDice: 6,
+        maxDice: 11,
+        hitChance: 95
     },
 
     preciseStrike: {
         name: "Εκτέλεση",
         multiplier: 1.0,
-        hitChance: 90,
+        hitChance: 95,
         fixedDice: 5,
         executeThreshold: 0.25
     }
@@ -4874,7 +4874,7 @@ function rollBaseDamage(fixedDice = null, minDice = null, maxDice = null) {
     }
     let diff = getPlayerAtk() - monster.def;
     let dmgModifier = calcDmgModifier(diff);
-    let dmg = d6 * 5 * player.level * dmgModifier * 1.05;
+    let dmg = d6 * 5 * player.level * dmgModifier * 1.1;
     return Math.max(1, Math.round(dmg));
 }
 
@@ -5101,7 +5101,7 @@ if (isAttemptingRetreat) {
         let d6 = Math.floor(Math.random() * 6) + 1;
         let diff = monster.atk - getPlayerDef();
         let dmgModifier = calcDmgModifier(diff);
-        let dmg = d6 * 5 * monster.level * dmgModifier * 0.95;
+        let dmg = d6 * 5 * monster.level * dmgModifier * 0.90;
         monsterDamageCalculated = Math.max(1, Math.round(dmg));
         monsterActionLog = `${getMonsterDisplayName(monster)}: σου έκανε ${formatNumber(monsterDamageCalculated)} ζημιά.`;
     }
@@ -5176,7 +5176,7 @@ function handleEquipmentDrop(type, rolledTier, monster, forceSell = false) {
 
     const isLegendaryDrop = monster && monster.variant === 'legendary';
         if (isLegendaryDrop) {
-            rolledTier = Math.min(120, rolledTier + 15);  //legendary bonus   max and bonus
+            rolledTier = Math.min(118, rolledTier + 13);  //legendary bonus   max and bonus
         }
 
     console.log("LEGENDARY?", isLegendaryDrop);
