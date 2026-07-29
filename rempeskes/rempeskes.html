@@ -2977,8 +2977,8 @@ const legendaryStatsByType = {
 // ==========================================================================
 const monsterHpGrowth = 1.05;        // κοινός εκθετικός ρυθμός για όλα τα monster HP
 const monsterBaseHpPerLevel = 100;   // normal monster
-const variantBaseHpPerLevel = 110;   // weapon/armor/magic variant monster (τώρα ίδιο με normal)
-const legendaryBaseHpPerLevel = 120; // legendary monster (τώρα ίδιο και για weapon/armor/magic legendary)
+const variantBaseHpPerLevel = 100;   // weapon/armor/magic variant monster (τώρα ίδιο με normal)
+const legendaryBaseHpPerLevel = 100; // legendary monster (τώρα ίδιο και για weapon/armor/magic legendary)
 const konanosMaxHp = 16666;          // fixed HP boss Θεός Κόνανος (δεν είναι lvl-based)
 function getMonsterMaxHp(lvl) { return Math.floor(monsterBaseHpPerLevel * Math.pow(monsterHpGrowth, lvl - 1)); }
 function getVariantMonsterMaxHp(lvl) { return Math.floor(variantBaseHpPerLevel * Math.pow(monsterHpGrowth, lvl - 1)); }
