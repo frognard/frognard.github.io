@@ -1170,8 +1170,8 @@ body {
             <label for="autoplay-speed-select">Ταχ.</label>
             <select id="autoplay-speed-select">
                 <option value="1">Μερακλίδικη</option>
-                <option value="1.25" selected>Μέτρια</option>
-                <option value="1.5">Σβέλτη</option>
+                <option value="1.5">Κανονική</option>
+                <option value="2">Σβέλτη</option>
                 <option value="3">Ταχύτατη</option>
                 <option value="7.5">Αστραπιαία</option>
                 <option value="15">Τούρμπο</option>
@@ -3672,9 +3672,15 @@ function checkLevelUp() {
         const offset = Math.floor(Math.random() * 40) - 20; 
         fText.style.left = `calc(50% + ${offset}px)`;
         fText.style.top = `0px`;
+
+        // Το animation (χωρίς delay) τελειώνει ΑΚΡΙΒΩΣ μαζί με το combat tick -
+        // effTick() ήδη scalάρει με την ταχύτητα (COMBAT_TICK_MS / speedFactor),
+        // άρα εδώ απλά το ακολουθούμε 1-προς-1 αντί να το χωρίζουμε σε fraction.
+        const floatDurationMs = effTick();
+        fText.style.animationDuration = `${floatDurationMs}ms`;
         
         parent.appendChild(fText);
-        setTimeout(() => { fText.remove(); }, 1400);
+        setTimeout(() => { fText.remove(); }, floatDurationMs);
     }
 
 
@@ -5279,13 +5285,16 @@ let finalType = type;
             );
         }
 
+        // Το delay πριν το gold popup μικραίνει αναλογικά με την ταχύτητα (ίδια
+        // λογική με τη διάρκεια του floating text), ώστε στις γρήγορες ταχύτητες
+        // να μη μένει "κολλημένο" σε 500ms ενώ όλα τα άλλα έχουν κονταίνει.
         setTimeout(() => {
             createFloatingText(
                 'stat-gold-box',
                 `+${formatNumber(sellValue)}g`,
                 "var(--accent-gold)"
             );
-        }, 500);
+        }, 500 / getSpeedFactor());
     }
 }
 
@@ -6538,8 +6547,8 @@ function applyOptions() {
             Ταχύτητα παιχνιδιού:
             <select id="options-speed" style="display:block;width:100%;margin-top:4px;background:#1a1a1a;color:#fff;border:1px solid var(--border-color);border-radius:3px;padding:4px;">
                 <option value="1">Μερακλίδικη</option>
-                <option value="1.25" >Μέτρια</option>
-                <option value="1.5" selected>Σβέλτη</option>
+                <option value="1.5" selected>Κανονική</option>
+                <option value="2" selected>Σβέλτη</option>
             </select>
         </label>
 
