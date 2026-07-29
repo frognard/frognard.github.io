@@ -3245,7 +3245,7 @@ if (roll <= 1) {
             magkiaMilestones: [],
         weapon: { name: "Ράβδος", power: 1, legendary: false },
         armor: { name: "Μανδύας", power: 1, legendary: false },
-        magic: { name: "Κόκκαλο Αρουραίου", power: 1, legendary: false },
+        magic: { name: "Τρύπια Πέτρα", power: 1, legendary: false },
         maxUnlockedLevel: 100,
         gameSpeedFactor: 1.5, // αποθηκευμένη επιλογή ταχύτητας παιχνιδιού (Μερακλίδικη=1, Κανονική=1.25, Αγχωτική=1.5)
         soundEnabled: true,   // αποθηκευμένη επιλογή ήχου
@@ -3406,8 +3406,8 @@ const AREA_TYPE_COLOR = {
 
 
   // Attack and defense formulas for player
-    function getPlayerAtk() { return player.level * 0.75 + player.weapon.power + player.magic.power/2; }
-    function getPlayerDef() { return player.level * 0.75 + player.armor.power + player.magic.power/2; }
+    function getPlayerAtk() { return player.level * 0.50 + player.weapon.power + player.magic.power/2; }
+    function getPlayerDef() { return player.level * 0.50 + player.armor.power + player.magic.power/2; }
 // player hp per level
     function getPlayerMaxHp() { return Math.floor(player.level * 150); }
     
@@ -4683,8 +4683,8 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
         level: 106,
         hp: konanosMaxHp,       // Βάλε όση ζωή θες για να είναι ζόρικος (μεταβλητή konanosMaxHp)
         maxHp: konanosMaxHp,
-        atk: 237,     // Δυνατό χτύπημα
-        def: 237,    // Σκληρή άμυνα
+        atk: 212,     // Δυνατό χτύπημα
+        def: 212,    // Σκληρή άμυνα
         isBoss: true,
         firstName: '',
         title: '',
@@ -4697,8 +4697,8 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
 
 
     let lvl = currentSelectedLevel;
-    let baseAtk = lvl * 0.75 + (lvl) + (lvl/2);
-    let baseDef = lvl * 0.75 + (lvl) + (lvl/2);
+    let baseAtk = lvl * 0.50 + (lvl) + (lvl/2);
+    let baseDef = lvl * 0.50 + (lvl) + (lvl/2);
     let baseHp = lvl * monsterBaseHpPerLevel;
 
     let areaType = getAreaType(lvl);
@@ -5959,8 +5959,8 @@ if (
     // χωρίς να χρειάζεται να το κάνουμε spawn — ίδιος τύπος στατιστικών με το spawnMonster().
     // (Οι σπάνιες παραλλαγές weapon/armor/magic/legendary αγνοούνται εδώ σκόπιμα ως προσέγγιση.)
     function estimateMonsterAt(lvl) {
-        const atk = lvl * 0.75 + (lvl) + (lvl / 2);
-        const def = lvl * 0.75 + (lvl) + (lvl / 2);
+        const atk = lvl * 0.50 + (lvl) + (lvl / 2);
+        const def = lvl * 0.50 + (lvl) + (lvl / 2);
         const maxHp = lvl * monsterBaseHpPerLevel;
         return { level: lvl, atk: atk, def: def, hp: maxHp, maxHp: maxHp };
     }
@@ -6548,7 +6548,6 @@ function applyOptions() {
             <select id="options-speed" style="display:block;width:100%;margin-top:4px;background:#1a1a1a;color:#fff;border:1px solid var(--border-color);border-radius:3px;padding:4px;">
                 <option value="1">Μερακλίδικη</option>
                 <option value="1.5" selected>Κανονική</option>
-                <option value="2" selected>Σβέλτη</option>
             </select>
         </label>
 
