@@ -3161,7 +3161,7 @@ function getLegendaryItemName(type, tier) {
     // Άρα αφαιρούμε το +20 για να βρούμε ξανά το αντίστοιχο bracket επιπέδου
     // μέσα στο legendaryMonstersByType, το ίδιο table που χρησιμοποιείται
     // και τη στιγμή του drop.
-    let baseLevel = tier - 13;  //legendary bonus roll factor (arnitiko)
+    let baseLevel = tier - 15;  //legendary bonus roll factor (arnitiko)
     baseLevel = Math.max(1, Math.min(100, baseLevel));
 
     const list = legendaryMonstersByType[type] || [];
@@ -4830,8 +4830,8 @@ function handleHuntRetreatClick() {
 // Global finetune multipliers - flat πολλαπλασιαστές ΕΞΩ απο το calcDmgModifier.
 // Χρησιμοποιούνται και στις πραγματικές damage formulas και στο TTK estimation
 // (calculateDifficulty), ωστε να μενουν παντα συγχρονισμενα.
-const playerDmgFinetune = 1.08;
-const monsterDmgFinetune = 0.92;
+const playerDmgFinetune = 1.07;
+const monsterDmgFinetune = 0.93;
 
 //complex εκθετικος modifier
     function calcDmgModifier(diff) {
@@ -5170,7 +5170,7 @@ function handleEquipmentDrop(type, rolledTier, monster, forceSell = false) {
 
     const isLegendaryDrop = monster && monster.variant === 'legendary';
         if (isLegendaryDrop) {
-            rolledTier = Math.min(118, rolledTier + 13);  //legendary bonus   max and bonus
+            rolledTier = Math.min(118, rolledTier + 15);  //legendary bonus   max and bonus
         }
 
     console.log("LEGENDARY?", isLegendaryDrop);
