@@ -1445,6 +1445,7 @@ function showStats() {
    logMessage("");
     logMessage("ΣΤΑΤΙΣΤΙΚΑ","stats");
     logMessage(`Φόνοι: ${formatNumber(player.kills)}`,"stats");
+    logMessage(`Φόνοι σπάνιων τεράτων: ${formatNumber(player.killsWeapon || 0)}-${formatNumber(player.killsArmor || 0)}-${formatNumber(player.killsMagic || 0)}`,"stats");
     logMessage(`Θάνατοι: ${player.ironman ? 'IRONMAN' : formatNumber(player.deaths)}`,"stats");
    // logMessage(`  ↳ από κόκκινα (Άγρια): ${formatNumber(player.deathsWeapon || 0)}`,"stats");
    // logMessage(`  ↳ από μπλε (Θωρακισμένα): ${formatNumber(player.deathsArmor || 0)}`,"stats");
@@ -1504,7 +1505,28 @@ function uploadCurrentPlayerToHiScores() {
         date: Date.now(),
         victory: player.hasBeatenConanos || false,
         ironman: player.ironman || false,
-        precomputedScore: player._displayedScore || 0
+        precomputedScore: player._displayedScore || 0,
+        // όλα τα υπόλοιπα στατιστικά
+        kills: player.kills || 0,
+        killsWeapon: player.killsWeapon || 0,
+        killsArmor: player.killsArmor || 0,
+        killsMagic: player.killsMagic || 0,
+        deaths: player.deaths || 0,
+        deathsWeapon: player.deathsWeapon || 0,
+        deathsArmor: player.deathsArmor || 0,
+        deathsMagic: player.deathsMagic || 0,
+        totalGoldGained: player.totalGoldGained || 0,
+        goldSpent: player.goldSpent || 0,
+        goldLost: player.goldLost || 0,
+        beersDrunk: player.beersDrunk || 0,
+        legendaryDrops: player.legendaryDrops || 0,
+        totalXpGained: player.totalXpGained || 0,
+        totalXpAtLevel100: player.totalXpAtLevel100 || 0,
+        bestKillStreak: player.bestKillStreak || 0,
+        risk: player.risk || 0,
+        magkiaKillCount: player.magkiaKillCount || 0,
+        totalDescents: player.totalDescents || 0,
+        magkiaMilestones: player.magkiaMilestones || []
     };
     if (typeof syncIronmanRecordsToCloud === 'function') {
         syncIronmanRecordsToCloud([record]);
@@ -3227,6 +3249,9 @@ if (roll <= 1) {
             deathsWeapon: 0, // θάνατοι από κόκκινα (Άγρια) τέρατα
             deathsArmor: 0,  // θάνατοι από μπλε (Θωρακισμένα) τέρατα
             deathsMagic: 0,  // θάνατοι από μωβ (Μαγικά) τέρατα
+            killsWeapon: 0, // φόνοι κόκκινων (Άγριων) variant τεράτων
+            killsArmor: 0,  // φόνοι μπλε (Θωρακισμένων) variant τεράτων
+            killsMagic: 0,  // φόνοι μωβ (Μαγικών) variant τεράτων
             kills: 0,
             totalGoldGained: 0,
             goldSpent: 0,
@@ -3701,6 +3726,9 @@ function loadGame() {
             if (typeof player.risk !== 'number') player.risk = 0;
             if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
             if (typeof player._displayedScore !== 'number') player._displayedScore = 0;
+            if (typeof player.killsWeapon !== 'number') player.killsWeapon = 0;
+            if (typeof player.killsArmor !== 'number') player.killsArmor = 0;
+            if (typeof player.killsMagic !== 'number') player.killsMagic = 0;
             if (typeof player.totalDescents !== 'number') player.totalDescents = 0;
             player.maxUnlockedLevel = 100;
 
@@ -3929,6 +3957,9 @@ function importSave() {
             if (typeof player.risk !== 'number') player.risk = 0;
             if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
             if (typeof player.totalDescents !== 'number') player.totalDescents = 0;
+            if (typeof player.killsWeapon !== 'number') player.killsWeapon = 0;
+            if (typeof player.killsArmor !== 'number') player.killsArmor = 0;
+            if (typeof player.killsMagic !== 'number') player.killsMagic = 0;
             player.maxUnlockedLevel = 100;
             player.nextXp = calculateNextXpRequirement(player.level);
 
@@ -5316,6 +5347,9 @@ function showAnnouncementPopup(text, styleClass, color) {
             logMessage(`${getMonsterDisplayName(monster)}: εξοντώθηκε.`, 'victory');
             monsterDeathSound();
             player.kills++;
+            if (monster.variant === 'weapon') player.killsWeapon = (player.killsWeapon || 0) + 1;
+            else if (monster.variant === 'armor') player.killsArmor = (player.killsArmor || 0) + 1;
+            else if (monster.variant === 'magic') player.killsMagic = (player.killsMagic || 0) + 1;
             currentRunKills++;
 
             // --- ΜΑΓΚΙΑ (ρίσκο): μέσος όρος της διαφοράς (επίπεδο τέρατος - επίπεδο παίκτη) σε όλους τους φόνους ---
@@ -6400,7 +6434,27 @@ if ('serviceWorker' in navigator) {
                     death_date: new Date(r.date).toISOString(),
                     victory: !!r.victory,
                     score: entryScore,
-                    ironman: !!r.ironman
+                    ironman: !!r.ironman,
+                    kills: r.kills || 0,
+                    kills_weapon: r.killsWeapon || 0,
+                    kills_armor: r.killsArmor || 0,
+                    kills_magic: r.killsMagic || 0,
+                    deaths: r.deaths || 0,
+                    deaths_weapon: r.deathsWeapon || 0,
+                    deaths_armor: r.deathsArmor || 0,
+                    deaths_magic: r.deathsMagic || 0,
+                    total_gold_gained: r.totalGoldGained || 0,
+                    gold_spent: r.goldSpent || 0,
+                    gold_lost: r.goldLost || 0,
+                    beers_drunk: r.beersDrunk || 0,
+                    legendary_drops: r.legendaryDrops || 0,
+                    total_xp_gained: r.totalXpGained || 0,
+                    total_xp_at_level_100: r.totalXpAtLevel100 || 0,
+                    best_kill_streak: r.bestKillStreak || 0,
+                    risk: r.risk || 0,
+                    magkia_kill_count: r.magkiaKillCount || 0,
+                    total_descents: r.totalDescents || 0,
+                    magkia_milestones: JSON.stringify(r.magkiaMilestones || [])
                 }, { onConflict: 'name' });
 
             if (ie) { console.error('[Upload] Insert error:', ie); dbErrors = ie.message || 'insert failed'; }

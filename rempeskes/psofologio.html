@@ -248,6 +248,79 @@
         header h1 { font-size: 2.4rem; }
         .entry { padding-left: 54px; }
     }
+
+    .stats-btn {
+        background: none;
+        border: 1px solid var(--ledger-line);
+        color: var(--parchment-dim);
+        cursor: pointer;
+        font-size: 0.85rem;
+        padding: 1px 6px;
+        border-radius: 2px;
+        margin-left: 6px;
+        transition: all 0.2s;
+        font-family: inherit;
+        vertical-align: middle;
+    }
+    .stats-btn:hover {
+        border-color: var(--brass);
+        color: var(--brass);
+    }
+
+    .stats-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    .stats-modal-box {
+        background: var(--ledger);
+        border: 1px solid var(--ledger-line);
+        border-radius: 6px;
+        padding: 28px 32px;
+        max-width: 460px;
+        width: 92%;
+    }
+    .stats-modal-box.wide {
+        max-width: 690px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+    .stats-modal-box h2 {
+        color: var(--brass);
+        font-family: 'Old Standard TT', serif;
+        margin: 0 0 18px;
+        text-align: center;
+        font-size: 1.4rem;
+        border-bottom: 1px solid var(--ledger-line);
+        padding-bottom: 12px;
+    }
+    .stats-row {
+        display: flex;
+        padding: 5px 0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    .stats-label { color: var(--parchment-dim); width: 200px; flex-shrink: 0; text-align: right; padding-right: 16px; }
+    .stats-value { color: var(--parchment); font-weight: bold; }
+    .stats-close-btn {
+        display: block;
+        margin: 16px auto 0;
+        background: var(--brass);
+        color: #1b160f;
+        border: none;
+        padding: 6px 24px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-family: 'PT Serif', serif;
+        font-size: 0.95rem;
+        transition: opacity 0.2s;
+    }
+    .stats-close-btn:hover { opacity: 0.85; }
 </style>
 </head>
 <body>
@@ -340,12 +413,20 @@ function renderEntry(s, i, isVictory, isIronman) {
     const armorLabel = escapeHtml(s.armor_name || 'Θωράκιση');
     const magicLabel = escapeHtml(s.magic_name || 'Μαγικό');
 
+    window._statsIdx = window._statsIdx || 0;
+    const statsIdx = window._statsIdx++;
+    window._statsData = window._statsData || {};
+    window._statsData[statsIdx] = s;
+
+    const statsBtn = `<button class="stats-btn" onclick="showStatsPopup(${statsIdx})">📊</button>`;
+    const logBtn = `<button class="stats-btn" onclick="showMagkiaPopup(${statsIdx})">📜</button>`;
+
     return `
         <div class="entry${isVictory ? ' victory' : isAlive ? ' alive' : ' dead'}">
             <div class="rank-badge">${romanish(i + 1)}</div>
             <div class="line1">${skull}<span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level} — Μαγκιά: ${formatScore(s.score ?? 0)}</div>
             <div class="line2">
-                ${detailLine}
+                ${detailLine} ${statsBtn} ${logBtn}
             </div>
             <div class="gear" style="margin-top:4px;">
                 <div style="color:${weaponColor};">🗡 ${weaponLabel} T${s.weapon || '?'}</div>
@@ -462,6 +543,96 @@ async function load() {
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
+}
+
+function formatNumber(num) {
+    if (num === undefined || num === null) return '0';
+    return Number(num).toLocaleString('el-GR');
+}
+
+function showStatsPopup(idx) {
+    const s = window._statsData && window._statsData[idx];
+    if (!s) return;
+    const d = s.deaths || 0;
+    const killsPerDesc = s.total_descents > 0 ? (s.kills || 0) / s.total_descents : 0;
+    const goldEff = s.total_gold_gained > 0 ? ((s.total_gold_gained - s.gold_spent - s.gold_lost) / s.total_gold_gained * 100) : 0;
+    const html = `
+        <div class="stats-modal-overlay" onclick="if(event.target===this)closeStatsPopup()">
+            <div class="stats-modal-box">
+                <h2>${escapeHtml(s.name)}</h2>
+                <div class="stats-row"><span class="stats-label">Φόνοι</span><span class="stats-value">${formatNumber(s.kills || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Φόνοι σπάνιων τεράτων</span><span class="stats-value">${formatNumber(s.kills_weapon || 0)}-${formatNumber(s.kills_armor || 0)}-${formatNumber(s.kills_magic || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Θάνατοι</span><span class="stats-value">${s.ironman ? 'IRONMAN' : formatNumber(d)}</span></div>
+                <div class="stats-row"><span class="stats-label">Θάνατοι από σπάνια</span><span class="stats-value">${formatNumber(s.deaths_weapon || 0)}-${formatNumber(s.deaths_armor || 0)}-${formatNumber(s.deaths_magic || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Κατανάλωση μπύρας</span><span class="stats-value">${formatNumber(s.beers_drunk || 0)} λίτρα</span></div>
+                <div class="stats-row"><span class="stats-label">Γύροι</span><span class="stats-value">${formatNumber(s.turns || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Ρίσκο</span><span class="stats-value">${(s.risk || 0) > 0 ? '+' : ''}${(s.risk || 0).toFixed(3)}</span></div>
+                <div class="stats-row"><span class="stats-label">Φόνοι/κατάβαση</span><span class="stats-value">${killsPerDesc.toFixed(1)}</span></div>
+                <div class="stats-row"><span class="stats-label">Καταβάσεις</span><span class="stats-value">${formatNumber(s.total_descents || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Θρυλικά drops</span><span class="stats-value">${formatNumber(s.legendary_drops || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Καλύτερο σερί</span><span class="stats-value">${formatNumber(s.best_kill_streak || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Συνολικά XP</span><span class="stats-value">${formatNumber(s.total_xp_gained || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Συνολικός χρυσός</span><span class="stats-value">${formatNumber(s.total_gold_gained || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Χρυσός που γλεντήθηκε</span><span class="stats-value">${formatNumber(s.gold_spent || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Χρυσός που χάθηκε</span><span class="stats-value">${formatNumber(s.gold_lost || 0)}</span></div>
+                <!-- <div class="stats-row"><span class="stats-label">Αποτελεσματικότητα</span><span class="stats-value">${goldEff.toFixed(1)}%</span></div> -->
+                <button class="stats-close-btn" onclick="closeStatsPopup()">Κλείσιμο</button>
+            </div>
+        </div>
+    `;
+    const el = document.createElement('div');
+    el.innerHTML = html;
+    document.body.appendChild(el);
+}
+
+function closeStatsPopup() {
+    const overlay = document.querySelector('.stats-modal-overlay');
+    if (overlay) overlay.remove();
+}
+
+function showMagkiaPopup(idx) {
+    const s = window._statsData && window._statsData[idx];
+    if (!s) return;
+    let milestones = [];
+    try {
+        milestones = JSON.parse(s.magkia_milestones || '[]');
+    } catch (e) { milestones = []; }
+    if (!milestones || milestones.length === 0) {
+        const el = document.createElement('div');
+        el.innerHTML = `
+            <div class="stats-modal-overlay" onclick="if(event.target===this)closeStatsPopup()">
+                <div class="stats-modal-box wide">
+                    <h2>${escapeHtml(s.name)}</h2>
+                    <p style="text-align:center;color:var(--parchment-dim);font-style:italic;">Δεν υπάρχουν ορόσημα μαγκιάς.</p>
+                    <button class="stats-close-btn" onclick="closeStatsPopup()">Κλείσιμο</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(el);
+        return;
+    }
+    let rows = '';
+    for (const m of milestones) {
+        if (m.level === 'death' || m.level === 'conanos') {
+            rows += `<div class="stats-row"><span class="stats-label" style="color:var(--brass);">Τελική μαγκιά</span><span class="stats-value">Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</span></div>`;
+        } else if (m.legendaryKill) {
+            rows += `<div class="stats-row"><span class="stats-label" style="color:#9b69b3;">Επίπεδο ${m.level}</span><span class="stats-value">Σκότωσε: "${escapeHtml(m.legendaryKill)}" &#8594; "${escapeHtml(m.legendaryDrop)}" &middot; γύρος ${formatNumber(m.turns)}</span></div>`;
+        } else {
+            rows += `<div class="stats-row"><span class="stats-label">Επίπεδο ${m.level}</span><span class="stats-value">Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</span></div>`;
+        }
+    }
+    const html = `
+        <div class="stats-modal-overlay" onclick="if(event.target===this)closeStatsPopup()">
+            <div class="stats-modal-box wide">
+                <h2>${escapeHtml(s.name)} — Ορόσημα Μαγκιάς</h2>
+                ${rows}
+                <button class="stats-close-btn" onclick="closeStatsPopup()">Κλείσιμο</button>
+            </div>
+        </div>
+    `;
+    const el = document.createElement('div');
+    el.innerHTML = html;
+    document.body.appendChild(el);
 }
 
 function escapeHtml(str) {
