@@ -614,11 +614,11 @@ function showMagkiaPopup(idx) {
     let rows = '';
     for (const m of milestones) {
         if (m.level === 'death' || m.level === 'conanos') {
-            rows += `<div class="stats-row"><span class="stats-label" style="color:var(--brass);">Τελική μαγκιά</span><span class="stats-value">Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</span></div>`;
+            rows += `<div style="padding:5px 0;line-height:1.6;color:var(--brass);">[Τέλος] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
         } else if (m.legendaryKill) {
-            rows += `<div class="stats-row"><span class="stats-label" style="color:#9b69b3;">Επίπεδο ${m.level}</span><span class="stats-value">Σκότωσε: "${escapeHtml(m.legendaryKill)}" &#8594; "${escapeHtml(m.legendaryDrop)}" &middot; γύρος ${formatNumber(m.turns)}</span></div>`;
+            rows += `<div style="padding:5px 0;line-height:1.6;color:var(--brass);">[${m.level}] Σκότωσε: "${escapeHtml(m.legendaryKill)}" &#8594; "${escapeHtml(m.legendaryDrop)}" &middot; γύρος ${formatNumber(m.turns)}</div>`;
         } else {
-            rows += `<div class="stats-row"><span class="stats-label">Επίπεδο ${m.level}</span><span class="stats-value">Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</span></div>`;
+            rows += `<div style="padding:5px 0;line-height:1.6;">[${m.level}] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
         }
     }
     const html = `
