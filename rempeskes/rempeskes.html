@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v354</title>
+    <title>Ρεμπεσκές v355</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -3620,13 +3620,21 @@ function updateKillStreakVisuals() {
     }
 }
 
+const STREAK_CHANCE_TABLE = [0.01, 0.02, 0.04, 0.08, 0.16, 0.18, 0.20, 0.21, 0.21, 0.22, 0.22, 0.22, 0.23, 0.23, 0.23, 0.23, 0.24, 0.24, 0.24, 0.24, 0.24, 0.25];
+
 function getStreakVariantChance() {
-    const streakChanceTable = [0.01, 0.02, 0.04, 0.08, 0.16, 0.18, 0.20, 0.21, 0.21, 0.22, 0.22, 0.22, 0.23, 0.23, 0.23, 0.23, 0.24, 0.24, 0.24, 0.24, 0.24, 0.25];
-    let chance = streakChanceTable[Math.min(currentRunKills, streakChanceTable.length - 1)];
+    let chance = STREAK_CHANCE_TABLE[Math.min(currentRunKills, STREAK_CHANCE_TABLE.length - 1)];
     const areaType = getAreaType(currentSelectedLevel);
     if (areaType === AREA_TYPES.RICH) chance *= 1.30;
     else if (areaType === AREA_TYPES.POOR) chance *= 0.70;
     return chance;
+}
+
+// Το ποσοστό "Σπάνιο" στη μπάρα του τέρατος — bold όταν το σερί φτάσει το τελευταίο στοιχείο του πίνακα
+function getMonsterVariantText() {
+    const atMaxStreakChance = currentRunKills >= STREAK_CHANCE_TABLE.length - 1;
+    const pct = Math.round(getStreakVariantChance() * 100);
+    return atMaxStreakChance ? `Σπάνιο: <b><i>${pct}%</i></b>` : `Σπάνιο: ${pct}%`;
 }
 
 function resetKillStreak() {
@@ -4294,7 +4302,7 @@ function refreshAreaSelectorAppearance() {
         document.getElementById('monster-hp-bar').style.transform = `scaleX(${mPct / 100})`;
         document.getElementById('monster-hp-text').innerText = `${formatNumber(Math.ceil(monster.hp))} / ${formatNumber(monster.maxHp)} HP`;
         document.getElementById('monster-kills-text').innerText = `Θάλαμος: ${currentRunKills + 1}`;
-        document.getElementById('monster-variant-text').innerText = `Σπάνιο: ${Math.round(getStreakVariantChance() * 100)}%`;
+        document.getElementById('monster-variant-text').innerHTML = getMonsterVariantText();
         
     } else {
         const mNameEl = document.getElementById('m-name');
@@ -4307,7 +4315,7 @@ function refreshAreaSelectorAppearance() {
         document.getElementById('monster-hp-bar').style.transform = 'scaleX(0)';
         document.getElementById('monster-hp-text').innerText = '-';
         document.getElementById('monster-kills-text').innerText = `Θάλαμος: ${currentRunKills + 1}`;
-        document.getElementById('monster-variant-text').innerText = `Σπάνιο: ${Math.round(getStreakVariantChance() * 100)}%`;
+        document.getElementById('monster-variant-text').innerHTML = getMonsterVariantText();
         
         const title = document.getElementById("battle-title");
         if (title) {
@@ -5202,6 +5210,7 @@ if (isAttemptingRetreat) {
 
 function handleEquipmentDrop(type, rolledTier, monster, forceSell = false) {
 
+    let pentariColor = null;
     const isLegendaryDrop = monster && monster.variant === 'legendary';
         if (isLegendaryDrop) {
             rolledTier = Math.min(118, rolledTier + 15);  //legendary bonus   max and bonus
@@ -5236,6 +5245,7 @@ if (isLegendaryDrop && monster.lootItemName) {
                             '#cc66ff';
 
     showAnnouncementPopup("ΠΕΝΤΑΡΙ!", "", color);
+    pentariColor = color;
 }
 
     logMessage(`[DROP] Στον εχθρό βρέθηκε: ${itemName} (T${rolledTier})!`, 'victory');
@@ -5302,6 +5312,10 @@ let finalType = type;
                 "var(--accent-gold)"
             );
         }, 500 / getSpeedFactor());
+    }
+
+    if (pentariColor) {
+        logMessageHTML(`<span style="color:${pentariColor}; font-weight:bold;">ΠΕΝΤΑΡΙ!</span>`, 'victory');
     }
 }
 
@@ -5730,10 +5744,21 @@ function applyDefeatPenalties() {
             return;
         }
 
+        let hpPctBefore = player.hp / maxHp;
         let pct = Math.floor(Math.random() * 41) + 10; 
         let heal = Math.round(maxHp * (pct / 100));
         player.hp = Math.min(maxHp, player.hp + heal);
         logMessage(`Έσφιξες μια μπύρα για +${formatNumber(heal)} HP! (Αναπλήρωση: ${pct}%).`, 'player');
+
+        // COMEBACK: αν το HP ήταν κάτω από 25% και η μπύρα το επανέφερε στο 50%+
+        if (hpPctBefore < 0.25 && player.hp / maxHp >= 0.50) {
+            logMessage('COMEBACK!', 'victory');
+            const comebackDelay = Math.min(600, 0.25 * effTick());
+            setTimeout(() => {
+                createFloatingText('player-hp-parent', 'COMEBACK!', '#ffd700');
+            }, comebackDelay);
+        }
+
         potionSound();
         flashSkillButton("btn-potion");
         player.beersDrunk += 0.5;
