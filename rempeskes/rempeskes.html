@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v353</title>
+    <title>Ρεμπεσκές v354</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -2595,6 +2595,7 @@ const magicTitles = [
 "ο Περκνός",
 "ο Μυστηριώδης",
 "ο Σκιώδης",
+"ο Γλοιώδης",
 "ο Μάντης",
 "ο Ασώματος",
 "ο Αρχαίος",
@@ -5365,6 +5366,11 @@ function showAnnouncementPopup(text, styleClass, color) {
             if (!player.hasBeatenConanos) {
                 player.hasBeatenConanos = true;
 
+                // --- ΑΥΤΟΜΑΤΟ ΠΑΙΞΙΜΟ: όταν σκοτώνεται ο Θεός Κόνανος, το AutoPlay σταματάει ---
+                if (typeof window.stopAutoPlay === 'function') {
+                    window.stopAutoPlay();
+                }
+
                 // --- ΣΚΟΡ: αν νικήθηκε ο Κόνανος κάτω από level 100, δίνεται ΑΜΕΣΑ (μόνο για το σκορ) όλο
                 // το XP που θα χρειαζόταν ακόμα ο παίκτης για να έφτανε level 100 -- χωρίς να γίνεται
                 // πραγματικά level 100, απλά μετράει σαν XP. Ο πραγματικός χαρακτήρας/level δεν αλλάζει.
@@ -6345,6 +6351,14 @@ if (
     document.getElementById('settings-cancel').addEventListener('click', closeSettingsModal);
 
     window.rearmTimers = rearmTimers;
+
+    // Σταματάει το AutoPlay (π.χ. όταν σκοτώνεται ο Θεός Κόνανος)
+    window.stopAutoPlay = function () {
+        if (autoPlayEnabled) {
+            setAutoPlayEnabled(false);
+            setStatus("AutoPlay ανενεργό: ο Θεός Κόνανος σκοτώθηκε!");
+        }
+    };
 
 })();
 </script>
