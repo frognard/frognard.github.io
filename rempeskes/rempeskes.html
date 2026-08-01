@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v355</title>
+    <title>Ρεμπεσκές v360</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -2992,9 +2992,9 @@ const msgs = [
 // atkBonus/defBonus προστίθενται πάνω στο κανονικό atk/def του επιπέδου.
 // Το HP των legendary τεράτων υπολογίζεται ξεχωριστά, βλ. legendaryBaseHpPerLevel παρακάτω.
 const legendaryStatsByType = {
-    weapon: { atkBonus: 12, defBonus: 0 },  // κόκκινα: επιθετικά, λιγότερη ζωή
-    armor:  { atkBonus: 0,  defBonus: 18 }, // μπλε: αμυντικά, πολλή ζωή
-    magic:  { atkBonus: 7.5, defBonus: 7.5 } // μωβ: ισορροπημένα
+    weapon: { atkBonus: 7.5, defBonus: 0 },  // κόκκινα: επιθετικά, λιγότερη ζωή
+    armor:  { atkBonus: 0,  defBonus: 15.5 }, // μπλε: αμυντικά, πολλή ζωή
+    magic:  { atkBonus: 3.75, defBonus: 7.75 } // μωβ: ισορροπημένα
 };
 
 // ==========================================================================
@@ -4786,20 +4786,20 @@ else if (Math.random() < specialChance) {
 
         if (chosenVariant === 'weapon') {
             variant = 'weapon';
-            baseAtk += 9;
+            baseAtk += 6;
             baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(wildTitles);
         }
         else if (chosenVariant === 'armor') {
             variant = 'armor';
-            baseDef += 14;
+            baseDef += 13.5;
             baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(armoredTitles);
         }
         else {
             variant = 'magic';
-            baseAtk += 5.5;
-            baseDef += 5.5;
+            baseAtk += 3;
+            baseDef += 6.75;
             baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(magicTitles);
         }
@@ -4876,12 +4876,13 @@ const playerDmgFinetune = 1.08;
 const monsterDmgFinetune = 0.92;
 
 //complex εκθετικος modifier
-    function calcDmgModifier(diff) {
-    return diff >= 0
-        ? 2 - Math.exp(-0.04 * diff)
-        : 0.5 + 0.5 * Math.exp(0.08 * diff);
+function calcDmgModifier(diff) {
+    if (diff >= 0) {
+        return Math.min(2.0, 1 + diff * 0.05);
+    } else {
+        return Math.max(0.5, 1 + diff * 0.025);
     }
-
+}
 //simple modifier flat % steps
 //   function calcDmgModifier(diff) {
  //   return Math.min(2, Math.max(0.4, 1 + diff * 0.03));
