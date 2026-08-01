@@ -3400,22 +3400,16 @@ const AREA_TYPE_COLOR = {
     function getSpeedFactor() { return autoPlayEnabled ? autoPlaySpeedFactor : gameSpeedFactor; }
     // Modifier ταχύτητας cooldowns: πολλαπλασιάζει το getSpeedFactor() με το calcDmgModifier.
     // π.χ. modifier 1.15 -> cooldowns 15% πιο γρήγορα, 0.83 -> πιο αργά.
-    // Υπολογίζεται ΜΙΑ ΦΟΡΑ ανά κατάβαση με βάση τα expected stats του κανονικού
-    // τέρατος του βάθους (def = lvl*0.75 + lvl + lvl/2), ΟΧΙ του τωρινού τέρατος.
-    // Ανανεώνεται μόνο αν αλλάξει το attack του παίκτη στη διάρκεια της κατάβασης.
-    let runCdModifier = null;
-    let runCdModifierAtk = 0;
+    // Υπολογίζεται ΜΟΝΟ τη στιγμή που χρησιμοποιείται το skill, με βάση το τέρας
+    // που έχει απέναντί του εκείνη τη στιγμή. Η επόμενη χρήση ξαναϋπολογίζει.
+    // Η μπύρα (effCDPotion) ΔΕΝ επηρεάζεται από τον modifier.
     function getCdModifier() {
-        if (!inCombat) return 1;
-        if (runCdModifier === null || getPlayerAtk() !== runCdModifierAtk) {
-            runCdModifierAtk = getPlayerAtk();
-            const expectedNormalMonsterDef = currentSelectedLevel * (0.75 + 1 + 0.5);
-            runCdModifier = calcDmgModifier(runCdModifierAtk - expectedNormalMonsterDef);
-        }
-        return runCdModifier;
+        if (!inCombat || !monster) return 1;
+        return calcDmgModifier(getPlayerAtk() - monster.def);
     }
-    function effCD() { return CD_DURATION / (getSpeedFactor() * getCdModifier()); }
-    // Η μπύρα ΔΕΝ επηρεάζεται από τον modifier — χρησιμοποιεί μόνο την ταχύτητα.
+    let skillCdModifier = 1;
+    let preciseCdModifier = 1;
+    function effCDMod(mod) { return CD_DURATION / (getSpeedFactor() * mod); }
     function effCDPotion() { return CD_DURATION / getSpeedFactor(); }
     function effTick() { return COMBAT_TICK_MS / getSpeedFactor(); }
 
@@ -4564,8 +4558,8 @@ function updateCooldownBars() {
         }
     }
     setBar('btn-potion', potionCooldownActive, potionCdStart, effCDPotion);
-    setBar('btn-skill', skillCooldownActive, skillCdStart, effCD);
-    setBar('btn-precise', preciseCooldownActive, preciseCdStart, effCD);
+    setBar('btn-skill', skillCooldownActive, skillCdStart, function() { return effCDMod(skillCdModifier); });
+    setBar('btn-precise', preciseCooldownActive, preciseCdStart, function() { return effCDMod(preciseCdModifier); });
     const huntBtn = document.getElementById('btn-hunt-retreat');
     if (huntBtn) huntBtn.style.setProperty('--fill', '100%');
 }
@@ -4674,7 +4668,6 @@ setInterval(function () {
     isAttemptingRetreat = false;
     isSkillQueued = false;
     currentRunConanosChance = currentSelectedLevel === 100 ? 0.5 : 0;
-    runCdModifier = null; // νέο ξεκίνημα κατάβασης -> επαναϋπολογισμός με τα stats του νέου βάθους
 
     // Άμυνα-2: αν έμεινε πίσω κάποιο "ορφανό" timeout από προηγούμενο endCombat(),
     // ακύρωσέ το εδώ ώστε να μη μπορέσει ποτέ να κάνει spawn τέρας μέσα σε αυτό το νέο hunt.
@@ -4996,10 +4989,11 @@ if (skill) {
 
     preciseCooldownActive = true;
     preciseCdStart = Date.now();
+    preciseCdModifier = getCdModifier();
     preciseCdTimer = setTimeout(() => {
         preciseCooldownActive = false;
         updateUI();
-    }, effCD());
+    }, effCDMod(preciseCdModifier));
 
     resolvePlayerAttack(result);
 }
@@ -5125,19 +5119,21 @@ if (isAttemptingRetreat) {
         if (queuedSkill === skills.heavyStrike) {
             skillCooldownActive = true;
             skillCdStart = Date.now();
+            skillCdModifier = getCdModifier();
             skillCdTimer = setTimeout(() => {
                 skillCooldownActive = false;
                 updateUI();
-            }, effCD());
+            }, effCDMod(skillCdModifier));
         }
         if (queuedSkill === skills.preciseStrike) {
             usedPreciseStrikeThisRound = true; // Ενεργοποιείται η ιδιότητα του skill
             preciseCooldownActive = true;
             preciseCdStart = Date.now();
+            preciseCdModifier = getCdModifier();
             preciseCdTimer = setTimeout(() => {
                 preciseCooldownActive = false;
                 updateUI();
-            }, effCD());
+            }, effCDMod(preciseCdModifier));
         }
         queuedSkill = null;
     } else {
@@ -6287,8 +6283,8 @@ if (
         }
 
         potionCdTimer = recalc(potionCooldownActive, potionCdStart, potionCdTimer, function(v) { potionCooldownActive = v; }, function(v) { potionCdStart = v; }, 1);
-        skillCdTimer = recalc(skillCooldownActive, skillCdStart, skillCdTimer, function(v) { skillCooldownActive = v; }, function(v) { skillCdStart = v; }, getCdModifier());
-        preciseCdTimer = recalc(preciseCooldownActive, preciseCdStart, preciseCdTimer, function(v) { preciseCooldownActive = v; }, function(v) { preciseCdStart = v; }, getCdModifier());
+        skillCdTimer = recalc(skillCooldownActive, skillCdStart, skillCdTimer, function(v) { skillCooldownActive = v; }, function(v) { skillCdStart = v; }, skillCdModifier);
+        preciseCdTimer = recalc(preciseCooldownActive, preciseCdStart, preciseCdTimer, function(v) { preciseCooldownActive = v; }, function(v) { preciseCdStart = v; }, preciseCdModifier);
     }
 
     function setAutoPlayEnabled(enabled) {
