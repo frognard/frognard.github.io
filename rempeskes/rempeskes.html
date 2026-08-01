@@ -2917,6 +2917,7 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι στο εκατοστό βάθος του λαβυρίνθου κάθεται φωλιασμένος ο Θεός Κόνανος, γελαστός και παγκάκιστος, ο μισός παγωμένος κι ο μισός πυρωμένος, με κέρατα, με δόντια, με νύχια ματωμένα, με τα πλεμόνια του απ'όξω από το στήθος!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''ΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑΑ!!!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όσο πιο αποτελεσματικά παίζεις, τόσο πιο μάγκας εισαι!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όσο καλύτερη είναι η επίθεσή σου, τόσο πιο γρήγορα μοιράζεις κατραπακιές και εκτελέσεις!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι είναι καλό να πίνεις τη μπύρα σου όταν είναι ακόμα κρύα!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι τα βάθη 40-50 είναι καταραμένα! Προσοχή!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι το επίπεδο πολλαπλασιάζει τη ζωή και τη ζημιά. Επίσης, λένε ότι ενώ στην αρχή το επίπεδο είναι πολύ σημαντικό, αργότερα δεν μετράει τόσο όσο ο εξοπλισμός.''" ,
@@ -2992,9 +2993,9 @@ const msgs = [
 // atkBonus/defBonus προστίθενται πάνω στο κανονικό atk/def του επιπέδου.
 // Το HP των legendary τεράτων υπολογίζεται ξεχωριστά, βλ. legendaryBaseHpPerLevel παρακάτω.
 const legendaryStatsByType = {
-    weapon: { atkBonus: 7.5, defBonus: 0 },  // κόκκινα: επιθετικά, λιγότερη ζωή
-    armor:  { atkBonus: 0,  defBonus: 15.5 }, // μπλε: αμυντικά, πολλή ζωή
-    magic:  { atkBonus: 3.75, defBonus: 7.75 } // μωβ: ισορροπημένα
+    weapon: { atkBonus: 12, defBonus: 0 },  // κόκκινα: επιθετικά, λιγότερη ζωή
+    armor:  { atkBonus: 0,  defBonus: 18 }, // μπλε: αμυντικά, πολλή ζωή
+    magic:  { atkBonus: 7.5, defBonus: 7.5 } // μωβ: ισορροπημένα
 };
 
 // ==========================================================================
@@ -3397,7 +3398,25 @@ const AREA_TYPE_COLOR = {
     let autoPlaySpeedFactor = 1.5;
     let gameSpeedFactor = 1.5;
     function getSpeedFactor() { return autoPlayEnabled ? autoPlaySpeedFactor : gameSpeedFactor; }
-    function effCD() { return CD_DURATION / getSpeedFactor(); }
+    // Modifier ταχύτητας cooldowns: πολλαπλασιάζει το getSpeedFactor() με το calcDmgModifier.
+    // π.χ. modifier 1.15 -> cooldowns 15% πιο γρήγορα, 0.83 -> πιο αργά.
+    // Υπολογίζεται ΜΙΑ ΦΟΡΑ ανά κατάβαση με βάση τα expected stats του κανονικού
+    // τέρατος του βάθους (def = lvl*0.75 + lvl + lvl/2), ΟΧΙ του τωρινού τέρατος.
+    // Ανανεώνεται μόνο αν αλλάξει το attack του παίκτη στη διάρκεια της κατάβασης.
+    let runCdModifier = null;
+    let runCdModifierAtk = 0;
+    function getCdModifier() {
+        if (!inCombat) return 1;
+        if (runCdModifier === null || getPlayerAtk() !== runCdModifierAtk) {
+            runCdModifierAtk = getPlayerAtk();
+            const expectedNormalMonsterDef = currentSelectedLevel * (0.75 + 1 + 0.5);
+            runCdModifier = calcDmgModifier(runCdModifierAtk - expectedNormalMonsterDef);
+        }
+        return runCdModifier;
+    }
+    function effCD() { return CD_DURATION / (getSpeedFactor() * getCdModifier()); }
+    // Η μπύρα ΔΕΝ επηρεάζεται από τον modifier — χρησιμοποιεί μόνο την ταχύτητα.
+    function effCDPotion() { return CD_DURATION / getSpeedFactor(); }
     function effTick() { return COMBAT_TICK_MS / getSpeedFactor(); }
 
     let potionCooldownActive = false;
@@ -4534,19 +4553,19 @@ function startTownRegen() {
     
 function updateCooldownBars() {
     const now = Date.now();
-    function setBar(id, active, start) {
+    function setBar(id, active, start, effFn) {
         const btn = document.getElementById(id);
         if (!btn) return; // αμυντικά: αν το κουμπί δεν υπάρχει (π.χ. μεταβατικό state modal), μην σκάσει το loop
         if (active) {
-            const pct = Math.min(100, ((now - start) / effCD()) * 100);
+            const pct = Math.min(100, ((now - start) / effFn()) * 100);
             btn.style.setProperty('--fill', pct + '%');
         } else {
             btn.style.setProperty('--fill', '100%');
         }
     }
-    setBar('btn-potion', potionCooldownActive, potionCdStart);
-    setBar('btn-skill', skillCooldownActive, skillCdStart);
-    setBar('btn-precise', preciseCooldownActive, preciseCdStart);
+    setBar('btn-potion', potionCooldownActive, potionCdStart, effCDPotion);
+    setBar('btn-skill', skillCooldownActive, skillCdStart, effCD);
+    setBar('btn-precise', preciseCooldownActive, preciseCdStart, effCD);
     const huntBtn = document.getElementById('btn-hunt-retreat');
     if (huntBtn) huntBtn.style.setProperty('--fill', '100%');
 }
@@ -4655,6 +4674,7 @@ setInterval(function () {
     isAttemptingRetreat = false;
     isSkillQueued = false;
     currentRunConanosChance = currentSelectedLevel === 100 ? 0.5 : 0;
+    runCdModifier = null; // νέο ξεκίνημα κατάβασης -> επαναϋπολογισμός με τα stats του νέου βάθους
 
     // Άμυνα-2: αν έμεινε πίσω κάποιο "ορφανό" timeout από προηγούμενο endCombat(),
     // ακύρωσέ το εδώ ώστε να μη μπορέσει ποτέ να κάνει spawn τέρας μέσα σε αυτό το νέο hunt.
@@ -4786,20 +4806,20 @@ else if (Math.random() < specialChance) {
 
         if (chosenVariant === 'weapon') {
             variant = 'weapon';
-            baseAtk += 6;
+            baseAtk += 9;
             baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(wildTitles);
         }
         else if (chosenVariant === 'armor') {
             variant = 'armor';
-            baseDef += 13.5;
+            baseDef += 14;
             baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(armoredTitles);
         }
         else {
             variant = 'magic';
-            baseAtk += 3;
-            baseDef += 6.75;
+            baseAtk += 5.5;
+            baseDef += 5.5;
             baseHp = lvl * variantBaseHpPerLevel;
             title = randomFrom(magicTitles);
         }
@@ -4876,13 +4896,12 @@ const playerDmgFinetune = 1.08;
 const monsterDmgFinetune = 0.92;
 
 //complex εκθετικος modifier
-function calcDmgModifier(diff) {
-    if (diff >= 0) {
-        return Math.min(2.0, 1 + diff * 0.05);
-    } else {
-        return Math.max(0.5, 1 + diff * 0.025);
+    function calcDmgModifier(diff) {
+    return diff >= 0
+        ? 2 - Math.exp(-0.04 * diff)
+        : 0.5 + 0.5 * Math.exp(0.08 * diff);
     }
-}
+
 //simple modifier flat % steps
 //   function calcDmgModifier(diff) {
  //   return Math.min(2, Math.max(0.4, 1 + diff * 0.03));
@@ -5769,7 +5788,7 @@ function applyDefeatPenalties() {
 
         potionCooldownActive = true;
         potionCdStart = Date.now();
-        potionCdTimer = setTimeout(() => { potionCooldownActive = false; updateUI(); }, effCD());
+        potionCdTimer = setTimeout(() => { potionCooldownActive = false; updateUI(); }, effCDPotion());
 
         saveGame();
         updateUI();
@@ -6157,7 +6176,7 @@ if (
                 usePotion();
             } else if (hpPctMid <= AUTO_RETREAT_HP_PCT && potionCooldownActive) {
                 const elapsedMid = Date.now() - potionCdStart;
-                const chargePctMid = Math.min(1, elapsedMid / effCD());
+                const chargePctMid = Math.min(1, elapsedMid / effCDPotion());
                 if (chargePctMid < AUTO_RETREAT_BEER_CHARGE_PCT) {
                     setStatus(`AutoPlay: HP χαμηλό ανάμεσα σε μάχες (${Math.round(hpPctMid * 100)}%) -> Retreat!`);
                     forceRetreat();
@@ -6218,7 +6237,7 @@ if (
                 usePotion();
             } else if (hpPct <= AUTO_RETREAT_HP_PCT && potionCooldownActive) {
                 const elapsed = Date.now() - potionCdStart;
-                const chargePct = Math.min(1, elapsed / effCD());
+                const chargePct = Math.min(1, elapsed / effCDPotion());
                 if (chargePct < AUTO_RETREAT_BEER_CHARGE_PCT) {
                     if (!isAttemptingRetreat) {
                         setStatus(`AutoPlay: HP χαμηλό (${Math.round(hpPct * 100)}%) & μπύρα όχι έτοιμη -> Retreat!`);
@@ -6252,10 +6271,10 @@ if (
     function recalculateCooldowns(oldSpeed) {
         const now = Date.now();
 
-        function recalc(active, start, timer, setActive, setStart) {
+        function recalc(active, start, timer, setActive, setStart, cdMod) {
             if (!active) return timer;
-            const oldEff = CD_DURATION / oldSpeed;
-            const newEff = CD_DURATION / getSpeedFactor();
+            const oldEff = CD_DURATION / (oldSpeed * cdMod);
+            const newEff = CD_DURATION / (getSpeedFactor() * cdMod);
             const elapsed = now - start;
             const frac = Math.min(1, elapsed / oldEff);
             const remaining = Math.max(0, newEff * (1 - frac));
@@ -6267,9 +6286,9 @@ if (
             }, remaining);
         }
 
-        potionCdTimer = recalc(potionCooldownActive, potionCdStart, potionCdTimer, function(v) { potionCooldownActive = v; }, function(v) { potionCdStart = v; });
-        skillCdTimer = recalc(skillCooldownActive, skillCdStart, skillCdTimer, function(v) { skillCooldownActive = v; }, function(v) { skillCdStart = v; });
-        preciseCdTimer = recalc(preciseCooldownActive, preciseCdStart, preciseCdTimer, function(v) { preciseCooldownActive = v; }, function(v) { preciseCdStart = v; });
+        potionCdTimer = recalc(potionCooldownActive, potionCdStart, potionCdTimer, function(v) { potionCooldownActive = v; }, function(v) { potionCdStart = v; }, 1);
+        skillCdTimer = recalc(skillCooldownActive, skillCdStart, skillCdTimer, function(v) { skillCooldownActive = v; }, function(v) { skillCdStart = v; }, getCdModifier());
+        preciseCdTimer = recalc(preciseCooldownActive, preciseCdStart, preciseCdTimer, function(v) { preciseCooldownActive = v; }, function(v) { preciseCdStart = v; }, getCdModifier());
     }
 
     function setAutoPlayEnabled(enabled) {
