@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v360</title>
+    <title>Ρεμπεσκές v361</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -3457,21 +3457,22 @@ const AREA_TYPE_COLOR = {
     // Σωστή κλίμακα: πράσινο -> ανοιχτό πράσινο -> κίτρινο -> πορτοκαλί -> κόκκινο (gradient με 5 στάσεις).
     // Σκορ = [ (mAtk+mDef) - (pAtk+pDef) ] * (mLvl/pLvl), δηλ. το total diff σε στατς
     // modified by level ratio, κλειδωμένο στο [-15, 15]. 0 = ισορροπία.
-    // Τα stats του τέρατος παίρνονται από τη φόρμουλα του spawnMonster για τα κανονικά τέρατα
-    // (atk = def = lvl*0.75 + lvl + lvl/2) στο level του τωρινού τέρατος.
-    function getMonsterNormalStatsAt(level) {
-        const stat = level * 0.75 + level + level / 2;
-        return { atk: stat, def: stat };
-    }
+    // Χρησιμοποιεί τα ΠΡΑΓΜΑΤΙΚΑ stats του τωρινού τέρατος (monster.atk/def),
+    // ώστε τα special τέρατα με bonus (weapon/armor/magic/legendary, Κόνανος) να φαίνονται.
     function getMonsterDangerScore() {
         if (!monster) return 0;
-        const pComp = getPlayerAtk() + getPlayerDef();
-        const mStats = getMonsterNormalStatsAt(monster.level);
-        const mComp = mStats.atk + mStats.def;
+        const pComp = getPlayerAtk() * 0.65 + getPlayerDef() * 1.55;
+        const mComp = monster.atk * 1.55 + monster.def * 0.65;
         const rawDiff = (mComp - pComp) * (monster.level / player.level);
         return Math.max(-15, Math.min(15, rawDiff));
     }
+    // Το χρώμα επικινδυνότητας υπολογίζεται ΜΟΝΟ όταν γεννιέται νέο τέρας (spawnMonster)
+    // και αποθηκεύεται εδώ, ώστε κάθε νέο τέρας να δίνει φρέσκο χρώμα χωρίς επανυπολογισμούς.
+    let monsterDangerColor = 'rgb(250,204,21)'; // πορτοκαλί (default)
     function getMonsterDangerColor() {
+        return monsterDangerColor;
+    }
+    function computeMonsterDangerColor() {
         const t = Math.max(-1, Math.min(1, getMonsterDangerScore() / 15)); // [-1, 1]
         // 5 στάσεις: 🟢 πράσινο -> 🟩 ανοιχτό πράσινο -> 🟨 κίτρινο -> 🟧 πορτοκαλί -> 🟥 κόκκινο
         const stops = [
@@ -4887,6 +4888,9 @@ else if (Math.random() < specialChance) {
         currentRunConanosChance = Math.min(99, currentRunConanosChance + 0.5);
     }
     }
+
+    // Χρώμα επικινδυνότητας του νέου τέρας — υπολογίζεται ΕΔΩ, στο spawn, μία φορά.
+    monsterDangerColor = computeMonsterDangerColor();
 }
 
     function toggleRetreat() {
