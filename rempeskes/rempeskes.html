@@ -3556,7 +3556,11 @@ function calculateDifficulty(player, monster) {
     const playerDmgMod = calcDmgModifier(playerAtk - monster.def);
     const monsterDmgMod = calcDmgModifier(monster.atk - playerDef);
 
-    const playerDps = player.level * playerDmgMod * playerDmgFinetune;
+    // Η επίθεση του παίκτη έχει πολύ μικρό βάρος στο challenge ratio (εκθέτης 0.1),
+    // ίδια φιλοσοφία με το danger score: το να πας βαθύτερα εξαρτάται κυρίως από την άμυνα.
+    // Με πλήρη βάρος, ένας παίκτης με τρελή επίθεση αλλά χωρίς άμυνα θα φαινόταν "ασφαλής".
+    // Το monsterDps (πλευρά άμυνας/επιβίωσης) παραμένει με πλήρες βάρος.
+    const playerDps = player.level * Math.pow(playerDmgMod, 0.1) * playerDmgFinetune;
     const monsterDps = monster.level * monsterDmgMod * monsterDmgFinetune;
 
     const playerTTK = monster.maxHp / playerDps;
