@@ -3466,9 +3466,9 @@ const AREA_TYPE_COLOR = {
     }
     function getMonsterDangerScore() {
         if (!monster) return 0;
-        const pComp = getPlayerAtk() * 0.2 + getPlayerDef();
+        const pComp = getPlayerAtk() * 0.1 + getPlayerDef();
         const mStats = getMonsterNormalStatsAt(monster.level);
-        const mComp = mStats.atk  + mStats.def * 0.2;
+        const mComp = mStats.atk  + mStats.def * 0.1;
         let rawDiff = (mComp - pComp) * (monster.level / player.level);
         if (monster.variant === 'legendary') rawDiff += 10;
         else if (monster.variant === 'weapon' || monster.variant === 'armor' || monster.variant === 'magic') rawDiff += 7;
