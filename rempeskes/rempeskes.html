@@ -3211,24 +3211,24 @@ if (roll <= 1) {
     modifier = -5;          //1%
 } else if (roll <= 3) {
     modifier = -4;          //2%
-} else if (roll <= 8) {
-    modifier = -3;          //5%
-} else if (roll <= 18) {
-    modifier = -2;          //10%
-} else if (roll <= 30) {
+} else if (roll <= 7) {
+    modifier = -3;          //4%
+} else if (roll <= 15) {
+    modifier = -2;          //8%
+} else if (roll <= 27) {
     modifier = -1;          //12%
-} else if (roll <= 50) {
+} else if (roll <= 47) {
     modifier = 0;           //20%
-} else if (roll <= 74) {
+} else if (roll <= 71) {
     modifier = +1;          //24%
-} else if (roll <= 88) {
+} else if (roll <= 85) {
     modifier = +2;          //14%
-} else if (roll <= 96) {
+} else if (roll <= 93) {
     modifier = +3;          //8%
-} else if (roll <= 99) {
-    modifier = +4;          //3%
+} else if (roll <= 98) {
+    modifier = +4;          //5%
 } else {
-    modifier = +5;          //1%
+    modifier = +5;          //2%
 }
 
     let tier = monsterLevel + modifier;
@@ -4803,7 +4803,7 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
     // Βασική πιθανότητα Legendary (1 στις x). Σκαλάρει με το βάθος λαβυρίνθου
     // (διπλάσια στο βάθος 100 σε σχέση με το βάθος 0). RICH/POOR areas την
     // επηρεάζουν, με δικούς της πολλαπλασιαστές ώστε να ρυθμίζεται ξεχωριστά από το specialChance.
-    let legendaryChance = 0.001 + 0.001 * (lvl / 100) * 1.0;
+    let legendaryChance = 0.0007 + 0.0007 * (lvl / 100) * 1.0; 
     const legendaryRichMultiplier = 1.30;  // πόσο πιο συχνά σε RICH areas
     const legendaryPoorMultiplier = 0.70;  // πόσο πιο σπάνια σε POOR areas
     if (areaType === AREA_TYPES.RICH) legendaryChance = legendaryChance * legendaryRichMultiplier;
