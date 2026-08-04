@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v365</title>
+    <title>Ρεμπεσκές v375</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -4180,8 +4180,10 @@ function importSave() {
 
     // ΨΥΧΕΣ IRONMEN: στην εκκίνηση ελέγχουμε την πρόσβαση στο online ψοφολόγιο και
     // φορτώνουμε τη λίστα των νεκρών ironmen. Το κάνουμε ασύγχρονα γιατί το supabase
-    // client ορίζεται σε μεταγενέστερο script block.
-    setTimeout(() => {
+    // client ορίζεται σε μεταγενέστερο script block (και στο πρώτο άνοιγμα χωρίς cache
+    // το CDN script μπορεί να μην έχει φορτώσει ακόμα — γι' αυτό retry με polling).
+    let soulPoolAttempts = 0;
+    const tryLoadSoulPool = () => {
         if (typeof window.fetchSoulPool === 'function') {
             window.fetchSoulPool().then(pool => {
                 pool = Array.isArray(pool) ? pool : [];
@@ -4198,10 +4200,14 @@ function importSave() {
                     logMessage('Καμία ψυχή ironman δεν στοιχειώνει ακόμα τα βάθη...', 'system');
                 }
             }).catch(() => { sessionSoulPoolLoaded = false; });
+        } else if (soulPoolAttempts < 20) {
+            soulPoolAttempts++;
+            setTimeout(tryLoadSoulPool, 250);
         } else {
             sessionSoulPoolLoaded = false;
         }
-    }, 0);
+    };
+    tryLoadSoulPool();
 
 let rateStartTime = Date.now();
 let sessionXp = 0;
