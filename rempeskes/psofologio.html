@@ -329,7 +329,7 @@
     <header>
         <div class="eyebrow">Ο Τεκές του Ζαλαδούρα</div>
         <h1>ΡΕΜΠΕΣΚΕΔΕΣ</h1>
-        <p class="sub">που αραδιάζουν ανοησίες για το πόπολο</p>
+        <p class="sub">Οι ζωντανοί χαρακτήρες παραμένουν μία εβδομάδα χωρίς update. Οι νεκροί ironmen και οι θεοσφάχτες είναι αιώνιοι.</p>
     </header>
 
     <div id="tab-bar">
@@ -543,7 +543,7 @@ async function load() {
         if (s.victory) return false; // θεοσφάχτες μένουν για πάντα
         const d = new Date(s.death_date);
         if (isNaN(d.getTime())) return false;
-        return (Date.now() - d.getTime()) > 30 * 24 * 60 * 60 * 1000; // >1 μήνας χωρίς update
+        return (Date.now() - d.getTime()) > 7 * 24 * 60 * 60 * 1000; // >1 βδομάδα χωρίς update
     };
     apateonData = deduped.filter(isApateon);
     normalData = deduped.filter(s => !isIronman(s) && !isK(s) && !isApateon(s) && !isStaleNonIronman(s));
@@ -589,6 +589,7 @@ function showStatsPopup(idx) {
                 <div class="stats-row"><span class="stats-label">Φόνοι/κατάβαση</span><span class="stats-value">${killsPerDesc.toFixed(1)}</span></div>
                 <div class="stats-row"><span class="stats-label">Καταβάσεις</span><span class="stats-value">${formatNumber(s.total_descents || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Πεντάρια</span><span class="stats-value">${formatNumber(s.pentaria || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Ψυχές</span><span class="stats-value">${formatNumber(s.souls_killed || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Θρυλικά drops</span><span class="stats-value">${formatNumber(s.legendary_drops || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Καλύτερο σερί</span><span class="stats-value">${formatNumber(s.best_kill_streak || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Συνολικά XP</span><span class="stats-value">${formatNumber(s.total_xp_gained || 0)}</span></div>
