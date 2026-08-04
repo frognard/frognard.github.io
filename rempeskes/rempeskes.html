@@ -1188,7 +1188,7 @@ body {
 
 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; justify-content:flex-end;">
 
-    <button class="btn-options" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music-toggle').checked=musicEnabled;document.getElementById('options-music-volume').value=musicVolumeDb;document.getElementById('options-modal').style.display='flex';">
+    <button class="btn-options" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music-toggle').checked=musicEnabled;document.getElementById('options-music-volume').value=musicVolumeDb;document.getElementById('options-live-upload').checked=(player.liveUpload!==false);document.getElementById('options-modal').style.display='flex';">
         Επ
     </button>
 
@@ -1243,6 +1243,10 @@ body {
         <label style="display: block; margin-bottom: 18px; cursor: pointer; color: #666;">
             <input type="checkbox" id="show-autoplay-checkbox">
             <span style="color: #888;">Χαρακτήρας Κυβόργιο (autoplay mode)</span>
+        </label>
+        <label style="display: block; margin-bottom: 18px; cursor: pointer;">
+            <input type="checkbox" id="live-upload-checkbox" checked>
+            Live-upload στα rankings (αυτόματο ανέβασμα στο database σε κάθε κατάβαση/θάνατο)
         </label>
         <button class="btn-showRules" onclick="confirmCharacterCreation()">Έναρξη</button>
     </div>
@@ -1486,9 +1490,8 @@ function showMagkiaMilestones() {
     // logMessage("");
 }
 
-function uploadCurrentPlayerToHiScores() {
-    logMessage('Ανέβασμα στο Hi-Scores...', 'system');
-    const record = {
+function buildPlayerRecord() {
+    return {
         name: player.name,
         level: player.level,
         depth: Math.round(currentSelectedLevel) || player.level,
@@ -1530,9 +1533,19 @@ function uploadCurrentPlayerToHiScores() {
         totalDescents: player.totalDescents || 0,
         magkiaMilestones: player.magkiaMilestones || []
     };
+}
+
+function uploadCurrentPlayerToHiScores() {
+    logMessage('Ανέβασμα στο Hi-Scores...', 'system');
     if (typeof syncIronmanRecordsToCloud === 'function') {
-        syncIronmanRecordsToCloud([record]);
+        syncIronmanRecordsToCloud([buildPlayerRecord()]);
     }
+}
+
+function liveUploadIfEnabled() {
+    if (player.liveUpload === false) return;
+    if (typeof syncIronmanRecordsToCloud !== 'function') return;
+    syncIronmanRecordsToCloud([buildPlayerRecord()], true);
 }
 
 
@@ -3287,7 +3300,8 @@ if (roll <= 1) {
         gameSpeedFactor: 1.5, // αποθηκευμένη επιλογή ταχύτητας παιχνιδιού (Μερακλίδικη=1, Κανονική=1.25, Αγχωτική=1.5)
         soundEnabled: true,   // αποθηκευμένη επιλογή ήχου
         musicEnabled: false,  // αποθηκευμένη επιλογή μουσικής
-        musicVolumeDb: -12    // αποθηκευμένη ένταση μουσικής (dB, 0 = max, -40 = πολύ χαμηλά)
+        musicVolumeDb: -12,   // αποθηκευμένη ένταση μουσικής (dB, 0 = max, -40 = πολύ χαμηλά)
+        liveUpload: true      // Live-upload στα rankings (αυτόματο ανέβασμα σε κατάβαση/θάνατο)
     };
 
 
@@ -3882,6 +3896,7 @@ function loadGame() {
     } else {
         player.musicVolumeDb = musicVolumeDb;
     }
+    if (typeof player.liveUpload !== 'boolean') player.liveUpload = true;
     setMusicVolume(musicVolumeDb);
     updateMusicState();
 
@@ -3959,6 +3974,7 @@ function confirmCharacterCreation() {
 
     player.ironman = document.getElementById('ironman-checkbox').checked;
     player.showAutoplay = document.getElementById('show-autoplay-checkbox').checked;
+    player.liveUpload = document.getElementById('live-upload-checkbox').checked;
     autoPlayEnabled = false;
     autoPlaySpeedFactor = 1.5;
     if (typeof window.rearmTimers === 'function') window.rearmTimers();
@@ -3969,6 +3985,7 @@ function confirmCharacterCreation() {
     }
 
     saveGame();
+    liveUploadIfEnabled();
     
     logMessage(`Μπαίνεις για πρώτη φορά στον Τεκέ του Ζαλαδούρα. Οι άλλοι ρεμπεσκέδες σε κοιτάνε στραβά.`, 'bright');
     logMessage(``);
@@ -4059,6 +4076,7 @@ function importSave() {
             if (typeof player.killsArmor !== 'number') player.killsArmor = 0;
             if (typeof player.killsMagic !== 'number') player.killsMagic = 0;
             if (typeof player.pentaria !== 'number') player.pentaria = 0;
+            if (typeof player.liveUpload !== 'boolean') player.liveUpload = true;
             player.maxUnlockedLevel = 100;
             player.nextXp = calculateNextXpRequirement(player.level);
 
@@ -5150,6 +5168,7 @@ function forceRetreat() {
     
     updateUI();
     saveGame();
+    liveUploadIfEnabled();
 
         const huntBtn = document.getElementById("btn-hunt-retreat");
     huntBtn.disabled = true;
@@ -5531,6 +5550,7 @@ function showAnnouncementPopup(text, styleClass, color) {
                 
                 checkLevelUp();
                 saveGame();
+                liveUploadIfEnabled();
                 updateUI();
                 return; // Σταματάει η εκτέλεση εδώ, δεν πάει σε επόμενο τέρας
             } else {
@@ -5672,6 +5692,7 @@ function showAnnouncementPopup(text, styleClass, color) {
                         triggerSmoothTransition('#172c57', 1.0);
                         
                         updateUI();
+                        liveUploadIfEnabled();
                         const huntBtn = document.getElementById("btn-hunt-retreat");
                             huntBtn.disabled = true;
                             setTimeout(() => {
@@ -5827,6 +5848,7 @@ function applyDefeatPenalties() {
     startTownRegen();
 
     saveGame();
+    liveUploadIfEnabled();
     document.getElementById('town-interface').classList.remove('hidden');
     document.getElementById('combat-interface').classList.add('hidden');
     updateUI();
@@ -6509,8 +6531,9 @@ if ('serviceWorker' in navigator) {
         console.error('Supabase init failed (psofologio sync off):', e);
     }
 
-    window.syncIronmanRecordsToCloud = async function (records) {
+    window.syncIronmanRecordsToCloud = async function (records, silent = false) {
         if (!sbClient || !records || records.length === 0) {
+            if (silent) { console.warn('[Supabase] sync failed (silent).'); return; }
             logMessage('Αποτυχία σύνδεσης με το database.', 'system');
             return;
         }
@@ -6604,11 +6627,11 @@ if ('serviceWorker' in navigator) {
         }
 
         if (uploaded > 0 || skipped > 0) {
-            logMessage(`O Χαρακτήρας ανέβηκε στο online database (${uploaded} upload, ${skipped} παραλείψεις).`, 'system');
+            if (!silent) logMessage(`O Χαρακτήρας ανέβηκε στο online database (${uploaded} upload, ${skipped} παραλείψεις).`, 'system');
         } else if (dbErrors) {
-            logMessage(`Αποτυχία σύνδεσης: ${dbErrors}`, 'system');
+            if (!silent) logMessage(`Αποτυχία σύνδεσης: ${dbErrors}`, 'system');
         } else {
-            logMessage('Το score δεν είναι υψηλότερο από το υπάρχον. Δεν ανέβηκε.', 'system');
+            if (!silent) logMessage('Το score δεν είναι υψηλότερο από το υπάρχον. Δεν ανέβηκε.', 'system');
         }
     };
 })();
@@ -6622,6 +6645,8 @@ function openOptionsModal() {
     if (speedEl) speedEl.value = gameSpeedFactor;
     const soundEl = document.getElementById('options-sound');
     if (soundEl) soundEl.checked = soundEnabled;
+    const liveEl = document.getElementById('options-live-upload');
+    if (liveEl) liveEl.checked = player.liveUpload !== false;
     const musicEl = document.getElementById('options-music');
     if (musicEl) musicEl.checked = musicEnabled;
     const musicVolEl = document.getElementById('options-music-volume');
@@ -6677,6 +6702,8 @@ function applyOptions() {
   const soundEl = document.getElementById('options-sound');
     if (soundEl) soundEnabled = soundEl.checked;
     player.soundEnabled = soundEnabled;
+    const liveEl = document.getElementById('options-live-upload');
+    if (liveEl) player.liveUpload = liveEl.checked;
     const musicToggleEl = document.getElementById('options-music-toggle');
     if (musicToggleEl) musicEnabled = musicToggleEl.checked;
     const musicVolEl = document.getElementById('options-music-volume');
@@ -6723,6 +6750,10 @@ function applyOptions() {
 
         <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
             <input type="checkbox" id="options-sound"> 🔉 Ήχος
+        </label>
+
+        <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
+            <input type="checkbox" id="options-live-upload"> 📡 Live-upload στα rankings
         </label>
 
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:0.85rem;">

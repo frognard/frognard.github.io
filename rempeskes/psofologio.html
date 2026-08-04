@@ -539,10 +539,16 @@ async function load() {
         if (isNaN(d.getTime())) return false;
         return (Date.now() - d.getTime()) > 7 * 24 * 60 * 60 * 1000; // >1 βδομάδα χωρίς update
     };
+    const isStaleNonIronman = s => {
+        if (s.victory) return false; // θεοσφάχτες μένουν για πάντα
+        const d = new Date(s.death_date);
+        if (isNaN(d.getTime())) return false;
+        return (Date.now() - d.getTime()) > 30 * 24 * 60 * 60 * 1000; // >1 μήνας χωρίς update
+    };
     apateonData = deduped.filter(isApateon);
-    normalData = deduped.filter(s => !isIronman(s) && !isK(s) && !isApateon(s));
+    normalData = deduped.filter(s => !isIronman(s) && !isK(s) && !isApateon(s) && !isStaleNonIronman(s));
     ironmenData = deduped.filter(s => isIronman(s) && !isK(s) && !isApateon(s) && !isStaleAliveIronman(s));
-    kNormalData = deduped.filter(s => !isIronman(s) && isK(s) && !isApateon(s));
+    kNormalData = deduped.filter(s => !isIronman(s) && isK(s) && !isApateon(s) && !isStaleNonIronman(s));
     kIronmenData = deduped.filter(s => isIronman(s) && isK(s) && !isApateon(s) && !isStaleAliveIronman(s));
 
     renderTabContent(normalData, entriesEl);
