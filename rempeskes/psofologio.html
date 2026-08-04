@@ -212,6 +212,7 @@
     #tab-bar {
         display: flex;
         justify-content: center;
+        flex-wrap: wrap;
         gap: 4px;
         margin: 0 0 24px;
     }
@@ -221,7 +222,8 @@
         color: var(--parchment-dim);
         font-family: 'PT Serif', serif;
         font-size: 0.9rem;
-        padding: 6px 22px;
+        padding: 6px 10px;
+        white-space: nowrap;
         cursor: pointer;
         transition: all 0.2s;
         border-radius: 2px;
@@ -638,6 +640,8 @@ function showMagkiaPopup(idx) {
             rows += `<div style="padding:5px 0;line-height:1.6;color:var(--brass);">[Τέλος] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
         } else if (m.legendaryKill) {
             rows += `<div style="padding:5px 0;line-height:1.6;color:var(--brass);">[${m.level}] Σκότωσε: "${escapeHtml(m.legendaryKill)}" &#8594; "${escapeHtml(m.legendaryDrop)}" &middot; γύρος ${formatNumber(m.turns)}</div>`;
+        } else if (m.soulKill) {
+            rows += `<div style="padding:5px 0;line-height:1.6;color:#a0703f;">Στοιχειό! Σκότωσε: "💀${escapeHtml(m.soulKill)}" και βρήκε: "Ψυχή (💀${escapeHtml(m.soulKill)})" &middot; γύρος ${formatNumber(m.turns)}</div>`;
         } else {
             rows += `<div style="padding:5px 0;line-height:1.6;">[${m.level}] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
         }

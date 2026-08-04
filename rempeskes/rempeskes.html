@@ -359,13 +359,13 @@
     color: #000 !important;
     font-weight: bold !important;
     letter-spacing: 1px;
-    text-shadow: 0 0 8px rgba(0,220,0,1.0), 0 0 22px rgba(0,220,0,0.8);
+    text-shadow: 0 0 6px rgba(0,220,0,1.0), 0 0 17px rgba(0,220,0,0.8);
 }
 
 .soul-item-glow {
     color: #000 !important;
     font-weight: 700;
-    text-shadow: 0 0 8px rgba(0,220,0,1.0), 0 0 22px rgba(0,220,0,0.8);
+    text-shadow: 0 0 6px rgba(0,220,0,1.0), 0 0 17px rgba(0,220,0,0.8);
 }
 
         .legendary-popup {
@@ -1504,7 +1504,7 @@ function showMagkiaMilestones() {
         } else if (m.legendaryKill) {
             logMessage(`Επίπεδο ${m.level}: Σκότωσε: "${m.legendaryKill}" και βρήκε: "${m.legendaryDrop}" - γύρος ${formatNumber(m.turns)}`, 'milestone-legendary');
         } else if (m.soulKill) {
-            logMessage(`Επίπεδο ${m.level}: Στοιχειό: "${m.soulKill}" και πήρες: "${m.soulDrop}" - γύρος ${formatNumber(m.turns)}`, 'milestone-soul');
+            logMessage(`Στοιχειό! Σκότωσε: "${m.soulKill}" και βρήκε: "Ψυχή (${m.soulKill})" - γύρος ${formatNumber(m.turns)}`, 'milestone-soul');
         } else {
             logMessage(`Επίπεδο ${m.level}: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`, 'milestone');
         }
@@ -1594,7 +1594,7 @@ function getMonsterDisplayName(monster) {
 
     // Ψυχές νεκρών ironmen: νεκροκεφαλή + κανονικό όνομα χαρακτήρα
     if (monster.variant === 'soul' || monster.isSoul) {
-        return `💀 ${monster.soulName}`;
+        return `💀${monster.soulName}`;
     }
 
     // Legendary monsters έχουν μόνο ένα καθαρό όνομα
@@ -4876,7 +4876,7 @@ function trySpawnSoulMonster(lvl, baseAtk, baseDef, baseHp) {
     if (!sessionSoulPoolLoaded || !sessionSoulPool || sessionSoulPool.length === 0) return null;
     if (Math.random() >= 1 / 800) return null;
 
-    const candidates = sessionSoulPool.filter(s => Math.abs(s.level - lvl) <= 5);
+    const candidates = sessionSoulPool.filter(s => Math.abs(s.level - lvl) <= 3);
     if (candidates.length === 0) return null;
 
     const soul = candidates[Math.floor(Math.random() * candidates.length)];
@@ -5468,7 +5468,7 @@ function handleEquipmentDrop(type, rolledTier, monster, forceSell = false) {
 let itemName;
 
 if (isSoulDrop) {
-    itemName = `Ψυχή (💀 ${monster.soulName || 'Αγνώστου'})`;
+    itemName = `Ψυχή (${monster.soulName || 'Αγνώστου'})`;
 } else if (isLegendaryDrop && monster.lootItemName) {
     itemName = monster.lootItemName;
 } else {
@@ -5625,7 +5625,7 @@ function showAnnouncementPopup(text, styleClass, color) {
                 player.magkiaMilestones.push({
                     level: player.level,
                     soulKill: monster.soulName,
-                    soulDrop: `Ψυχή (💀 ${monster.soulName})`,
+                    soulDrop: `Ψυχή (${monster.soulName})`,
                     score: Math.max(computeScore(), player._displayedScore || 0),
                     turns: player.activeTime || 0,
                     deaths: player.deaths || 0
