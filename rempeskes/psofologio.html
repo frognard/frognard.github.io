@@ -337,6 +337,7 @@
         <button class="tab-btn" data-tab="ironmen">Ironmen</button>
         <button class="tab-btn" data-tab="cyborg-normal">[K] Normal</button>
         <button class="tab-btn" data-tab="cyborg-ironmen">[K] Ironmen</button>
+        <button class="tab-btn" data-tab="apateon">Απατεώνες</button>
     </div>
 
     <div id="tally"></div>
@@ -344,6 +345,7 @@
     <div id="entries-ironmen" style="display:none;"></div>
     <div id="entries-k-normal" style="display:none;"></div>
     <div id="entries-k-ironmen" style="display:none;"></div>
+    <div id="entries-apateon" style="display:none;"></div>
     <div id="empty" style="display:none;">Το κατάστιχο είναι άδειο...</div>
     <div id="err" style="display:none;">Δεν κατάφερα να διαβάσω το κατάστιχο αυτή τη στιγμή.</div>
 
@@ -465,14 +467,16 @@ let normalData = [];
 let ironmenData = [];
 let kNormalData = [];
 let kIronmenData = [];
+let apateonData = [];
 
 function switchTab(tab) {
     document.getElementById('entries').style.display = tab === 'normal' ? '' : 'none';
     document.getElementById('entries-ironmen').style.display = tab === 'ironmen' ? '' : 'none';
     document.getElementById('entries-k-normal').style.display = tab === 'cyborg-normal' ? '' : 'none';
     document.getElementById('entries-k-ironmen').style.display = tab === 'cyborg-ironmen' ? '' : 'none';
+    document.getElementById('entries-apateon').style.display = tab === 'apateon' ? '' : 'none';
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
-    const data = tab === 'normal' ? normalData : tab === 'ironmen' ? ironmenData : tab === 'cyborg-normal' ? kNormalData : kIronmenData;
+    const data = tab === 'normal' ? normalData : tab === 'ironmen' ? ironmenData : tab === 'cyborg-normal' ? kNormalData : tab === 'cyborg-ironmen' ? kIronmenData : apateonData;
     const victors = data.filter(s => s.victory);
     const alive = data.filter(s => !s.victory && !s.killer);
     const deaths = data.filter(s => !s.victory && s.killer);
@@ -528,15 +532,24 @@ async function load() {
 
     const isK = n => n.name.startsWith('[K]') || n.name.startsWith('[Κ]');
     const isIronman = n => n.ironman === true;
-    normalData = deduped.filter(s => !isIronman(s) && !isK(s));
-    ironmenData = deduped.filter(s => isIronman(s) && !isK(s));
-    kNormalData = deduped.filter(s => !isIronman(s) && isK(s));
-    kIronmenData = deduped.filter(s => isIronman(s) && isK(s));
+    const isApateon = n => n.apateon === true;
+    const isStaleAliveIronman = s => {
+        if (s.victory || s.killer) return false; // νεκροί/θεοσφάχτες μένουν για πάντα
+        const d = new Date(s.death_date);
+        if (isNaN(d.getTime())) return false;
+        return (Date.now() - d.getTime()) > 7 * 24 * 60 * 60 * 1000; // >1 βδομάδα χωρίς update
+    };
+    apateonData = deduped.filter(isApateon);
+    normalData = deduped.filter(s => !isIronman(s) && !isK(s) && !isApateon(s));
+    ironmenData = deduped.filter(s => isIronman(s) && !isK(s) && !isApateon(s) && !isStaleAliveIronman(s));
+    kNormalData = deduped.filter(s => !isIronman(s) && isK(s) && !isApateon(s));
+    kIronmenData = deduped.filter(s => isIronman(s) && isK(s) && !isApateon(s) && !isStaleAliveIronman(s));
 
     renderTabContent(normalData, entriesEl);
     renderTabContent(ironmenData, document.getElementById('entries-ironmen'));
     renderTabContent(kNormalData, document.getElementById('entries-k-normal'));
     renderTabContent(kIronmenData, document.getElementById('entries-k-ironmen'));
+    renderTabContent(apateonData, document.getElementById('entries-apateon'));
 
     switchTab('normal');
 
@@ -569,6 +582,7 @@ function showStatsPopup(idx) {
                 <div class="stats-row"><span class="stats-label">Ρίσκο</span><span class="stats-value">${(s.risk || 0) > 0 ? '+' : ''}${(s.risk || 0).toFixed(3)}</span></div>
                 <div class="stats-row"><span class="stats-label">Φόνοι/κατάβαση</span><span class="stats-value">${killsPerDesc.toFixed(1)}</span></div>
                 <div class="stats-row"><span class="stats-label">Καταβάσεις</span><span class="stats-value">${formatNumber(s.total_descents || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Πεντάρια</span><span class="stats-value">${formatNumber(s.pentaria || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Θρυλικά drops</span><span class="stats-value">${formatNumber(s.legendary_drops || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Καλύτερο σερί</span><span class="stats-value">${formatNumber(s.best_kill_streak || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Συνολικά XP</span><span class="stats-value">${formatNumber(s.total_xp_gained || 0)}</span></div>
