@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v391</title>
+    <title>Ρεμπεσκές v390</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1277,7 +1277,7 @@ body {
 <div id="ironman-modal" class="hidden ironman-modal-overlay">
     <div class="ironman-modal-box">
         <p>Όνομα χαρακτήρα:</p>
-        <input type="text" id="char-name-input" placeholder="Όνομα ρεμπεσκέ" enterkeyhint="go"
+        <input type="text" id="char-name-input" placeholder="Όνομα ρεμπεσκέ" enterkeyhint="go" maxlength="18"
                onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmCharacterCreation();}"
                style="width: 100%; padding: 6px; margin-bottom: 14px; background: #1a1a1a; color: #fff; border: 1px solid var(--accent-gold); border-radius: 4px;">
         <p id="char-name-error" class="hidden" style="color:#e74c3c; font-size:0.85rem; margin: 0 0 10px;">Πρέπει να δώσεις ένα όνομα.</p>
@@ -3812,7 +3812,7 @@ function updateBattleAreaRow() {
     const pct = Math.round(getStreakVariantChance() * 100);
     const variantHtml = atMaxStreakChance ? `<b style="color:#fff;"><i>${pct}%</i></b>` : `<b style="color:#fff;">${pct}%</b>`;
     areaRow.innerHTML =
-        `<span style="color:${areaColor}; font-weight:bold;">Βάθος ${depthNames[currentSelectedLevel - 1]}</span>` +
+        `<span style="color:${areaColor}; font-weight:bold;">${depthNames[currentSelectedLevel - 1]}</span>` +
         `, Θάλαμος <b style="color:#fff;">${currentRunKills + 1}</b>, Σπάνιο ${variantHtml}`;
 }
 
@@ -4087,7 +4087,7 @@ function resetGame() {
 function confirmCharacterCreation() {
     const nameInput = document.getElementById('char-name-input');
     const errorEl = document.getElementById('char-name-error');
-    let chosenName = nameInput.value.trim();
+    let chosenName = nameInput.value.trim().slice(0, 18);
 
     if (!chosenName) {
         errorEl.classList.remove('hidden');
@@ -4261,7 +4261,7 @@ function importSave() {
 
     function savePlayerName() {
         const nameEl = document.getElementById('p-name');
-        let newName = nameEl.innerText.trim();
+        let newName = nameEl.innerText.trim().slice(0, 18);
         if (newName === "") newName = "Ρεμπεσκές";
         player.name = newName;
         nameEl.innerText = newName;
@@ -6294,6 +6294,73 @@ if (
 }
 
 });
+
+// ==== CONTROLLER SUPPORT (Gamepad API) ====
+// Face buttons (PS): Τετράγωνο=Κατραπακιά, Τρίγωνο=Εκτέλεση, Χ=Μπύρα, Κύκλος=Σφάξε
+// Shoulders: LB/L1=προηγούμενη περιοχή, RB/R1=επόμενη περιοχή (μόνο εκτός μάχης)
+// Edge detection: ενέργεια μόνο τη στιγμή που πατιέται το κουμπί, όχι σε επανάληψη.
+(function initGamepadSupport() {
+    if (!('getGamepads' in navigator)) {
+        console.log('[Controller] Gamepad API not supported in this browser');
+        return;
+    }
+
+    const lastButtons = new Map();
+
+    function gamepadChangeArea(delta) {
+        if (inCombat) return;
+        const selector = document.getElementById('area-selector');
+        if (!selector) return;
+        const target = selector.selectedIndex + delta;
+        if (target < 0 || target >= selector.options.length) return;
+        selector.selectedIndex = target;
+        currentSelectedLevel = parseFloat(selector.value);
+        updateSelectorColor(selector);
+        saveGame();
+        updateUI();
+    }
+
+    function gamepadHandlePress(buttonIndex) {
+        switch (buttonIndex) {
+            case 0: usePotion(); break;               // X / κάτω → Μπύρα
+            case 1: handleHuntRetreatClick(); break;  // Circle / δεξιά → Σφάξε
+            case 2: queueSpecialAttack(); break;      // Square / αριστερά → Κατραπακιά
+            case 3: queuePreciseStrike(); break;      // Triangle / πάνω → Εκτέλεση
+            case 4: gamepadChangeArea(-1); break;     // LB / L1 → προηγούμενη περιοχή
+            case 5: gamepadChangeArea(1); break;      // RB / R1 → επόμενη περιοχή
+        }
+    }
+
+    function gamepadPoll() {
+        requestAnimationFrame(gamepadPoll);
+        let pads;
+        try { pads = navigator.getGamepads(); } catch (e) { return; }
+        if (!pads) return;
+        for (let g = 0; g < pads.length; g++) {
+            const gp = pads[g];
+            if (!gp || !gp.connected) continue;
+            if (!lastButtons.has(gp.index)) lastButtons.set(gp.index, []);
+            const prev = lastButtons.get(gp.index);
+            const btns = gp.buttons;
+            for (let i = 0; i < btns.length; i++) {
+                const now = !!btns[i].pressed;
+                const was = !!prev[i];
+                prev[i] = now;
+                if (now && !was) gamepadHandlePress(i);
+            }
+        }
+    }
+
+    window.addEventListener('gamepadconnected', function () {
+        console.log('[Controller] connected');
+    });
+    window.addEventListener('gamepaddisconnected', function () {
+        console.log('[Controller] disconnected');
+    });
+
+    gamepadPoll();
+})();
+
 </script>
 
 <!-- AutoPlay Settings Modal -->
