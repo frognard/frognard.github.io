@@ -5387,7 +5387,7 @@ function forceRetreat() {
     isSkillQueued = false;
     queuedSkill = null;
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
-    logMessage(`Επιστρέφεις κουρασμένος στον Τεκέ του Ζαλαδούρα. Έσφαξες εχθρούς ${currentRunKills} και βρήκες ${currentRunItems} αντικείμενα σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο.`, 'retreat');
+    logMessage(`Επιστρέφεις κουρασμένος στον Τεκέ του Ζαλαδούρα. Έσφαξες ${currentRunKills} εχθρούς και βρήκες ${currentRunItems} αντικείμενα σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο.`, 'retreat');
         if (currentSelectedLevel >= player.level && currentRunKills > player.bestKillStreak) {
         player.bestKillStreak = currentRunKills;
         }
@@ -5939,7 +5939,7 @@ function showAnnouncementPopup(text, styleClass, color) {
                         document.getElementById('combat-interface').classList.add('hidden');
                         refreshTekePatrons();
                         
-                        logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες εχθρούς ${currentRunKills} και βρήκες ${currentRunItems} αντικείμενα σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο...`, 'retreat');
+                        logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες ${currentRunKills} εχθρούς και βρήκες ${currentRunItems} αντικείμενα σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο...`, 'retreat');
                         if (currentSelectedLevel >= player.level && currentRunKills > player.bestKillStreak) {
                             player.bestKillStreak = currentRunKills;
                         }
