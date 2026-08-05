@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v391</title>
+    <title>Ρεμπεσκές v392</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -3486,8 +3486,9 @@ const AREA_TYPE_COLOR = {
     function getSpeedFactor() { return autoPlayEnabled ? autoPlaySpeedFactor : gameSpeedFactor; }
     // Modifier ταχύτητας cooldowns: πολλαπλασιάζει το getSpeedFactor() με το calcDmgModifier.
     // π.χ. modifier 1.15 -> cooldowns 15% πιο γρήγορα, 0.83 -> πιο αργά.
-    // Υπολογίζεται ΜΟΝΟ τη στιγμή που χρησιμοποιείται το skill, με βάση το τέρας
-    // που έχει απέναντί του εκείνη τη στιγμή. Η επόμενη χρήση ξαναϋπολογίζει.
+    // Υπολογίζεται ΜΟΝΟ στο spawn νέου τέρας (refreshCooldownModifiers), με βάση το τέρας
+    // που έχει απέναντί του εκείνη τη στιγμή. Αν αλλάξει τέρας ενώ τρέχει cooldown,
+    // αλλάζει μόνο η ταχύτητα — το ποσοστό γεμίσματος μένει σταθερό.
     // Η μπύρα (effCDPotion) ΔΕΝ επηρεάζεται από τον modifier.
     function getCdModifier() {
         if (!inCombat || !monster) return 1;
@@ -3510,7 +3511,39 @@ const AREA_TYPE_COLOR = {
     let preciseCooldownActive = false;
     let preciseCdStart = 0;
     let preciseCdTimer = null;
-    
+
+    // Ανανεώνει τα modifiers ταχύτητας cooldowns (skill/precise) με βάση το τωρινό τέρας.
+    // Αν κάποιο cooldown τρέχει, κρατάει το ποσοστό γεμίσματος της μπάρας σταθερό
+    // (μετακινεί το start) και αλλάζει μόνο την ταχύτητα γεμίσματος.
+    function refreshCooldownModifiers() {
+        const newMod = getCdModifier();
+        const now = Date.now();
+
+        function rescale(active, start, timer, cdMod, setActive, setStart, setMod) {
+            setMod(newMod);
+            if (!active) return timer;
+            const speed = getSpeedFactor();
+            const oldEff = CD_DURATION / (speed * cdMod);
+            const newEff = CD_DURATION / (speed * newMod);
+            const frac = Math.min(1, (now - start) / oldEff);
+            const remaining = Math.max(0, newEff * (1 - frac));
+            clearTimeout(timer);
+            setStart(now - (newEff * frac));
+            return setTimeout(() => {
+                setActive(false);
+                updateUI();
+            }, remaining);
+        }
+
+        skillCdTimer = rescale(skillCooldownActive, skillCdStart, skillCdTimer, skillCdModifier,
+            function (v) { skillCooldownActive = v; },
+            function (v) { skillCdStart = v; },
+            function (v) { skillCdModifier = v; });
+        preciseCdTimer = rescale(preciseCooldownActive, preciseCdStart, preciseCdTimer, preciseCdModifier,
+            function (v) { preciseCooldownActive = v; },
+            function (v) { preciseCdStart = v; },
+            function (v) { preciseCdModifier = v; });
+    }
 
     const skills = {
     heavyStrike: {
@@ -5177,6 +5210,7 @@ else if (Math.random() < specialChance) {
 
     // Χρώμα επικινδυνότητας του νέου τέρας — υπολογίζεται ΕΔΩ, στο spawn, μία φορά.
     monsterDangerColor = computeMonsterDangerColor();
+    refreshCooldownModifiers();
 }
 
     function toggleRetreat() {
@@ -5319,7 +5353,6 @@ if (skill) {
 
     preciseCooldownActive = true;
     preciseCdStart = Date.now();
-    preciseCdModifier = getCdModifier();
     preciseCdTimer = setTimeout(() => {
         preciseCooldownActive = false;
         updateUI();
@@ -5452,7 +5485,6 @@ if (isAttemptingRetreat) {
         if (queuedSkill === skills.heavyStrike) {
             skillCooldownActive = true;
             skillCdStart = Date.now();
-            skillCdModifier = getCdModifier();
             skillCdTimer = setTimeout(() => {
                 skillCooldownActive = false;
                 updateUI();
@@ -5462,7 +5494,6 @@ if (isAttemptingRetreat) {
             usedPreciseStrikeThisRound = true; // Ενεργοποιείται η ιδιότητα του skill
             preciseCooldownActive = true;
             preciseCdStart = Date.now();
-            preciseCdModifier = getCdModifier();
             preciseCdTimer = setTimeout(() => {
                 preciseCooldownActive = false;
                 updateUI();
@@ -6297,7 +6328,7 @@ if (
 
 // ==== CONTROLLER SUPPORT (Gamepad API) ====
 // Face buttons (PS): Τετράγωνο=Κατραπακιά, Τρίγωνο=Εκτέλεση, Χ=Μπύρα, Κύκλος=Σφάξε
-// Shoulders: LB/L1=προηγούμενη περιοχή, RB/R1=επόμενη περιοχή (μόνο εκτός μάχης)
+// Shoulders: LB/L1 και RB/R1 = Σφάξε (τρέξε/γλέντα). Τα βάθη μόνο από D-pad.
 // Edge detection: ενέργεια μόνο τη στιγμή που πατιέται το κουμπί, όχι σε επανάληψη.
 (function initGamepadSupport() {
     if (!('getGamepads' in navigator)) {
@@ -6323,11 +6354,10 @@ if (
     function gamepadHandlePress(buttonIndex) {
         switch (buttonIndex) {
             case 0: usePotion(); break;               // X / κάτω → Μπύρα
-            case 1: handleHuntRetreatClick(); break;  // Circle / δεξιά → Σφάξε
+            case 1: queuePreciseStrike(); break;      // Circle / δεξιά → Εκτέλεση
             case 2: queueSpecialAttack(); break;      // Square / αριστερά → Κατραπακιά
-            case 3: queuePreciseStrike(); break;      // Triangle / πάνω → Εκτέλεση
-            case 4: gamepadChangeArea(-1); break;     // LB / L1 → προηγούμενη περιοχή
-            case 5: gamepadChangeArea(1); break;      // RB / R1 → επόμενη περιοχή
+            case 4: handleHuntRetreatClick(); break;  // LB / L1 → Σφάξε
+            case 5: handleHuntRetreatClick(); break;  // RB / R1 → Σφάξε
             case 12: gamepadChangeArea(-1); break;    // D-pad πάνω → προηγούμενη περιοχή
             case 13: gamepadChangeArea(1); break;     // D-pad κάτω → επόμενη περιοχή
         }
