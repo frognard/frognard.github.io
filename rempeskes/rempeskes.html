@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v375</title>
+    <title>Ρεμπεσκές v380</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -321,7 +321,7 @@
             display:grid;
             grid-template-columns:1fr 1fr;
             gap:8px;
-            margin-top:10px;
+            margin-top:5px;
             margin-bottom:15px;
         }
 
@@ -861,9 +861,19 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--border-color);
     padding-bottom: 8px;
     margin-bottom: 15px;
+}
+
+#town-interface, #combat-interface {
+    box-sizing: border-box;
+    height: 76px;
+}
+
+@media (max-width: 600px) {
+    #town-interface, #combat-interface {
+        height: 94px;
+    }
 }
 
 @keyframes itemUpgradeFlash {
@@ -1080,7 +1090,7 @@ body {
 </div>  
 -->
 
-<div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
+<div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 18px;">
     <div class="stat-row equipment-row" id="stat-atk-box">
         <!-- Αφαιρέθηκε το font-weight:bold; -->
         <div class="equip-label">🗡</div>
@@ -1114,33 +1124,6 @@ body {
         </div>
     </div>
 </div>
-        
-<div class="skill-grid">
-
-    <button id="btn-skill" class="skill-btn" onclick="queueSpecialAttack()">
-        <span>Κατραπακιά [4]</span>
-    </button>
-
-    <button id="btn-precise" class="skill-btn" onclick="queuePreciseStrike()">
-        <span>Εκτέλεση [5]</span>
-    </button>
-
-    <button id="btn-potion"
-        class="skill-btn potion-btn"
-        onclick="usePotion()">
-        <span>Μπύρα [6]</span>
-    </button>
-
-    <button id="btn-hunt-retreat" class="skill-btn hunt-btn" onclick="handleHuntRetreatClick()">
-        <span>Σφάξε! [↵]</span>
-    </button>
-
-</div>
-
-        <div class="bar-container" id="player-hp-parent">
-            <div id="player-hp-bar" class="bar"></div>
-            <div id="player-hp-text" class="bar-text">100 / 100 HP</div>
-        </div>
     </div>
 
 
@@ -1157,7 +1140,7 @@ body {
 </div>
 
 <div id="combat-interface" class="hidden">
-    <h3 style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap; margin: 0 0 10px 0;">
+    <h3 style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap; margin: 0 0 10px 0; border-bottom: none;">
         <span id="battle-title" style="color: #d9d9d9;">Μάχη:</span>
         
         <span id="m-name" style="color: #fff; font-weight: bold;">Τέρας</span>
@@ -1196,8 +1179,35 @@ body {
     <div id="autoplay-status" class="autoplay-status">AutoPlay ανενεργό.</div>
 </div>
 
-    <main style="margin-top: 20px;">
-        
+        <div class="bar-container" id="player-hp-parent">
+            <div id="player-hp-bar" class="bar"></div>
+            <div id="player-hp-text" class="bar-text">100 / 100 HP</div>
+        </div>
+
+<div class="skill-grid">
+
+    <button id="btn-skill" class="skill-btn" onclick="queueSpecialAttack()">
+        <span>Κατραπακιά [4]</span>
+    </button>
+
+    <button id="btn-precise" class="skill-btn" onclick="queuePreciseStrike()">
+        <span>Εκτέλεση [5]</span>
+    </button>
+
+    <button id="btn-potion"
+        class="skill-btn potion-btn"
+        onclick="usePotion()">
+        <span>Μπύρα [6]</span>
+    </button>
+
+    <button id="btn-hunt-retreat" class="skill-btn hunt-btn" onclick="handleHuntRetreatClick()">
+        <span>Σφάξε! [↵]</span>
+    </button>
+
+</div>
+
+    <main style="margin-top: 0;">
+
         <div id="log"></div>
 
 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; justify-content:flex-end;">
