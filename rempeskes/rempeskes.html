@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v375</title>
+    <title>Ρεμπεσκές v390</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -37,8 +37,9 @@
         }
 
        #game-container {
-            width: 100%;
-            max-width: 450px;
+            width: 450px;
+            max-width: 100%;
+            min-width: 0;
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
             padding: 20px;
@@ -321,7 +322,7 @@
             display:grid;
             grid-template-columns:1fr 1fr;
             gap:8px;
-            margin-top:10px;
+            margin-top:5px;
             margin-bottom:15px;
         }
 
@@ -861,9 +862,32 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid var(--border-color);
     padding-bottom: 8px;
-    margin-bottom: 15px;
+    margin-bottom: 8px;
+}
+
+#town-interface, #combat-interface {
+    box-sizing: border-box;
+    height: 94px;
+}
+
+#teke-patrons {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 600px) {
+    #town-interface, #combat-interface {
+        height: 94px;
+    }
+    #teke-patrons {
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        overflow-wrap: anywhere;
+        margin: -13px 0 10px 0;
+    }
 }
 
 @keyframes itemUpgradeFlash {
@@ -1080,7 +1104,7 @@ body {
 </div>  
 -->
 
-<div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
+<div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 18px;">
     <div class="stat-row equipment-row" id="stat-atk-box">
         <!-- Αφαιρέθηκε το font-weight:bold; -->
         <div class="equip-label">🗡</div>
@@ -1114,33 +1138,13 @@ body {
         </div>
     </div>
 </div>
-        
-<div class="skill-grid">
 
-    <button id="btn-skill" class="skill-btn" onclick="queueSpecialAttack()">
-        <span>Κατραπακιά [4]</span>
-    </button>
+    <div class="bar-container" id="player-hp-parent" style="margin: 5px 0 8px 0;">
+        <div id="player-hp-bar" class="bar"></div>
+        <div id="player-hp-text" class="bar-text">100 / 100 HP</div>
+    </div>
 
-    <button id="btn-precise" class="skill-btn" onclick="queuePreciseStrike()">
-        <span>Εκτέλεση [5]</span>
-    </button>
-
-    <button id="btn-potion"
-        class="skill-btn potion-btn"
-        onclick="usePotion()">
-        <span>Μπύρα [6]</span>
-    </button>
-
-    <button id="btn-hunt-retreat" class="skill-btn hunt-btn" onclick="handleHuntRetreatClick()">
-        <span>Σφάξε! [↵]</span>
-    </button>
-
-</div>
-
-        <div class="bar-container" id="player-hp-parent">
-            <div id="player-hp-bar" class="bar"></div>
-            <div id="player-hp-text" class="bar-text">100 / 100 HP</div>
-        </div>
+    <div style="border-bottom: 1px solid var(--border-color); margin: 0 0 8px 0;"></div>
     </div>
 
 
@@ -1154,24 +1158,29 @@ body {
             <select id="area-selector"></select>
         </div>
     </div>
+    <div id="teke-patrons" style="font-size: 0.8rem; color: #aaa; margin: -13px 0 12px 0;">
+        Θαμώνες: -
+    </div>
 </div>
 
 <div id="combat-interface" class="hidden">
-    <h3 style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap; margin: 0 0 10px 0;">
-        <span id="battle-title" style="color: #d9d9d9;">Μάχη:</span>
+    <h3 style="display: flex; gap: 5px; align-items: flex-start; margin: 0 0 12px 0; border-bottom: none; font-size: 1.2rem; line-height: 1.2;">
+        <span id="battle-title" style="color: #d9d9d9; white-space: nowrap;"></span>
         
-        <span id="m-name" style="color: #fff; font-weight: bold;">Τέρας</span>
+        <span id="m-name" style="color: #fff; font-weight: bold; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Τέρας</span>
         
-        <span id="retreat-status-text"></span>
+        <span id="retreat-status-text" style="white-space: nowrap;"></span>
     </h3>
+
+    <div id="battle-area-row" style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 4px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        <span id="battle-area-name">-</span>
+    </div>
 
     <span id="m-level" style="display: none;"></span>
 
-    <div class="bar-container" id="monster-hp-parent">
+    <div class="bar-container" id="monster-hp-parent" style="margin: 8px 0 6px 0;">
         <div id="monster-hp-bar" class="bar"></div>
         <div id="monster-hp-text" class="bar-text">0 / 0 HP</div>
-        <div id="monster-kills-text" class="bar-variant-text">Θάλαμος: 1</div>
-        <div id="monster-variant-text" class="bar-kills-text">Σπάνιο: 1%</div>
         <div id="monster-hp-flash" class="hp-flash-overlay"></div>
     </div>
 </div>
@@ -1196,8 +1205,30 @@ body {
     <div id="autoplay-status" class="autoplay-status">AutoPlay ανενεργό.</div>
 </div>
 
-    <main style="margin-top: 20px;">
-        
+<div class="skill-grid">
+
+    <button id="btn-skill" class="skill-btn" onclick="queueSpecialAttack()">
+        <span>Κατραπακιά [1]</span>
+    </button>
+
+    <button id="btn-precise" class="skill-btn" onclick="queuePreciseStrike()">
+        <span>Εκτέλεση [2]</span>
+    </button>
+
+    <button id="btn-potion"
+        class="skill-btn potion-btn"
+        onclick="usePotion()">
+        <span>Μπύρα [3]</span>
+    </button>
+
+    <button id="btn-hunt-retreat" class="skill-btn hunt-btn" onclick="handleHuntRetreatClick()">
+        <span>Σφάξε! [↵]</span>
+    </button>
+
+</div>
+
+    <main style="margin-top: 0;">
+
         <div id="log"></div>
 
 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; justify-content:flex-end;">
@@ -1504,7 +1535,7 @@ function showMagkiaMilestones() {
         } else if (m.legendaryKill) {
             logMessage(`Επίπεδο ${m.level}: Σκότωσε: "${m.legendaryKill}" και βρήκε: "${m.legendaryDrop}" - γύρος ${formatNumber(m.turns)}`, 'milestone-legendary');
         } else if (m.soulKill) {
-            logMessage(`Στοιχειό! Σκότωσε: "${m.soulKill}" και βρήκε: "Ψυχή (${m.soulKill})" - γύρος ${formatNumber(m.turns)}`, 'milestone-soul');
+            logMessage(`Επίπεδο ${m.level}: Στοιχειό! Σκότωσε: "${m.soulKill}" και βρήκε: "Ψυχή (${m.soulKill})" - γύρος ${formatNumber(m.turns)}`, 'milestone-soul');
         } else {
             logMessage(`Επίπεδο ${m.level}: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`, 'milestone');
         }
@@ -3236,7 +3267,7 @@ function getLegendaryItemName(type, tier) {
     // Άρα αφαιρούμε το +20 για να βρούμε ξανά το αντίστοιχο bracket επιπέδου
     // μέσα στο legendaryMonstersByType, το ίδιο table που χρησιμοποιείται
     // και τη στιγμή του drop.
-    let baseLevel = tier - 15;  //legendary bonus roll factor (arnitiko)
+    let baseLevel = tier - 13;  //legendary bonus roll factor (arnitiko)
     baseLevel = Math.max(1, Math.min(100, baseLevel));
 
     const list = legendaryMonstersByType[type] || [];
@@ -3771,6 +3802,78 @@ function getMonsterVariantText() {
     return atMaxStreakChance ? `Σπάνιο: <b><i>${pct}%</i></b>` : `Σπάνιο: ${pct}%`;
 }
 
+// Σειρά περιοχής στο combat interface (Περιοχή / Θάλαμος / Σπάνιο)
+function updateBattleAreaRow() {
+    const areaRow = document.getElementById('battle-area-row');
+    if (!areaRow) return;
+    const areaType = getAreaType(currentSelectedLevel);
+    const areaColor = AREA_TYPE_COLOR[areaType] || '#d9d9d9';
+    const atMaxStreakChance = currentRunKills >= STREAK_CHANCE_TABLE.length - 1;
+    const pct = Math.round(getStreakVariantChance() * 100);
+    const variantHtml = atMaxStreakChance ? `<b style="color:#fff;"><i>${pct}%</i></b>` : `<b style="color:#fff;">${pct}%</b>`;
+    areaRow.innerHTML =
+        `<span style="color:${areaColor}; font-weight:bold;">Βάθος ${depthNames[currentSelectedLevel - 1]}</span>` +
+        `, Θάλαμος <b style="color:#fff;">${currentRunKills + 1}</b>, Σπάνιο ${variantHtml}`;
+}
+
+// === ΘΑΜΩΝΕΣ ΤΟΥ ΤΕΚΕ ===
+// Μία τυχαία κατηγορία από τη λίστα
+const TEKE_PATRON_CATEGORIES = [
+    { singular: 'μάγκας', plural: 'μάγκες', min: 1, max: 10 },
+    { singular: 'κουτσαβάκι', plural: 'κουτσαβάκια', min: 1, max: 5 },
+    { singular: 'νταής', plural: 'νταήδες', min: 1, max: 5 },
+    { singular: 'χασικλής', plural: 'χασικλίδες', min: 1, max: 6 },
+    { singular: 'ζητιάνος', plural: 'ζητιάνοι', min: 1, max: 3 },
+    { singular: 'τζουτζές', plural: '', min: 1, max: 1 },
+    { singular: 'κατσαρίδα', plural: 'κατσαρίδες', min: 1, max: 9 }
+];
+
+// Ένας ακόμα τυχαίος από τη λίστα (όλα πεζά, gender για "μια"/"ένας")
+const TEKE_PATRON_NAMES = [
+    { name: 'απεριποίητη τσούλα', gender: 'f' },
+    { name: 'ξεδιάντροπη καριόλα', gender: 'f' },
+    { name: 'φτηνή ξεμαλλιάρα', gender: 'f' },
+    { name: 'τυπική σουρτούκα', gender: 'f' },
+    { name: 'αναιδής κοκότα', gender: 'f' },
+    { name: 'πρόστυχη τσούπρα', gender: 'f' },
+    { name: 'ακριβοπλήρωτη σουρλουλού', gender: 'f' },
+    { name: 'ξεβγαλμένη κούρβα', gender: 'f' },
+    { name: 'κωλοπετσωμένη σκρόφα', gender: 'f' },
+    { name: 'ακουσμένη ρουφιάνα', gender: 'f' },
+    { name: 'παρδαλή αλανιάρα', gender: 'f' },
+    { name: 'παστρικιά φακλάνα', gender: 'f' },
+    { name: 'επηρμένη μετρέσα', gender: 'f' },
+    { name: 'εκλεκτή εταίρα', gender: 'f' },
+    { name: 'γριά ξεκωλιάρα', gender: 'f' },
+    { name: 'πλούσια τσατσόγρια', gender: 'f' },
+    { name: 'τραμπούκος νταβατζής', gender: 'm' },
+    { name: 'φραγκάτος μαστροπός', gender: 'm' }
+];
+
+function refreshTekePatrons() {
+    const el = document.getElementById('teke-patrons');
+    if (!el) return;
+
+    const rand = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
+
+    // Ρεμπεσκέδες: (1-6) * 3 → 3..18
+    const baseCount = rand(1, 6) * 3;
+
+    // Μία τυχαία κατηγορία
+    const cat = TEKE_PATRON_CATEGORIES[Math.floor(Math.random() * TEKE_PATRON_CATEGORIES.length)];
+    const catCount = rand(cat.min, cat.max);
+    const catPlural = cat.plural || cat.singular;
+    const catWord = catCount === 1 ? cat.singular : catPlural;
+
+    // Ένας ακόμα τυχαίος από τη δεύτερη λίστα
+    const pick = TEKE_PATRON_NAMES[Math.floor(Math.random() * TEKE_PATRON_NAMES.length)];
+    const pickWord = pick.gender === 'm' ? `ένας ${pick.name}` : `μια ${pick.name}`;
+
+    el.innerHTML =
+        `Θαμώνες: ${baseCount} ρεμπεσκέδες, ` +
+        `${catCount} ${catWord} και ${pickWord}.`;
+}
+
 function resetKillStreak() {
     killStreakBonus = 0;
     const xpBarContainer = document.getElementById('xp-bar-container');
@@ -4033,6 +4136,7 @@ function confirmCharacterCreation() {
     logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
     if (Math.random() < 1/3) {const _zm = getZaladourasMessages(); logMessage(_zm[Math.floor(Math.random() * _zm.length)], 'britalic');}
 
+    refreshTekePatrons();
     updateUI();
 }
 
@@ -4177,6 +4281,7 @@ function importSave() {
     }
 
     loadGame();
+    refreshTekePatrons();
 
     // ΨΥΧΕΣ IRONMEN: στην εκκίνηση ελέγχουμε την πρόσβαση στο online ψοφολόγιο και
     // φορτώνουμε τη λίστα των νεκρών ironmen. Το κάνουμε ασύγχρονα γιατί το supabase
@@ -4473,25 +4578,16 @@ function refreshAreaSelectorAppearance() {
         // === ΤΙΤΛΟΣ ΜΑΧΗΣ ===
         const title = document.getElementById("battle-title");
         if (title) {
-            const areaType = getAreaType(monster.level);
-            let areaColor = '#d9d9d9';
-            
-            if (areaType === AREA_TYPES.RICH) areaColor = '#ffff00';
-            else if (areaType === AREA_TYPES.POOR) areaColor = '#737373';
-            else if (areaType === AREA_TYPES.WEAPON) areaColor = '#e07a7a';
-            else if (areaType === AREA_TYPES.ARMOR) areaColor = '#6fa8e0';
-            else if (areaType === AREA_TYPES.MAGIC) areaColor = '#b37ed9';
-
-            title.innerText = `${(player.magkiaEarnedDepths && player.magkiaEarnedDepths.includes(currentSelectedLevel)) ? '⭐ ' : ''}Μάχη:`;
-            title.style.color = areaColor;
-            title.style.fontSize = "1.2rem";
+            const hasMagkia = player.magkiaEarnedDepths && player.magkiaEarnedDepths.includes(currentSelectedLevel);
+            title.innerText = hasMagkia ? '⭐ ' : '';
+            title.style.color = "#d9d9d9";
+            title.style.display = hasMagkia ? '' : 'none';
         }
  
         const mPct = Math.max(0, (monster.hp / monster.maxHp) * 100);
         document.getElementById('monster-hp-bar').style.transform = `scaleX(${mPct / 100})`;
         document.getElementById('monster-hp-text').innerText = `${formatNumber(Math.ceil(monster.hp))} / ${formatNumber(monster.maxHp)} HP`;
-        document.getElementById('monster-kills-text').innerText = `Θάλαμος: ${currentRunKills + 1}`;
-        document.getElementById('monster-variant-text').innerHTML = getMonsterVariantText();
+        updateBattleAreaRow();
         
     } else {
         const mNameEl = document.getElementById('m-name');
@@ -4499,18 +4595,18 @@ function refreshAreaSelectorAppearance() {
             mNameEl.classList.remove('legendary-monster-glow');
             mNameEl.classList.remove('legendary-glow-weapon', 'legendary-glow-armor', 'legendary-glow-magic');
             mNameEl.classList.remove('soul-monster-glow');
-            mNameEl.innerText = depthNames[currentSelectedLevel - 1] + "...";
+            mNameEl.innerText = "";
             mNameEl.style.color = "#888";
         }
         document.getElementById('monster-hp-bar').style.transform = 'scaleX(0)';
         document.getElementById('monster-hp-text').innerText = '-';
-        document.getElementById('monster-kills-text').innerText = `Θάλαμος: ${currentRunKills + 1}`;
-        document.getElementById('monster-variant-text').innerHTML = getMonsterVariantText();
+        updateBattleAreaRow();
         
         const title = document.getElementById("battle-title");
         if (title) {
-            title.innerText = `${(player.magkiaEarnedDepths && player.magkiaEarnedDepths.includes(currentSelectedLevel)) ? '⭐ ' : ''}Μάχη:`;
-          //  title.style.color = "#888";
+            title.innerText = `${(player.magkiaEarnedDepths && player.magkiaEarnedDepths.includes(currentSelectedLevel)) ? '⭐ ' : ''}Περιπλάνηση...`;
+            title.style.color = "#d9d9d9";
+            title.style.display = '';
         }
     }
         
@@ -4548,11 +4644,11 @@ function refreshAreaSelectorAppearance() {
 
     if (isSkillQueued && queuedSkill === skills.heavyStrike) {
         btnSkill.classList.add('skill-queued');
-        btnSkill.innerHTML = "<span>Κατραπακιά [4]</span>";
+        btnSkill.innerHTML = "<span>Κατραπακιά [1]</span>";
     }
     else {
         btnSkill.classList.remove('skill-queued');
-        btnSkill.innerHTML = "<span>Κατραπακιά [4]</span>";
+        btnSkill.innerHTML = "<span>Κατραπακιά [1]</span>";
     }
 
     const btnPrecise = document.getElementById('btn-precise');
@@ -4564,7 +4660,7 @@ function refreshAreaSelectorAppearance() {
     }
     else {
         btnPrecise.classList.remove('skill-queued');
-        btnPrecise.innerHTML = "<span>Εκτέλεση [5]</span>";
+        btnPrecise.innerHTML = "<span>Εκτέλεση [2]</span>";
     }
 
     const btnPotion = document.getElementById('btn-potion');
@@ -5272,6 +5368,7 @@ function forceRetreat() {
     startTownRegen();
     document.getElementById('town-interface').classList.remove('hidden');
     document.getElementById('combat-interface').classList.add('hidden');
+    refreshTekePatrons();
 
     // 3. Επαναφορά μεταβλητών κατάστασης
     inCombat = false;
@@ -5455,7 +5552,7 @@ function handleEquipmentDrop(type, rolledTier, monster, forceSell = false) {
     const isLegendaryDrop = monster && monster.variant === 'legendary';
     const isSoulDrop = monster && monster.isSoul === true;
         if (isLegendaryDrop) {
-            rolledTier = Math.min(118, rolledTier + 15);  //legendary bonus   max and bonus
+            rolledTier = Math.min(118, rolledTier + 13);  //legendary bonus   max and bonus
         }
         if (isSoulDrop) {
             rolledTier = monster.level + 7; // οι ψυχές έχουν πάντα +7 από το βάθος
@@ -5680,6 +5777,7 @@ function showAnnouncementPopup(text, styleClass, color) {
                 startTownRegen();
                 document.getElementById('town-interface').classList.remove('hidden');
                 document.getElementById('combat-interface').classList.add('hidden');
+                refreshTekePatrons();
                 
                 logMessage(`Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΠΕΘΑΝΕ! Το παιχνίδι νικήθηκε! Αιώνια δόξα στον ${player.name}! Απο δω και πέρα θα είναι γνωστός ως ΘΕΟΣΦΑΧΤΗΣ. Επιστρέφεις στον τεκέ και ρίχνεις έναν υπνάκο...`, 'konanos');
                     if (currentSelectedLevel >= player.level && currentRunKills > player.bestKillStreak) {
@@ -5828,8 +5926,9 @@ function showAnnouncementPopup(text, styleClass, color) {
                         startTownRegen();
                         document.getElementById('town-interface').classList.remove('hidden');
                         document.getElementById('combat-interface').classList.add('hidden');
+                        refreshTekePatrons();
                         
-                        logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες εχθρούς ${currentRunKills} και βρήκες ${currentRunItems} αντικείμενα σε αυτή την έξοδο. Ρίχνεις έναν υπνάκο...`, 'retreat');
+                        logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Ξεπαστρέψες εχθρούς ${currentRunKills} και βρήκες ${currentRunItems} αντικείμενα σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο...`, 'retreat');
                         if (currentSelectedLevel >= player.level && currentRunKills > player.bestKillStreak) {
                             player.bestKillStreak = currentRunKills;
                         }
@@ -5911,6 +6010,7 @@ function showAnnouncementPopup(text, styleClass, color) {
                 saveGame();
                 document.getElementById('town-interface').classList.remove('hidden');
                 document.getElementById('combat-interface').classList.add('hidden');
+                refreshTekePatrons();
                 updateUI();
             }
         }
@@ -6005,6 +6105,7 @@ function applyDefeatPenalties() {
     liveUploadIfEnabled();
     document.getElementById('town-interface').classList.remove('hidden');
     document.getElementById('combat-interface').classList.add('hidden');
+    refreshTekePatrons();
     updateUI();
 }
 
@@ -6083,33 +6184,33 @@ function applyDefeatPenalties() {
         return;
     }
 
-    // 4 = Κατραπακιά
+    // 1 = Κατραπακιά
     if (
-        code === 'Digit4' ||
-        code === 'Numpad4' ||
-        key === '4'
+        code === 'Digit1' ||
+        code === 'Numpad1' ||
+        key === '1'
     ) {
         event.preventDefault();
         queueSpecialAttack();
         return;
     }
 
-    // 5 = Εκτέλεση
+    // 2 = Εκτέλεση
     if (
-        code === 'Digit5' ||
-        code === 'Numpad5' ||
-        key === '5'
+        code === 'Digit2' ||
+        code === 'Numpad2' ||
+        key === '2'
     ) {
         event.preventDefault();
         queuePreciseStrike();
         return;
     }
 
-    // 6 = Μπύρα
+    // 3 = Μπύρα
     if (
-        code === 'Digit6' ||
-        code === 'Numpad6' ||
-        key === '6'
+        code === 'Digit3' ||
+        code === 'Numpad3' ||
+        key === '3'
     ) {
         event.preventDefault();
         usePotion();
@@ -6132,9 +6233,9 @@ function applyDefeatPenalties() {
     // επόμενο επίπεδο
 // επόμενο επίπεδο
 if (
-    code === 'Digit2' ||
-    code === 'Numpad2' ||
-    key === '2'
+    code === 'Digit5' ||
+    code === 'Numpad5' ||
+    key === '5'
 ) {
 
     event.preventDefault();
