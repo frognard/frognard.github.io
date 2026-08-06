@@ -1473,7 +1473,7 @@ function computeScore() {
     const turns = player.activeTime || 0;
     const deaths = player.ironman ? 0 : (player.deaths || 0);
     const deathFactor = Math.pow(0.99, deaths);
-    const raw = (turns === 0) ? totalXp : totalXp * 500 / turns;
+    const raw = (turns === 0) ? totalXp : totalXp * 1000 / turns;
     let score = raw * deathFactor;
     if (player.ironman) score *= 1.5;
     if (player.hasBeatenConanos) score *= 1.5;
@@ -3698,7 +3698,7 @@ function computeMonsterDangerColor() {
 }
     
    // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to equipment
-    function calculateNextXpRequirement(lvl) { return Math.round(1000 * Math.pow(lvl, 1.5)); }
+    function calculateNextXpRequirement(lvl) { return Math.round(500 * Math.pow(lvl, 1.5)); }
 
     // Πόσο XP θα χρειαζόταν ακόμα ο παίκτης (από το τρέχον level/xp του) για να έφτανε level 100.
     // Χρησιμοποιείται ΜΟΝΟ για το σκορ (πρόωρος Κόνανος), όχι για πραγματικό level up.
@@ -3718,7 +3718,7 @@ function computeMonsterDangerColor() {
  //XP REWARD FORMULA
     function getMonsterXpReward(monsterLvl) { 
 
-     let xp = 70 * Math.pow(monsterLvl, 1.05);
+     let xp = 35 * Math.pow(monsterLvl, 1.05);
 
 
 
