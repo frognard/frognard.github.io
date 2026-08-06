@@ -143,7 +143,7 @@
     .entry .gear {
         color: var(--parchment-dim);
         font-size: 0.85rem;
-        font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', 'PT Serif', serif;
+        font-family: 'PT Serif', 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', serif;
     }
 
     .entry.victory {
@@ -641,7 +641,7 @@ function showMagkiaPopup(idx) {
         } else if (m.legendaryKill) {
             rows += `<div style="padding:5px 0;line-height:1.6;color:var(--brass);">[${m.level}] Σκότωσε: "${escapeHtml(m.legendaryKill)}" &#8594; "${escapeHtml(m.legendaryDrop)}" &middot; γύρος ${formatNumber(m.turns)}</div>`;
         } else if (m.soulKill) {
-            rows += `<div style="padding:5px 0;line-height:1.6;color:#a0703f;">Στοιχειό! Σκότωσε: "💀${escapeHtml(m.soulKill)}" και βρήκε: "Ψυχή (💀${escapeHtml(m.soulKill)})" &middot; γύρος ${formatNumber(m.turns)}</div>`;
+            rows += `<div style="padding:5px 0;line-height:1.6;color:#a0703f;">[${m.level}] Στοιχειό! Σκότωσε: "💀${escapeHtml(m.soulKill)}" και βρήκε: "Ψυχή (💀${escapeHtml(m.soulKill)})" &middot; γύρος ${formatNumber(m.turns)}</div>`;
         } else {
             rows += `<div style="padding:5px 0;line-height:1.6;">[${m.level}] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
         }

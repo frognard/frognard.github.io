@@ -1080,7 +1080,7 @@ body {
 
 <midi-player
     id="bg-midi-player"
-    src="https://raw.githubusercontent.com/frognard/frognard.github.io/refs/heads/main/rempeskes/ntoutse.mid"
+    src="https://raw.githubusercontent.com/frognard/frognard.github.io/refs/heads/main/rempeskes/bach807a.mid"
     sound-font
     loop
     style="display:none;">
@@ -1407,14 +1407,14 @@ let _musicStarting = false;
 // Μουσικά κομμάτια — πρόσθεσε νέα εδώ (χρειάζεσαι μόνο id, name, src)
 const MUSIC_TRACKS = [
     
-    { id: 'bachtris', name: 'Μπάχτρις', src: 'https://raw.githubusercontent.com/frognard/frognard.github.io/refs/heads/main/rempeskes/bachtris.mid' },
     { id: 'bach807', name: 'Μπάχ807', src: 'https://raw.githubusercontent.com/frognard/frognard.github.io/refs/heads/main/rempeskes/bach807a.mid' },
+    { id: 'bachtris', name: 'Μπάχτρις', src: 'https://raw.githubusercontent.com/frognard/frognard.github.io/refs/heads/main/rempeskes/bachtris.mid' },
     { id: 'ntoutse', name: 'Ντούτσε', src: 'https://raw.githubusercontent.com/frognard/frognard.github.io/refs/heads/main/rempeskes/ntoutse.mid' }
 
 ];
 
 function getMusicTrack() {
-    const id = (player && player.musicTrack) || 'ntoutse';
+    const id = (player && player.musicTrack) || 'bach807';
     return MUSIC_TRACKS.find(t => t.id === id) || MUSIC_TRACKS[0];
 }
 
@@ -3474,7 +3474,7 @@ if (roll <= 1) {
         soundEnabled: true,   // αποθηκευμένη επιλογή ήχου
         musicEnabled: false,  // αποθηκευμένη επιλογή μουσικής
         musicVolumeDb: -12,   // αποθηκευμένη ένταση μουσικής (dB, 0 = max, -40 = πολύ χαμηλά)
-        musicTrack: 'ntoutse', // αποθηκευμένο μουσικό κομμάτι (id από το MUSIC_TRACKS)
+        musicTrack: 'bach807', // αποθηκευμένο μουσικό κομμάτι (id από το MUSIC_TRACKS)
         liveUpload: false     // Live-upload στα rankings (αυτόματο ανέβασμα σε κατάβαση/θάνατο)
     };
 
@@ -4185,7 +4185,7 @@ function loadGame() {
     }
     if (typeof player.liveUpload !== 'boolean') player.liveUpload = false;
     if (typeof player.onScreenStats !== 'boolean') player.onScreenStats = false;
-    if (!player.musicTrack) player.musicTrack = 'ntoutse';
+    if (!player.musicTrack) player.musicTrack = 'bach807';
     setMusicVolume(musicVolumeDb);
     updateMusicState();
 
