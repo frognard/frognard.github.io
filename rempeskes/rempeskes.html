@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v391</title>
+    <title>Ρεμπεσκές v395</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -524,6 +524,22 @@ justify-content: center;
         .log-player { color: #5dade2; }
         .log-help { color: #439439; }
         .log-stats { color: #5680ce; font-weight: bold;}
+        .stats-tab {
+            background: #333;
+            color: #ccc;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 5px 14px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        .stats-tab:hover { background: #444; color: #fff; }
+        .stats-tab.active {
+            background: var(--accent-gold);
+            color: #1a1a1a;
+            border-color: var(--accent-gold);
+        }
         .log-psof { color: #9b69b3; font-weight: bold;}
         .log-psof-victory { color: var(--accent-gold); font-weight: bold; text-shadow: 0 0 6px rgba(255,215,0,0.5); }
         .log-monster { color: #f1948a; }
@@ -1457,7 +1473,7 @@ function computeScore() {
     const turns = player.activeTime || 0;
     const deaths = player.ironman ? 0 : (player.deaths || 0);
     const deathFactor = Math.pow(0.99, deaths);
-    const raw = (turns === 0) ? totalXp : totalXp * 5000 / turns;
+    const raw = (turns === 0) ? totalXp : totalXp * 500 / turns;
     let score = raw * deathFactor;
     if (player.ironman) score *= 1.5;
     if (player.hasBeatenConanos) score *= 1.5;
@@ -1491,17 +1507,79 @@ function showStats() {
     const body = openInfoModal("ΣΤΑΤΙΣΤΙΚΑ");
     if (!body) return;
 
-    appendInfoLine(body, `Φόνοι: ${formatNumber(player.kills)}`, "stats");
-    appendInfoLine(body, `Φόνοι σπάνιων τεράτων: ${formatNumber(player.killsWeapon || 0)}-${formatNumber(player.killsArmor || 0)}-${formatNumber(player.killsMagic || 0)}`, "stats");
-    appendInfoLine(body, `Θάνατοι: ${player.ironman ? 'IRONMAN' : formatNumber(player.deaths)}`, "stats");
-    appendInfoLine(body, `Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`, "stats");
-    appendInfoLine(body, `Γύροι: ${formatNumber(player.activeTime)}`, "stats");
-    appendInfoLine(body, `Ρίσκο: ${(player.risk || 0) > 0 ? '+' : ''}${(player.risk || 0).toFixed(3)}`, "stats");
-    appendInfoLine(body, `Φόνοι/κατάβαση: ${player.totalDescents > 0 ? (player.kills / player.totalDescents).toFixed(1) : '0'}`, "stats");
-    appendInfoLine(body, `Πεντάρια: ${formatNumber(player.pentaria || 0)}`, "stats");
-    appendInfoLine(body, `Ψυχές: ${formatNumber(player.soulsKilled || 0)}`, "stats");
-    appendInfoLine(body, `Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`, "stats");
-    appendInfoLineHTML(body, `<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε online rankings</a>`, "stats");
+    // Tabs: Συνολικά | Κατάβασης
+    const tabsRow = document.createElement('div');
+    tabsRow.style.cssText = 'display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;background:#1e1e1e;padding:4px 0;z-index:1;';
+    const btnTotal = document.createElement('button');
+    btnTotal.className = 'stats-tab active';
+    btnTotal.id = 'stats-tab-btn-total';
+    btnTotal.textContent = 'Συνολικά';
+    btnTotal.onclick = () => switchStatsTab('total');
+    const btnDescent = document.createElement('button');
+    btnDescent.className = 'stats-tab';
+    btnDescent.id = 'stats-tab-btn-descent';
+    btnDescent.textContent = 'Κατάβασης';
+    btnDescent.onclick = () => switchStatsTab('descent');
+    tabsRow.append(btnTotal, btnDescent);
+    body.append(tabsRow);
+
+    const totalDiv = document.createElement('div');
+    totalDiv.id = 'stats-tab-total';
+    const descentDiv = document.createElement('div');
+    descentDiv.id = 'stats-tab-descent';
+    descentDiv.style.display = 'none';
+    body.append(totalDiv, descentDiv);
+
+    // --- Tab "Συνολικά" ---
+    appendInfoLine(totalDiv, `Φόνοι: ${formatNumber(player.kills)}`, "stats");
+    appendInfoLine(totalDiv, `Φόνοι σπάνιων τεράτων: ${formatNumber(player.killsWeapon || 0)}-${formatNumber(player.killsArmor || 0)}-${formatNumber(player.killsMagic || 0)}`, "stats");
+    appendInfoLine(totalDiv, `Θάνατοι: ${player.ironman ? 'IRONMAN' : formatNumber(player.deaths)}`, "stats");
+    appendInfoLine(totalDiv, `Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`, "stats");
+    appendInfoLine(totalDiv, `Γύροι: ${formatNumber(player.activeTime)}`, "stats");
+    appendInfoLine(totalDiv, `Ρίσκο: ${(player.risk || 0) > 0 ? '+' : ''}${(player.risk || 0).toFixed(3)}`, "stats");
+    appendInfoLine(totalDiv, `Φόνοι/κατάβαση: ${player.totalDescents > 0 ? (player.kills / player.totalDescents).toFixed(1) : '0'}`, "stats");
+    appendInfoLine(totalDiv, `Πεντάρια: ${formatNumber(player.pentaria || 0)}`, "stats");
+    appendInfoLine(totalDiv, `Ψυχές: ${formatNumber(player.soulsKilled || 0)}`, "stats");
+    appendInfoLine(totalDiv, `Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`, "stats");
+    appendInfoLineHTML(totalDiv, `<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε online rankings</a>`, "stats");
+
+    // --- Tab "Κατάβασης" ---
+    const d = descentStats || { turns: 0, damageDealt: 0, damageTaken: 0, kills: 0, xp: 0, gp: 0 };
+    const perRound = (num) => d.turns > 0 ? (num / d.turns).toFixed(1) : '0';
+    const avgKillTime = d.kills > 0 ? (d.turns / d.kills).toFixed(1) : '0';
+    appendInfoLine(descentDiv, `Damage per round: ${perRound(d.damageDealt)}`, "stats");
+    appendInfoLine(descentDiv, `Damage taken per round: ${perRound(d.damageTaken)}`, "stats");
+    appendInfoLine(descentDiv, `Average kill time: ${avgKillTime} γύροι`, "stats");
+    appendInfoLine(descentDiv, `XP/Round: ${perRound(d.xp)}`, "stats");
+    appendInfoLine(descentDiv, `GP/Round: ${perRound(d.gp)}`, "stats");
+
+    // Σταθερό μέγεθος παραθύρου: όσο χρειάζεται το μεγαλύτερο tab (δεν αλλάζει κατά την εναλλαγή)
+    const statsModalEl = document.getElementById('info-modal');
+    const statsBox = statsModalEl && statsModalEl.firstElementChild;
+    if (statsBox) {
+        const bodyHTotal = body.offsetHeight;
+        totalDiv.style.display = 'none';
+        descentDiv.style.display = 'block';
+        const bodyHDescent = body.offsetHeight;
+        descentDiv.style.display = 'none';
+        totalDiv.style.display = 'block';
+        const headerFooter = statsBox.offsetHeight - bodyHTotal;
+        const maxBodyH = Math.max(bodyHTotal, bodyHDescent);
+        statsBox.style.height = (headerFooter + maxBodyH) + 'px';
+    }
+}
+
+function switchStatsTab(tab) {
+    const total = document.getElementById('stats-tab-total');
+    const descent = document.getElementById('stats-tab-descent');
+    const btnTotal = document.getElementById('stats-tab-btn-total');
+    const btnDescent = document.getElementById('stats-tab-btn-descent');
+    if (!total || !descent || !btnTotal || !btnDescent) return;
+    const showTotal = tab !== 'descent';
+    total.style.display = showTotal ? 'block' : 'none';
+    descent.style.display = showTotal ? 'none' : 'block';
+    btnTotal.classList.toggle('active', showTotal);
+    btnDescent.classList.toggle('active', !showTotal);
 }
 
 function showMagkiaMilestones() {
@@ -3451,6 +3529,8 @@ const AREA_TYPE_COLOR = {
     let nextMonsterTimeoutId = null; // id του setTimeout που κάνει spawn το επόμενο τέρας (endCombat) — ώστε να μπορεί να ακυρωθεί σε forceRetreat/θάνατο
     let currentRunKills = 0;
     let currentRunItems = 0;
+    // Στατιστικά τελευταίας κατάβασης (δεν αποθηκεύονται, μηδενίζονται σε κάθε νέα κατάβαση)
+    let descentStats = { turns: 0, damageDealt: 0, damageTaken: 0, kills: 0, xp: 0, gp: 0 };
     let sessionSoulPool = null;        // λίστα ψυχών νεκρών ironmen (τοπική, από το online ψοφολόγιο)
     let sessionSoulPoolLoaded = false; // true μόνο αν η λίστα φορτώθηκε επιτυχώς σε αυτό το session
     let currentRunConanosChance = 0;
@@ -3618,7 +3698,7 @@ function computeMonsterDangerColor() {
 }
     
    // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to equipment
-    function calculateNextXpRequirement(lvl) { return Math.round(100 * Math.pow(lvl, 1.5)); }
+    function calculateNextXpRequirement(lvl) { return Math.round(1000 * Math.pow(lvl, 1.5)); }
 
     // Πόσο XP θα χρειαζόταν ακόμα ο παίκτης (από το τρέχον level/xp του) για να έφτανε level 100.
     // Χρησιμοποιείται ΜΟΝΟ για το σκορ (πρόωρος Κόνανος), όχι για πραγματικό level up.
@@ -3637,14 +3717,8 @@ function computeMonsterDangerColor() {
     
  //XP REWARD FORMULA
     function getMonsterXpReward(monsterLvl) { 
-   
-   // dynamic difficulty xp mod
-//  let difficultyModifier = calculateDifficulty(player, monster);
- // let xp = 10 * Math.pow(monsterLvl, 2) * ((difficultyModifier + 1)/2); // half effect on xp
- //  let xp = 10 * Math.pow(monsterLvl, 2) * difficultyModifier * 1.8 ;  //1:1 xp modifier :: apply final modifier to match normal center value
-            // let xp = 10 * Math.pow(monsterLvl, 2) * ((difficultyModifier + 1)/2); // half effect on xp
-      
-     let xp = 7 * Math.pow(monsterLvl, 1.05);
+
+     let xp = 70 * Math.pow(monsterLvl, 1.05);
 
 
 
@@ -3963,8 +4037,9 @@ function checkLevelUp() {
         fText.innerText = text;
         fText.style.color = color;
         
-        const offset = Math.floor(Math.random() * 40) - 20; 
-        fText.style.left = `calc(50% + ${offset}px)`;
+        const offset = Math.floor(Math.random() * 40) - 20;
+        const hpBar = (parentId === 'player-hp-parent' || parentId === 'monster-hp-parent');
+        fText.style.left = `calc(${hpBar ? '75%' : '50%'} + ${offset}px)`;
         fText.style.top = `0px`;
 
         // Το animation (χωρίς delay) τελειώνει ΑΚΡΙΒΩΣ μαζί με το combat tick -
@@ -4943,6 +5018,7 @@ setInterval(function () {
     stopTownRegen(); 
     currentSelectedLevel = parseFloat(document.getElementById('area-selector').value);
     player.totalDescents++;
+    descentStats = { turns: 0, damageDealt: 0, damageTaken: 0, kills: 0, xp: 0, gp: 0 };
     if (isNaN(currentSelectedLevel) || currentSelectedLevel < 1) {
         currentSelectedLevel = 1;
         document.getElementById('area-selector').value = "1";
@@ -5349,6 +5425,7 @@ function resolvePlayerAttack(result) {
     if (result.log) logMessage(result.log, 'player');
     if (result.damage > 0) {
         monster.hp = Math.max(0, monster.hp - result.damage);
+        descentStats.damageDealt += result.damage;
         if (monster.hp > 0) hitSound();
         createFloatingText('monster-hp-parent', `-${formatNumber(result.damage)}`, "var(--hp-monster)");
         flashHpBar('monster-hp-parent');  
@@ -5438,6 +5515,7 @@ function executeCombatRound() {
         spawnMonster();
         updateUI();
     }
+    descentStats.turns++;
 
 // Προσθήκη για την πιθανότητα υποχώρησης
 if (isAttemptingRetreat) {
@@ -5514,6 +5592,7 @@ if (isAttemptingRetreat) {
     if (result.log) logMessage(result.log, 'player');
     if (result.damage > 0) {
         monster.hp = Math.max(0, monster.hp - result.damage);
+        descentStats.damageDealt += result.damage;
         if (monster.hp > 0) hitSound();
         createFloatingText('monster-hp-parent', `-${formatNumber(result.damage)}`, "var(--hp-monster)");
         flashHpBar('monster-hp-parent');
@@ -5535,6 +5614,7 @@ if (isAttemptingRetreat) {
     if (monsterActionLog) logMessage(monsterActionLog, 'monster');
     if (monsterDamageCalculated > 0) {
         player.hp = Math.max(0, player.hp - monsterDamageCalculated);
+        descentStats.damageTaken += monsterDamageCalculated;
         createFloatingText('player-hp-parent', `-${formatNumber(monsterDamageCalculated)}`, "var(--hp-monster)");
         playerHitSound();
         flashHpBar('player-hp-parent');  
@@ -5734,6 +5814,7 @@ function showAnnouncementPopup(text, styleClass, color) {
             logMessage(`${getMonsterDisplayName(monster)}: εξοντώθηκε.`, 'victory');
             monsterDeathSound();
             player.kills++;
+            descentStats.kills++;
             if (monster.variant === 'weapon') player.killsWeapon = (player.killsWeapon || 0) + 1;
             else if (monster.variant === 'armor') player.killsArmor = (player.killsArmor || 0) + 1;
             else if (monster.variant === 'magic') player.killsMagic = (player.killsMagic || 0) + 1;
@@ -5841,6 +5922,7 @@ function showAnnouncementPopup(text, styleClass, color) {
             player.gold += gainedGold;
             sessionGold += gainedGold;
             player.totalGoldGained += gainedGold;
+            descentStats.gp += gainedGold;
    
             logMessage(`+${formatNumber(gainedGold)} GP`, 'victory');
             createFloatingText('stat-gold-box', `+${formatNumber(gainedGold)}g`, "var(--accent-gold)");
@@ -5858,6 +5940,7 @@ function showAnnouncementPopup(text, styleClass, color) {
             player.xp += gainedXp;
             player.totalXpGained = (player.totalXpGained || 0) + gainedXp;
             sessionXp += gainedXp;
+            descentStats.xp += gainedXp;
             logMessage(`+${formatNumber(gainedXp)} XP`, 'victory');
             createFloatingText('xp-parent', `+${formatNumber(gainedXp)} XP`, "var(--accent-gold)");
 
@@ -7055,6 +7138,8 @@ function openInfoModal(title) {
     if (!modal || !body) return null;
     titleEl.textContent = title;
     body.innerHTML = '';
+    const box = modal.firstElementChild;
+    if (box) { box.style.minHeight = ''; box.style.height = ''; }
     modal.style.display = 'flex';
     return body;
 }
