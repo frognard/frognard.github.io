@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v392</title>
+    <title>Ρεμπεσκές v391</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1233,31 +1233,31 @@ body {
 
 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; justify-content:flex-end;">
 
-    <button class="btn-options" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music-toggle').checked=musicEnabled;document.getElementById('options-music-volume').value=musicVolumeDb;document.getElementById('options-live-upload').checked=(player.liveUpload!==false);document.getElementById('options-modal').style.display='flex';">
+    <button class="btn-options" title="Επιλογές" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music-toggle').checked=musicEnabled;document.getElementById('options-music-volume').value=musicVolumeDb;document.getElementById('options-live-upload').checked=(player.liveUpload!==false);document.getElementById('options-modal').style.display='flex';">
         Επ
     </button>
 
-    <button class = "btn-showStats" onclick="showStats()">
+    <button class = "btn-showStats" title="Στατιστικά" onclick="showStats()">
         %
     </button>
 
-    <button class="btn-psofo" onclick="window.open('https://frognard.github.io/rempeskes/psofologio.html', '_blank')">
+    <button class="btn-psofo" title="Hi-Scores" onclick="window.open('https://frognard.github.io/rempeskes/psofologio.html', '_blank')">
         Hi
     </button>
 
-    <button class = "btn-showRules" onclick="showRules()">
+    <button class = "btn-showRules" title="Help" onclick="showRules()">
         ?
     </button>
 
-    <button class="btn-save" onclick="exportSave()">
+    <button class="btn-save" title="Export" onclick="exportSave()">
         Exp
     </button>
 
-    <button class="btn-save" onclick="importSave()">
+    <button class="btn-save" title="Import" onclick="importSave()">
         Imp
     </button>
     
-    <button class="btn-delete-save" onclick="resetGame()">
+    <button class="btn-delete-save" title="Delete Character" onclick="resetGame()">
         Del
     </button>
 
@@ -1488,36 +1488,20 @@ function isMobileDevice() {
 
 function showStats() {
 
-    let efficiency = 0;
+    const body = openInfoModal("ΣΤΑΤΙΣΤΙΚΑ");
+    if (!body) return;
 
-    if (player.totalGoldGained > 0) {
-        efficiency = (
-            player.gold / player.totalGoldGained * 100
-        ).toFixed(1);
-    }
-
-   logMessage("");
-    logMessage("ΣΤΑΤΙΣΤΙΚΑ","stats");
-    logMessage(`Φόνοι: ${formatNumber(player.kills)}`,"stats");
-    logMessage(`Φόνοι σπάνιων τεράτων: ${formatNumber(player.killsWeapon || 0)}-${formatNumber(player.killsArmor || 0)}-${formatNumber(player.killsMagic || 0)}`,"stats");
-    logMessage(`Θάνατοι: ${player.ironman ? 'IRONMAN' : formatNumber(player.deaths)}`,"stats");
-   // logMessage(`  ↳ από κόκκινα (Άγρια): ${formatNumber(player.deathsWeapon || 0)}`,"stats");
-   // logMessage(`  ↳ από μπλε (Θωρακισμένα): ${formatNumber(player.deathsArmor || 0)}`,"stats");
-   // logMessage(`  ↳ από μωβ (Μαγικά): ${formatNumber(player.deathsMagic || 0)}`,"stats");
-  //  logMessage(`Χρυσάφι που γλεντήθηκε: ${formatNumber(player.goldSpent)}`,"stats");
-  //  logMessage(`Χρυσάφι που χάθηκε: ${formatNumber(player.goldLost)}`,"stats");
-    logMessage(`Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`,"stats");
-    logMessage(`Γύροι: ${formatNumber(player.activeTime)}`,"stats");
-    logMessage(`Ρίσκο: ${(player.risk || 0) > 0 ? '+' : ''}${(player.risk || 0).toFixed(3)}`,"stats");
-    logMessage(`Φόνοι/κατάβαση: ${player.totalDescents > 0 ? (player.kills / player.totalDescents).toFixed(1) : '0'}`,"stats");
-  //  logMessage(`Μαγκιά: ${formatNumber(player._displayedScore || 0)}`,"stats");
-     // logMessage(`Καλύτερο σερί: ${formatNumber(player.bestKillStreak)}`,"stats");
-    logMessage(`Πεντάρια: ${formatNumber(player.pentaria || 0)}`,"stats");
-    logMessage(`Ψυχές: ${formatNumber(player.soulsKilled || 0)}`,"stats");
-    logMessage(`Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`,"stats");
-  //  logMessage("");
-    logMessageHTML(`<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε online rankings</a>`, "stats");
-   // logMessage("");
+    appendInfoLine(body, `Φόνοι: ${formatNumber(player.kills)}`, "stats");
+    appendInfoLine(body, `Φόνοι σπάνιων τεράτων: ${formatNumber(player.killsWeapon || 0)}-${formatNumber(player.killsArmor || 0)}-${formatNumber(player.killsMagic || 0)}`, "stats");
+    appendInfoLine(body, `Θάνατοι: ${player.ironman ? 'IRONMAN' : formatNumber(player.deaths)}`, "stats");
+    appendInfoLine(body, `Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`, "stats");
+    appendInfoLine(body, `Γύροι: ${formatNumber(player.activeTime)}`, "stats");
+    appendInfoLine(body, `Ρίσκο: ${(player.risk || 0) > 0 ? '+' : ''}${(player.risk || 0).toFixed(3)}`, "stats");
+    appendInfoLine(body, `Φόνοι/κατάβαση: ${player.totalDescents > 0 ? (player.kills / player.totalDescents).toFixed(1) : '0'}`, "stats");
+    appendInfoLine(body, `Πεντάρια: ${formatNumber(player.pentaria || 0)}`, "stats");
+    appendInfoLine(body, `Ψυχές: ${formatNumber(player.soulsKilled || 0)}`, "stats");
+    appendInfoLine(body, `Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`, "stats");
+    appendInfoLineHTML(body, `<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε online rankings</a>`, "stats");
 }
 
 function showMagkiaMilestones() {
