@@ -3352,8 +3352,15 @@ function getMonsterName(lvl) {
     // 1. Το κανονικό index του τέρατος με βάση το επίπεδό του
     let baseIndex = Math.floor(lvl) - 1;
 
-    // 2. Υπολογισμός τυχαίας μετατόπισης από -2 έως +2
-    const offset = Math.floor(Math.random() * 5) - 2; // Παράγει: -2, -1, 0, 1, 2
+    // 2. Τυχαία μετατόπιση από -2 έως +2 με ζυγισμένες πιθανότητες:
+    //    -2: 15%, -1: 20%, 0: 30%, +1: 20%, +2: 15%
+    const roll = Math.random();
+    let offset;
+    if (roll < 0.15) offset = -2;
+    else if (roll < 0.35) offset = -1;
+    else if (roll < 0.65) offset = 0;
+    else if (roll < 0.85) offset = 1;
+    else offset = 2;
 
     // 3. Εφαρμογή της μετατόπισης
     let nameIndex = baseIndex + offset;
