@@ -1266,7 +1266,7 @@ body {
 
 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; justify-content:flex-end;">
 
-    <button class="btn-options" title="Επιλογές" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music-toggle').checked=musicEnabled;document.getElementById('options-music-volume').value=musicVolumeDb;document.getElementById('options-live-upload').checked=(player.liveUpload!==false);document.getElementById('options-screen-stats').checked=(player.onScreenStats===true);document.getElementById('options-modal').style.display='flex';">
+    <button class="btn-options" title="Επιλογές" onclick="openOptionsModal()">
         Επ
     </button>
 
@@ -1404,6 +1404,35 @@ function getHitjazNoteForStep(step) {
 
 let _musicStarting = false;
 
+// Μουσικά κομμάτια — πρόσθεσε νέα εδώ (χρειάζεσαι μόνο id, name, src)
+const MUSIC_TRACKS = [
+    
+    { id: 'bachtris', name: 'Μπάχτρις', src: 'https://raw.githubusercontent.com/frognard/frognard.github.io/refs/heads/main/rempeskes/bachtris.mid' },
+    { id: 'bach807', name: 'Μπάχ807', src: 'https://raw.githubusercontent.com/frognard/frognard.github.io/refs/heads/main/rempeskes/bach807a.mid' },
+    { id: 'ntoutse', name: 'Ντούτσε', src: 'https://raw.githubusercontent.com/frognard/frognard.github.io/refs/heads/main/rempeskes/ntoutse.mid' }
+
+];
+
+function getMusicTrack() {
+    const id = (player && player.musicTrack) || 'ntoutse';
+    return MUSIC_TRACKS.find(t => t.id === id) || MUSIC_TRACKS[0];
+}
+
+function loadMidiSrc(player, src, timeoutMs = 15000) {
+    return new Promise((resolve, reject) => {
+        const onLoad = () => {
+            player.removeEventListener('load', onLoad);
+            resolve();
+        };
+        player.addEventListener('load', onLoad);
+        player.setAttribute('src', src);
+        setTimeout(() => {
+            player.removeEventListener('load', onLoad);
+            reject(new Error('MIDI load timeout'));
+        }, timeoutMs);
+    });
+}
+
 function startBackgroundMusic() {
     if (isMusicPlaying || _musicStarting || !musicEnabled) return;
     _musicStarting = true;
@@ -1413,6 +1442,10 @@ function startBackgroundMusic() {
 
     const tryStart = async () => {
         try {
+            const track = getMusicTrack();
+            if (track && player.getAttribute('src') !== track.src) {
+                await loadMidiSrc(player, track.src);
+            }
             if (typeof player.start === 'function') {
                 await player.start();
             }
@@ -3441,6 +3474,7 @@ if (roll <= 1) {
         soundEnabled: true,   // αποθηκευμένη επιλογή ήχου
         musicEnabled: false,  // αποθηκευμένη επιλογή μουσικής
         musicVolumeDb: -12,   // αποθηκευμένη ένταση μουσικής (dB, 0 = max, -40 = πολύ χαμηλά)
+        musicTrack: 'ntoutse', // αποθηκευμένο μουσικό κομμάτι (id από το MUSIC_TRACKS)
         liveUpload: false     // Live-upload στα rankings (αυτόματο ανέβασμα σε κατάβαση/θάνατο)
     };
 
@@ -4151,6 +4185,7 @@ function loadGame() {
     }
     if (typeof player.liveUpload !== 'boolean') player.liveUpload = false;
     if (typeof player.onScreenStats !== 'boolean') player.onScreenStats = false;
+    if (!player.musicTrack) player.musicTrack = 'ntoutse';
     setMusicVolume(musicVolumeDb);
     updateMusicState();
 
@@ -7146,6 +7181,17 @@ function openOptionsModal() {
     if (musicEl) musicEl.checked = musicEnabled;
     const musicVolEl = document.getElementById('options-music-volume');
     if (musicVolEl) musicVolEl.value = musicVolumeDb;
+    const musicTrackEl = document.getElementById('options-music-track');
+    if (musicTrackEl) {
+        musicTrackEl.innerHTML = '';
+        for (const t of MUSIC_TRACKS) {
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            opt.textContent = t.name;
+            musicTrackEl.appendChild(opt);
+        }
+        musicTrackEl.value = (player.musicTrack && MUSIC_TRACKS.some(t => t.id === player.musicTrack)) ? player.musicTrack : MUSIC_TRACKS[0].id;
+    }
     modal.style.display = 'flex';
 }
 
@@ -7208,6 +7254,16 @@ function applyOptions() {
     const musicVolEl = document.getElementById('options-music-volume');
     if (musicVolEl) setMusicVolume(parseFloat(musicVolEl.value));
     player.musicVolumeDb = musicVolumeDb;
+    const musicTrackEl = document.getElementById('options-music-track');
+    let musicTrackChanged = false;
+    if (musicTrackEl) {
+        const newTrack = musicTrackEl.value;
+        musicTrackChanged = newTrack !== player.musicTrack;
+        player.musicTrack = newTrack;
+    }
+    if (musicEnabled && musicTrackChanged) {
+        stopBackgroundMusic();
+    }
     updateMusicState();
     if (typeof rearmTimers === 'function') rearmTimers();
     else     if (typeof window.rearmTimers === 'function') window.rearmTimers();
@@ -7273,10 +7329,6 @@ updateOnScreenStats();
         </label>
 
         <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
-            <input type="checkbox" id="options-sound"> 🔉 Ήχος
-        </label>
-
-        <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
             <input type="checkbox" id="options-live-upload"> 📡 Live-upload στα rankings
         </label>
 
@@ -7284,18 +7336,16 @@ updateOnScreenStats();
             <input type="checkbox" id="options-screen-stats"> 📊 On-screen stats
         </label>
 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:0.85rem;">
-            <span>🎵 Μουσική</span>
-            <label style="position:relative;display:inline-block;width:40px;height:22px;cursor:pointer;">
-                <input type="checkbox" id="options-music-toggle" style="opacity:0;width:0;height:0;">
-                <span id="music-toggle-track" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#444;border-radius:11px;transition:background .3s;"></span>
-                <span id="music-toggle-thumb" style="position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#999;border-radius:50%;transition:transform .3s,background .3s;"></span>
+        <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
+            <input type="checkbox" id="options-sound"> 🔉 Ήχος
+        </label>
+
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:0.85rem;">
+            <label style="display:inline-flex;align-items:center;cursor:pointer;white-space:nowrap;">
+                <input type="checkbox" id="options-music-toggle"> 🎵 Μουσική
             </label>
+            <select id="options-music-track" style="background:#1a1a1a;color:#fff;border:1px solid #444;border-radius:3px;padding:3px 5px;font-family:inherit;font-size:0.8rem;max-width:150px;"></select>
         </div>
-        <style>
-            #options-music-toggle:checked ~ #music-toggle-track { background: var(--accent-gold); }
-            #options-music-toggle:checked ~ #music-toggle-thumb { transform: translateX(18px); background: #fff; }
-        </style>
 
         <label style="display:block;margin-bottom:20px;font-size:0.85rem;">
             Ένταση μουσικής:
