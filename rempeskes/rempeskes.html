@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v395</title>
+    <title>Ρεμπεσκές v398</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -45,6 +45,7 @@ justify-content: center;
             padding: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.7);
             transition: none;
+            position: relative;
         }
 
         h2, h3 {
@@ -784,6 +785,17 @@ justify-content: center;
             100% { opacity: 1; transform: translateY(-55px) scale(0.85); }
         }
 
+        .floating-text.hp-bar-fixed {
+            animation: popInPlace 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes popInPlace {
+            0% { opacity: 1; transform: scale(0.5); }
+            20% { transform: scale(1.3); }
+            60% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0; transform: scale(1.1); }
+        }
+
 @keyframes monsterDeathFlash {
     0% {
         filter: brightness(1);
@@ -1076,6 +1088,11 @@ body {
 
 
 <div id="game-container">
+    <div id="on-screen-stats" style="position:absolute;top:4px;right:10%;z-index:50;text-align:right;font-size:0.66rem;pointer-events:none;display:none;line-height:1.4;min-width:110px;">
+        <div id="os-dpr" style="color:rgba(200,200,200,0.55);">DPR 0</div>
+        <div id="os-dtr" style="color:rgba(200,200,200,0.55);">DTR 0</div>
+        <div id="os-xpr" style="color:rgba(200,200,200,0.55);">XPR 0</div>
+    </div>
     <div class="header-row">
         <h3>
 <span id="p-name-skull" class="hidden" style="margin-right:4px;">💀</span><span id="p-name">Ρεμπεσκές</span>
@@ -1249,7 +1266,7 @@ body {
 
 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; justify-content:flex-end;">
 
-    <button class="btn-options" title="Επιλογές" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music-toggle').checked=musicEnabled;document.getElementById('options-music-volume').value=musicVolumeDb;document.getElementById('options-live-upload').checked=(player.liveUpload!==false);document.getElementById('options-modal').style.display='flex';">
+    <button class="btn-options" title="Επιλογές" onclick="document.getElementById('options-speed').value=gameSpeedFactor;document.getElementById('options-sound').checked=soundEnabled;document.getElementById('options-music-toggle').checked=musicEnabled;document.getElementById('options-music-volume').value=musicVolumeDb;document.getElementById('options-live-upload').checked=(player.liveUpload!==false);document.getElementById('options-screen-stats').checked=(player.onScreenStats===true);document.getElementById('options-modal').style.display='flex';">
         Επ
     </button>
 
@@ -4037,10 +4054,13 @@ function checkLevelUp() {
         fText.innerText = text;
         fText.style.color = color;
         
-        const offset = Math.floor(Math.random() * 40) - 20;
-        const hpBar = (parentId === 'player-hp-parent' || parentId === 'monster-hp-parent');
-        fText.style.left = `calc(${hpBar ? '75%' : '50%'} + ${offset}px)`;
-        fText.style.top = `0px`;
+        const playerBar = (parentId === 'player-hp-parent');
+        const monsterBar = (parentId === 'monster-hp-parent');
+        const isHpBar = playerBar || monsterBar;
+        const offset = isHpBar ? 0 : Math.floor(Math.random() * 40) - 20;
+        fText.style.left = `calc(${isHpBar ? '70%' : '50%'} + ${offset}px)`;
+        fText.style.top = isHpBar ? `-20px` : `0px`;
+        if (isHpBar) fText.classList.add('hp-bar-fixed');
 
         // Το animation (χωρίς delay) τελειώνει ΑΚΡΙΒΩΣ μαζί με το combat tick -
         // effTick() ήδη scalάρει με την ταχύτητα (COMBAT_TICK_MS / speedFactor),
@@ -4130,6 +4150,7 @@ function loadGame() {
         player.musicVolumeDb = musicVolumeDb;
     }
     if (typeof player.liveUpload !== 'boolean') player.liveUpload = false;
+    if (typeof player.onScreenStats !== 'boolean') player.onScreenStats = false;
     setMusicVolume(musicVolumeDb);
     updateMusicState();
 
@@ -7119,6 +7140,8 @@ function openOptionsModal() {
     if (soundEl) soundEl.checked = soundEnabled;
     const liveEl = document.getElementById('options-live-upload');
     if (liveEl) liveEl.checked = player.liveUpload !== false;
+    const screenStatsEl = document.getElementById('options-screen-stats');
+    if (screenStatsEl) screenStatsEl.checked = player.onScreenStats === true;
     const musicEl = document.getElementById('options-music');
     if (musicEl) musicEl.checked = musicEnabled;
     const musicVolEl = document.getElementById('options-music-volume');
@@ -7178,6 +7201,8 @@ function applyOptions() {
     player.soundEnabled = soundEnabled;
     const liveEl = document.getElementById('options-live-upload');
     if (liveEl) player.liveUpload = liveEl.checked;
+    const screenStatsEl = document.getElementById('options-screen-stats');
+    if (screenStatsEl) player.onScreenStats = screenStatsEl.checked;
     const musicToggleEl = document.getElementById('options-music-toggle');
     if (musicToggleEl) musicEnabled = musicToggleEl.checked;
     const musicVolEl = document.getElementById('options-music-volume');
@@ -7189,6 +7214,31 @@ function applyOptions() {
     if (typeof saveGame === 'function') saveGame();
     closeOptionsModal();
 }
+
+let onScreenStatsTimer = null;
+function updateOnScreenStats() {
+    const el = document.getElementById('on-screen-stats');
+    if (!el) return;
+    const on = player.onScreenStats === true;
+    el.style.display = on ? 'block' : 'none';
+    if (!on) return;
+    const d = descentStats || { turns: 0, damageDealt: 0, damageTaken: 0, xp: 0 };
+    const perRound = (num) => d.turns > 0 ? Math.round(num / d.turns) : '0';
+    const dprEl = document.getElementById('os-dpr');
+    const dtrEl = document.getElementById('os-dtr');
+    const xprEl = document.getElementById('os-xpr');
+    if (dprEl) dprEl.innerText = `DPR ${perRound(d.damageDealt)}`;
+    if (dtrEl) dtrEl.innerText = `DTR ${perRound(d.damageTaken)}`;
+    if (xprEl) xprEl.innerText = `XPR ${perRound(d.xp)}`;
+}
+
+function startOnScreenStatsLoop() {
+    if (onScreenStatsTimer) return;
+    onScreenStatsTimer = setInterval(updateOnScreenStats, 500);
+}
+
+startOnScreenStatsLoop();
+updateOnScreenStats();
 </script>
 
 <div id="legendary-popup" class="legendary-popup hidden">
@@ -7228,6 +7278,10 @@ function applyOptions() {
 
         <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
             <input type="checkbox" id="options-live-upload"> 📡 Live-upload στα rankings
+        </label>
+
+        <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
+            <input type="checkbox" id="options-screen-stats"> 📊 On-screen stats
         </label>
 
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:0.85rem;">
