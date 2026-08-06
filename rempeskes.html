@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v398</title>
+    <title>Ρεμπεσκές v399</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -493,6 +493,12 @@ justify-content: center;
 
 .skill-btn:disabled{
     opacity:1;
+}
+
+/* ΣΦΑΞΕ disabled μέχρι 100% HP: γκριζαρισμένο, αλλά το Γλέντα/Τρέξε δεν ακουμπιέται */
+.hunt-btn:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
 }      
         .cd-inner.active {
             background-color: var(--hp-monster);
@@ -4440,13 +4446,6 @@ function importSave() {
     loadGame();
     refreshTekePatrons();
 
-    // Απενεργοποίηση του κουμπιού ΣΦΑΞΕ για 1 combat/regen tick κατά τη φόρτωση του παιχνιδιού
-    const huntBtnLoad = document.getElementById("btn-hunt-retreat");
-    if (huntBtnLoad) huntBtnLoad.disabled = true;
-    setTimeout(() => {
-        if (huntBtnLoad) huntBtnLoad.disabled = false;
-    }, 1 * effTick());
-
     // ΨΥΧΕΣ IRONMEN: στην εκκίνηση ελέγχουμε την πρόσβαση στο online ψοφολόγιο και
     // φορτώνουμε τη λίστα των νεκρών ironmen. Το κάνουμε ασύγχρονα γιατί το supabase
     // client ορίζεται σε μεταγενέστερο script block (και στο πρώτο άνοιγμα χωρίς cache
@@ -4781,6 +4780,7 @@ function refreshAreaSelectorAppearance() {
 
     if (inCombat) {
         btnHuntRetreat.classList.add('retreat-mode');
+        btnHuntRetreat.disabled = false;
 
         if (isAttemptingRetreat) {
             btnHuntRetreat.innerHTML = "<span>Υποχώρηση... [↵]</span>";
@@ -4795,12 +4795,15 @@ function refreshAreaSelectorAppearance() {
     else if (player.level > player.lastGoldCashedLevel && player.gold > 0) {
     btnHuntRetreat.innerHTML = "<span>Γλέντα! [↵]</span>";
     btnHuntRetreat.classList.add('retreat-ready');
+    btnHuntRetreat.disabled = false;
     
     }
     else {
         btnHuntRetreat.innerHTML = "<span>Σφάξε [↵]</span>";
         btnHuntRetreat.classList.remove('skill-queued');
         btnHuntRetreat.classList.remove('retreat-ready');
+        // ΣΦΑΞΕ ενεργό μόνο με 100% ζωή στον τεκέ
+        btnHuntRetreat.disabled = player.hp < getPlayerMaxHp();
     }
 
     const btnSkill = document.getElementById('btn-skill');
@@ -5361,6 +5364,12 @@ function handleHuntRetreatClick() {
     }, 280);
         levelUpSound();
     } else {
+        // ΣΦΑΞΕ μόνο με 100% ζωή: το disabled κουμπί δεν πιάνεται με ποντίκι,
+        // αλλά Enter/Gamepad καλούν απευθείας αυτή τη συνάρτηση.
+        if (player.hp < getPlayerMaxHp()) {
+            logMessage("Δεν είσαι σε πλήρη φόρμα για νέα κατάβαση! Περίμενε να συνέλθεις.", 'system');
+            return;
+        }
         enterCombatFromSelector();
     }
 }
@@ -5542,7 +5551,7 @@ function forceRetreat() {
     isSkillQueued = false;
     queuedSkill = null;
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
-    logMessage(`Επιστρέφεις κουρασμένος στον Τεκέ του Ζαλαδούρα. Έσφαξες ${currentRunKills} εχθρούς και βρήκες ${currentRunItems} αντικείμενα σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο.`, 'retreat');
+    logMessage(`Επιστρέφεις στον Τεκέ του Ζαλαδούρα. Έσφαξες ${currentRunKills} εχθρούς και βρήκες ${currentRunItems} αντικείμενα σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο...`, 'retreat');
         if (currentSelectedLevel >= player.level && currentRunKills > player.bestKillStreak) {
         player.bestKillStreak = currentRunKills;
         }
@@ -5558,12 +5567,6 @@ function forceRetreat() {
     updateUI();
     saveGame();
     liveUploadIfEnabled();
-
-        const huntBtn = document.getElementById("btn-hunt-retreat");
-    huntBtn.disabled = true;
-    setTimeout(() => {
-        huntBtn.disabled = false;
-    }, 1 * effTick());
 }
 
 function executeCombatRound() {
@@ -6081,11 +6084,6 @@ function showAnnouncementPopup(text, styleClass, color) {
                     monster = null;
                     isAttemptingRetreat = false;
 
-                                // ← ΝΕΟ: 2 γραμμές εδώ
-                    const huntBtnEarly = document.getElementById("btn-hunt-retreat");
-                    if (huntBtnEarly) huntBtnEarly.disabled = true;
-
-
                     setTimeout(() => {
 
                         document.getElementById('monster-hp-flash').classList.remove('monster-death');
@@ -6098,7 +6096,7 @@ function showAnnouncementPopup(text, styleClass, color) {
                         document.getElementById('combat-interface').classList.add('hidden');
                         refreshTekePatrons();
                         
-                        logMessage(`Επέστρεψες κουρασμένος στον Τεκέ του Ζαλαδούρα. Έσφαξες ${currentRunKills} εχθρούς και βρήκες ${currentRunItems} αντικείμενα σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο...`, 'retreat');
+                        logMessage(`Επέστρεψες στον Τεκέ του Ζαλαδούρα. Έσφαξες ${currentRunKills} εχθρούς και βρήκες ${currentRunItems} αντικείμενα σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο...`, 'retreat');
                         if (currentSelectedLevel >= player.level && currentRunKills > player.bestKillStreak) {
                             player.bestKillStreak = currentRunKills;
                         }
@@ -6116,11 +6114,6 @@ function showAnnouncementPopup(text, styleClass, color) {
                         
                         updateUI();
                         liveUploadIfEnabled();
-                        const huntBtn = document.getElementById("btn-hunt-retreat");
-                            huntBtn.disabled = true;
-                            setTimeout(() => {
-                                huntBtn.disabled = false;
-                            }, 1 * effTick());
 
                     }, 500);
 
@@ -6200,14 +6193,6 @@ function applyDefeatPenalties() {
     player.goldLost += player.gold;
     player.gold = 0;
     player.hp = 1;
-
-   // Απενεργοποίηση του κουμπιού ΣΦΑΞΕ για 2 combat/regen ticks (προσαρμόζεται στην ταχύτητα)
-    const huntBtn = document.getElementById("btn-hunt-retreat");
-    huntBtn.disabled = true;
-
-    setTimeout(() => {
-        huntBtn.disabled = false;
-    }, 1 * effTick());
 
     // xasimo eksoplismou
     const slots = ['weapon', 'armor', 'magic'];
