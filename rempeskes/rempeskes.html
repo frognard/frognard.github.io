@@ -370,6 +370,14 @@ justify-content: center;
     text-shadow: 0 0 6px rgba(0,220,0,1.0), 0 0 17px rgba(0,220,0,0.8);
 }
 
+#m-name.legendary-monster-glow,
+#m-name.legendary-glow-weapon,
+#m-name.legendary-glow-armor,
+#m-name.legendary-glow-magic,
+#m-name.soul-monster-glow {
+    overflow: visible !important;
+}
+
         .legendary-popup {
     position: fixed;
     top: 40%;
@@ -792,14 +800,16 @@ justify-content: center;
         }
 
         .floating-text.hp-bar-fixed {
+            font-size: 1rem;
+            transform: translateY(-50%);
             animation: popInPlace 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
 
         @keyframes popInPlace {
-            0% { opacity: 1; transform: scale(0.5); }
-            20% { transform: scale(1.3); }
-            60% { opacity: 1; transform: scale(1.1); }
-            100% { opacity: 0; transform: scale(1.1); }
+            0% { opacity: 1; transform: translateY(-50%) scale(0.5); }
+            20% { transform: translateY(-50%) scale(1.3); }
+            60% { opacity: 1; transform: translateY(-50%) scale(1.1); }
+            100% { opacity: 0; transform: translateY(-50%) scale(1.1); }
         }
 
 @keyframes monsterDeathFlash {
@@ -1176,14 +1186,6 @@ body {
     </div>
 </div>
 
-    <div class="bar-container" id="player-hp-parent" style="margin: 5px 0 8px 0;">
-        <div id="player-hp-bar" class="bar"></div>
-        <div id="player-hp-text" class="bar-text">100 / 100 HP</div>
-    </div>
-
-    <div style="border-bottom: 1px solid var(--border-color); margin: 0 0 8px 0;"></div>
-    </div>
-
 
 
 <div id="town-interface">
@@ -1201,6 +1203,10 @@ body {
 </div>
 
 <div id="combat-interface" class="hidden">
+    <div id="battle-area-row" style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        <span id="battle-area-name">-</span>
+    </div>
+
     <h3 style="display: flex; gap: 5px; align-items: flex-start; margin: 0 0 6px 0; border-bottom: none; font-size: 1.2rem; line-height: 1.2;">
         <span id="battle-title" style="color: #d9d9d9; white-space: nowrap;"></span>
         
@@ -1209,18 +1215,21 @@ body {
         <span id="retreat-status-text" style="white-space: nowrap;"></span>
     </h3>
 
-    <div id="battle-area-row" style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 10px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-        <span id="battle-area-name">-</span>
-    </div>
-
     <span id="m-level" style="display: none;"></span>
 
-    <div class="bar-container" id="monster-hp-parent" style="margin: 8px 0 6px 0;">
+    <div class="bar-container" id="monster-hp-parent" style="margin: 8px 0 5px 0;">
         <div id="monster-hp-bar" class="bar"></div>
         <div id="monster-hp-text" class="bar-text">0 / 0 HP</div>
         <div id="monster-hp-flash" class="hp-flash-overlay"></div>
     </div>
 </div>
+
+<div class="bar-container" id="player-hp-parent" style="margin: 0 0 8px 0;">
+    <div id="player-hp-bar" class="bar"></div>
+    <div id="player-hp-text" class="bar-text">100 / 100 HP</div>
+</div>
+
+<div style="border-bottom: 1px solid var(--border-color); margin: 10px 0 14px 0;"></div>
 
 <div id="autoplay-panel" style="display:none">
     <div class="autoplay-row">
@@ -4103,8 +4112,8 @@ function checkLevelUp() {
         const monsterBar = (parentId === 'monster-hp-parent');
         const isHpBar = playerBar || monsterBar;
         const offset = isHpBar ? 0 : Math.floor(Math.random() * 40) - 20;
-        fText.style.left = `calc(${isHpBar ? '70%' : '50%'} + ${offset}px)`;
-        fText.style.top = isHpBar ? `-20px` : `0px`;
+        fText.style.left = `calc(${isHpBar ? '80%' : '50%'} + ${offset}px)`;
+        fText.style.top = isHpBar ? `50%` : `0px`;
         if (isHpBar) fText.classList.add('hp-bar-fixed');
 
         // Το animation (χωρίς delay) τελειώνει ΑΚΡΙΒΩΣ μαζί με το combat tick -
@@ -6267,7 +6276,7 @@ function applyDefeatPenalties() {
     function usePotion() {
         if (potionCooldownActive) return;
             if (!inCombat) {
-        logMessage("Δεν μπορείς να πιεις μπύρα στον τεκέ.", 'system');
+        logMessage("Δεν μπορείς να πιεις μπύρα όσο κοιμάσαι!", 'system');
         return;
             }
         
