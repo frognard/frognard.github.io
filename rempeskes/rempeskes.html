@@ -6280,6 +6280,15 @@ function applyDefeatPenalties() {
             `${slotNames[lostSlot]} σου φθείρεται: (T${oldPower} → T${player[lostSlot].power})`,
             'monster'
         );
+
+        // Πλήρης φθορά (5 πόντοι) → popup ΚΑΤΑΣΤΡΟΦΗ! με το χρώμα του αντικειμένου
+        if (actualLoss >= 5) {
+            const slotColor =
+                lostSlot === 'weapon' ? '#ff4444' :
+                lostSlot === 'armor'  ? '#1ab2ff' :
+                                        '#cc66ff';
+            showAnnouncementPopup("ΚΑΤΑΣΤΡΟΦΗ!", "", slotColor);
+        }
     }
         
         logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
