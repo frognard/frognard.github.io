@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v399</title>
+    <title>Ρεμπεσκές v400</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -3621,13 +3621,19 @@ const AREA_TYPE_COLOR = {
     function getSpeedFactor() { return autoPlayEnabled ? autoPlaySpeedFactor : gameSpeedFactor; }
     // Modifier ταχύτητας cooldowns: πολλαπλασιάζει το getSpeedFactor() με το calcDmgModifier.
     // π.χ. modifier 1.15 -> cooldowns 15% πιο γρήγορα, 0.83 -> πιο αργά.
-    // Υπολογίζεται ΜΟΝΟ στο spawn νέου τέρας (refreshCooldownModifiers), με βάση το τέρας
-    // που έχει απέναντί του εκείνη τη στιγμή. Αν αλλάξει τέρας ενώ τρέχει cooldown,
-    // αλλάζει μόνο η ταχύτητα — το ποσοστό γεμίσματος μένει σταθερό.
+    // Υπολογίζεται στο spawn νέου τέρας (refreshCooldownModifiers) με βάση το τέρας που έχει
+    // απέναντί του εκείνη τη στιγμή, ΚΑΙ όταν πεθαίνει εχθρός, οπότε χρησιμοποιούνται τα
+    // στατιστικά του κανονικού τέρατος του βάθους (monster = null ενώ τρέχει το hunt).
+    // Αν αλλάξει τέρας ενώ τρέχει cooldown, αλλάζει μόνο η ταχύτητα —
+    // το ποσοστό γεμίσματος μένει σταθερό.
     // Η μπύρα (effCDPotion) ΔΕΝ επηρεάζεται από τον modifier.
+    function getNormalMonsterDefForLevel(lvl) {
+        return lvl * 0.75 + lvl + lvl / 2;
+    }
     function getCdModifier() {
-        if (!inCombat || !monster) return 1;
-        return calcDmgModifier(getPlayerAtk() - monster.def);
+        if (!inCombat) return 1;
+        const def = monster ? monster.def : getNormalMonsterDefForLevel(currentSelectedLevel);
+        return calcDmgModifier(getPlayerAtk() - def);
     }
     let skillCdModifier = 1;
     let preciseCdModifier = 1;
@@ -4967,6 +4973,12 @@ function logMessageHTML(html, type = 'system') {
 
 function startTownRegen() {
     if (townRegenInterval) clearInterval(townRegenInterval);
+    const hpBarEl = document.getElementById('player-hp-bar');
+    // Άμεσα σκούρο πράσινο κατά την επιστροφή στον τεκέ (όχι ανά tick regen)
+    if (hpBarEl) {
+        const needsRegen = !(player.ironman && player.ironmanDead) && player.hp < getPlayerMaxHp();
+        hpBarEl.style.backgroundColor = needsRegen ? '#145a32' : '';
+    }
     townRegenInterval = setInterval(() => {
        const maxHp = getPlayerMaxHp();
         if (!inCombat && player.hp < maxHp && !(player.ironman && player.ironmanDead)) {
@@ -4987,6 +4999,10 @@ function startTownRegen() {
             updateUI();
             saveGame();
             
+         }
+         // Όταν το HP γεμίσει, η μπάρα επιστρέφει στο κανονικό πράσινο
+         if (hpBarEl && !(player.ironman && player.ironmanDead) && player.hp >= maxHp) {
+             hpBarEl.style.backgroundColor = '';
          }
     }, effTick());
 }
@@ -5118,6 +5134,10 @@ setInterval(function () {
     isAttemptingRetreat = false;
     isSkillQueued = false;
     currentRunConanosChance = currentSelectedLevel === 100 ? 0.5 : 0;
+
+    // Η μπάρα HP γυρνάει άμεσα στο κανονικό χρώμα (τέλος υπνάκου στον τεκέ)
+    const _hpBarReset = document.getElementById('player-hp-bar');
+    if (_hpBarReset) _hpBarReset.style.backgroundColor = '';
 
     // Άμυνα-2: αν έμεινε πίσω κάποιο "ορφανό" timeout από προηγούμενο endCombat(),
     // ακύρωσέ το εδώ ώστε να μη μπορέσει ποτέ να κάνει spawn τέρας μέσα σε αυτό το νέο hunt.
@@ -5549,7 +5569,6 @@ function forceRetreat() {
 
     // 2. Επαναφορά του interface
     document.getElementById('monster-hp-flash').classList.remove('monster-death');
-    startTownRegen();
     document.getElementById('town-interface').classList.remove('hidden');
     document.getElementById('combat-interface').classList.add('hidden');
     refreshTekePatrons();
@@ -5560,6 +5579,8 @@ function forceRetreat() {
     isSkillQueued = false;
     queuedSkill = null;
     player.hp = Math.round(getPlayerMaxHp() * 0.10);
+    // Ο υπνάκος ξεκινά αφού μπει το 10% HP, ώστε η μπάρα να γίνει σκούρη σωστά
+    startTownRegen();
     logMessage(`Επιστρέφεις στον Τεκέ του Ζαλαδούρα. Έσφαξες ${currentRunKills} εχθρούς και βρήκες ${currentRunItems} αντικείμενα σε αυτή την κατάβαση. Ρίχνεις έναν υπνάκο...`, 'retreat');
         if (currentSelectedLevel >= player.level && currentRunKills > player.bestKillStreak) {
         player.bestKillStreak = currentRunKills;
@@ -6132,6 +6153,10 @@ function showAnnouncementPopup(text, styleClass, color) {
                     waitingForNextMonster = true;
                     monster = null;
                     
+                    // Ο εχθρός πέθανε: επαναϋπολογισμός cooldowns με βάση το
+                    // κανονικό τέρας του βάθους (όχι το variant που σκοτώθηκε).
+                    refreshCooldownModifiers();
+
                     logMessage("Περιπλανιέσαι στο λαβύρινθο...", "system");
                     updateUI();
 
