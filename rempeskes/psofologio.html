@@ -641,7 +641,7 @@ function showMagkiaPopup(idx) {
         } else if (m.legendaryKill) {
             rows += `<div style="padding:5px 0;line-height:1.6;color:var(--brass);">[${m.level}] Σκότωσε: "${escapeHtml(m.legendaryKill)}" &#8594; "${escapeHtml(m.legendaryDrop)}" &middot; γύρος ${formatNumber(m.turns)}</div>`;
         } else if (m.soulKill) {
-            rows += `<div style="padding:5px 0;line-height:1.6;color:#a0703f;">[${m.level}] Στοιχειό! Σκότωσε: "💀${escapeHtml(m.soulKill)}" και βρήκε: "Ψυχή (💀${escapeHtml(m.soulKill)})" &middot; γύρος ${formatNumber(m.turns)}</div>`;
+            rows += `<div style="padding:5px 0;line-height:1.6;color:#a0703f;">[${m.level}] Στοιχειό! Σκότωσε: "${escapeHtml(m.soulKill)}" και βρήκε: "Ψυχή (${escapeHtml(m.soulKill)})" &middot; γύρος ${formatNumber(m.turns)}</div>`;
         } else {
             rows += `<div style="padding:5px 0;line-height:1.6;">[${m.level}] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
         }
