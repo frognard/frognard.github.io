@@ -4112,7 +4112,7 @@ function checkLevelUp() {
         const monsterBar = (parentId === 'monster-hp-parent');
         const isHpBar = playerBar || monsterBar;
         const offset = isHpBar ? 0 : Math.floor(Math.random() * 40) - 20;
-        fText.style.left = `calc(${isHpBar ? '80%' : '50%'} + ${offset}px)`;
+        fText.style.left = `calc(${isHpBar ? '75%' : '50%'} + ${offset}px)`;
         fText.style.top = isHpBar ? `50%` : `0px`;
         if (isHpBar) fText.classList.add('hp-bar-fixed');
 
