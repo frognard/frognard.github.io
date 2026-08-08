@@ -71,22 +71,6 @@
         font-size: 0.95rem; /* Αυξήθηκε από 0.85rem */
     }
 
-    #tally {
-        display: flex;
-        justify-content: center;
-        gap: 28px;
-        margin: 20px 0 30px;
-        font-size: 0.9rem; /* Αυξήθηκε από 0.8rem */
-        color: var(--parchment-dim);
-    }
-
-    #tally strong {
-        display: block;
-        font-family: 'Old Standard TT', serif;
-        font-size: 1.8rem; /* Αυξήθηκε από 1.6rem */
-        color: var(--brass);
-    }
-
     #entries { display: flex; flex-direction: column; gap: 0; }
 
     .entry {
@@ -342,7 +326,6 @@
         <button class="tab-btn" data-tab="apateon">Απατεώνες</button>
     </div>
 
-    <div id="tally"></div>
     <div id="entries"></div>
     <div id="entries-ironmen" style="display:none;"></div>
     <div id="entries-k-normal" style="display:none;"></div>
@@ -408,6 +391,7 @@ function renderEntry(s, i, isVictory, isIronman) {
         detailLine = `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)}, το γυρο ${turnsStr} &middot; ${formattedDate}`;
     }
     const skull = isIronman ? '<span class="ironman-skull">&#128128;</span> ' : '';
+    const crown = i === 0 ? '&#128081; ' : '';
 
     const weaponColor = s.weapon_legendary ? '#ffde21' : '#ec6868';
     const armorColor = s.armor_legendary ? '#ffde21' : '#1ab2ff';
@@ -428,7 +412,7 @@ function renderEntry(s, i, isVictory, isIronman) {
     return `
         <div class="entry${isVictory ? ' victory' : isAlive ? ' alive' : ' dead'}">
             <div class="rank-badge">${romanish(i + 1)}</div>
-            <div class="line1">${skull}<span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level} — Μαγκιά: ${formatScore(s.score ?? 0)}</div>
+            <div class="line1">${crown}${skull}<span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level} — Μαγκιά: ${formatScore(s.score ?? 0)}</div>
             <div class="line2">
                 ${detailLine} ${statsBtn} ${logBtn}
             </div>
@@ -442,25 +426,9 @@ function renderEntry(s, i, isVictory, isIronman) {
 }
 
 function renderTabContent(data, entriesEl) {
-    const victors = data.filter(s => s.victory);
-    const alive = data.filter(s => !s.victory && !s.killer);
-    const deaths = data.filter(s => !s.victory && s.killer);
     let html = '';
-    if (victors.length > 0) {
-        html += `<div id="victors-heading">Θεοσφάχτες</div>`;
-        html += victors.map((s, i) => renderEntry(s, i, true, s.ironman)).join('');
-    }
-    if (alive.length > 0) {
-        if (victors.length > 0) {
-            html += `<div id="victors-heading">Ζωντανοί</div>`;
-        }
-        html += alive.map((s, i) => renderEntry(s, i, false, s.ironman)).join('');
-    }
-    if (deaths.length > 0) {
-        if (victors.length > 0 || alive.length > 0) {
-            html += `<div id="victors-heading">Ψοφολόγιον</div>`;
-        }
-        html += deaths.map((s, i) => renderEntry(s, i, false, s.ironman)).join('');
+    if (data.length > 0) {
+        html += data.map((s, i) => renderEntry(s, i, s.victory === true, s.ironman === true)).join('');
     }
     entriesEl.innerHTML = html || '<div style="text-align:center;color:var(--parchment-dim);font-style:italic;padding:40px 10px;font-size:1.1rem;">Το κατάστιχο είναι άδειο...</div>';
 }
@@ -478,20 +446,6 @@ function switchTab(tab) {
     document.getElementById('entries-k-ironmen').style.display = tab === 'cyborg-ironmen' ? '' : 'none';
     document.getElementById('entries-apateon').style.display = tab === 'apateon' ? '' : 'none';
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
-    const data = tab === 'normal' ? normalData : tab === 'ironmen' ? ironmenData : tab === 'cyborg-normal' ? kNormalData : tab === 'cyborg-ironmen' ? kIronmenData : apateonData;
-    const victors = data.filter(s => s.victory);
-    const alive = data.filter(s => !s.victory && !s.killer);
-    const deaths = data.filter(s => !s.victory && s.killer);
-    const topScore = data.length > 0 ? Math.max(...data.map(s => s.score ?? 0)) : 0;
-    const deathMaxScore = deaths.length > 0 ? Math.max(...deaths.map(s => s.score ?? 0)) : 0;
-    const victorMaxScore = victors.length > 0 ? Math.max(...victors.map(s => s.score ?? 0)) : 0;
-    const aliveMaxScore = alive.length > 0 ? Math.max(...alive.map(s => s.score ?? 0)) : 0;
-    document.getElementById('tally').innerHTML = `
-        <div><strong>${deaths.length}</strong>νεκροί ${deaths.length > 0 ? `<span style="font-size:0.7em;opacity:0.7">(${formatScore(deathMaxScore)})</span>` : ''}</div>
-        <div><strong>${victors.length}</strong>θεοσφάχτες ${victors.length > 0 ? `<span style="font-size:0.7em;opacity:0.7">(${formatScore(victorMaxScore)})</span>` : ''}</div>
-        <div><strong>${alive.length}</strong>ζωντανοί ${alive.length > 0 ? `<span style="font-size:0.7em;opacity:0.7">(${formatScore(aliveMaxScore)})</span>` : ''}</div>
-        <div><strong>${formatScore(topScore)}</strong>μέγιστη μαγκιά</div>
-    `;
 }
 
 async function load() {
@@ -534,7 +488,7 @@ async function load() {
 
     const isK = n => n.name.startsWith('[K]') || n.name.startsWith('[Κ]');
     const isIronman = n => n.ironman === true;
-    const isApateon = n => n.apateon === true;
+    const isApateon = n => n.apateon === true || n.name.startsWith('[A]') || n.name.startsWith('[Α]');
     const isStaleAliveIronman = s => {
         if (s.victory || s.killer) return false; // νεκροί/θεοσφάχτες μένουν για πάντα
         const d = new Date(s.death_date);
@@ -589,9 +543,11 @@ function showStatsPopup(idx) {
                 <div class="stats-row"><span class="stats-label">Γύροι</span><span class="stats-value">${formatNumber(s.turns || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Ρίσκο</span><span class="stats-value">${(s.risk || 0) > 0 ? '+' : ''}${(s.risk || 0).toFixed(3)}</span></div>
                 <div class="stats-row"><span class="stats-label">Φόνοι/κατάβαση</span><span class="stats-value">${killsPerDesc.toFixed(1)}</span></div>
+                <div class="stats-row"><span class="stats-label">Average kill time</span><span class="stats-value">${(s.avg_kill_time || 0).toFixed(1)} γύροι</span></div>
                 <div class="stats-row"><span class="stats-label">Καταβάσεις</span><span class="stats-value">${formatNumber(s.total_descents || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Πεντάρια</span><span class="stats-value">${formatNumber(s.pentaria || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Ψυχές</span><span class="stats-value">${formatNumber(s.souls_killed || 0)}</span></div>
+                <div class="stats-row"><span class="stats-label">Θρυλικοί εχθροί</span><span class="stats-value">${formatNumber(s.legendary_encounters || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Θρυλικά drops</span><span class="stats-value">${formatNumber(s.legendary_drops || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Καλύτερο σερί</span><span class="stats-value">${formatNumber(s.best_kill_streak || 0)}</span></div>
                 <div class="stats-row"><span class="stats-label">Συνολικά XP</span><span class="stats-value">${formatNumber(s.total_xp_gained || 0)}</span></div>

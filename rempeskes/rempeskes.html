@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v400</title>
+    <title>Ρεμπεσκές v402</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1601,8 +1601,10 @@ function showStats() {
     appendInfoLine(totalDiv, `Γύροι: ${formatNumber(player.activeTime)}`, "stats");
     appendInfoLine(totalDiv, `Ρίσκο: ${(player.risk || 0) > 0 ? '+' : ''}${(player.risk || 0).toFixed(3)}`, "stats");
     appendInfoLine(totalDiv, `Φόνοι/κατάβαση: ${player.totalDescents > 0 ? (player.kills / player.totalDescents).toFixed(1) : '0'}`, "stats");
+    appendInfoLine(totalDiv, `Average kill time: ${player.kills > 0 ? (player.combatRounds / player.kills).toFixed(1) : '0'} γύροι`, "stats");
     appendInfoLine(totalDiv, `Πεντάρια: ${formatNumber(player.pentaria || 0)}`, "stats");
     appendInfoLine(totalDiv, `Ψυχές: ${formatNumber(player.soulsKilled || 0)}`, "stats");
+    appendInfoLine(totalDiv, `Θρυλικοί εχθροί: ${formatNumber(player.legendaryEncounters || 0)}`, "stats");
     appendInfoLine(totalDiv, `Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`, "stats");
     appendInfoLineHTML(totalDiv, `<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε online rankings</a>`, "stats");
 
@@ -1703,7 +1705,9 @@ function buildPlayerRecord() {
         beersDrunk: player.beersDrunk || 0,
         pentaria: player.pentaria || 0,
         soulsKilled: player.soulsKilled || 0,
+        legendaryEncounters: player.legendaryEncounters || 0,
         legendaryDrops: player.legendaryDrops || 0,
+        avgKillTime: player.kills > 0 ? (player.combatRounds / player.kills) : 0,
         totalXpGained: player.totalXpGained || 0,
         totalXpAtLevel100: player.totalXpAtLevel100 || 0,
         bestKillStreak: player.bestKillStreak || 0,
@@ -3473,7 +3477,9 @@ if (roll <= 1) {
             goldLost: 0,
             beersDrunk: 0,
             activeTime: 0, // μετράει γύρους (κάθε γύρος μάχης/regen = +1), όχι πλέον δευτερόλεπτα
+            combatRounds: 0, // μετράει ΜΟΝΟ γύρους μάχης (χωρίς resting στον τεκέ)
             legendaryDrops: 0,
+            legendaryEncounters: 0,
             pentaria: 0,
             soulsKilled: 0,
             totalXpGained: 0,
@@ -4028,8 +4034,8 @@ function refreshTekePatrons() {
 
     const rand = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
 
-// Ρεμπεσκέδες: 1..18
-const baseCount = rand(1, 18);
+    // Ρεμπεσκέδες: 1..18
+    const baseCount = rand(2, 18);
 
     // Μία τυχαία κατηγορία
     const cat = TEKE_PATRON_CATEGORIES[Math.floor(Math.random() * TEKE_PATRON_CATEGORIES.length)];
@@ -4155,6 +4161,8 @@ function loadGame() {
             if (typeof player.totalDescents !== 'number') player.totalDescents = 0;
             if (typeof player.pentaria !== 'number') player.pentaria = 0;
             if (typeof player.soulsKilled !== 'number') player.soulsKilled = 0;
+            if (typeof player.legendaryEncounters !== 'number') player.legendaryEncounters = 0;
+            if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
             player.maxUnlockedLevel = 100;
 
             player.nextXp = calculateNextXpRequirement(player.level);
@@ -4399,6 +4407,8 @@ function importSave() {
             if (typeof player.killsMagic !== 'number') player.killsMagic = 0;
             if (typeof player.pentaria !== 'number') player.pentaria = 0;
             if (typeof player.soulsKilled !== 'number') player.soulsKilled = 0;
+            if (typeof player.legendaryEncounters !== 'number') player.legendaryEncounters = 0;
+            if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
             if (typeof player.liveUpload !== 'boolean') player.liveUpload = false;
             player.maxUnlockedLevel = 100;
             player.nextXp = calculateNextXpRequirement(player.level);
@@ -5270,6 +5280,7 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
     if (isLegendary) {
 
     variant = 'legendary';
+    player.legendaryEncounters = (player.legendaryEncounters || 0) + 1;
 
     // Πρώτα αποφασίζουμε τον τύπο (33/33/33) - καθορίζει ΚΑΙ το χρώμα/λάμψη
     // ΚΑΙ τι είδους αντικείμενο θα πέσει.
@@ -5610,6 +5621,7 @@ function executeCombatRound() {
         updateUI();
     }
     descentStats.turns++;
+    player.combatRounds = (player.combatRounds || 0) + 1;
 
 // Προσθήκη για την πιθανότητα υποχώρησης
 if (isAttemptingRetreat) {
@@ -7134,7 +7146,9 @@ if ('serviceWorker' in navigator) {
                     gold_lost: r.goldLost || 0,
                     beers_drunk: r.beersDrunk || 0,
                     pentaria: r.pentaria || 0,
+                    legendary_encounters: r.legendaryEncounters || 0,
                     legendary_drops: r.legendaryDrops || 0,
+                    avg_kill_time: r.avgKillTime || 0,
                     total_xp_gained: r.totalXpGained || 0,
                     total_xp_at_level_100: r.totalXpAtLevel100 || 0,
                     best_kill_streak: r.bestKillStreak || 0,
@@ -7338,7 +7352,7 @@ updateOnScreenStats();
 <div id="info-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);z-index:1100;align-items:center;justify-content:center;">
     <div style="background:#1e1e1e;border:1px solid var(--accent-gold);border-radius:8px;padding:20px;max-width:480px;width:92%;max-height:80vh;display:flex;flex-direction:column;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.8);">
         <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #444;padding-bottom:8px;margin-bottom:10px;flex-shrink:0;">
-            <h3 id="info-modal-title" style="margin:0;color:var(--accent-gold);"></h3>
+            <h3 id="info-modal-title" style="margin:0;color:var(--accent-gold);border-bottom:none;padding-bottom:0;"></h3>
             <button onclick="closeInfoModal()" style="background:none;border:none;color:#ccc;font-size:1.5rem;cursor:pointer;line-height:1;padding:0 4px;">&times;</button>
         </div>
         <div id="info-modal-body" style="overflow-y:auto;flex:1;font-size:0.85rem;line-height:1.4;"></div>
