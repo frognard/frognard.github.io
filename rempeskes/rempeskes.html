@@ -4028,8 +4028,8 @@ function refreshTekePatrons() {
 
     const rand = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
 
-    // Ρεμπεσκέδες: (1-6) * 3 → 3..18
-    const baseCount = rand(1, 6) * 3;
+// Ρεμπεσκέδες: 1..18
+const baseCount = rand(1, 18);
 
     // Μία τυχαία κατηγορία
     const cat = TEKE_PATRON_CATEGORIES[Math.floor(Math.random() * TEKE_PATRON_CATEGORIES.length)];
