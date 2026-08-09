@@ -222,6 +222,20 @@
         border-color: var(--brass);
     }
 
+    #hide-dead-label {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        margin: -14px 0 24px;
+        font-size: 0.9rem;
+        color: var(--parchment-dim);
+        cursor: pointer;
+        user-select: none;
+    }
+    #hide-dead-label:hover { color: var(--parchment); }
+    #hide-dead-label input { accent-color: var(--brass); cursor: pointer; }
+
     footer {
         text-align: center;
         margin-top: 40px;
@@ -325,6 +339,8 @@
         <button class="tab-btn" data-tab="cyborg-ironmen">[K] Ironmen</button>
         <button class="tab-btn" data-tab="apateon">Απατεώνες</button>
     </div>
+
+    <label id="hide-dead-label"><input type="checkbox" id="hide-dead"> Εξαίρεση νεκρών</label>
 
     <div id="entries"></div>
     <div id="entries-ironmen" style="display:none;"></div>
@@ -444,12 +460,25 @@ let kIronmenData = [];
 let apateonData = [];
 
 function switchTab(tab) {
+    activeTab = tab;
     document.getElementById('entries').style.display = tab === 'normal' ? '' : 'none';
     document.getElementById('entries-ironmen').style.display = tab === 'ironmen' ? '' : 'none';
     document.getElementById('entries-k-normal').style.display = tab === 'cyborg-normal' ? '' : 'none';
     document.getElementById('entries-k-ironmen').style.display = tab === 'cyborg-ironmen' ? '' : 'none';
     document.getElementById('entries-apateon').style.display = tab === 'apateon' ? '' : 'none';
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tab));
+}
+
+let activeTab = 'normal';
+
+function renderAll() {
+    const hideDead = document.getElementById('hide-dead').checked;
+    const f = arr => hideDead ? arr.filter(s => !s.killer) : arr;
+    renderTabContent(f(normalData), document.getElementById('entries'));
+    renderTabContent(f(ironmenData), document.getElementById('entries-ironmen'));
+    renderTabContent(f(kNormalData), document.getElementById('entries-k-normal'));
+    renderTabContent(f(kIronmenData), document.getElementById('entries-k-ironmen'));
+    renderTabContent(f(apateonData), document.getElementById('entries-apateon'));
 }
 
 async function load() {
@@ -511,16 +540,17 @@ async function load() {
     kNormalData = deduped.filter(s => !isIronman(s) && isK(s) && !isApateon(s) && !isStaleNonIronman(s));
     kIronmenData = deduped.filter(s => isIronman(s) && isK(s) && !isApateon(s) && !isStaleAliveIronman(s));
 
-    renderTabContent(normalData, entriesEl);
-    renderTabContent(ironmenData, document.getElementById('entries-ironmen'));
-    renderTabContent(kNormalData, document.getElementById('entries-k-normal'));
-    renderTabContent(kIronmenData, document.getElementById('entries-k-ironmen'));
-    renderTabContent(apateonData, document.getElementById('entries-apateon'));
+    renderAll();
 
     switchTab('normal');
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.getElementById('hide-dead').addEventListener('change', () => {
+        renderAll();
+        switchTab(activeTab);
     });
 }
 
