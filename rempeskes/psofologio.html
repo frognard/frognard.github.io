@@ -393,6 +393,10 @@ function renderEntry(s, i, isVictory, isIronman) {
     const skull = isIronman ? '<span class="ironman-skull">&#128128;</span> ' : '';
     const crown = i === 0 ? '&#128081; ' : '';
 
+    const magkiaScore = s.score ?? 0;
+    const magkiaPct = s.magkia_pct || 0;
+    const pctText = magkiaPct > 0 ? ` (${magkiaPct.toFixed(2)}%)` : '';
+
     const weaponColor = s.weapon_legendary ? '#ffde21' : '#ec6868';
     const armorColor = s.armor_legendary ? '#ffde21' : '#1ab2ff';
     const magicColor = s.magic_legendary ? '#ffde21' : '#cc66ff';
@@ -412,7 +416,7 @@ function renderEntry(s, i, isVictory, isIronman) {
     return `
         <div class="entry${isVictory ? ' victory' : isAlive ? ' alive' : ' dead'}">
             <div class="rank-badge">${romanish(i + 1)}</div>
-            <div class="line1">${crown}${skull}<span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level} — Μαγκιά: ${formatScore(s.score ?? 0)}</div>
+            <div class="line1">${crown}${skull}<span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level} — Μαγκιά: ${formatScore(magkiaScore)}${pctText}</div>
             <div class="line2">
                 ${detailLine} ${statsBtn} ${logBtn}
             </div>

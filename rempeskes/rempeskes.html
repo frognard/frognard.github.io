@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v402</title>
+    <title>Ρεμπεσκές v405</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1136,7 +1136,7 @@ body {
 
 <div class="stats-grid" id="stats-summary" style="grid-template-columns: 1.0fr 1fr;">
     <div class="stat-row">
-        <div><b>Μαγκιά:</b> <span id="p-score" class="xp-value" onclick="showMagkiaMilestones()">0</span></div>
+        <div><b>Μαγκιά:</b> <span id="p-score" class="xp-value" onclick="toggleMagkiaDisplay()" style="cursor:pointer;">0</span></div>
     </div>
     <div class="stat-row" id="stat-gold-box" style="display:flex;justify-content:flex-end;">
         <div><b>Χρυσάφι:</b> <span id="p-gold" class="gold">0</span></div>
@@ -1530,6 +1530,62 @@ function formatNumber(num) {
     return Number(num).toLocaleString('el-GR');
 }
 
+// Μαγκιά-στόχος (reference) του "ιδανικού" χαρακτήρα — υπολογίζεται από τους ίδιους τύπους
+// του παιχνιδιού αντί για σκληροδεμένο πίνακα:
+//   req(L)    = round(500·L^1.5)                 (calculateNextXpRequirement)
+//   reward(L) = round(35·L^1.05)                 (getMonsterXpReward, χωρίς diff)
+//   kills(L)  = round(req/reward)
+//   4.3 γύροι/kill, 6 kills/κατάβαση + 9 ρεστ γύροι, μαγκιά = totalXP·1000/totalTurns.
+// Η μαγκιά-στόχος δίνεται ΣΥΝΕΧΩΣ σε σχέση με το αθροιστικό XP (γραμμική παρεμβολή μέσα
+// στο επίπεδο), ώστε το % να αλλάζει ομαλά όσο κερδίζεται XP και όχι απότομα στο level up.
+// Ο ιδανικός χαρακτήρας μετράει ΠΑΝΤΑ σαν να έχει σκοτώσει τον Κόνανο → η μαγκιά του ×1.5.
+const _refMagkiaXP = { 1: 0 };
+const _refMagkiaTurns = { 1: 0 };
+let _refMagkiaMaxLevel = 1;
+
+function _refMagkiaEnsureLevel(targetLevel) {
+    while (_refMagkiaMaxLevel < targetLevel) {
+        const lvl = _refMagkiaMaxLevel;
+        const req = Math.round(500 * Math.pow(lvl, 1.5));
+        const reward = Math.round(35 * Math.pow(lvl, 1.05));
+        const needed = Math.round(req / reward);
+        _refMagkiaXP[lvl + 1] = _refMagkiaXP[lvl] + needed * reward;
+        _refMagkiaTurns[lvl + 1] = _refMagkiaTurns[lvl] + needed * 4.3 + Math.ceil(needed / 6) * 9;
+        _refMagkiaMaxLevel++;
+    }
+}
+
+// Ομαλή μαγκιά-στόχος στο δεδομένο αθροιστικό XP (περνάει από όλα τα σημεία των επιπέδων).
+function refMagkiaAtXP(totalXp) {
+    const xp = Math.max(0, totalXp || 0);
+    _refMagkiaEnsureLevel(100);
+    let L = 1;
+    while (L < 100 && _refMagkiaXP[L + 1] <= xp) L++;
+    const xp0 = _refMagkiaXP[L];
+    const xp1 = _refMagkiaXP[L + 1];
+    const turns0 = _refMagkiaTurns[L];
+    const turns1 = _refMagkiaTurns[L + 1];
+    let turns;
+    if (xp <= xp0) {
+        turns = turns0;
+    } else if (xp <= xp1) {
+        turns = turns0 + (xp - xp0) * ((turns1 - turns0) / (xp1 - xp0));
+    } else {
+        turns = turns1;
+    }
+    if (turns <= 0) return 0;
+    return (xp * 1000 / turns) * 1.5;
+}
+
+function getMagkiaPercent() {
+    const score = player._displayedScore || 0;
+    // Το ίδιο totalXP που χρησιμοποιεί και το computeScore για το σκορ.
+    const totalXp = (player.level >= 100) ? (player.totalXpAtLevel100 || 0) : (player.totalXpGained || 0);
+    const ref = refMagkiaAtXP(totalXp);
+    if (ref <= 0) return null;
+    return score / ref * 100;
+}
+
 // ΣΚΟΡ: totalXpGained * 100 / totalTurns * deathFactor (2.5% penalty ανά θάνατο) --- PROS TO PARON DE METRAEI
 function computeScore() {
     const totalXp = (player.level >= 100) ? (player.totalXpAtLevel100 || 0) : (player.totalXpGained || 0);
@@ -1570,7 +1626,7 @@ function showStats() {
     const body = openInfoModal("ΣΤΑΤΙΣΤΙΚΑ");
     if (!body) return;
 
-    // Tabs: Συνολικά | Κατάβασης
+    // Tabs: Συνολικά | Κατάβασης | Ορόσημα
     const tabsRow = document.createElement('div');
     tabsRow.style.cssText = 'display:flex;gap:8px;margin-bottom:10px;position:sticky;top:0;background:#1e1e1e;padding:4px 0;z-index:1;';
     const btnTotal = document.createElement('button');
@@ -1583,7 +1639,12 @@ function showStats() {
     btnDescent.id = 'stats-tab-btn-descent';
     btnDescent.textContent = 'Κατάβασης';
     btnDescent.onclick = () => switchStatsTab('descent');
-    tabsRow.append(btnTotal, btnDescent);
+    const btnMilestones = document.createElement('button');
+    btnMilestones.className = 'stats-tab';
+    btnMilestones.id = 'stats-tab-btn-milestones';
+    btnMilestones.textContent = 'Ορόσημα';
+    btnMilestones.onclick = () => switchStatsTab('milestones');
+    tabsRow.append(btnTotal, btnDescent, btnMilestones);
     body.append(tabsRow);
 
     const totalDiv = document.createElement('div');
@@ -1591,7 +1652,11 @@ function showStats() {
     const descentDiv = document.createElement('div');
     descentDiv.id = 'stats-tab-descent';
     descentDiv.style.display = 'none';
-    body.append(totalDiv, descentDiv);
+    const milestonesDiv = document.createElement('div');
+    milestonesDiv.id = 'stats-tab-milestones';
+    milestonesDiv.style.display = 'none';
+    milestonesDiv.innerHTML = buildMilestonesHTML();
+    body.append(totalDiv, descentDiv, milestonesDiv);
 
     // --- Tab "Συνολικά" ---
     appendInfoLine(totalDiv, `Φόνοι: ${formatNumber(player.kills)}`, "stats");
@@ -1627,9 +1692,12 @@ function showStats() {
         descentDiv.style.display = 'block';
         const bodyHDescent = body.offsetHeight;
         descentDiv.style.display = 'none';
+        milestonesDiv.style.display = 'block';
+        const bodyHMilestones = body.offsetHeight;
+        milestonesDiv.style.display = 'none';
         totalDiv.style.display = 'block';
         const headerFooter = statsBox.offsetHeight - bodyHTotal;
-        const maxBodyH = Math.max(bodyHTotal, bodyHDescent);
+        const maxBodyH = Math.max(bodyHTotal, bodyHDescent, bodyHMilestones);
         statsBox.style.height = (headerFooter + maxBodyH) + 'px';
     }
 }
@@ -1637,37 +1705,55 @@ function showStats() {
 function switchStatsTab(tab) {
     const total = document.getElementById('stats-tab-total');
     const descent = document.getElementById('stats-tab-descent');
+    const milestones = document.getElementById('stats-tab-milestones');
     const btnTotal = document.getElementById('stats-tab-btn-total');
     const btnDescent = document.getElementById('stats-tab-btn-descent');
-    if (!total || !descent || !btnTotal || !btnDescent) return;
-    const showTotal = tab !== 'descent';
-    total.style.display = showTotal ? 'block' : 'none';
-    descent.style.display = showTotal ? 'none' : 'block';
-    btnTotal.classList.toggle('active', showTotal);
-    btnDescent.classList.toggle('active', !showTotal);
+    const btnMilestones = document.getElementById('stats-tab-btn-milestones');
+    if (!total || !descent || !milestones || !btnTotal || !btnDescent || !btnMilestones) return;
+    total.style.display = tab === 'total' ? 'block' : 'none';
+    descent.style.display = tab === 'descent' ? 'block' : 'none';
+    milestones.style.display = tab === 'milestones' ? 'block' : 'none';
+    btnTotal.classList.toggle('active', tab === 'total');
+    btnDescent.classList.toggle('active', tab === 'descent');
+    btnMilestones.classList.toggle('active', tab === 'milestones');
 }
 
-function showMagkiaMilestones() {
-    if (!player.magkiaMilestones || player.magkiaMilestones.length === 0) {
-        logMessage("Δεν υπάρχουν ακόμη ορόσημα μαγκιάς.", 'milestone');
-        return;
+function renderMagkiaScore() {
+    const score = player._displayedScore || 0;
+    if (player._showMagkiaPct === true) {
+        const pct = getMagkiaPercent();
+        document.getElementById('p-score').innerText = (pct !== null ? `${pct.toFixed(2)}%` : '50%');
+    } else {
+        document.getElementById('p-score').innerText = formatNumber(score);
     }
-    logMessage("");
-    logMessage("Ορόσημα μαγκιάς", 'milestone-title');
-    for (const m of player.magkiaMilestones) {
-        if (m.level === 'death') {
-            logMessage(`Τελική μαγκιά: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`, 'milestone');
-        } else if (m.level === 'conanos') {
-            logMessage(`Τελική μαγκιά: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`, 'milestone');
+}
+
+function toggleMagkiaDisplay() {
+    player._showMagkiaPct = !(player._showMagkiaPct === true);
+    renderMagkiaScore();
+}
+
+function buildMilestonesHTML() {
+    const ms = player.magkiaMilestones || [];
+    if (ms.length === 0) {
+        return '<div style="color:#ccc;font-style:italic;padding:10px 0;">Δεν υπάρχουν ακόμη ορόσημα μαγκιάς.</div>';
+    }
+    return ms.map(m => {
+        let icon = '';
+        let text;
+        if (m.level === 'death' || m.level === 'conanos') {
+            text = `Τελική μαγκιά: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`;
         } else if (m.legendaryKill) {
-            logMessage(`Επίπεδο ${m.level}: Σκότωσε: "${m.legendaryKill}" και βρήκε: "${m.legendaryDrop}" - γύρος ${formatNumber(m.turns)}`, 'milestone-legendary');
+            icon = '⭐';
+            text = `Επίπεδο ${m.level}: Σκότωσε: "${m.legendaryKill}" και βρήκε: "${m.legendaryDrop}" - γύρος ${formatNumber(m.turns)}`;
         } else if (m.soulKill) {
-            logMessage(`Επίπεδο ${m.level}: Στοιχειό! Σκότωσε: "${m.soulKill}" και βρήκε: "Ψυχή (${m.soulKill})" - γύρος ${formatNumber(m.turns)}`, 'milestone-soul');
+            icon = '💀';
+            text = `Επίπεδο ${m.level}: Στοιχειό! Σκότωσε: "${m.soulKill}" και βρήκε: "Ψυχή (${m.soulKill})" - γύρος ${formatNumber(m.turns)}`;
         } else {
-            logMessage(`Επίπεδο ${m.level}: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`, 'milestone');
+            text = `Επίπεδο ${m.level}: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`;
         }
-    }
-    // logMessage("");
+        return `<div style="padding:8px 0;border-bottom:1px solid #333;line-height:1.5;">${icon ? icon + ' ' : ''}${text}</div>`;
+    }).join('');
 }
 
 function buildPlayerRecord() {
@@ -1714,7 +1800,8 @@ function buildPlayerRecord() {
         risk: player.risk || 0,
         magkiaKillCount: player.magkiaKillCount || 0,
         totalDescents: player.totalDescents || 0,
-        magkiaMilestones: player.magkiaMilestones || []
+        magkiaMilestones: player.magkiaMilestones || [],
+        magkiaPct: (() => { const p = getMagkiaPercent(); return p === null ? 0 : p; })()
     };
 }
 
@@ -4663,7 +4750,7 @@ function refreshAreaSelectorAppearance() {
     document.getElementById('p-gold').innerText = formatNumber(player.gold);
     const currentScore = computeScore();
     if (currentScore > (player._displayedScore || 0)) player._displayedScore = currentScore;
-    document.getElementById('p-score').innerText = formatNumber(player._displayedScore || 0);
+    renderMagkiaScore();
     updateXpPerTurn();
     
     
@@ -7155,6 +7242,7 @@ if ('serviceWorker' in navigator) {
                     risk: r.risk || 0,
                     magkia_kill_count: r.magkiaKillCount || 0,
                     total_descents: r.totalDescents || 0,
+                    magkia_pct: r.magkiaPct || 0,
                     magkia_milestones: JSON.stringify(r.magkiaMilestones || [])
                 }, { onConflict: 'name' });
 
