@@ -1556,9 +1556,10 @@ function _refMagkiaEnsureLevel(targetLevel) {
 }
 
 // Ομαλή μαγκιά-στόχος στο δεδομένο αθροιστικό XP (περνάει από όλα τα σημεία των επιπέδων).
-function refMagkiaAtXP(totalXp) {
-    const xp = Math.max(0, totalXp || 0);
+function refMagkiaAtXP(totalXp, ironman) {
     _refMagkiaEnsureLevel(100);
+    const cap = _refMagkiaXP[100];
+    const xp = Math.min(Math.max(0, totalXp || 0), cap);
     let L = 1;
     while (L < 100 && _refMagkiaXP[L + 1] <= xp) L++;
     const xp0 = _refMagkiaXP[L];
@@ -1574,15 +1575,15 @@ function refMagkiaAtXP(totalXp) {
         turns = turns1;
     }
     if (turns <= 0) return 0;
-    return (xp * 1000 / turns) * 1.5;
+    return (xp * 1000 / turns) * 1.5 * (ironman ? 1.5 : 1);
 }
 
 function getMagkiaPercent() {
     const score = player._displayedScore || 0;
     // Το ίδιο totalXP που χρησιμοποιεί και το computeScore για το σκορ.
     const totalXp = (player.level >= 100) ? (player.totalXpAtLevel100 || 0) : (player.totalXpGained || 0);
-    const ref = refMagkiaAtXP(totalXp);
-    if (ref <= 0) return null;
+    const ref = refMagkiaAtXP(totalXp, !!player.ironman);
+    if (!Number.isFinite(ref) || ref <= 0) return null;
     return score / ref * 100;
 }
 
