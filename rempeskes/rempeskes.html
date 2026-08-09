@@ -1746,10 +1746,10 @@ function buildMilestonesHTML() {
             text = `Τελική μαγκιά: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`;
         } else if (m.legendaryKill) {
             icon = '⭐';
-            text = `Επίπεδο ${m.level}: Σκότωσε: "${m.legendaryKill}" και βρήκε: "${m.legendaryDrop}" - γύρος ${formatNumber(m.turns)}`;
+            text = `<span style="color:#ffde21;">Επίπεδο ${m.level}: Σκότωσε: "${m.legendaryKill}" και βρήκε: "${m.legendaryDrop}" - γύρος ${formatNumber(m.turns)}</span>`;
         } else if (m.soulKill) {
             icon = '💀';
-            text = `Επίπεδο ${m.level}: Στοιχειό! Σκότωσε: "${m.soulKill}" και βρήκε: "Ψυχή (${m.soulKill})" - γύρος ${formatNumber(m.turns)}`;
+            text = `<span style="color:#a0703f;">Επίπεδο ${m.level}: Στοιχειό! Σκότωσε: "${m.soulKill}" και βρήκε: "Ψυχή (${m.soulKill})" - γύρος ${formatNumber(m.turns)}</span>`;
         } else {
             text = `Επίπεδο ${m.level}: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`;
         }
@@ -2637,120 +2637,121 @@ const levelTitles = {
 };
 
 const monsterFirstNames = [
-"Γκνωχ",
-"Σούκα",
-"Μπλιάτ",
-"Τσίφσα",
-"Παξ",
-"Κλασορέψ",
-"Τλακοτακοατλ",
-"Ουλγκαραθίρ",
-"Τσαραμπόκ",
-"Κραβούλναχ",
-"Γκνούρτ",
-"Θούρμα",
-"Ισκαραβάχ",
-"Αμπαχάς",
-"Όρζαλαχ",
-"Σουρμαγκάν",
-"Βούλβουλ",
-"Γκουλ",
-"Σχιραχαβάρ",
-"Ζίμα Ζούμα",
-"Ξαραζάρ",
-"Μαζοχαλούν",
-"Λασσονού",
-"Αταθαπαλάλ",
-"Μαγκρίβα",
-"Τυλλ",
-"Γκολχούμ",
-"Γκρίσνακ",
-"Ουλέλα",
-"Καφά-Καφάλ",
-"Ατάβαρ",
-"Ατατάρ",
-"Αλαλάρ",
-"Βερσιμεχέτ",
-"Θαρθαραώρ",
-"Τόλογκ",
-"Μύρκαλ",
-"Θουλμ",
-"Καχούρ",
-"Σούουρ",
-"Χαϊβάν",
-"Ραθόγκ",
-"Μαρδάκ",
-"Σχάνταρ",
-"Τερ-Μπατ-Μαχράκ",
-"Βαλεφάρ",
-"Γίρσα",
-"Μάλεμ-Κις",
-"Ουνέγκε",
-"Ουτουκκού",
-"Πόνμ",
-"Τσαθόγκουα",
-"Σεσνάκα",
-"Καβέκαρ",
-"Γκόρο",
-"Ενκίντου",
-"Κράθα",
-"Κοσχάι",
-"Υμεάλογο-Ίμε",
-"Μαρντούκ",
-"Τριμπόκ",
-"Χάττα",
-"Χεμπάτ",
-"Νακτάρ",
-"Κερεβάρ",
-"Μπόρζιγκ",
-"Ούντορ",
-"Ιμπιρίτ",
-"Παλασίκ",
-"Τσιπάκουε",
-"Γκεντερούβο",
-"Λεάκ",
-"Θουλαθούφ",
-"Άχταρ",
-"Αταουλάμ",
-"Μπάοκ",
-"Ρεμούτρο",
-"Ρεμουνιά",
-"Ρεπούστι",
-"Μαλάκ-Μαλίκ",
-"Σοχούμ",
-"Λούγκο",
-"Κάσλαμ",
-"Θασβάλλα",
-"Λαθμάλσα",
-"Γιομάλσα",
-"Θραοχούλμ",
-"Όρανγκ Μπάτι",
-"Μπέξα",
-"Ουράρτα",
-"Καλέντζο",
-"Πίσκε",
-"Σάγια",
-"Λουρ",
-"Υξηξίξ",
-"Γκρίσναχ",
-"Ωλφαμπόγκ",
-"Γκορ",
-"Ουλμ",
-"Βωλχ",
-"Κνώδαξ",
-"Ν'γκα",
-"Ράζλογκ",
-"Ζουούλ",
-"Πιζνού",
-"Ταρακάν",
-"Ουλγκάν",
-"Χθιάβαρ",
-"Πέρκελε",
-"Σαρκόι",
-"Τιζίν"
+{ name: "Γκνωχ", gender: "male" },
+{ name: "Αλέκος", gender: "male" },
+{ name: "Σούκα", gender: "female" },
+{ name: "Μπλιάτ", gender: "male" },
+{ name: "Τσίφσα", gender: "male" },
+{ name: "Παξ", gender: "male" },
+{ name: "Κλασορέψ", gender: "male" },
+{ name: "Τλακοτακοατλ", gender: "male" },
+{ name: "Ουλγκαραθίρ", gender: "female" },
+{ name: "Τσαραμπόκ", gender: "male" },
+{ name: "Κραβούλναχ", gender: "male" },
+{ name: "Γκνούρτ", gender: "male" },
+{ name: "Θούρμα", gender: "male" },
+{ name: "Ισκαραβάχ", gender: "male" },
+{ name: "Αμπαχάς", gender: "male" },
+{ name: "Όρζαλαχ", gender: "male" },
+{ name: "Σουρμαγκάν", gender: "male" },
+{ name: "Βούλβουλ", gender: "male" },
+{ name: "Γκουλ", gender: "male" },
+{ name: "Σχιραχαβάρ", gender: "male" },
+{ name: "Ζίμα Ζούμα", gender: "male" },
+{ name: "Ξαραζάρ", gender: "male" },
+{ name: "Μαζοχαλούν", gender: "male" },
+{ name: "Λασσονού", gender: "male" },
+{ name: "Αταθαπαλάλ", gender: "male" },
+{ name: "Μαγκρίβα", gender: "male" },
+{ name: "Τυλλ", gender: "female" },
+{ name: "Γκολχούμ", gender: "male" },
+{ name: "Γκρίσνακ", gender: "male" },
+{ name: "Ουλέλα", gender: "female" },
+{ name: "Καφά-Καφάλ", gender: "male" },
+{ name: "Ατάβαρ", gender: "male" },
+{ name: "Ατατάρ", gender: "male" },
+{ name: "Αλαλάρ", gender: "male" },
+{ name: "Βερσιμεχέτ", gender: "female" },
+{ name: "Θαρθαραώρ", gender: "female" },
+{ name: "Τόλογκ", gender: "male" },
+{ name: "Μύρκαλ", gender: "male" },
+{ name: "Θουλμ", gender: "male" },
+{ name: "Καχούρ", gender: "male" },
+{ name: "Σούουρ", gender: "male" },
+{ name: "Χαϊβάν", gender: "male" },
+{ name: "Ραθόγκ", gender: "male" },
+{ name: "Μαρδάκ", gender: "male" },
+{ name: "Σχάνταρ", gender: "male" },
+{ name: "Τερ-Μπατ-Μαχράκ", gender: "male" },
+{ name: "Βαλεφάρ", gender: "male" },
+{ name: "Γίρσα", gender: "female" },
+{ name: "Μάλεμ-Κις", gender: "male" },
+{ name: "Ουνέγκε", gender: "male" },
+{ name: "Ουτουκκού", gender: "male" },
+{ name: "Πόνμ", gender: "female" },
+{ name: "Τσαθόγκουα", gender: "male" },
+{ name: "Σεσνάκα", gender: "female" },
+{ name: "Καβέκαρ", gender: "female" },
+{ name: "Γκόρο", gender: "male" },
+{ name: "Ενκίντου", gender: "male" },
+{ name: "Κράθα", gender: "male" },
+{ name: "Κοσχάι", gender: "male" },
+{ name: "Υμεάλογο-Ίμε", gender: "male" },
+{ name: "Μαρντούκ", gender: "male" },
+{ name: "Τριμπόκ", gender: "male" },
+{ name: "Χάττα", gender: "female" },
+{ name: "Χεμπάτ", gender: "female" },
+{ name: "Νακτάρ", gender: "male" },
+{ name: "Κερεβάρ", gender: "male" },
+{ name: "Μπόρζιγκ", gender: "male" },
+{ name: "Ούντορ", gender: "male" },
+{ name: "Ιμπιρίτ", gender: "male" },
+{ name: "Παλασίκ", gender: "female" },
+{ name: "Τσιπάκουε", gender: "male" },
+{ name: "Γκεντερούβο", gender: "female" },
+{ name: "Λεάκ", gender: "female" },
+{ name: "Θουλαθούφ", gender: "male" },
+{ name: "Άχταρ", gender: "male" },
+{ name: "Αταουλάμ", gender: "male" },
+{ name: "Μπάοκ", gender: "male" },
+{ name: "Ρεμούτρο", gender: "male" },
+{ name: "Ρεμουνιά", gender: "male" },
+{ name: "Ρεπούστι", gender: "male" },
+{ name: "Μαλάκ-Μαλίκ", gender: "male" },
+{ name: "Σοχούμ", gender: "male" },
+{ name: "Λούγκο", gender: "male" },
+{ name: "Κάσλαμ", gender: "male" },
+{ name: "Θασβάλλα", gender: "female" },
+{ name: "Λαθμάλσα", gender: "female" },
+{ name: "Γιομάλσα", gender: "female" },
+{ name: "Θραοχούλμ", gender: "male" },
+{ name: "Όρανγκ Μπάτι", gender: "male" },
+{ name: "Μπέξα", gender: "female" },
+{ name: "Ουράρτα", gender: "female" },
+{ name: "Καλέντζο", gender: "male" },
+{ name: "Πίσκε", gender: "female" },
+{ name: "Σάγια", gender: "female" },
+{ name: "Λουρ", gender: "female" },
+{ name: "Υξηξίξ", gender: "male" },
+{ name: "Γκρίσναχ", gender: "male" },
+{ name: "Ωλφαμπόγκ", gender: "male" },
+{ name: "Γκορ", gender: "male" },
+{ name: "Ουλμ", gender: "male" },
+{ name: "Βωλχ", gender: "male" },
+{ name: "Κνώδαξ", gender: "male" },
+{ name: "Ν'γκα", gender: "male" },
+{ name: "Ράζλογκ", gender: "male" },
+{ name: "Ζουούλ", gender: "male" },
+{ name: "Πιζνού", gender: "male" },
+{ name: "Ταρακάν", gender: "male" },
+{ name: "Ουλγκάν", gender: "male" },
+{ name: "Χθιάβαρ", gender: "male" },
+{ name: "Πέρκελε", gender: "male" },
+{ name: "Σαρκόι", gender: "male" },
+{ name: "Τιζίν", gender: "female" }
 ];
 
-const wildTitles = [
+const wildTitlesMale = [
 "ο Τύραννος",
 "ο Αιμοπότης",
 "ο Δοξαπατρής",
@@ -2788,7 +2789,10 @@ const wildTitles = [
 "ο Αχόρταγος",
 "ο Σουβλατζής",
 "ο Πετσοκόφτης",
-"το Αρχίδι",
+"το Αρχίδι"
+];
+
+const wildTitlesFemale = [
 "η Σκύλα",
 "η Σφύρα",
 "η Μπαμπέσα",
@@ -2804,7 +2808,7 @@ const wildTitles = [
 "η Δαγκάνα"
 ];
 
-const armoredTitles = [
+const armoredTitlesMale = [
 "ο Σιδηρόδερμος",
 "ο Παχύδερμος",
 "ο Βράχος",
@@ -2843,7 +2847,10 @@ const armoredTitles = [
 "ο Κατάφρακτος",
 "το Κάστρο",
 "ο Μούλος",
-"το Αμόνι",
+"το Αμόνι"
+];
+
+const armoredTitlesFemale = [
 "η Άλειωτη",
 "η Πλατφόρμα",
 "η Αιώνια",
@@ -2853,11 +2860,12 @@ const armoredTitles = [
 "η Σιδερένια",
 "η Πετροκώλα",
 "η Θωρακισμένη",
-"η Άτρωτη"
+"η Άτρωτη",
+"το Αμόνι"
 ];
 
 
-const magicTitles = [
+const magicTitlesMale = [
 "ο Αιθερικός",
 "ο Φιλόσοφος",
 "ο Πρεζάκιας",
@@ -2901,7 +2909,10 @@ const magicTitles = [
 "ο Μυσταγωγός",
 "ο Αστρικός",
 "ο Μιάστωρ",
-"ο Γνοφιστής",
+"ο Γνοφιστής"
+];
+
+const magicTitlesFemale = [
 "η Μάγισσα",
 "η Γητεύτρα",
 "η Πλανεύτρα",
@@ -3151,30 +3162,30 @@ const depthNames = [
 
 function getRandomMonsterFullName() {
 
-    const firstName = monsterFirstNames[
+    const nameObj = monsterFirstNames[
         Math.floor(Math.random() * monsterFirstNames.length)
     ];
 
-     // Διαλέγει τυχαία μία από τις 3 κατηγορίες τίτλων
+     // Διαλέγει τυχαία μία από τις 3 κατηγορίες τίτλων (βάσει γένους)
     const titlePool = [
-        wildTitles,
-        armoredTitles,
-        magicTitles
+        nameObj.gender === 'female' ? wildTitlesFemale : wildTitlesMale,
+        nameObj.gender === 'female' ? armoredTitlesFemale : armoredTitlesMale,
+        nameObj.gender === 'female' ? magicTitlesFemale : magicTitlesMale
     ][Math.floor(Math.random() * 3)];
 
     const title = titlePool[
         Math.floor(Math.random() * titlePool.length)
     ];
 
-    return `${firstName} ${title}`;
+    return `${nameObj.name} ${title}`;
 }
 
 function getRandomMonsterFirstName() {
 
-    const firstName = monsterFirstNames[
+    const nameObj = monsterFirstNames[
         Math.floor(Math.random() * monsterFirstNames.length)
     ];
-    return `${firstName}`;
+    return `${nameObj.name}`;
 }
 
 
@@ -5390,7 +5401,9 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
 
 }
 else if (Math.random() < specialChance) {
-        firstName = randomFrom(monsterFirstNames);
+        const nameObj = randomFrom(monsterFirstNames);
+        firstName = nameObj.name;
+        const monsterGender = nameObj.gender;
 
         // WEAPON/ARMOR/MAGIC areas: extra 33% check να είναι ο "δικός" τους τύπος,
         // αλλιώς γίνεται το κανονικό τυχαίο 33/33/33
@@ -5411,20 +5424,20 @@ else if (Math.random() < specialChance) {
             variant = 'weapon';
             baseAtk += 9;
             baseHp = lvl * variantBaseHpPerLevel;
-            title = randomFrom(wildTitles);
+            title = randomFrom(monsterGender === 'female' ? wildTitlesFemale : wildTitlesMale);
         }
         else if (chosenVariant === 'armor') {
             variant = 'armor';
             baseDef += 14;
             baseHp = lvl * variantBaseHpPerLevel;
-            title = randomFrom(armoredTitles);
+            title = randomFrom(monsterGender === 'female' ? armoredTitlesFemale : armoredTitlesMale);
         }
         else {
             variant = 'magic';
             baseAtk += 5.5;
             baseDef += 5.5;
             baseHp = lvl * variantBaseHpPerLevel;
-            title = randomFrom(magicTitles);
+            title = randomFrom(monsterGender === 'female' ? magicTitlesFemale : magicTitlesMale);
         }
     }
 
