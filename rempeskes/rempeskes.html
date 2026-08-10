@@ -530,6 +530,14 @@ justify-content: center;
             display: none;              /* Chrome, Safari, νεότερο Edge */
         }
 
+        #info-modal-body.no-scrollbar {
+            scrollbar-width: none;       /* Firefox */
+            -ms-overflow-style: none;    /* Edge/IE παλιό */
+        }
+        #info-modal-body.no-scrollbar::-webkit-scrollbar {
+            display: none;              /* Chrome, Safari, νεότερο Edge */
+        }
+
         #log .log-entry {
             margin-bottom: 3px;                          /* 3 εικονοστοιχεία κενό ανάμεσα στις γραμμές */
             line-height: 1.3;                            /* Ύψος γραμμής για σωστή απόσταση */
@@ -674,8 +682,14 @@ justify-content: center;
 
         .btn-delete-save {
             border-color: #c0392b; 
-            padding: 4px 8px; 
-            font-size: 0.75rem;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
             background-color: #1a1a1a;
             color: #e74c3c;
         }
@@ -687,8 +701,14 @@ justify-content: center;
 
         .btn-showRules {
             border-color: #218518; 
-            padding: 4px 8px; 
-            font-size: 0.75rem;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
             background-color: #1a1a1a;
             color: #218518;
         }
@@ -700,8 +720,14 @@ justify-content: center;
 
         .btn-options {
             border-color: #e67e22;
-            padding: 4px 8px;
-            font-size: 0.75rem;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
             background-color: #1a1a1a;
             color: #e67e22;
         }
@@ -713,8 +739,14 @@ justify-content: center;
 
         .btn-showStats {
             border-color: #2d66a7; 
-            padding: 4px 8px; 
-            font-size: 0.75rem;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
             background-color: #1a1a1a;
             color: #2d66a7;
         }
@@ -726,8 +758,14 @@ justify-content: center;
 
         .btn-psofo {
             border-color: #9b69b3;
-            padding: 4px 8px;
-            font-size: 0.75rem;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
             background-color: #1a1a1a;
             color: #9b69b3;
         }
@@ -739,8 +777,14 @@ justify-content: center;
 
         .btn-save {
             border-color: #8b5814; 
-            padding: 4px 8px; 
-            font-size: 0.75rem;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
             background-color: #1a1a1a;
             color: #8b5814;
         }
@@ -1280,31 +1324,31 @@ body {
 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; justify-content:flex-end;">
 
     <button class="btn-options" title="Επιλογές" onclick="openOptionsModal()">
-        Επ
-    </button>
-
-    <button class = "btn-showStats" title="Στατιστικά" onclick="showStats()">
-        %
-    </button>
-
-    <button class="btn-psofo" title="Hi-Scores" onclick="window.open('https://frognard.github.io/rempeskes/psofologio.html', '_blank')">
-        Hi
+        ⚙️
     </button>
 
     <button class = "btn-showRules" title="Help" onclick="showRules()">
-        ?
+        ❓
+    </button>
+
+    <button class = "btn-showStats" title="Στατιστικά" onclick="showStats()">
+        📊
+    </button>
+
+    <button class="btn-psofo" title="Hi-Scores" onclick="window.open('https://frognard.github.io/rempeskes/psofologio.html', '_blank')">
+        🏆
     </button>
 
     <button class="btn-save" title="Export" onclick="exportSave()">
-        Exp
+        📤
     </button>
 
     <button class="btn-save" title="Import" onclick="importSave()">
-        Imp
+        📥
     </button>
     
-    <button class="btn-delete-save" title="Delete Character" onclick="resetGame()">
-        Del
+    <button class="btn-delete-save" title="New Character" onclick="resetGame()">
+        👤
     </button>
 
 </div>
@@ -1327,17 +1371,17 @@ body {
                onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmCharacterCreation();}"
                style="width: 100%; padding: 6px; margin-bottom: 14px; background: #1a1a1a; color: #fff; border: 1px solid var(--accent-gold); border-radius: 4px;">
         <p id="char-name-error" class="hidden" style="color:#e74c3c; font-size:0.85rem; margin: 0 0 10px;">Πρέπει να δώσεις ένα όνομα.</p>
-               <label style="display: block; margin-bottom: 18px; cursor: pointer;">
-            <input type="checkbox" id="ironman-checkbox">
-            Ironman mode (αν πεθάνεις, ο χαρακτήρας κλειδώνει οριστικά)
-        </label>
-        <label style="display: block; margin-bottom: 18px; cursor: pointer; color: #666;">
-            <input type="checkbox" id="show-autoplay-checkbox">
-            <span style="color: #888;">Χαρακτήρας Κυβόργιο (autoplay mode)</span>
+        <label style="display: block; margin-bottom: 18px; cursor: pointer;">
+            <input type="checkbox" id="live-upload-checkbox" checked>
+            Auto-upload στα rankings
         </label>
         <label style="display: block; margin-bottom: 18px; cursor: pointer;">
-            <input type="checkbox" id="live-upload-checkbox">
-            Live-upload στα rankings (αυτόματο ανέβασμα στο database σε κάθε κατάβαση/θάνατο)
+            <input type="checkbox" id="ironman-checkbox">
+            Ironman mode (θάνατος = τέλος!)
+        </label>
+        <label style="display: block; margin-bottom: 18px; cursor: pointer;">
+            <input type="checkbox" id="show-autoplay-checkbox">
+            <span style=>Κυβόργιο (autoplay mode)</span>
         </label>
         <button class="btn-showRules" onclick="confirmCharacterCreation()">Έναρξη</button>
     </div>
@@ -1624,7 +1668,7 @@ function isMobileDevice() {
 
 function showStats() {
 
-    const body = openInfoModal("ΣΤΑΤΙΣΤΙΚΑ");
+    const body = openInfoModal("📊 ΣΤΑΤΙΣΤΙΚΑ");
     if (!body) return;
 
     // Tabs: Συνολικά | Κατάβασης | Ορόσημα
@@ -1744,7 +1788,7 @@ function depthLabelBracketed(depth) {
 function buildMilestonesHTML() {
     const ms = player.magkiaMilestones || [];
     if (ms.length === 0) {
-        return '<div style="color:#ccc;font-style:italic;padding:10px 0;">Δεν υπάρχουν ακόμη ορόσημα μαγκιάς.</div>';
+        return '<div style="color:#ccc;font-style:italic;padding:10px 0;">Δεν υπάρχουν ακόμη ορόσημα.</div>';
     }
     return ms.map(m => {
         let icon = '';
@@ -2656,6 +2700,7 @@ const levelTitles = {
 const monsterFirstNames = [
 { name: "Γκνωχ", gender: "male" },
 { name: "Αλέκος", gender: "male" },
+{ name: "Αλέκα", gender: "female" },
 { name: "Σούκα", gender: "female" },
 { name: "Μπλιάτ", gender: "male" },
 { name: "Τσίφσα", gender: "male" },
@@ -3617,7 +3662,7 @@ if (roll <= 1) {
         musicEnabled: false,  // αποθηκευμένη επιλογή μουσικής
         musicVolumeDb: -12,   // αποθηκευμένη ένταση μουσικής (dB, 0 = max, -40 = πολύ χαμηλά)
         musicTrack: 'bach807', // αποθηκευμένο μουσικό κομμάτι (id από το MUSIC_TRACKS)
-        liveUpload: false     // Live-upload στα rankings (αυτόματο ανέβασμα σε κατάβαση/θάνατο)
+        liveUpload: true      // Live-upload στα rankings (αυτόματο ανέβασμα σε κατάβαση/θάνατο)
     };
 
 
@@ -4333,7 +4378,7 @@ function loadGame() {
     } else {
         player.musicVolumeDb = musicVolumeDb;
     }
-    if (typeof player.liveUpload !== 'boolean') player.liveUpload = false;
+    if (typeof player.liveUpload !== 'boolean') player.liveUpload = true;
     if (typeof player.onScreenStats !== 'boolean') player.onScreenStats = false;
     if (!player.musicTrack) player.musicTrack = 'bach807';
     setMusicVolume(musicVolumeDb);
@@ -4525,7 +4570,7 @@ function importSave() {
             if (typeof player.soulsKilled !== 'number') player.soulsKilled = 0;
             if (typeof player.legendaryEncounters !== 'number') player.legendaryEncounters = 0;
             if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
-            if (typeof player.liveUpload !== 'boolean') player.liveUpload = false;
+            if (typeof player.liveUpload !== 'boolean') player.liveUpload = true;
             player.maxUnlockedLevel = 100;
             player.nextXp = calculateNextXpRequirement(player.level);
 
@@ -5034,7 +5079,8 @@ function logMessageHTML(html, type = 'system') {
 
     function showRules() {
 
-    const body = openInfoModal("Βοήθεια");
+    const body = openInfoModal("❓ Βοήθεια");
+    body.classList.add('no-scrollbar');
 
     appendInfoLine(body, "");
     appendInfoLine(body, "ΡΕΜΠΕΣΚΕΣ");
@@ -7396,6 +7442,8 @@ function openInfoModal(title) {
 
 function closeInfoModal() {
     const modal = document.getElementById('info-modal');
+    const body = document.getElementById('info-modal-body');
+    if (body) body.classList.remove('no-scrollbar');
     if (modal) modal.style.display = 'none';
 }
 
@@ -7499,7 +7547,7 @@ updateOnScreenStats();
 <!-- Options Modal -->
 <div id="options-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
     <div style="background:#2a2a2a;border:1px solid #e67e22;border-radius:8px;padding:20px;max-width:350px;width:90%;color:#fff;">
-        <h3 style="margin:0 0 15px;color:#e67e22;border-bottom:1px solid #444;padding-bottom:8px;">Επιλογές</h3>
+        <h3 style="margin:0 0 15px;color:#e67e22;border-bottom:1px solid #444;padding-bottom:8px;">⚙️ Επιλογές</h3>
 
         <label style="display:block;margin-bottom:15px;font-size:0.85rem;">
             Ταχύτητα παιχνιδιού:
@@ -7510,7 +7558,7 @@ updateOnScreenStats();
         </label>
 
         <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
-            <input type="checkbox" id="options-live-upload"> 📡 Live-upload στα rankings
+            <input type="checkbox" id="options-live-upload"> 📡 Auto-upload στα rankings
         </label>
 
         <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
