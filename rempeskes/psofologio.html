@@ -626,14 +626,24 @@ function showMagkiaPopup(idx) {
     }
     let rows = '';
     for (const m of milestones) {
-        if (m.level === 'death' || m.level === 'conanos') {
-            rows += `<div style="padding:5px 0;line-height:1.6;color:var(--brass);">[Τέλος] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
+        if (m.level === 'death') {
+            if (m.deathDepth !== undefined && m.killerName) {
+                rows += `<div style="padding:5px 0;line-height:1.6;color:#e74c3c;">Επίπεδο ${m.deathLevel}: Σκοτώθηκε στο ${escapeHtml(depthLabel(m.deathDepth))}, από ${escapeHtml(m.killerName)}, το γύρο ${formatNumber(m.turns)}</div>`;
+            } else {
+                rows += `<div style="padding:5px 0;line-height:1.6;color:#ccc;">[Τέλος] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
+            }
+        } else if (m.level === 'conanos') {
+            if (m.conanosLevel !== undefined) {
+                rows += `<div style="padding:5px 0;line-height:1.6;color:#ffffff;">Επίπεδο ${m.conanosLevel}: Νίκησε τον Θεό Κόνανο στο ${escapeHtml(depthLabel(m.conanosDepth || 100))}, το γύρο ${formatNumber(m.turns)}</div>`;
+            } else {
+                rows += `<div style="padding:5px 0;line-height:1.6;color:#ccc;">[Τέλος] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
+            }
         } else if (m.legendaryKill) {
             rows += `<div style="padding:5px 0;line-height:1.6;color:var(--brass);">[${m.level}] Σκότωσε: "${escapeHtml(m.legendaryKill)}" &#8594; "${escapeHtml(m.legendaryDrop)}" &middot; γύρος ${formatNumber(m.turns)}</div>`;
         } else if (m.soulKill) {
             rows += `<div style="padding:5px 0;line-height:1.6;color:#a0703f;">[${m.level}] Στοιχειό! Σκότωσε: "${escapeHtml(m.soulKill)}" και βρήκε: "Ψυχή (${escapeHtml(m.soulKill)})" &middot; γύρος ${formatNumber(m.turns)}</div>`;
         } else {
-            rows += `<div style="padding:5px 0;line-height:1.6;">[${m.level}] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
+            rows += `<div style="padding:5px 0;line-height:1.6;color:#ccc;">[${m.level}] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
         }
     }
     const html = `

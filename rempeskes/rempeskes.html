@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v406</title>
+    <title>Ρεμπεσκές v408</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1734,6 +1734,13 @@ function toggleMagkiaDisplay() {
     renderMagkiaScore();
 }
 
+function depthLabelBracketed(depth) {
+    const entry = depthNames[depth - 1];
+    if (!entry) return `[${depth}]`;
+    const name = entry.replace(/^\d+\.\s*/, '');
+    return `[${depth}] ${name}`;
+}
+
 function buildMilestonesHTML() {
     const ms = player.magkiaMilestones || [];
     if (ms.length === 0) {
@@ -1742,8 +1749,18 @@ function buildMilestonesHTML() {
     return ms.map(m => {
         let icon = '';
         let text;
-        if (m.level === 'death' || m.level === 'conanos') {
-            text = `Τελική μαγκιά: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`;
+        if (m.level === 'death') {
+            if (m.deathDepth !== undefined && m.killerName) {
+                text = `<span style="color:#e74c3c;">Επίπεδο ${m.deathLevel}: Σκοτώθηκε στο ${depthLabelBracketed(m.deathDepth)}, από ${m.killerName}, το γύρο ${formatNumber(m.turns)}</span>`;
+            } else {
+                text = `<span style="color:#ccc;">Τελική μαγκιά: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι</span>`;
+            }
+        } else if (m.level === 'conanos') {
+            if (m.conanosLevel !== undefined) {
+                text = `<span style="color:#ffffff;">Επίπεδο ${m.conanosLevel}: Νίκησε τον Θεό Κόνανο στο ${depthLabelBracketed(m.conanosDepth || 100)}, το γύρο ${formatNumber(m.turns)}</span>`;
+            } else {
+                text = `<span style="color:#ccc;">Τελική μαγκιά: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι</span>`;
+            }
         } else if (m.legendaryKill) {
             icon = '⭐';
             text = `<span style="color:#ffde21;">Επίπεδο ${m.level}: Σκότωσε: "${m.legendaryKill}" και βρήκε: "${m.legendaryDrop}" - γύρος ${formatNumber(m.turns)}</span>`;
@@ -1751,7 +1768,7 @@ function buildMilestonesHTML() {
             icon = '💀';
             text = `<span style="color:#a0703f;">Επίπεδο ${m.level}: Στοιχειό! Σκότωσε: "${m.soulKill}" και βρήκε: "Ψυχή (${m.soulKill})" - γύρος ${formatNumber(m.turns)}</span>`;
         } else {
-            text = `Επίπεδο ${m.level}: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι`;
+            text = `<span style="color:#ccc;">Επίπεδο ${m.level}: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι</span>`;
         }
         return `<div style="padding:8px 0;border-bottom:1px solid #333;line-height:1.5;">${icon ? icon + ' ' : ''}${text}</div>`;
     }).join('');
@@ -6071,7 +6088,14 @@ function showAnnouncementPopup(text, styleClass, color) {
                 }
 
                 if (!player.magkiaMilestones) player.magkiaMilestones = [];
-                player.magkiaMilestones.push({ level: 'conanos', score: Math.max(computeScore(), player._displayedScore || 0), turns: player.activeTime || 0, deaths: player.deaths || 0 });
+                player.magkiaMilestones.push({
+                    level: 'conanos',
+                    conanosLevel: player.level,
+                    conanosDepth: 100,
+                    score: Math.max(computeScore(), player._displayedScore || 0),
+                    turns: player.activeTime || 0,
+                    deaths: player.deaths || 0
+                });
                 
                // logMessage(`Ο ΘΕΟΣ ΚΟΝΑΝΟΣ ΠΕΘΑΝΕ! Το παιχνίδι νικήθηκε! Αιώνια δόξα στον ${player.name}! Απο δω και πέρα θα είναι γνωστός ως ΘΕΟΣΦΑΧΤΗΣ.`, 'victory');
 
@@ -6329,7 +6353,15 @@ function showAnnouncementPopup(text, styleClass, color) {
 function applyDefeatPenalties() {
     if (player.ironman) {
         if (!player.magkiaMilestones) player.magkiaMilestones = [];
-        player.magkiaMilestones.push({ level: 'death', score: Math.max(computeScore(), player._displayedScore || 0), deathLevel: player.level, turns: player.activeTime || 0, deaths: player.deaths || 0 });
+        player.magkiaMilestones.push({
+            level: 'death',
+            score: Math.max(computeScore(), player._displayedScore || 0),
+            deathLevel: player.level,
+            deathDepth: monster.level,
+            killerName: getMonsterDisplayName(monster),
+            turns: player.activeTime || 0,
+            deaths: (player.deaths || 0) + 1
+        });
     }
 
     generateAreaModifiers();
