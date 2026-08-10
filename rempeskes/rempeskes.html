@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v410</title>
+    <title>Ρεμπεσκές v411</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -42,7 +42,7 @@ justify-content: center;
             min-width: 0;
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
-            padding: 20px;
+            padding: 20px 20px 7px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.7);
             transition: none;
             position: relative;
@@ -681,15 +681,15 @@ justify-content: center;
         }
 
         .btn-delete-save {
-            border-color: #c0392b; 
+            border: none; 
             padding: 0;
-            width: 30px;
-            height: 30px;
+            width: 34px;
+            height: 34px;
             box-sizing: border-box;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.85rem;
+            font-size: 1rem;
             background-color: #1a1a1a;
             color: #e74c3c;
         }
@@ -708,13 +708,15 @@ justify-content: center;
         }
 
         .btn-icon-square {
+            border: none;
             padding: 0;
-            width: 30px;
-            height: 30px;
+            width: 34px;
+            height: 34px;
             box-sizing: border-box;
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            font-size: 1rem;
         }
 
         .btn-showRules:hover {
@@ -723,15 +725,15 @@ justify-content: center;
         }
 
         .btn-options {
-            border-color: #e67e22;
+            border: none;
             padding: 0;
-            width: 30px;
-            height: 30px;
+            width: 34px;
+            height: 34px;
             box-sizing: border-box;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.85rem;
+            font-size: 1rem;
             background-color: #1a1a1a;
             color: #e67e22;
         }
@@ -742,15 +744,15 @@ justify-content: center;
         }
 
         .btn-showStats {
-            border-color: #2d66a7; 
+            border: none; 
             padding: 0;
-            width: 30px;
-            height: 30px;
+            width: 34px;
+            height: 34px;
             box-sizing: border-box;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.85rem;
+            font-size: 1rem;
             background-color: #1a1a1a;
             color: #2d66a7;
         }
@@ -761,15 +763,15 @@ justify-content: center;
         }
 
         .btn-psofo {
-            border-color: #9b69b3;
+            border: none;
             padding: 0;
-            width: 30px;
-            height: 30px;
+            width: 34px;
+            height: 34px;
             box-sizing: border-box;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.85rem;
+            font-size: 1rem;
             background-color: #1a1a1a;
             color: #9b69b3;
         }
@@ -780,15 +782,15 @@ justify-content: center;
         }
 
         .btn-save {
-            border-color: #8b5814; 
+            border: none; 
             padding: 0;
-            width: 30px;
-            height: 30px;
+            width: 34px;
+            height: 34px;
             box-sizing: border-box;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.85rem;
+            font-size: 1rem;
             background-color: #1a1a1a;
             color: #8b5814;
         }
@@ -1331,16 +1333,16 @@ body {
         ⚙️
     </button>
 
-    <button class="btn-showRules btn-icon-square" title="Βοήθεια" onclick="showRules()">
-        ❓
-    </button>
-
     <button class = "btn-showStats" title="Στατιστικά" onclick="showStats()">
         📊
     </button>
 
-    <button class="btn-psofo" title="Hi-Scores" onclick="window.open('https://frognard.github.io/rempeskes/psofologio.html', '_blank')">
+    <button class="btn-psofo" title="Hi-Scores" onclick="window.open('https://frognard.github.io/rempeskes/psofologio.html', '_blank')" style="margin-right:auto;">
         🏆
+    </button>
+
+    <button class="btn-delete-save" title="Νέος Χαρακτήρας" onclick="resetGame()">
+        👤
     </button>
 
     <button class="btn-save" title="Export" onclick="exportSave()">
@@ -1350,9 +1352,9 @@ body {
     <button class="btn-save" title="Import" onclick="importSave()">
         📥
     </button>
-    
-    <button class="btn-delete-save" title="Νέος Χαρακτήρας" onclick="resetGame()">
-        👤
+
+    <button class="btn-showRules btn-icon-square" title="Βοήθεια" onclick="showRules()">
+        ❓
     </button>
 
 </div>
