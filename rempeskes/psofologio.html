@@ -110,6 +110,43 @@
         letter-spacing: 0.5px;
     }
 
+    .entry:hover {
+        z-index: 10;
+    }
+
+    .entry .name.has-portrait {
+        position: relative;
+        cursor: help;
+        border-bottom: 1px dotted var(--ledger-line);
+    }
+
+    .portrait-pop {
+        position: absolute;
+        top: 115%;
+        left: 0;
+        width: 100px;
+        height: 100px;
+        border-radius: 4px;
+        border: 2px solid #444;
+        background: #111;
+        overflow: hidden;
+        z-index: 50;
+        display: none;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.85);
+    }
+
+    .entry .name.has-portrait:hover .portrait-pop {
+        display: block;
+    }
+
+    .portrait-pop img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+    }
+
     .ironman-skull {
         color: var(--wine-bright);
         font-size: 1rem;
@@ -429,10 +466,14 @@ function renderEntry(s, i, isVictory, isIronman) {
     const statsBtn = `<button class="stats-btn" onclick="showStatsPopup(${statsIdx})">📊</button>`;
     const logBtn = `<button class="stats-btn" onclick="showMagkiaPopup(${statsIdx})">📜</button>`;
 
+    const nameHtml = s.portrait
+        ? `<span class="name has-portrait">${escapeHtml(s.name)}<span class="portrait-pop"><img src="${escapeHtml(s.portrait)}" alt="" onerror="this.parentNode.style.display='none';"></span></span>`
+        : `<span class="name">${escapeHtml(s.name)}</span>`;
+
     return `
         <div class="entry${isVictory ? ' victory' : isAlive ? ' alive' : ' dead'}">
             <div class="rank-badge">${romanish(i + 1)}</div>
-            <div class="line1">${crown}${skull}<span class="name">${escapeHtml(s.name)}</span> — επίπεδο ${s.level} — Μαγκιά: ${formatScore(magkiaScore)}${pctText}</div>
+            <div class="line1">${crown}${skull}${nameHtml} — επίπεδο ${s.level} — Μαγκιά: ${formatScore(magkiaScore)}${pctText}</div>
             <div class="line2">
                 ${detailLine} ${statsBtn} ${logBtn}
             </div>

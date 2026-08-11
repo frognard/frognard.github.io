@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v411</title>
+    <title>Ρεμπεσκές v420</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -32,14 +32,14 @@ color: var(--text-main);
             font-family: 'Segoe UI', Roboto, 'Noto Sans', system-ui, 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
 margin: 0;
 padding: 20px;
-display: flex;
-justify-content: center;
 }
 
        #game-container {
             width: 450px;
             max-width: 100%;
             min-width: 0;
+            margin: 0 auto;
+            box-sizing: border-box;
             background-color: var(--panel-bg);
             border: 1px solid var(--border-color);
             padding: 20px 20px 7px;
@@ -67,6 +67,10 @@ justify-content: center;
             margin: 0;
             border-bottom: none;
             padding-bottom: 0;
+            flex: 1 1 auto;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .editable-name {
@@ -931,17 +935,90 @@ justify-content: center;
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.6); /* Εφέ βάθους στο εσωτερικό */
 }
 
-.equip-label{
-text-align:center;
-font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', Roboto, 'Noto Sans', system-ui, sans-serif;
-  /*  border-right: 1px solid #555; */
+.equip-icon{
+    text-align:left;
+    padding-left:8px;
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', Roboto, 'Noto Sans', system-ui, sans-serif;
 }
 
 .equip-name{
     text-align:center;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
   /*     border-right: 1px solid #555; */
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.9); /* Η προσθήκη της σκιάς */
     font-weight: 500;                            /* Προαιρετικό: κάνει το όνομα ελαφρώς πιο στιβαρό */
+}
+
+.equip-name > span{
+    display: inline-block;
+    max-width: 100%;
+}
+
+.equip-emoji {
+    font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', Roboto, 'Noto Sans', system-ui, sans-serif;
+}
+
+.portrait-layout {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.portrait-frame {
+    position: relative;
+    flex: none;
+    box-sizing: border-box;
+    background-color: #111;
+    border: 2px solid #444;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.portrait-frame:hover {
+    border-color: var(--accent-gold);
+}
+
+.portrait-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;      /* πάντα τετράγωνη, γεμίζει το πλαίσιο χωρίς κενά */
+    object-position: center;
+    display: none;
+}
+
+.portrait-frame.has-portrait .portrait-img {
+    display: block;
+}
+
+.portrait-frame.has-portrait .portrait-hint {
+    display: none;
+}
+
+.portrait-hint {
+    font-size: 1.6rem;
+    color: #666;
+    pointer-events: none;
+    user-select: none;
+}
+
+.equipment-list {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+
+.portrait-layout.no-portrait .portrait-frame {
+    display: none;
 }
 
 .equip-tier{
@@ -972,6 +1049,12 @@ font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', Roboto, 
 }
 
 @media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    #game-container {
+        padding: 14px 14px 7px;
+    }
     #town-interface, #combat-interface {
         height: 94px;
     }
@@ -1161,17 +1244,13 @@ body {
         <h3>
 <span id="p-name-skull" class="hidden" style="margin-right:4px;">💀</span><span id="p-name">Ρεμπεσκές</span>
 
-            <span style="margin-left: 12px; font-weight: normal; font-size: 1rem; color: #ffffff; vertical-align: middle;">
+            <span style="margin-left: 12px; font-weight: normal; font-size: 0.86em; color: #ffffff; vertical-align: middle;">
                 Επ. <span id="p-level">1</span> -
                 <span id="p-title" style="margin-left: 2px; font-weight: normal;">Αλήτης</span>
             </span>
         </h3>
-</h3>
-        
-
-
     </div>
-    
+
     <div>
         <div class="xp-wrapper-area" id="xp-parent">
             <div class="xp-bar-container" id="xp-bar-container">
@@ -1184,14 +1263,9 @@ body {
 
 
 
-<div class="stats-grid" id="stats-summary" style="grid-template-columns: 1.0fr 1fr;">
-    <div class="stat-row">
-        <div><b>Μαγκιά:</b> <span id="p-score" class="xp-value" onclick="toggleMagkiaDisplay()" style="cursor:pointer;">0</span></div>
-    </div>
-    <div class="stat-row" id="stat-gold-box" style="display:flex;justify-content:flex-end;">
-        <div><b>Χρυσάφι:</b> <span id="p-gold" class="gold">0</span></div>
-    </div>
-</div>
+
+
+
 
 <!--
 <div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 5px;">
@@ -1201,42 +1275,63 @@ body {
 </div>  
 -->
 
-<div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 18px;">
-    <div class="stat-row equipment-row" id="stat-atk-box">
-        <!-- Αφαιρέθηκε το font-weight:bold; -->
-        <div class="equip-label">🗡</div>
-        <div class="equip-name">
-            <span id="eq-weapon" style="color: #ec6868; font-weight: bold;">Γυμνά Χέρια</span>
-        </div>
-        <div class="equip-tier">
-            <span id="p-wep-bonus" style="color: #ec6868;"></span>
-        </div>
+<div class="stats-grid" id="stats-summary" style="grid-template-columns: 1.0fr 1fr;">
+    <div class="stat-row">
+        <div><b>Μαγκιά:</b> <span id="p-score" class="xp-value" onclick="toggleMagkiaDisplay()" style="cursor:pointer;">0</span></div>
     </div>
-    
-    <div class="stat-row equipment-row" id="stat-def-box">
-        <!-- Αφαιρέθηκε το font-weight:bold; -->
-        <div class="equip-label">🛡</div>
-        <div class="equip-name">
-            <span id="eq-armor" style="color: #1ab2ff; font-weight: bold;">Κουρέλια</span>
-        </div>
-        <div class="equip-tier">
-            <span id="p-arm-bonus" style="color: #1ab2ff;"></span>
-        </div>
-    </div>
-    
-    <div class="stat-row equipment-row" id="stat-magic-box">
-        <!-- Αφαιρέθηκε το font-weight:bold; -->
-        <div class="equip-label">✨</div>
-        <div class="equip-name">
-            <span id="eq-magic" style="color: #cc66ff; font-weight: bold;">Χωρίς Φυλαχτό</span>
-        </div>
-        <div class="equip-tier">
-            <span id="p-mag-bonus" style="color: #cc66ff;"></span>
-        </div>
+    <div class="stat-row" id="stat-gold-box" style="display:flex;justify-content:flex-end;">
+        <div><b>Χρυσάφι:</b> <span id="p-gold" class="gold">0</span></div>
     </div>
 </div>
 
-
+<div class="stats-grid" style="grid-template-columns: 1fr; margin-bottom: 18px;">
+    <div class="portrait-layout">
+        <div id="portrait-frame" class="portrait-frame" onclick="setPortrait()" title="Κάνε κλικ για να βάλεις πορτρέτο">
+            <img id="portrait-img" class="portrait-img" alt="πορτρέτο" draggable="false" />
+            <div class="portrait-hint">+</div>
+        </div>
+        <div class="equipment-list">
+            <div class="stat-row equipment-row" id="stat-atk-box">
+                <!-- Αφαιρέθηκε το font-weight:bold; -->
+                <div class="equip-icon">
+                    <span class="equip-emoji">🗡</span>
+                </div>
+                <div class="equip-name">
+                    <span id="eq-weapon" style="color: #ec6868; font-weight: bold;">Γυμνά Χέρια</span>
+                </div>
+                <div class="equip-tier">
+                    <span id="p-wep-bonus" style="color: #ec6868;"></span>
+                </div>
+            </div>
+            
+            <div class="stat-row equipment-row" id="stat-def-box">
+                <!-- Αφαιρέθηκε το font-weight:bold; -->
+                <div class="equip-icon">
+                    <span class="equip-emoji">🛡</span>
+                </div>
+                <div class="equip-name">
+                    <span id="eq-armor" style="color: #1ab2ff; font-weight: bold;">Κουρέλια</span>
+                </div>
+                <div class="equip-tier">
+                    <span id="p-arm-bonus" style="color: #1ab2ff;"></span>
+                </div>
+            </div>
+            
+            <div class="stat-row equipment-row" id="stat-magic-box">
+                <!-- Αφαιρέθηκε το font-weight:bold; -->
+                <div class="equip-icon">
+                    <span class="equip-emoji">✨</span>
+                </div>
+                <div class="equip-name">
+                    <span id="eq-magic" style="color: #cc66ff; font-weight: bold;">Χωρίς Φυλαχτό</span>
+                </div>
+                <div class="equip-tier">
+                    <span id="p-mag-bonus" style="color: #cc66ff;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div id="town-interface">
     <div class="town-header-row">
@@ -1868,6 +1963,7 @@ function buildPlayerRecord() {
         risk: player.risk || 0,
         magkiaKillCount: player.magkiaKillCount || 0,
         totalDescents: player.totalDescents || 0,
+        portrait: player.portrait || '',
         magkiaMilestones: player.magkiaMilestones || [],
         magkiaPct: (() => { const p = getMagkiaPercent(); return p === null ? 0 : p; })()
     };
@@ -3668,7 +3764,9 @@ if (roll <= 1) {
         musicEnabled: false,  // αποθηκευμένη επιλογή μουσικής
         musicVolumeDb: -12,   // αποθηκευμένη ένταση μουσικής (dB, 0 = max, -40 = πολύ χαμηλά)
         musicTrack: 'bach807', // αποθηκευμένο μουσικό κομμάτι (id από το MUSIC_TRACKS)
-        liveUpload: true      // Live-upload στα rankings (αυτόματο ανέβασμα σε κατάβαση/θάνατο)
+        liveUpload: true,      // Live-upload στα rankings (αυτόματο ανέβασμα σε κατάβαση/θάνατο)
+        portrait: "",          // link εικόνας πορτρέτου (πλαίσιο αριστερά από τον εξοπλισμό)
+        showPortrait: false    // αν εμφανίζεται το πλαίσιο πορτρέτου (από το μενού Επιλογές)
     };
 
 
@@ -4330,6 +4428,8 @@ function loadGame() {
             if (typeof player.soulsKilled !== 'number') player.soulsKilled = 0;
             if (typeof player.legendaryEncounters !== 'number') player.legendaryEncounters = 0;
             if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
+            if (typeof player.portrait !== 'string') player.portrait = '';
+            if (typeof player.showPortrait !== 'boolean') player.showPortrait = false;
             player.maxUnlockedLevel = 100;
 
             player.nextXp = calculateNextXpRequirement(player.level);
@@ -4577,6 +4677,8 @@ function importSave() {
             if (typeof player.legendaryEncounters !== 'number') player.legendaryEncounters = 0;
             if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
             if (typeof player.liveUpload !== 'boolean') player.liveUpload = true;
+            if (typeof player.portrait !== 'string') player.portrait = '';
+            if (typeof player.showPortrait !== 'boolean') player.showPortrait = false;
             player.maxUnlockedLevel = 100;
             player.nextXp = calculateNextXpRequirement(player.level);
 
@@ -4600,6 +4702,7 @@ function importSave() {
 
             saveGame();
             updateUI();
+            applyPortrait();
             applyAutoplayVisibility();
             overlay.remove();
             logMessage("Το save εισήχθη επιτυχώς.", 'system');
@@ -4616,6 +4719,7 @@ function importSave() {
         if (newName === "") newName = "Ρεμπεσκές";
         player.name = newName;
         nameEl.innerText = newName;
+        fitNameTitle();
         saveGame();
     }
 
@@ -4624,6 +4728,92 @@ function importSave() {
             event.preventDefault();
             document.getElementById('p-name').blur();
         }
+    }
+
+    function applyPortrait() {
+        const layout = document.querySelector('.portrait-layout');
+        const frame = document.getElementById('portrait-frame');
+        const img = document.getElementById('portrait-img');
+        if (layout) layout.classList.toggle('no-portrait', player.showPortrait !== true);
+        if (!frame || !img) return;
+        if (player.showPortrait !== true) {
+            frame.classList.remove('has-portrait');
+            img.removeAttribute('src');
+            return;
+        }
+        if (player.portrait) {
+            img.onerror = function () {
+                frame.classList.remove('has-portrait');
+                img.removeAttribute('src');
+                logMessage('Δεν φορτώθηκε η εικόνα πορτρέτου.', 'system');
+            };
+            img.src = player.portrait;
+            frame.classList.add('has-portrait');
+        } else {
+            img.removeAttribute('src');
+            frame.classList.remove('has-portrait');
+        }
+        sizePortraitFrame();
+        fitEquipmentNames();
+    }
+
+    let _lastPortraitH = 0;
+    function sizePortraitFrame() {
+        const frame = document.getElementById('portrait-frame');
+        if (!frame) return;
+        const h = frame.offsetHeight;
+        if (Math.abs(h - _lastPortraitH) > 1) {
+            frame.style.width = h + 'px';
+            _lastPortraitH = h;
+        }
+    }
+
+    window.addEventListener('resize', function () {
+        sizePortraitFrame();
+        fitNameTitle();
+        fitEquipmentNames();
+    });
+
+    function fitNameTitle() {
+        const headerRow = document.querySelector('.header-row');
+        const h3 = headerRow ? headerRow.querySelector('h3') : null;
+        if (!h3) return;
+        h3.style.fontSize = '';
+        if (h3.scrollWidth > headerRow.clientWidth) {
+            let fs = parseFloat(getComputedStyle(h3).fontSize) || 20;
+            const minFs = 10;
+            let guard = 0;
+            while (h3.scrollWidth > headerRow.clientWidth && fs > minFs && guard++ < 100) {
+                fs -= 0.5;
+                h3.style.fontSize = fs + 'px';
+            }
+        }
+    }
+
+    function fitEquipmentNames() {
+        ['eq-weapon', 'eq-armor', 'eq-magic'].forEach(function (id) {
+            const el = document.getElementById(id);
+            if (!el || !el.parentElement) return;
+            el.style.fontSize = '';
+            if (el.scrollWidth > el.parentElement.clientWidth) {
+                let fs = parseFloat(getComputedStyle(el).fontSize) || 15;
+                const minFs = 8;
+                let guard = 0;
+                while (el.scrollWidth > el.parentElement.clientWidth && fs > minFs && guard++ < 100) {
+                    fs -= 0.5;
+                    el.style.fontSize = fs + 'px';
+                }
+            }
+        });
+    }
+
+    function setPortrait() {
+        const url = prompt('Δώσε link εικόνας για το πορτρέτο:', player.portrait || '');
+        if (url === null) return;
+        const trimmed = url.trim();
+        player.portrait = trimmed;
+        applyPortrait();
+        saveGame();
     }
 
     let _pendingLogScroll = null;
@@ -4636,6 +4826,7 @@ function importSave() {
     }
 
     loadGame();
+    applyPortrait();
     refreshTekePatrons();
 
     // ΨΥΧΕΣ IRONMEN: στην εκκίνηση ελέγχουμε την πρόσβαση στο online ψοφολόγιο και
@@ -4848,6 +5039,9 @@ function refreshAreaSelectorAppearance() {
     magicEl.classList.toggle('legendary-glow-magic', player.magic.legendary === true);
     magicEl.classList.toggle('soul-item-glow', player.magic.soul === true);
 
+    fitNameTitle();
+    fitEquipmentNames();
+
     if (player.level >= 100) {
         document.getElementById('p-xp-bar').style.transform = 'scaleX(1)';
         document.getElementById('p-xp-percent').textContent = '*';
@@ -5044,6 +5238,7 @@ if (player.ironman && player.ironmanDead) {
     nameElement.style.fontWeight = "";
 }
     updateCooldownBars();
+    sizePortraitFrame();
 }
 
 
@@ -7339,6 +7534,7 @@ if ('serviceWorker' in navigator) {
                     magkia_kill_count: r.magkiaKillCount || 0,
                     total_descents: r.totalDescents || 0,
                     magkia_pct: r.magkiaPct || 0,
+                    portrait: r.portrait || '',
                     magkia_milestones: JSON.stringify(r.magkiaMilestones || [])
                 }, { onConflict: 'name' });
 
@@ -7406,6 +7602,8 @@ function openOptionsModal() {
     if (soundEl) soundEl.checked = soundEnabled;
     const liveEl = document.getElementById('options-live-upload');
     if (liveEl) liveEl.checked = player.liveUpload !== false;
+    const portraitEl = document.getElementById('options-portrait');
+    if (portraitEl) portraitEl.checked = player.showPortrait === true;
     const screenStatsEl = document.getElementById('options-screen-stats');
     if (screenStatsEl) screenStatsEl.checked = player.onScreenStats === true;
     const musicEl = document.getElementById('options-music');
@@ -7480,6 +7678,9 @@ function applyOptions() {
     player.soundEnabled = soundEnabled;
     const liveEl = document.getElementById('options-live-upload');
     if (liveEl) player.liveUpload = liveEl.checked;
+    const portraitEl = document.getElementById('options-portrait');
+    if (portraitEl) player.showPortrait = portraitEl.checked;
+    applyPortrait();
     const screenStatsEl = document.getElementById('options-screen-stats');
     if (screenStatsEl) player.onScreenStats = screenStatsEl.checked;
     const musicToggleEl = document.getElementById('options-music-toggle');
@@ -7559,6 +7760,10 @@ updateOnScreenStats();
                 <option value="1">Μερακλίδικη</option>
                 <option value="1.5" selected>Κανονική</option>
             </select>
+        </label>
+
+        <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
+            <input type="checkbox" id="options-portrait"> 🖼️ Πορτρέτο
         </label>
 
         <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
