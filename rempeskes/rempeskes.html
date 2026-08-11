@@ -1293,7 +1293,7 @@ body {
             <img id="portrait-img" class="portrait-img" alt="πορτρέτο" draggable="false" />
             <div class="portrait-hint">+</div>
         </div>
-        <div class="equipment-list">
+        <div class="equipment-list" onclick="togglePortrait()" style="cursor:pointer;" title="Εμφάνιση/απόκρυψη πορτρέτου">
             <div class="stat-row equipment-row" id="stat-atk-box">
                 <!-- Αφαιρέθηκε το font-weight:bold; -->
                 <div class="equip-icon">
@@ -4759,6 +4759,14 @@ function importSave() {
         }
         sizePortraitFrame();
         fitEquipmentNames();
+    }
+
+    function togglePortrait() {
+        player.showPortrait = player.showPortrait !== true;
+        applyPortrait();
+        saveGame();
+        const portraitEl = document.getElementById('options-portrait');
+        if (portraitEl) portraitEl.checked = player.showPortrait === true;
     }
 
     let _lastPortraitH = 0;
