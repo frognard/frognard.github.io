@@ -1373,7 +1373,7 @@ body {
 <div id="ironman-modal" class="hidden ironman-modal-overlay">
     <div class="ironman-modal-box">
         <p>Όνομα χαρακτήρα:</p>
-        <input type="text" id="char-name-input" placeholder="Όνομα ρεμπεσκέ" enterkeyhint="go" maxlength="18"
+        <input type="text" id="char-name-input" placeholder="Όνομα ρεμπεσκέ" enterkeyhint="go" maxlength="24"
                onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmCharacterCreation();}"
                style="width: 100%; padding: 6px; margin-bottom: 14px; background: #1a1a1a; color: #fff; border: 1px solid var(--accent-gold); border-radius: 4px;">
         <p id="char-name-error" class="hidden" style="color:#e74c3c; font-size:0.85rem; margin: 0 0 10px;">Πρέπει να δώσεις ένα όνομα.</p>
@@ -4436,7 +4436,7 @@ function resetGame() {
 function confirmCharacterCreation() {
     const nameInput = document.getElementById('char-name-input');
     const errorEl = document.getElementById('char-name-error');
-    let chosenName = nameInput.value.trim().slice(0, 18);
+    let chosenName = nameInput.value.trim().slice(0, 24);
 
     if (!chosenName) {
         errorEl.classList.remove('hidden');
@@ -4612,7 +4612,7 @@ function importSave() {
 
     function savePlayerName() {
         const nameEl = document.getElementById('p-name');
-        let newName = nameEl.innerText.trim().slice(0, 18);
+        let newName = nameEl.innerText.trim().slice(0, 24);
         if (newName === "") newName = "Ρεμπεσκές";
         player.name = newName;
         nameEl.innerText = newName;
