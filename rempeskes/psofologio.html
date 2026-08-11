@@ -155,9 +155,16 @@
     }
 
     .entry .line2 {
-        font-size: 0.95rem; /* Σημαντική αύξηση από 0.78rem για τις λεπτομέρειες */
-        color: var(--parchment-dim);
+        font-size: 1.1rem; /* ίδιο με το line1 */
+        color: var(--parchment);
         margin-top: 6px;
+        line-height: 1.5;
+    }
+
+    .entry .line3 {
+        font-size: 0.9rem;
+        color: var(--parchment-dim);
+        margin-top: 2px;
         line-height: 1.5;
     }
 
@@ -473,9 +480,12 @@ function renderEntry(s, i, isVictory, isIronman) {
     return `
         <div class="entry${isVictory ? ' victory' : isAlive ? ' alive' : ' dead'}">
             <div class="rank-badge">${romanish(i + 1)}</div>
-            <div class="line1">${crown}${skull}${nameHtml} — επίπεδο ${s.level} — Μαγκιά: ${formatScore(magkiaScore)}${pctText}</div>
+            <div class="line1">${crown}${skull}${nameHtml}</div>
             <div class="line2">
-                ${detailLine} ${statsBtn} ${logBtn}
+                Επίπεδο ${s.level} — Μαγκιά: ${formatScore(magkiaScore)}${pctText} ${statsBtn} ${logBtn}
+            </div>
+            <div class="line3">
+                ${detailLine}
             </div>
             <div class="gear" style="margin-top:4px;">
                 <div style="color:${weaponColor};">🗡 ${weaponLabel} T${s.weapon || '?'}</div>
