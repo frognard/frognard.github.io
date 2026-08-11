@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v420</title>
+    <title>Ρεμπεσκές v421</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1043,11 +1043,13 @@ padding: 20px;
 }
 
 #teke-patrons {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
 }
 
+/*
 @media (max-width: 600px) {
     body {
         padding: 10px;
@@ -1066,6 +1068,7 @@ padding: 20px;
         margin: -13px 0 10px 0;
     }
 }
+*/
 
 @keyframes itemUpgradeFlash {
     0%   { background-color: #171717; }
@@ -1342,7 +1345,7 @@ body {
             <select id="area-selector"></select>
         </div>
     </div>
-    <div id="teke-patrons" style="font-size: 0.8rem; color: #aaa; margin: -13px 0 12px 0;">
+    <div id="teke-patrons" style="font-size: 0.8rem; color: #aaa; margin: -17px 0 8px 0;">
         Θαμώνες: -
     </div>
 </div>
@@ -1817,7 +1820,8 @@ function showStats() {
     appendInfoLine(totalDiv, `Ψυχές: ${formatNumber(player.soulsKilled || 0)}`, "stats");
     appendInfoLine(totalDiv, `Θρυλικοί εχθροί: ${formatNumber(player.legendaryEncounters || 0)}`, "stats");
     appendInfoLine(totalDiv, `Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`, "stats");
-    appendInfoLineHTML(totalDiv, `<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα σε online rankings</a>`, "stats");
+    appendInfoLine(totalDiv, ``);
+    appendInfoLineHTML(totalDiv, `<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα χαρακτήρα σε online rankings</a>`, "stats");
 
     // --- Tab "Κατάβασης" ---
     const d = descentStats || { turns: 0, damageDealt: 0, damageTaken: 0, kills: 0, xp: 0, gp: 0 };
@@ -3766,7 +3770,7 @@ if (roll <= 1) {
         musicTrack: 'bach807', // αποθηκευμένο μουσικό κομμάτι (id από το MUSIC_TRACKS)
         liveUpload: true,      // Live-upload στα rankings (αυτόματο ανέβασμα σε κατάβαση/θάνατο)
         portrait: "",          // link εικόνας πορτρέτου (πλαίσιο αριστερά από τον εξοπλισμό)
-        showPortrait: false    // αν εμφανίζεται το πλαίσιο πορτρέτου (από το μενού Επιλογές)
+        showPortrait: true    // αν εμφανίζεται το πλαίσιο πορτρέτου (από το μενού Επιλογές)
     };
 
 
@@ -4429,7 +4433,7 @@ function loadGame() {
             if (typeof player.legendaryEncounters !== 'number') player.legendaryEncounters = 0;
             if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
             if (typeof player.portrait !== 'string') player.portrait = '';
-            if (typeof player.showPortrait !== 'boolean') player.showPortrait = false;
+            if (typeof player.showPortrait !== 'boolean') player.showPortrait = true;
             player.maxUnlockedLevel = 100;
 
             player.nextXp = calculateNextXpRequirement(player.level);
@@ -4678,7 +4682,7 @@ function importSave() {
             if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
             if (typeof player.liveUpload !== 'boolean') player.liveUpload = true;
             if (typeof player.portrait !== 'string') player.portrait = '';
-            if (typeof player.showPortrait !== 'boolean') player.showPortrait = false;
+            if (typeof player.showPortrait !== 'boolean') player.showPortrait = true;
             player.maxUnlockedLevel = 100;
             player.nextXp = calculateNextXpRequirement(player.level);
 
@@ -7484,7 +7488,7 @@ if ('serviceWorker' in navigator) {
 
             console.log('[Upload] existingCount:', existingList.length, 'bestExistTurns:', bestExistTurns);
 
-            if (bestExistTurns >= 0 && entryTurns <= bestExistTurns && !r.killer) {
+            if (bestExistTurns >= 0 && entryTurns < bestExistTurns && !r.killer) {
                 console.log('[Upload] SKIPPED — not more turns than existing');
                 skipped++;
                 continue;
@@ -7763,7 +7767,7 @@ updateOnScreenStats();
         </label>
 
         <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
-            <input type="checkbox" id="options-portrait"> 🖼️ Πορτρέτο
+            <input type="checkbox" id="options-portrait"> 🖼️ Εμφάνιση πορτραίτου
         </label>
 
         <label style="display:block;margin-bottom:10px;font-size:0.85rem;cursor:pointer;">
