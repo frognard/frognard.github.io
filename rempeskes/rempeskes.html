@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v421</title>
+    <title>Ρεμπεσκές v422</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -2498,7 +2498,7 @@ const weaponNames = [
   "Βαριά Σιδηρά Ρομφαία",
   "Ατσαλένιο Φαλξ",
   "Μέγα Σφυρί δύο Χειρών",
-  "Πολιορκιτική Τζάγγρα",
+  "Πολιορκητική Τζάγγρα",
   "Ξίφος του Στρατηλάτη",
   "Βαρύ Δορυδρέπανο",
   "Σπάθη του Πρόμαχου",
@@ -4767,6 +4767,7 @@ function importSave() {
         saveGame();
         const portraitEl = document.getElementById('options-portrait');
         if (portraitEl) portraitEl.checked = player.showPortrait === true;
+        updateUI();
     }
 
     let _lastPortraitH = 0;
