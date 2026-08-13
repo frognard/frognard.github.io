@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v432</title>
+    <title>Ρεμπεσκές v433</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -946,8 +946,13 @@ padding: 20px;
             min-height: 58px;
         }
 
+        .slot-row.slot-filled {
+            cursor: pointer;
+        }
+
         .slot-row.slot-filled:hover {
             border-color: var(--accent-gold);
+            background: #222;
         }
 
         .slot-info {
@@ -4700,7 +4705,10 @@ function makeSlotBtn(icon, title, fn, extraClass) {
     b.className = 'slot-btn' + (extraClass ? ' ' + extraClass : '');
     b.title = title;
     b.textContent = icon;
-    b.onclick = fn;
+    b.onclick = function (e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        fn();
+    };
     return b;
 }
 
@@ -4760,9 +4768,10 @@ function renderSlotSelect() {
             nameCol.appendChild(lvl);
             info.appendChild(nameCol);
             row.appendChild(info);
+            row.style.cursor = 'pointer';
+            row.onclick = function () { slotSelectPlay(i); };
             const actions = document.createElement('div');
             actions.className = 'slot-actions';
-            actions.appendChild(makeSlotBtn('▶', 'Παίξε', function () { slotSelectPlay(i); }, 'slot-btn-play'));
             actions.appendChild(makeSlotBtn('📥', 'Import σε αυτό το slot', function () { slotSelectImport(i); }));
             actions.appendChild(makeSlotBtn('📤', 'Export αυτού του slot', function () { slotSelectExport(i); }));
             actions.appendChild(makeSlotBtn('✕', 'Διαγραφή χαρακτήρα', function () { slotSelectDelete(i); }, 'slot-btn-danger'));
