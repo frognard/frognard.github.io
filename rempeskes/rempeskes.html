@@ -814,7 +814,7 @@ padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 1200;
         }
 
         .ironman-modal-box {
@@ -833,6 +833,246 @@ padding: 20px;
             margin: 0 6px;
         }
 
+        .btn-cancel {
+            border-color: #c0392b;
+            background-color: #1a1a1a;
+            color: #e74c3c;
+        }
+
+        .create-portrait-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .create-portrait-row .create-portrait-fields {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .create-portrait-row p {
+            margin-top: 0;
+        }
+
+        .create-portrait-frame {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            flex: none;
+            box-sizing: border-box;
+            background-color: #111;
+            border: 2px solid #444;
+            border-radius: 4px;
+            overflow: hidden;
+            cursor: pointer;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .create-portrait-frame:hover {
+            border-color: var(--accent-gold);
+        }
+
+        .create-portrait-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: none;
+        }
+
+        .create-portrait-frame.has-portrait .create-portrait-img {
+            display: block;
+        }
+
+        .create-portrait-frame.has-portrait .create-portrait-hint {
+            display: none;
+        }
+
+        .create-portrait-hint {
+            font-size: 1.6rem;
+            color: #666;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .slot-select-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+        }
+
+        .slot-select-box {
+            background: var(--panel-bg);
+            padding: 24px;
+            border-radius: 8px;
+            max-width: 450px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .slot-select-title {
+            color: var(--accent-gold);
+            margin: 0 0 18px 0;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .slot-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            background: #1a1a1a;
+            position: relative;
+            min-height: 58px;
+        }
+
+        .slot-row.slot-filled:hover {
+            border-color: var(--accent-gold);
+        }
+
+        .slot-info {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 10px;
+            min-width: 0;
+            color: #fff;
+            font-size: 1.05rem;
+            text-align: left;
+        }
+
+        .slot-name-col {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .slot-name-row {
+            display: flex;
+            align-items: baseline;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .slot-name {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .slot-level {
+            margin-top: 2px;
+            color: var(--accent-gold);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .slot-ironman {
+            margin-right: 0;
+        }
+
+        .slot-name-dead {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .slot-name-godkiller {
+            color: #FFD700;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.9), 0 0 15px rgba(255, 170, 0, 0.6);
+        }
+
+        .slot-portrait {
+            width: 52px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid var(--accent-gold);
+            flex-shrink: 0;
+            background: #222;
+        }
+
+        .slot-portrait-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #555;
+            border-color: #333;
+            background: #1a1a1a;
+        }
+
+        .slot-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .slot-btn {
+            width: 34px;
+            height: 34px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            background: #2a2a2a;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slot-btn:hover {
+            border-color: var(--accent-gold);
+            background: #3a3a3a;
+        }
+
+        .slot-btn-danger:hover {
+            border-color: #e74c3c;
+            background: #3a1f1c;
+        }
+
+        .slot-create-btn {
+            flex: 1;
+            border: 1px dashed #555;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-muted);
+            padding: 14px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .slot-create-btn:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
 
         .hidden { display: none; }
         .hotkey-hint { color: var(--text-muted); font-size: 0.8rem; text-align: right; white-space: nowrap; }
@@ -1427,28 +1667,20 @@ body {
 
 <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap; margin-bottom:8px; justify-content:flex-end;">
 
-    <button class="btn-options" title="Επιλογές" onclick="openOptionsModal()">
-        ⚙️
-    </button>
-
-    <button class = "btn-showStats" title="Στατιστικά" onclick="showStats()">
+    <button class="btn-showStats" title="Στατιστικά" onclick="showStats()">
         📊
     </button>
 
-    <button class="btn-psofo" title="Hi-Scores" onclick="window.open('https://frognard.github.io/rempeskes/psofologio.html', '_blank')" style="margin-right:auto;">
+    <button class="btn-psofo" title="Hi-Scores" onclick="window.open('https://frognard.github.io/rempeskes/psofologio.html', '_blank')">
         🏆
     </button>
 
-    <button class="btn-delete-save" title="Νέος Χαρακτήρας" onclick="resetGame()">
+    <button class="btn-delete-save" title="Επιλογή Χαρακτήρα" onclick="showCharacterSelect()" style="margin-left:auto;">
         👤
     </button>
 
-    <button class="btn-save" title="Export" onclick="exportSave()">
-        📤
-    </button>
-
-    <button class="btn-save" title="Import" onclick="importSave()">
-        📥
+    <button class="btn-options" title="Επιλογές" onclick="openOptionsModal()">
+        ⚙️
     </button>
 
     <button class="btn-showRules btn-icon-square" title="Βοήθεια" onclick="showRules()">
@@ -1470,11 +1702,19 @@ body {
 
 <div id="ironman-modal" class="hidden ironman-modal-overlay">
     <div class="ironman-modal-box">
-        <p>Όνομα χαρακτήρα:</p>
-        <input type="text" id="char-name-input" placeholder="Όνομα ρεμπεσκέ" enterkeyhint="go" maxlength="24"
-               onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmCharacterCreation();}"
-               style="width: 100%; padding: 6px; margin-bottom: 14px; background: #1a1a1a; color: #fff; border: 1px solid var(--accent-gold); border-radius: 4px;">
-        <p id="char-name-error" class="hidden" style="color:#e74c3c; font-size:0.85rem; margin: 0 0 10px;">Πρέπει να δώσεις ένα όνομα.</p>
+        <div class="create-portrait-row">
+            <div id="create-portrait-frame" class="create-portrait-frame" onclick="setCreatePortrait()" title="Κάνε κλικ για να βάλεις πορτρέτο">
+                <img id="create-portrait-img" class="create-portrait-img" alt="πορτρέτο" draggable="false" />
+                <div class="create-portrait-hint">+</div>
+            </div>
+            <div class="create-portrait-fields">
+                <p>Όνομα ρεμπεσκέ:</p>
+                <input type="text" id="char-name-input" placeholder="Όνομα" enterkeyhint="go" maxlength="24"
+                       onkeydown="if(event.key==='Enter'){event.preventDefault(); confirmCharacterCreation();}"
+                       style="width: 100%; padding: 6px; background: #1a1a1a; color: #fff; border: 1px solid var(--accent-gold); border-radius: 4px;">
+                <p id="char-name-error" class="hidden" style="color:#e74c3c; font-size:0.85rem; margin: 6px 0 0;">Πρέπει να δώσεις ένα όνομα.</p>
+            </div>
+        </div>
         <label style="display: block; margin-bottom: 18px; cursor: pointer;">
             <input type="checkbox" id="live-upload-checkbox" checked>
             Auto-upload στα rankings
@@ -1487,7 +1727,15 @@ body {
             <input type="checkbox" id="show-autoplay-checkbox">
             <span style=>Κυβόργιο (autoplay mode)</span>
         </label>
-        <button class="btn-showRules" onclick="confirmCharacterCreation()">Έναρξη</button>
+        <button class="btn-showRules" onclick="confirmCharacterCreation()">Δημιουργία</button>
+        <button class="btn-showRules btn-cancel" onclick="cancelCharacterCreation()">Άκυρο</button>
+    </div>
+</div>
+
+<div id="slot-select-modal" class="hidden slot-select-overlay">
+    <div class="slot-select-box">
+        <h2 class="slot-select-title">Επιλογή ρεμπεσκέ</h2>
+        <div id="slot-list"></div>
     </div>
 </div>
 
@@ -3770,8 +4018,11 @@ if (roll <= 1) {
         musicTrack: 'bach807', // αποθηκευμένο μουσικό κομμάτι (id από το MUSIC_TRACKS)
         liveUpload: true,      // Live-upload στα rankings (αυτόματο ανέβασμα σε κατάβαση/θάνατο)
         portrait: "",          // link εικόνας πορτρέτου (πλαίσιο αριστερά από τον εξοπλισμό)
-        showPortrait: true    // αν εμφανίζεται το πλαίσιο πορτρέτου (από το μενού Επιλογές)
+        showPortrait: true,    // αν εμφανίζεται το πλαίσιο πορτρέτου (από το μενού Επιλογές)
+        selectedMonsterLevel: 1 // το βάθος που είχε επιλέξει ο χαρακτήρας στο λαβύρινθο
     };
+
+    const PLAYER_DEFAULTS = JSON.parse(JSON.stringify(player));
 
 
 const AREA_TYPES = {
@@ -3867,7 +4118,7 @@ const AREA_TYPE_COLOR = {
     let combatInterval = null;
     let townRegenInterval = null; 
     let inCombat = false;
-   let currentSelectedLevel = 0.5;
+   let currentSelectedLevel = 1;
     let isAttemptingRetreat = false; 
     let isSkillQueued = false; 
     let queuedSkill = null;
@@ -4408,67 +4659,235 @@ function checkLevelUp() {
     }
 
 
-function loadGame() {
-    generateAreaModifiers();
-    const savedData = localStorage.getItem('minimal_rpg_save');
-    if (savedData) {
-        try {
-            player = { ...player, ...JSON.parse(savedData) };
-            player.level = Math.min(player.level, 100);
-            player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105); //legendary bonus minmaxes 1/1
-            player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
-            player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
-            if (!player.name) player.name = "Ρεμπεσκές";
-            if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
-            if (!Array.isArray(player.magkiaMilestones)) player.magkiaMilestones = [];
-            if (typeof player.risk !== 'number') player.risk = 0;
-            if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
-            if (typeof player._displayedScore !== 'number') player._displayedScore = 0;
-            if (typeof player.killsWeapon !== 'number') player.killsWeapon = 0;
-            if (typeof player.killsArmor !== 'number') player.killsArmor = 0;
-            if (typeof player.killsMagic !== 'number') player.killsMagic = 0;
-            if (typeof player.totalDescents !== 'number') player.totalDescents = 0;
-            if (typeof player.pentaria !== 'number') player.pentaria = 0;
-            if (typeof player.soulsKilled !== 'number') player.soulsKilled = 0;
-            if (typeof player.legendaryEncounters !== 'number') player.legendaryEncounters = 0;
-            if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
-            if (typeof player.portrait !== 'string') player.portrait = '';
-            if (typeof player.showPortrait !== 'boolean') player.showPortrait = true;
-            player.maxUnlockedLevel = 100;
+// ===================== ΠΟΛΛΟΙ ΧΑΡΑΚΤΗΡΕΣ (3 SLOTS) =====================
+const SLOT_COUNT = 3;
+const SLOT_STORAGE_KEY = 'rempeskes_slots';
+let charSlots = [null, null, null];
+let currentSlot = -1;   // -1 = κανένας ενεργός (οθόνη επιλογής χαρακτήρων)
+let creatingSlot = 0;   // σε ποιο slot θα αποθηκευτεί ο χαρακτήρας που δημιουργείται
+let createPortrait = '';  // πορτρέτο που επιλέγεται στη φόρμα δημιουργίας
 
-            player.nextXp = calculateNextXpRequirement(player.level);
-
-            const savedMonsterLevel = localStorage.getItem('selectedMonsterLevel');
-
-            if (savedMonsterLevel) {
-                currentSelectedLevel = parseFloat(savedMonsterLevel);
-                document.getElementById('area-selector').value = savedMonsterLevel;
-            }
-            
-            logMessage("Η πρόοδος φορτώθηκε αυτόματα.", 'system');
-            logMessage("Είσαι στον Τεκέ του Ζαλαδούρα.");
-            logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
-            if (Math.random() < 1/3) {const _zm = getZaladourasMessages(); logMessage(_zm[Math.floor(Math.random() * _zm.length)], 'britalic');}
-                
-        } catch (e) {
-            logMessage("Σφάλμα κατά τη φόρτωση του save.", 'system');
+function loadSlots() {
+    let loaded = null;
+    try { loaded = JSON.parse(localStorage.getItem(SLOT_STORAGE_KEY)); } catch (e) { loaded = null; }
+    if (Array.isArray(loaded) && loaded.length > 0) {
+        charSlots = [];
+        for (let i = 0; i < SLOT_COUNT; i++) charSlots.push(loaded[i] || null);
+        return;
+    }
+    // Μετανάστευση από το παλιό μοναδικό save (single-slot)
+    try {
+        const legacy = localStorage.getItem('minimal_rpg_save');
+        if (legacy) {
+            charSlots[0] = JSON.parse(legacy);
+            saveSlots();
         }
-    }
-    else {
-        //   let chosenName = prompt("Όνομα χαρακτήρα");
-        //   if (chosenName) chosenName = chosenName.trim();
-        //   if (chosenName) player.name = chosenName;
+    } catch (e) { /* αγνοούμε παλιά/χαλασμένα saves */ }
+}
 
-        document.getElementById('ironman-modal').classList.remove('hidden');
+function saveSlots() {
+    try {
+        localStorage.setItem(SLOT_STORAGE_KEY, JSON.stringify(charSlots));
+    } catch (e) {
+        console.error('saveSlots failed:', e);
+        logMessage("Δεν ήταν δυνατή η αποθήκευση (ο browser μπλόκαρε το localStorage — π.χ. Private Browsing).", 'system');
     }
-    const savedConanos = localStorage.getItem('rempeskes_hasBeatenConanos');
-    if (savedConanos) {
-        player.hasBeatenConanos = (savedConanos === "true");
+}
+
+function makeSlotBtn(icon, title, fn, extraClass) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'slot-btn' + (extraClass ? ' ' + extraClass : '');
+    b.title = title;
+    b.textContent = icon;
+    b.onclick = fn;
+    return b;
+}
+
+function renderSlotSelect() {
+    const list = document.getElementById('slot-list');
+    if (!list) return;
+    list.innerHTML = '';
+    for (let i = 0; i < SLOT_COUNT; i++) {
+        const data = charSlots[i];
+        const row = document.createElement('div');
+        row.className = 'slot-row' + (data ? ' slot-filled' : ' slot-empty');
+        if (data) {
+            const info = document.createElement('div');
+            info.className = 'slot-info';
+            let portraitEl;
+            if (data.portrait) {
+                portraitEl = document.createElement('img');
+                portraitEl.className = 'slot-portrait';
+                portraitEl.src = data.portrait;
+                portraitEl.alt = '';
+                portraitEl.onerror = function () {
+                    const ph = document.createElement('div');
+                    ph.className = 'slot-portrait slot-portrait-empty';
+                    ph.textContent = '👤';
+                    this.replaceWith(ph);
+                };
+            } else {
+                portraitEl = document.createElement('div');
+                portraitEl.className = 'slot-portrait slot-portrait-empty';
+                portraitEl.textContent = '👤';
+            }
+            info.appendChild(portraitEl);
+            const nameCol = document.createElement('div');
+            nameCol.className = 'slot-name-col';
+            const nameRow = document.createElement('div');
+            nameRow.className = 'slot-name-row';
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'slot-name';
+            nameSpan.textContent = data.name || 'Ρεμπεσκές';
+            if (data.ironman) {
+                const im = document.createElement('span');
+                im.className = 'slot-ironman';
+                im.textContent = '💀 ';
+                im.title = 'Ironman';
+                nameRow.appendChild(im);
+            }
+            if (data.ironman && data.ironmanDead) {
+                nameSpan.classList.add('slot-name-dead');
+            } else if (data.hasBeatenConanos) {
+                nameSpan.classList.add('slot-name-godkiller');
+            }
+            nameRow.appendChild(nameSpan);
+            nameCol.appendChild(nameRow);
+            const lvl = document.createElement('span');
+            lvl.className = 'slot-level';
+            lvl.textContent = 'Επίπεδο ' + (typeof data.level === 'number' ? data.level : 1);
+            nameCol.appendChild(lvl);
+            info.appendChild(nameCol);
+            row.appendChild(info);
+            const actions = document.createElement('div');
+            actions.className = 'slot-actions';
+            actions.appendChild(makeSlotBtn('▶', 'Παίξε', function () { slotSelectPlay(i); }, 'slot-btn-play'));
+            actions.appendChild(makeSlotBtn('📥', 'Import σε αυτό το slot', function () { slotSelectImport(i); }));
+            actions.appendChild(makeSlotBtn('📤', 'Export αυτού του slot', function () { slotSelectExport(i); }));
+            actions.appendChild(makeSlotBtn('✕', 'Διαγραφή χαρακτήρα', function () { slotSelectDelete(i); }, 'slot-btn-danger'));
+            row.appendChild(actions);
+        } else {
+            const createBtn = document.createElement('button');
+            createBtn.type = 'button';
+            createBtn.className = 'slot-create-btn';
+            createBtn.textContent = 'Δημιουργία ρεμπεσκέ';
+            createBtn.onclick = function () { slotSelectCreate(i); };
+            row.appendChild(createBtn);
+            const actions = document.createElement('div');
+            actions.className = 'slot-actions';
+            actions.appendChild(makeSlotBtn('📥', 'Import σε αυτό το slot', function () { slotSelectImport(i); }));
+            row.appendChild(actions);
+        }
+        list.appendChild(row);
+    }
+}
+
+function stopGameActivity() {
+    if (typeof stopTownRegen === 'function') stopTownRegen();
+    if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+    if (nextMonsterTimeoutId) { clearTimeout(nextMonsterTimeoutId); nextMonsterTimeoutId = null; }
+    inCombat = false;
+    const ti = document.getElementById('town-interface');
+    const ci = document.getElementById('combat-interface');
+    if (ti) ti.classList.remove('hidden');
+    if (ci) ci.classList.add('hidden');
+}
+
+function showCharacterSelect() {
+    stopGameActivity();
+    autoPlayEnabled = false;
+    if (typeof window.stopAutoPlay === 'function') window.stopAutoPlay();
+    if (currentSlot >= 0 && player) {
+        charSlots[currentSlot] = JSON.parse(JSON.stringify(player));
+        saveSlots();
+    }
+    currentSlot = -1;
+    renderSlotSelect();
+    document.getElementById('slot-select-modal').classList.remove('hidden');
+}
+
+function slotSelectCreate(i) {
+    creatingSlot = i;
+    const nameInput = document.getElementById('char-name-input');
+    const errorEl = document.getElementById('char-name-error');
+    if (nameInput) nameInput.value = '';
+    if (errorEl) errorEl.classList.add('hidden');
+    const iron = document.getElementById('ironman-checkbox');
+    if (iron) iron.checked = false;
+    const autoplay = document.getElementById('show-autoplay-checkbox');
+    if (autoplay) autoplay.checked = false;
+    const live = document.getElementById('live-upload-checkbox');
+    if (live) live.checked = true;
+    createPortrait = '';
+    const cpf = document.getElementById('create-portrait-frame');
+    const cpi = document.getElementById('create-portrait-img');
+    if (cpf) cpf.classList.remove('has-portrait');
+    if (cpi) cpi.removeAttribute('src');
+    document.getElementById('ironman-modal').classList.remove('hidden');
+}
+
+function setCreatePortrait() {
+    const url = prompt('Δώσε link εικόνας για το πορτρέτο:', createPortrait || '');
+    if (url === null) return;
+    createPortrait = url.trim();
+    const frame = document.getElementById('create-portrait-frame');
+    const img = document.getElementById('create-portrait-img');
+    if (!frame || !img) return;
+    if (createPortrait) {
+        img.onerror = function () {
+            frame.classList.remove('has-portrait');
+            img.removeAttribute('src');
+        };
+        img.src = createPortrait;
+        frame.classList.add('has-portrait');
     } else {
-        player.hasBeatenConanos = false;
+        img.removeAttribute('src');
+        frame.classList.remove('has-portrait');
     }
+}
 
-    // Συγχρονισμός της αποθηκευμένης ταχύτητας παιχνιδιού με τη global μεταβλητή
+function cancelCharacterCreation() {
+    document.getElementById('ironman-modal').classList.add('hidden');
+}
+
+function normalizePlayerAfterLoad() {
+    player.level = Math.min(player.level, 100);
+    if (player.weapon && typeof player.weapon.power === 'number') player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105);
+    if (player.armor && typeof player.armor.power === 'number') player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
+    if (player.magic && typeof player.magic.power === 'number') player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
+    if (!player.name) player.name = "Ρεμπεσκές";
+    if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
+    if (!Array.isArray(player.magkiaMilestones)) player.magkiaMilestones = [];
+    if (typeof player.risk !== 'number') player.risk = 0;
+    if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
+    if (typeof player._displayedScore !== 'number') player._displayedScore = 0;
+    if (typeof player.killsWeapon !== 'number') player.killsWeapon = 0;
+    if (typeof player.killsArmor !== 'number') player.killsArmor = 0;
+    if (typeof player.killsMagic !== 'number') player.killsMagic = 0;
+    if (typeof player.totalDescents !== 'number') player.totalDescents = 0;
+    if (typeof player.pentaria !== 'number') player.pentaria = 0;
+    if (typeof player.soulsKilled !== 'number') player.soulsKilled = 0;
+    if (typeof player.legendaryEncounters !== 'number') player.legendaryEncounters = 0;
+    if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
+    if (typeof player.portrait !== 'string') player.portrait = '';
+    if (typeof player.showPortrait !== 'boolean') player.showPortrait = true;
+    if (typeof player.liveUpload !== 'boolean') player.liveUpload = true;
+    if (typeof player.onScreenStats !== 'boolean') player.onScreenStats = false;
+    if (typeof player.hasBeatenConanos !== 'boolean') player.hasBeatenConanos = false;
+    if (typeof player.ironmanDead !== 'boolean') player.ironmanDead = false;
+    player.maxUnlockedLevel = 100;
+    player.nextXp = calculateNextXpRequirement(player.level);
+    if (player.weapon && player.weapon.legendary === undefined) player.weapon.legendary = false;
+    if (player.armor && player.armor.legendary === undefined) player.armor.legendary = false;
+    if (player.magic && player.magic.legendary === undefined) player.magic.legendary = false;
+    if (!player.musicTrack) player.musicTrack = 'bach807';
+    if (typeof player.gameSpeedFactor !== 'number' || isNaN(player.gameSpeedFactor)) player.gameSpeedFactor = gameSpeedFactor;
+    if (typeof player.soundEnabled !== 'boolean') player.soundEnabled = soundEnabled;
+    if (typeof player.musicVolumeDb !== 'number') player.musicVolumeDb = musicVolumeDb;
+}
+
+function syncPlayerSettings() {
     if (typeof player.gameSpeedFactor === 'number' && !isNaN(player.gameSpeedFactor)) {
         gameSpeedFactor = player.gameSpeedFactor;
     } else {
@@ -4477,7 +4896,6 @@ function loadGame() {
     const speedEl = document.getElementById('options-speed');
     if (speedEl) speedEl.value = gameSpeedFactor;
 
-    // Συγχρονισμός των αποθηκευμένων επιλογών ήχου/μουσικής με τις global μεταβλητές
     if (typeof player.soundEnabled === 'boolean') {
         soundEnabled = player.soundEnabled;
     } else {
@@ -4488,13 +4906,142 @@ function loadGame() {
     } else {
         player.musicVolumeDb = musicVolumeDb;
     }
-    if (typeof player.liveUpload !== 'boolean') player.liveUpload = true;
-    if (typeof player.onScreenStats !== 'boolean') player.onScreenStats = false;
-    if (!player.musicTrack) player.musicTrack = 'bach807';
+    if (typeof player.musicEnabled === 'boolean') {
+        musicEnabled = player.musicEnabled;
+    } else {
+        player.musicEnabled = musicEnabled;
+    }
     setMusicVolume(musicVolumeDb);
+
+    // Αν άλλαξε το μουσικό κομμάτι του χαρακτήρα ενώ παίζει μουσική, το ξεκινάμε από την αρχή
+    if (musicEnabled && isMusicPlaying) {
+        const midiEl = document.getElementById('bg-midi-player');
+        if (midiEl && getMusicTrack() && midiEl.getAttribute('src') !== getMusicTrack().src) {
+            stopBackgroundMusic();
+        }
+    }
     updateMusicState();
 
+    // Βάθος: ανά χαρακτήρα (με πέσιμο στο legacy global για παλιά saves, μόνο μία φορά)
+    let savedLevel = (typeof player.selectedMonsterLevel === 'number' && !isNaN(player.selectedMonsterLevel))
+        ? player.selectedMonsterLevel
+        : (parseFloat(localStorage.getItem('selectedMonsterLevel')) || 1);
+    player.selectedMonsterLevel = savedLevel;
+    currentSelectedLevel = savedLevel;
+    const selector = document.getElementById('area-selector');
+    if (selector) {
+        selector.value = savedLevel;
+        updateSelectorColor(selector);
+    }
+}
+
+function slotSelectPlay(i) {
+    const data = charSlots[i];
+    if (!data) return;
+    currentSlot = i;
+    player = JSON.parse(JSON.stringify(PLAYER_DEFAULTS));
+    Object.assign(player, data);
+    normalizePlayerAfterLoad();
+    syncPlayerSettings();
+
+    const isFirstPlay = player._justCreated === true;
+    delete player._justCreated;
+
+    document.getElementById('slot-select-modal').classList.add('hidden');
+    document.getElementById('town-interface').classList.remove('hidden');
+    document.getElementById('combat-interface').classList.add('hidden');
+
+    // reset runtime state (cooldowns / autoplay) για καθαρή έναρξη
+    if (potionCdTimer) clearTimeout(potionCdTimer);
+    if (skillCdTimer) clearTimeout(skillCdTimer);
+    if (preciseCdTimer) clearTimeout(preciseCdTimer);
+    preciseCooldownActive = false;
+    potionCooldownActive = false;
+    skillCooldownActive = false;
+    isSkillQueued = false;
+    autoPlayEnabled = false;
+    autoPlaySpeedFactor = 1.5;
+    if (typeof window.rearmTimers === 'function') window.rearmTimers();
+
+    if (isFirstPlay) {
+        logMessage(`Μπαίνεις για πρώτη φορά στον Τεκέ του Ζαλαδούρα. Οι άλλοι ρεμπεσκέδες σε κοιτάνε στραβά.`, 'bright');
+        logMessage(``);
+        logMessage(`Ο Ζαλαδούρας λέει: "${player.name}! Βρε καλώς το παιδί! Μπες στο λαβύρινθο και σφάξε ό,τι κινείται. Μετά γύρνα εδώ και ρίχτο στο πιοτό. Αυτή είναι η ζωή σου τώρα!"`, 'bright');
+    } else {
+        logMessage("Η πρόοδος φορτώθηκε αυτόματα.", 'system');
+        logMessage("Είσαι στον Τεκέ του Ζαλαδούρα.");
+    }
+    logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
+    if (Math.random() < 1/3) {const _zm = getZaladourasMessages(); logMessage(_zm[Math.floor(Math.random() * _zm.length)], 'britalic');}
+
     applyAutoplayVisibility();
+    applyPortrait();
+    updateUI();
+    refreshTekePatrons();
+    startTownRegen();
+    updateCooldownBars();
+    saveGame();
+    liveUploadIfEnabled();
+}
+
+function slotSelectDelete(i) {
+    const data = charSlots[i];
+    if (!data) return;
+    const nm = data.name || 'αυτού του χαρακτήρα';
+    if (!confirm('Διαγραφή χαρακτήρα "' + nm + '";')) return;
+    charSlots[i] = null;
+    if (currentSlot === i) {
+        currentSlot = -1;
+        stopGameActivity();
+    }
+    saveSlots();
+    renderSlotSelect();
+}
+
+function slotSelectExport(i) {
+    const data = charSlots[i];
+    if (!data) return;
+    openExportModal(data);
+}
+
+function slotSelectImport(i) {
+    showImportCodeModal(function (data) {
+        if (!confirm('Θα αντικατασταθεί ο χαρακτήρας σε αυτό το slot. Συνέχεια;')) return false;
+        let p = JSON.parse(JSON.stringify(PLAYER_DEFAULTS));
+        Object.assign(p, data.player);
+        const prev = player;
+        player = p;
+        normalizePlayerAfterLoad();
+        p = player;
+        player = prev;
+        if (data.selectedMonsterLevel) {
+            const selector = document.getElementById('area-selector');
+            if (selector) {
+                selector.value = data.selectedMonsterLevel;
+                currentSelectedLevel = parseFloat(data.selectedMonsterLevel);
+                updateSelectorColor(selector);
+            }
+            p.selectedMonsterLevel = parseFloat(data.selectedMonsterLevel) || 1;
+        }
+        charSlots[i] = JSON.parse(JSON.stringify(p));
+        if (currentSlot === i) {
+            player = p;
+            saveGame();
+            updateUI();
+            applyPortrait();
+            applyAutoplayVisibility();
+        }
+        saveSlots();
+        renderSlotSelect();
+        return true;
+    });
+}
+
+function loadGame() {
+    generateAreaModifiers();
+    loadSlots();
+    renderSlotSelect();
+    document.getElementById('slot-select-modal').classList.remove('hidden');
 }
 
 function applyAutoplayVisibility() {
@@ -4505,22 +5052,16 @@ function applyAutoplayVisibility() {
 }
 
 function resetGame() {
-    if (!confirm("Διαγραφή χαρακτήρα;")) return;
-
-    if (townRegenInterval) { clearInterval(townRegenInterval); townRegenInterval = null; }
-    if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
-    if (nextMonsterTimeoutId) { clearTimeout(nextMonsterTimeoutId); nextMonsterTimeoutId = null; }
-
-    try {
-        localStorage.removeItem('minimal_rpg_save');
-        localStorage.removeItem('selectedMonsterLevel');
-        localStorage.removeItem('rempeskes_areaModifiers');
-        localStorage.setItem('rempeskes_hasBeatenConanos', "false");
-    } catch (e) {
-        console.error('resetGame storage cleanup failed:', e);
+    if (currentSlot >= 0 && charSlots[currentSlot]) {
+        const nm = charSlots[currentSlot].name || 'αυτού του χαρακτήρα';
+        if (!confirm('Διαγραφή χαρακτήρα "' + nm + '";')) return;
+        charSlots[currentSlot] = null;
+        currentSlot = -1;
+        stopGameActivity();
+        saveSlots();
     }
-
-    location.reload();
+    renderSlotSelect();
+    document.getElementById('slot-select-modal').classList.remove('hidden');
 }
 
     function saveGame() {
@@ -4529,7 +5070,12 @@ function resetGame() {
         localStorage.setItem('rempeskes_hasBeatenConanos', player.hasBeatenConanos ? "true" : "false");
         const selector = document.getElementById('area-selector');
         if (selector) {
-            localStorage.setItem('selectedMonsterLevel', selector.value);
+            player.selectedMonsterLevel = parseFloat(selector.value) || 1;
+            localStorage.setItem('selectedMonsterLevel', selector.value); // legacy global (για συμβατότητα)
+        }
+        if (currentSlot >= 0) {
+            charSlots[currentSlot] = JSON.parse(JSON.stringify(player));
+            saveSlots();
         }
     } catch (e) {
         console.error('saveGame failed:', e);
@@ -4564,44 +5110,36 @@ function confirmCharacterCreation() {
         chosenName = '[Κ] ' + chosenName;
     }
 
+    player = JSON.parse(JSON.stringify(PLAYER_DEFAULTS));
     player.name = chosenName;
+    player.portrait = createPortrait;
 
     player.ironman = document.getElementById('ironman-checkbox').checked;
     player.showAutoplay = document.getElementById('show-autoplay-checkbox').checked;
     player.liveUpload = document.getElementById('live-upload-checkbox').checked;
+    player._justCreated = true;
     autoPlayEnabled = false;
     autoPlaySpeedFactor = 1.5;
     if (typeof window.rearmTimers === 'function') window.rearmTimers();
     applyAutoplayVisibility();
 
-    if (player.ironman) {
-        logMessage("Ironman mode ενεργό. Δεν υπάρχει γυρισμός.", 'system');
-    }
+    charSlots[creatingSlot] = JSON.parse(JSON.stringify(player));
+    saveSlots();
 
-    saveGame();
-    liveUploadIfEnabled();
-    
-    logMessage(`Μπαίνεις για πρώτη φορά στον Τεκέ του Ζαλαδούρα. Οι άλλοι ρεμπεσκέδες σε κοιτάνε στραβά.`, 'bright');
-    logMessage(``);
-    logMessage(`Ο Ζαλαδούρας λέει: "${player.name}! Βρε καλώς το παιδί! Μπες στο λαβύρινθο και σφάξε ό,τι κινείται. Μετά γύρνα εδώ και ρίχτο στο πιοτό. Αυτή είναι η ζωή σου τώρα!"`, 'bright');
-    logMessage(``);
-    // logMessage(`"Και μία συμβουλή: Πριν πας βαθύτερα φρόντισε να έχεις βρει και κατάλληλο εξοπλισμό. Δεν αρκεί το επίπεδό σου."`, 'bright');
-
-   
-   
-    // logMessage("Είσαι στον Τεκέ του Ζαλαδούρα");
-    logMessage("Η κομπανία παίζει «" + randomTekeSong() + "».");
-    if (Math.random() < 1/3) {const _zm = getZaladourasMessages(); logMessage(_zm[Math.floor(Math.random() * _zm.length)], 'britalic');}
-
-    refreshTekePatrons();
-    updateUI();
+    // Επιστροφή στην οθόνη επιλογής χαρακτήρων
+    renderSlotSelect();
+    document.getElementById('slot-select-modal').classList.remove('hidden');
 }
 
 
 function exportSave() {
+    openExportModal(player);
+}
+
+function openExportModal(playerObj) {
     const exportData = {
         v: 1,
-        player: player,
+        player: playerObj,
         selectedMonsterLevel: document.getElementById('area-selector')
             ? document.getElementById('area-selector').value
             : null
@@ -4626,7 +5164,34 @@ function exportSave() {
     document.getElementById('export-code-area').select();
 }
 
-function importSave() {
+function applyImportedPlayer(data) {
+    player = JSON.parse(JSON.stringify(PLAYER_DEFAULTS));
+    Object.assign(player, data.player);
+    normalizePlayerAfterLoad();
+
+    if (data.selectedMonsterLevel) {
+        const selector = document.getElementById('area-selector');
+        if (selector) {
+            selector.value = data.selectedMonsterLevel;
+            currentSelectedLevel = parseFloat(data.selectedMonsterLevel);
+            updateSelectorColor(selector);
+        }
+        player.selectedMonsterLevel = parseFloat(data.selectedMonsterLevel) || 1;
+    }
+
+    const cb = document.getElementById('show-autoplay-checkbox');
+    if (cb) {
+        cb.checked = !!player.showAutoplay;
+    }
+
+    saveGame();
+    updateUI();
+    applyPortrait();
+    applyAutoplayVisibility();
+    logMessage("Το save εισήχθη επιτυχώς.", 'system');
+}
+
+function showImportCodeModal(onImport) {
     const overlay = document.createElement('div');
     overlay.id = 'save-modal-overlay';
     overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;';
@@ -4660,60 +5225,20 @@ function importSave() {
             const data = JSON.parse(json);
             if (!data || !data.player) throw new Error("invalid");
 
-            if (!confirm("Αυτό θα αντικαταστήσει τον τρέχοντα χαρακτήρα σου. Συνέχεια;")) return;
-
-            player = { ...player, ...data.player };
-            player.level = Math.min(player.level, 100);
-            player.weapon.power = Math.min(player.weapon.power, player.weapon.legendary ? 120 : 105);
-            player.armor.power = Math.min(player.armor.power, player.armor.legendary ? 120 : 105);
-            player.magic.power = Math.min(player.magic.power, player.magic.legendary ? 120 : 105);
-            if (!player.name) player.name = "Ρεμπεσκές";
-            if (!Array.isArray(player.magkiaEarnedDepths)) player.magkiaEarnedDepths = [];
-            if (!Array.isArray(player.magkiaMilestones)) player.magkiaMilestones = [];
-            if (typeof player.risk !== 'number') player.risk = 0;
-            if (typeof player.magkiaKillCount !== 'number') player.magkiaKillCount = 0;
-            if (typeof player.totalDescents !== 'number') player.totalDescents = 0;
-            if (typeof player.killsWeapon !== 'number') player.killsWeapon = 0;
-            if (typeof player.killsArmor !== 'number') player.killsArmor = 0;
-            if (typeof player.killsMagic !== 'number') player.killsMagic = 0;
-            if (typeof player.pentaria !== 'number') player.pentaria = 0;
-            if (typeof player.soulsKilled !== 'number') player.soulsKilled = 0;
-            if (typeof player.legendaryEncounters !== 'number') player.legendaryEncounters = 0;
-            if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
-            if (typeof player.liveUpload !== 'boolean') player.liveUpload = true;
-            if (typeof player.portrait !== 'string') player.portrait = '';
-            if (typeof player.showPortrait !== 'boolean') player.showPortrait = true;
-            player.maxUnlockedLevel = 100;
-            player.nextXp = calculateNextXpRequirement(player.level);
-
-            if (player.weapon.legendary === undefined) player.weapon.legendary = false;
-            if (player.armor.legendary === undefined) player.armor.legendary = false;
-            if (player.magic.legendary === undefined) player.magic.legendary = false;
-
-            if (data.selectedMonsterLevel) {
-                const selector = document.getElementById('area-selector');
-                if (selector) {
-                    selector.value = data.selectedMonsterLevel;
-                    currentSelectedLevel = parseFloat(data.selectedMonsterLevel);
-                    updateSelectorColor(selector);
-                }
-            }
-
-            const cb = document.getElementById('show-autoplay-checkbox');
-            if (cb) {
-                cb.checked = !!player.showAutoplay;
-            }
-
-            saveGame();
-            updateUI();
-            applyPortrait();
-            applyAutoplayVisibility();
-            overlay.remove();
-            logMessage("Το save εισήχθη επιτυχώς.", 'system');
+            const done = onImport(data);
+            if (done !== false) overlay.remove();
         } catch (e) {
             errEl.textContent = 'Ο κωδικός save είναι χαλασμένος ή άκυρος.';
             errEl.style.display = 'block';
         }
+    });
+}
+
+function importSave() {
+    showImportCodeModal(function (data) {
+        if (!confirm("Αυτό θα αντικαταστήσει τον τρέχοντα χαρακτήρα σου. Συνέχεια;")) return false;
+        applyImportedPlayer(data);
+        return true;
     });
 }
 
@@ -7424,11 +7949,11 @@ if (
 
     window.rearmTimers = rearmTimers;
 
-    // Σταματάει το AutoPlay (π.χ. όταν σκοτώνεται ο Θεός Κόνανος)
+    // Σταματάει το AutoPlay (π.χ. όταν σκοτώνεται ο Θεός Κόνανος ή αλλάζεις χαρακτήρα)
     window.stopAutoPlay = function () {
         if (autoPlayEnabled) {
             setAutoPlayEnabled(false);
-            setStatus("AutoPlay ανενεργό: ο Θεός Κόνανος σκοτώθηκε!");
+            setStatus("AutoPlay ανενεργό.");
         }
     };
 
@@ -7698,6 +8223,7 @@ function applyOptions() {
     if (screenStatsEl) player.onScreenStats = screenStatsEl.checked;
     const musicToggleEl = document.getElementById('options-music-toggle');
     if (musicToggleEl) musicEnabled = musicToggleEl.checked;
+    player.musicEnabled = musicEnabled;
     const musicVolEl = document.getElementById('options-music-volume');
     if (musicVolEl) setMusicVolume(parseFloat(musicVolEl.value));
     player.musicVolumeDb = musicVolumeDb;
