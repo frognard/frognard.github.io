@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v434</title>
+    <title>Ρεμπεσκές v435</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -341,20 +341,27 @@ padding: 20px;
     text-shadow: 0 0 4px rgba(255,215,0,0.4), 0 0 10px rgba(255,200,0,0.2);
 }
 
-.legendary-glow-weapon {
+.legendary-glow-weapon,
+.legendary-glow-armor,
+.legendary-glow-magic,
+.soul-monster-glow,
+.soul-item-glow {
     color: #ffde21 !important;
     font-weight: 700;
+}
+.legendary-glow-weapon {
     text-shadow: 0 0 8px rgba(255,60,60,1.0), 0 0 22px rgba(255,0,0,0.75);
 }
 .legendary-glow-armor {
-    color: #ffde21 !important;
-    font-weight: 700;
     text-shadow: 0 0 8px rgba(60,150,255,1.0), 0 0 22px rgba(0,100,255,0.75);
 }
 .legendary-glow-magic {
-    color: #ffde21 !important;
-    font-weight: 700;
     text-shadow: 0 0 8px rgba(180,60,255,1.0), 0 0 22px rgba(120,0,255,0.75);
+}
+.soul-monster-glow,
+.soul-item-glow {
+    color: #c0c0c0 !important;
+    text-shadow: 0 0 8px rgba(140,130,220,1.0), 0 0 22px rgba(90,50,210,0.75);
 }
 
 .legendary-monster-glow {
@@ -363,19 +370,6 @@ padding: 20px;
     text-transform: uppercase;
     letter-spacing: 2px;
     text-shadow: 0 0 8px rgba(255,150,0,1.0), 0 0 22px rgba(255,100,0,0.75);
-}
-
-.soul-monster-glow {
-    color: #000 !important;
-    font-weight: bold !important;
-    letter-spacing: 1px;
-    text-shadow: 0 0 6px rgba(0,220,0,1.0), 0 0 17px rgba(0,220,0,0.8);
-}
-
-.soul-item-glow {
-    color: #000 !important;
-    font-weight: 700;
-    text-shadow: 0 0 6px rgba(0,220,0,1.0), 0 0 17px rgba(0,220,0,0.8);
 }
 
 #m-name.legendary-monster-glow,
@@ -1176,7 +1170,7 @@ padding: 20px;
 
 .equipment-row {
     display: grid;
-    grid-template-columns: 40px 1fr 40px;
+    grid-template-columns: min-content 1fr min-content;
     align-items: center;
     background-color: #1a1a1a !important;   /* Σκούρο υπόβαθρο για το slot */
     border: 1px solid #333333 !important;   /* Διακριτικό περίγραμμα γύρω από το κουτάκι */
@@ -1185,8 +1179,9 @@ padding: 20px;
 }
 
 .equip-icon{
-    text-align:left;
-    padding-left:8px;
+    text-align:center;
+    padding-left:2px;
+    padding-right:2px;
     font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', Roboto, 'Noto Sans', system-ui, sans-serif;
 }
 
