@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v433</title>
+    <title>Ρεμπεσκές v434</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -71,6 +71,10 @@ padding: 20px;
             min-width: 0;
             white-space: nowrap;
             overflow: hidden;
+        }
+
+        #p-name {
+            color: var(--text-bright);
         }
 
         .editable-name {
@@ -6925,6 +6929,7 @@ function showAnnouncementPopup(text, styleClass, color) {
                 triggerSmoothTransition('#ffffff', 2.0);
                 
                 checkLevelUp();
+                player._displayedScore = Math.max(computeScore(), player._displayedScore || 0);
                 saveGame();
                 liveUploadIfEnabled();
                 updateUI();
