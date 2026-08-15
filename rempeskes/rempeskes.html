@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v436</title>
+    <title>Ρεμπεσκές v437</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1107,6 +1107,19 @@ padding: 20px;
             20% { transform: translateY(-50%) scale(1.3); }
             60% { opacity: 1; transform: translateY(-50%) scale(1.1); }
             100% { opacity: 0; transform: translateY(-50%) scale(1.1); }
+        }
+
+        .floating-text.hp-bar-float {
+            font-size: 1rem;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            animation: floatUpFromBar 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes floatUpFromBar {
+            0% { transform: translateY(-50%) scale(1); }
+            20% { transform: translateY(calc(-50% - 12px)) scale(1.2); }
+            100% { transform: translateY(calc(-50% - 34px)) scale(1); }
         }
 
 @keyframes monsterDeathFlash {
@@ -4832,7 +4845,7 @@ function checkLevelUp() {
     return array[Math.floor(Math.random() * array.length)];
         }
 
-    function createFloatingText(parentId, text, color) {
+    function createFloatingText(parentId, text, color, opts) {
         const parent = document.getElementById(parentId);
         if (!parent) return;
         
@@ -4844,18 +4857,38 @@ function checkLevelUp() {
         const playerBar = (parentId === 'player-hp-parent');
         const monsterBar = (parentId === 'monster-hp-parent');
         const isHpBar = playerBar || monsterBar;
+        const hpBarFloat = !!(opts && opts.floatUp);
         const offset = isHpBar ? 0 : Math.floor(Math.random() * 40) - 20;
-        fText.style.left = `calc(${isHpBar ? '75%' : '50%'} + ${offset}px)`;
+        if (isHpBar && hpBarFloat) {
+            // Όσο πιο δεξιά γίνεται στη μπάρα· αν το κείμενο δεν χωράει
+            // μέσα στο πλαίσιο, τραβιέται λίγο πιο αριστερά (βλ. μετά το append).
+            fText.style.right = '2%';
+        } else {
+            fText.style.left = `calc(${isHpBar ? '75%' : '50%'} + ${offset}px)`;
+        }
         fText.style.top = isHpBar ? `50%` : `0px`;
-        if (isHpBar) fText.classList.add('hp-bar-fixed');
+        if (isHpBar) fText.classList.add(hpBarFloat ? 'hp-bar-float' : 'hp-bar-fixed');
 
         // Το animation (χωρίς delay) τελειώνει ΑΚΡΙΒΩΣ μαζί με το combat tick -
         // effTick() ήδη scalάρει με την ταχύτητα (COMBAT_TICK_MS / speedFactor),
         // άρα εδώ απλά το ακολουθούμε 1-προς-1 αντί να το χωρίζουμε σε fraction.
-        const floatDurationMs = effTick();
+        // Το float-up drop text μένει 2 τικ, ώστε να προλαβαίνει να διαβαστεί.
+        const floatDurationMs = effTick() * (hpBarFloat ? 2 : 1);
         fText.style.animationDuration = `${floatDurationMs}ms`;
         
         parent.appendChild(fText);
+
+        if (hpBarFloat) {
+            // Κράτα το κείμενο πάντα μέσα στο πλαίσιο: αν χωράει μένει όσο πιο δεξιά
+            // γίνεται (right: 2%). Αν δεν χωράει, τραβιέται αριστερά.
+            const pw = parent.clientWidth || 1;
+            const w = fText.offsetWidth;
+            if (w > pw * 0.96) {
+                fText.style.right = '';
+                fText.style.left = '2%';
+            }
+        }
+
         setTimeout(() => { fText.remove(); }, floatDurationMs);
     }
 
@@ -6896,6 +6929,13 @@ if (isSoulDrop) {
 
     // ...και ΜΕΤΑ μπορούμε να το χρησιμοποιήσουμε στο console.log!
     console.log("ITEM:", itemName);
+
+    // Floating text drop με το χρώμα του αντικειμένου (το θρυλικό χωρίς τη λάμψη).
+    const dropColor = isLegendaryDrop ? '#ffde21' :
+                      isSoulDrop ? '#c0c0c0' :
+                      type === 'weapon' ? '#ff4444' :
+                      type === 'armor' ? '#1ab2ff' : '#cc66ff';
+    createFloatingText('monster-hp-parent', `${itemName} Τ${rolledTier}`, dropColor, { floatUp: true });
 
     // Το popup πρέπει να εμφανίζεται ΜΟΝΟ αν είναι Legendary
     if (isLegendaryDrop) {
