@@ -2040,7 +2040,12 @@ function refMagkiaAtXP(totalXp, ironman) {
 }
 
 function getMagkiaPercent() {
-    const score = player._displayedScore || 0;
+    // Το σκορ μετράει ΧΩΡΙΣ το ×1.5 του Κόνανου για τον παίκτη: το αφαιρούμε,
+    // ώστε το % να μένει ίδιο όταν σκοτωθεί ο Κόνανος (ο ιδανικός χαρακτήρας
+    // το μετράει πάντα, όχι μόνο μετά τη νίκη). Το κανονικό σκορ (computeScore)
+    // εξακολουθεί να ανεβαίνει κανονικά με το ×1.5.
+    let score = player._displayedScore || 0;
+    if (player.hasBeatenConanos) score /= 1.5;
     // Το ίδιο totalXP που χρησιμοποιεί και το computeScore για το σκορ.
     const totalXp = (player.level >= 100) ? (player.totalXpAtLevel100 || 0) : (player.totalXpGained || 0);
     const ref = refMagkiaAtXP(totalXp, !!player.ironman);
@@ -2052,6 +2057,7 @@ function getMagkiaPercent() {
 // Χρησιμοποιείται στα ορόσημα ανά 5 επίπεδα, ώστε το γράφημα να δείχνει το πραγματικό %.
 function magkiaPctFromScore(score) {
     if (!score || !(score > 0)) return null;
+    if (player.hasBeatenConanos) score /= 1.5;
     const ref = refMagkiaAtXP(player.totalXpGained || 0, !!player.ironman);
     if (!Number.isFinite(ref) || ref <= 0) return null;
     return score / ref * 100;
@@ -2221,9 +2227,10 @@ function depthLabelBracketed(depth) {
 // Μαγκιά% ενός ορόσημου: αν αποθηκεύτηκε pct το χρησιμοποιεί, αλλιώς το υπολογίζει
 // από το σκορ έναντι του ιδανικού στο συγκεκριμένο επίπεδο (για παλιά ορόσημα).
 function magkiaMilestonePct(m) {
-    const score = m.score || 0;
+    let score = m.score || 0;
     if (!(score > 0)) return null;
     if (typeof m.pct === 'number' && Number.isFinite(m.pct)) return m.pct;
+    if (player.hasBeatenConanos) score /= 1.5;
     const L = Math.min(Math.max(1, m.level), 100);
     _refMagkiaEnsureLevel(100);
     const ref = refMagkiaAtXP(_refMagkiaXP[L] || 0, !!player.ironman);
