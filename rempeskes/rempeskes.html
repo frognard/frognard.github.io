@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v440</title>
+    <title>Ρεμπεσκές v441</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -5960,9 +5960,10 @@ function refreshAreaSelectorAppearance() {
         // Προσθήκη επιπέδου (χρώμα = επικινδυνότητα τέρατος)
         displayedName += ` <span style="color:${getMonsterDangerColor()}; font-size:1.1rem;">(${monster.level})</span>`;
 
-        // Χρώματα για SPECIAL τέρατα
+        // Χρώματα για SPECIAL τέρατα — ΑΚΡΙΒΩΣ ίδια με τα χρώματα των αντίστοιχων
+        // αντικειμένων στο πεδίο των αντικειμένων (weapon #ec6868, armor #1ab2ff, magic #cc66ff).
         if (monster.variant === 'weapon') {
-            displayedName = `<span style="color:#ff4444;">${displayedName}</span>`;
+            displayedName = `<span style="color:#ec6868;">${displayedName}</span>`;
         }
         else if (monster.variant === 'armor') {
             displayedName = `<span style="color:#1ab2ff;">${displayedName}</span>`;
@@ -7045,10 +7046,11 @@ if (isSoulDrop) {
     // ...και ΜΕΤΑ μπορούμε να το χρησιμοποιήσουμε στο console.log!
     console.log("ITEM:", itemName);
 
-    // Floating text drop με το χρώμα του αντικειμένου (το θρυλικό χωρίς τη λάμψη).
+    // Floating text drop με το χρώμα του αντικειμένου — ίδιο με το πεδίο αντικειμένων
+    // (weapon #ec6868, armor #1ab2ff, magic #cc66ff). Το θρυλικό χωρίς τη λάμψη.
     const dropColor = isLegendaryDrop ? '#ffde21' :
                       isSoulDrop ? '#c0c0c0' :
-                      type === 'weapon' ? '#ff4444' :
+                      type === 'weapon' ? '#ec6868' :
                       type === 'armor' ? '#1ab2ff' : '#cc66ff';
     createFloatingText('monster-hp-parent', `${itemName} Τ${rolledTier}`, dropColor, { floatUp: true });
 
@@ -7061,7 +7063,7 @@ if (isSoulDrop) {
     else if (!isSoulDrop && rolledTier >= monster.level + 5) {
 
     const color =
-        type === 'weapon' ? '#ff4444' :
+        type === 'weapon' ? '#ec6868' :
         type === 'armor'  ? '#1ab2ff' :
                             '#cc66ff';
 
@@ -7581,7 +7583,7 @@ function applyDefeatPenalties() {
         // Πλήρης φθορά (5 πόντοι) → popup ΚΑΤΑΣΤΡΟΦΗ! με το χρώμα του αντικειμένου
         if (actualLoss >= 5) {
             const slotColor =
-                lostSlot === 'weapon' ? '#ff4444' :
+                lostSlot === 'weapon' ? '#ec6868' :
                 lostSlot === 'armor'  ? '#1ab2ff' :
                                         '#cc66ff';
             showAnnouncementPopup("ΚΑΤΑΣΤΡΟΦΗ!", "", slotColor);
