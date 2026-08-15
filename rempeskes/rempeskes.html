@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v437</title>
+    <title>Ρεμπεσκές v439</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -1435,6 +1435,10 @@ body {
     flex-wrap: wrap;
 }
 
+.autoplay-row + .autoplay-row {
+    margin-top: 10px;
+}
+
 #autoplay-toggle-btn {
     background-color: #2a2a2a;
     color: var(--text-muted);
@@ -1456,6 +1460,23 @@ body {
     background-color: #2ecc71;
     border-color: #2ecc71;
     font-weight: bold;
+}
+
+#autoplay-retreat-btn {
+    background-color: #2a2a2a;
+    color: var(--text-muted);
+    border: 1px solid #444;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-radius: 2px;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+#autoplay-retreat-btn:hover {
+    border-color: var(--hp-player);
+    color: var(--hp-player);
 }
 
 .autoplay-speed-wrap {
@@ -1480,6 +1501,25 @@ body {
     font-size: 0.78rem;
     color: var(--text-muted);
     min-height: 1em;
+}
+
+.autoplay-depth-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.autoplay-depth-wrap select {
+    flex: 1;
+    min-width: 0;
+    background-color: #1a1a1a;
+    color: var(--text-main);
+    border: 1px solid #444;
+    border-radius: 2px;
+    padding: 3px 5px;
+    font-family: inherit;
 }
 
     </style>
@@ -1642,6 +1682,9 @@ body {
     <div class="autoplay-row">
         <button id="autoplay-toggle-btn" type="button">🤖 AutoPlay: OFF</button>
         <button id="autoplay-settings-btn" type="button" title="AutoPlay ρυθμίσεις">⚙️</button>
+        <button id="autoplay-retreat-btn" type="button" title="Υποχώρηση (αν υπάρχει μάχη)">Υποχώρηση</button>
+    </div>
+    <div class="autoplay-row">
         <div class="autoplay-speed-wrap">
             <label for="autoplay-speed-select">Ταχ.</label>
             <select id="autoplay-speed-select">
@@ -1653,6 +1696,9 @@ body {
                 <option value="15">Τούρμπο</option>
                 <option value="30">Καρατούρμπο</option>
             </select>
+        </div>
+        <div class="autoplay-depth-wrap">
+            <select id="autoplay-area-selector"></select>
         </div>
     </div>
     <div id="autoplay-status" class="autoplay-status">AutoPlay ανενεργό.</div>
@@ -5170,6 +5216,7 @@ function syncPlayerSettings() {
     if (selector) {
         selector.value = savedLevel;
         updateSelectorColor(selector);
+        syncAutoplayAreaSelector();
     }
 }
 
@@ -5288,6 +5335,14 @@ function applyAutoplayVisibility() {
     const panel = document.getElementById('autoplay-panel');
     if (panel) {
         panel.style.display = (player.showAutoplay) ? '' : 'none';
+    }
+    const skillGrid = document.querySelector('.skill-grid');
+    if (skillGrid) {
+        skillGrid.style.display = (player.showAutoplay) ? 'none' : '';
+    }
+    const tekeAreaSel = document.querySelector('.area-select-container');
+    if (tekeAreaSel) {
+        tekeAreaSel.style.display = (player.showAutoplay) ? 'none' : '';
     }
 }
 
@@ -5741,6 +5796,41 @@ function updateAreaSelector() {
         saveGame();
         updateUI();
     };
+
+    syncAutoplayAreaSelector();
+}
+
+function syncAutoplayAreaSelector() {
+    const mainSel = document.getElementById('area-selector');
+    const autoSel = document.getElementById('autoplay-area-selector');
+    if (!mainSel || !autoSel) return;
+    if (autoSel.options.length !== mainSel.options.length) {
+        autoSel.innerHTML = '';
+        for (let i = 0; i < mainSel.options.length; i++) {
+            const opt = document.createElement('option');
+            opt.value = mainSel.options[i].value;
+            opt.innerText = mainSel.options[i].innerText;
+            opt.style.color = mainSel.options[i].style.color;
+            autoSel.appendChild(opt);
+        }
+    } else {
+        for (let i = 0; i < mainSel.options.length; i++) {
+            const src = mainSel.options[i];
+            const dst = autoSel.options[i];
+            if (dst.innerText !== src.innerText) dst.innerText = src.innerText;
+            if (dst.style.color !== src.style.color) dst.style.color = src.style.color;
+        }
+    }
+    autoSel.value = mainSel.value;
+    autoSel.style.color = mainSel.style.color;
+}
+
+function syncAutoplayAreaSelectorValue() {
+    const mainSel = document.getElementById('area-selector');
+    const autoSel = document.getElementById('autoplay-area-selector');
+    if (!mainSel || !autoSel) return;
+    autoSel.value = mainSel.value;
+    autoSel.style.color = mainSel.style.color;
 }
 
 function updateSelectorColor(selector) {
@@ -5751,6 +5841,24 @@ function updateSelectorColor(selector) {
 
 document.getElementById('area-selector').addEventListener('change', function() {
     updateSelectorColor(this);
+    syncAutoplayAreaSelectorValue();
+});
+
+document.getElementById('autoplay-area-selector').addEventListener('change', function() {
+    const mainSel = document.getElementById('area-selector');
+    if (!mainSel) return;
+    mainSel.value = this.value;
+    updateSelectorColor(mainSel);
+    this.style.color = mainSel.style.color;
+    if (inCombat) {
+        // μέσα σε μάχη: ισχύει στην επόμενη κατάβαση (όχι στην τρέχουσα μάχη)
+        if (typeof window.__autoSetManualDepth === 'function') window.__autoSetManualDepth(parseFloat(mainSel.value));
+    } else {
+        currentSelectedLevel = parseFloat(mainSel.value);
+        logAreaTransition(currentSelectedLevel);
+        saveGame();
+        updateUI();
+    }
 });
 
 function refreshAreaSelectorAppearance() {
@@ -5766,6 +5874,7 @@ function refreshAreaSelectorAppearance() {
         opt.style.color = AREA_TYPE_COLOR[areaType];
     }
     updateSelectorColor(selector);
+    syncAutoplayAreaSelector();
 }
 
 
@@ -7609,60 +7718,74 @@ function applyDefeatPenalties() {
         return;
     }
 
+    // ===== ΑΛΛΑΓΗ ΒΑΘΟΥΣ (5/8) — λειτουργεί και μέσα σε μάχη/autoplay =====
+    // μέσα σε μάχη η αλλαγή ισχύει στην ΕΠΟΜΕΝΗ κατάβαση, όχι στην τρέχουσα
+    // επόμενο επίπεδο
+    if (
+        code === 'Digit5' ||
+        code === 'Numpad5' ||
+        key === '5'
+    ) {
+
+        event.preventDefault();
+
+        const selector = document.getElementById('area-selector');
+
+        if (selector.selectedIndex < selector.options.length - 1) {
+            selector.selectedIndex++;
+            const newDepth = parseFloat(selector.value);
+
+            // ΠΡΟΣΘΗΚΗ: Ενημέρωση του χρώματος της μπάρας
+            updateSelectorColor(selector);
+
+            syncAutoplayAreaSelectorValue();
+
+            if (inCombat) {
+                if (typeof window.__autoSetManualDepth === 'function') window.__autoSetManualDepth(newDepth);
+            } else {
+                currentSelectedLevel = newDepth;
+                saveGame();
+                updateUI();
+            }
+        }
+
+        return;
+    }
+
+    // προηγούμενο επίπεδο
+    if (
+        code === 'Digit8' ||
+        code === 'Numpad8' ||
+        key === '8'
+    ) {
+
+        event.preventDefault();
+
+        const selector = document.getElementById('area-selector');
+
+        if (selector.selectedIndex > 0) {
+            selector.selectedIndex--;
+            const newDepth = parseFloat(selector.value);
+
+            // ΠΡΟΣΘΗΚΗ: Ενημέρωση του χρώματος της μπάρας
+            updateSelectorColor(selector);
+
+            syncAutoplayAreaSelectorValue();
+
+            if (inCombat) {
+                if (typeof window.__autoSetManualDepth === 'function') window.__autoSetManualDepth(newDepth);
+            } else {
+                currentSelectedLevel = newDepth;
+                saveGame();
+                updateUI();
+            }
+        }
+
+        return;
+    }
+
     // τα παρακάτω μόνο εκτός μάχης
     if (inCombat) return;
-
-    // επόμενο επίπεδο
-// επόμενο επίπεδο
-if (
-    code === 'Digit5' ||
-    code === 'Numpad5' ||
-    key === '5'
-) {
-
-    event.preventDefault();
-
-    const selector = document.getElementById('area-selector');
-
-    if (selector.selectedIndex < selector.options.length - 1) {
-        selector.selectedIndex++;
-        currentSelectedLevel = parseFloat(selector.value);
-        
-        // ΠΡΟΣΘΗΚΗ: Ενημέρωση του χρώματος της μπάρας
-        updateSelectorColor(selector);
-
-        saveGame();
-        updateUI();
-    }
-
-    return;
-}
-
-    // προηγούμενο επίπεδο
-    // προηγούμενο επίπεδο
-if (
-    code === 'Digit8' ||
-    code === 'Numpad8' ||
-    key === '8'
-) {
-
-    event.preventDefault();
-
-    const selector = document.getElementById('area-selector');
-
-    if (selector.selectedIndex > 0) {
-        selector.selectedIndex--;
-        currentSelectedLevel = parseFloat(selector.value);
-
-        // ΠΡΟΣΘΗΚΗ: Ενημέρωση του χρώματος της μπάρας
-        updateSelectorColor(selector);
-
-        saveGame();
-        updateUI();
-    }
-
-    return;
-}
 
 });
 
@@ -7687,6 +7810,7 @@ if (
         selector.selectedIndex = target;
         currentSelectedLevel = parseFloat(selector.value);
         updateSelectorColor(selector);
+        syncAutoplayAreaSelectorValue();
         saveGame();
         updateUI();
     }
@@ -7739,9 +7863,8 @@ if (
 <div id="autoplay-settings-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
     <div style="background:#2a2a2a;border:1px solid var(--accent-gold);border-radius:8px;padding:20px;max-width:400px;width:90%;color:#fff;">
         <h3 style="margin:0 0 15px;color:var(--accent-gold);">AutoPlay Ρυθμίσεις</h3>
-        <label style="display:block;margin-bottom:12px;font-size:0.85rem;">
-            Στόχος βάθους: <span id="settings-depth-val">-1</span>
-            <input type="range" id="settings-depth" min="-20" max="20" step="1" value="-1" style="width:100%;">
+        <label style="display:block;margin-bottom:12px;font-size:0.85rem;cursor:pointer;">
+            <input type="checkbox" id="settings-use-selected-depth"> Χρήση επιλεγμένου βάθους
         </label>
         <label style="display:block;margin-bottom:12px;font-size:0.85rem;cursor:pointer;">
             <input type="checkbox" id="settings-use-ratio"> Χρήση auto risk ratio
@@ -7749,6 +7872,10 @@ if (
         <label style="display:block;margin-bottom:12px;font-size:0.85rem;">
             Risk Ratio: <span id="settings-ratio-val">0.8</span>
             <input type="range" id="settings-ratio" min="0.1" max="2.0" step="0.05" value="0.8" style="width:100%;">
+        </label>
+        <label style="display:block;margin-bottom:12px;font-size:0.85rem;">
+            Στόχος βάθους: <span id="settings-depth-val">-1</span>
+            <input type="range" id="settings-depth" min="-20" max="20" step="1" value="-1" style="width:100%;">
         </label>
         <label style="display:block;margin-bottom:12px;font-size:0.85rem;">
             HP% για μπύρα: <span id="settings-beer-val">0.80</span>
@@ -7781,10 +7908,13 @@ if (
    - AUTO_DEPTH_BELOW_PLAYER : πόσα levels κάτω από τον παίκτη
      διαλέγει αυτόματα το dungeon (default 5). Χρησιμοποιείται μόνο
      όταν AUTO_USE_TARGET_RATIO = false.
-   - AUTO_USE_TARGET_RATIO   : true -> αγνοεί το AUTO_DEPTH_BELOW_PLAYER
-     και αντ' αυτού διαλέγει το βάθος που φέρνει το combat ratio
-     (calculateDifficulty του παιχνιδιού) όσο πιο κοντά γίνεται στο
-     AUTO_TARGET_COMBAT_RATIO.
+    - AUTO_USE_TARGET_RATIO   : true -> αγνοεί το AUTO_DEPTH_BELOW_PLAYER
+      και αντ' αυτού διαλέγει το βάθος που φέρνει το combat ratio
+      (calculateDifficulty του παιχνιδιού) όσο πιο κοντά γίνεται στο
+      AUTO_TARGET_COMBAT_RATIO.
+    - AUTO_USE_SELECTED_DEPTH : true -> αγνοεί τόσο το ratio όσο και το
+      offset και κατεβαίνει ΠΑΝΤΑ στο βάθος που έχει ήδη επιλεγμένο ο
+      παίκτης στο area-selector.
    - AUTO_TARGET_COMBAT_RATIO : επιθυμητό ratio δυσκολίας (π.χ. 0.9).
      Μικρότερο ratio = πιο εύκολη/ασφαλής μάχη, μεγαλύτερο = πιο δύσκολη.
    - AUTO_BEER_HP_PCT        : κάτω από ποιο % HP πίνει μπύρα (0.70 = 70%).
@@ -7799,6 +7929,7 @@ if (
     let AUTO_DEPTH_BELOW_PLAYER = 0;        // levels κάτω (ή πάνω, αν αρνητικό) από τον player — μόνο αν AUTO_USE_TARGET_RATIO = false
     let AUTO_USE_TARGET_RATIO = true;       // true: επιλογή βάθους με βάση το combat ratio αντί για σταθερό offset
     let AUTO_TARGET_COMBAT_RATIO = 0.5;      // στόχος για το calculateDifficulty(player, monster) — μόνο αν AUTO_USE_TARGET_RATIO = true
+    let AUTO_USE_SELECTED_DEPTH = false;     // true: χρησιμοποιεί πάντα το ήδη επιλεγμένο βάθος (αγνοεί ratio & offset)
     let AUTO_BEER_HP_PCT = 0.80;            // μπύρα όταν HP <= 70% (δηλ. έχει δεχτεί >=30% damage)
     let AUTO_RETREAT_HP_PCT = 0.4;         // κατώφλι HP για σκέψη retreat
     let AUTO_RETREAT_BEER_CHARGE_PCT = 1.0;// αν η μπύρα δεν είναι έστω χ% charged -> retreat
@@ -7814,6 +7945,15 @@ if (
     let autoLatePhaseFired = false;
     let autoRetreatAfterLevel = false;
     let autoLastCombatTime = 0;
+    let autoPendingStop = false; // κλείσιμο σε εξέλιξη: περιμένουμε υποχώρηση πριν σβήσει
+    let autoManualDepth = null;  // βάθος που διάλεξε χειροκίνητα ο παίκτης (hotkeys 5/8) — μπαίνει στην επόμενη κατάβαση
+
+    // Καλείται από τα hotkeys αλλαγής βάθους όταν το bot είναι μέσα σε μάχη:
+    // δεν αλλάζει το τρέχον βάθος, μόνο καταγράφει το επόμενο.
+    window.__autoSetManualDepth = function (level) {
+        autoManualDepth = level;
+        setStatus(`AutoPlay: επιλέχθηκε βάθος ${level} → θα μπει στην επόμενη κατάβαση...`);
+    };
 
     const toggleBtn = document.getElementById('autoplay-toggle-btn');
     const speedSelect = document.getElementById('autoplay-speed-select');
@@ -7888,6 +8028,17 @@ if (
     function autoPlayTick() {
         if (!autoPlayEnabled) return;
 
+        // Κλείσιμο σε εξέλιξη (autoPendingStop): όταν επιστρέψουμε στον τεκέ
+        // (εκτός μάχης), ολοκληρώνουμε το κλείσιμο — τώρα είναι ασφαλές.
+        if (autoPendingStop) {
+            if (inCombat) {
+                setStatus("AutoPlay: υποχώρηση πριν κλείσει...");
+                return;
+            }
+            setAutoPlayEnabled(false);
+            return;
+        }
+
         // Ironman νεκρός -> δεν κάνει τίποτα (ο παίκτης πρέπει να ξεκινήσει νέο)
         if (player.ironman && player.ironmanDead) {
             setStatus("AutoPlay: ο Ironman χαρακτήρας έχει πεθάνει, δεν μπορεί να συνεχίσει.");
@@ -7935,7 +8086,16 @@ if (
             if (!selector || selector.options.length === 0) return;
 
             let targetLevel;
-            if (AUTO_USE_TARGET_RATIO) {
+            if (autoManualDepth != null) {
+                // Ο παίκτης άλλαξε βάθος με hotkeys (5/8) ενώ το bot ήταν σε μάχη:
+                // αυτό το βάθος ισχύει μόνο για την επόμενη κατάβαση.
+                targetLevel = Math.max(1, Math.min(autoManualDepth, selector.options.length));
+                autoManualDepth = null;
+                setStatus(`AutoPlay: κατεβαίνει στο χειροκίνητα επιλεγμένο βάθος ${targetLevel}...`);
+            } else if (AUTO_USE_SELECTED_DEPTH) {
+                targetLevel = Math.max(1, Math.min(parseFloat(selector.value) || currentSelectedLevel, selector.options.length));
+                setStatus(`AutoPlay: χρησιμοποιεί το επιλεγμένο βάθος ${targetLevel}...`);
+            } else if (AUTO_USE_TARGET_RATIO) {
                 targetLevel = findDepthForTargetRatio(AUTO_TARGET_COMBAT_RATIO, selector.options.length);
                 const achievedRatio = calculateDifficulty(player, estimateMonsterAt(targetLevel));
                 setStatus(`AutoPlay: στοχεύει ratio ${AUTO_TARGET_COMBAT_RATIO} -> βάθος ${targetLevel} (εκτ. ratio ${achievedRatio.toFixed(2)})`);
@@ -8100,6 +8260,16 @@ if (
     }
 
     function setAutoPlayEnabled(enabled) {
+        // Κλείσιμο ενώ είμαστε σε μάχη: μην κλείνεις αμέσως — πρώτα υποχώρηση,
+        // και το κλείσιμο ολοκληρώνεται όταν το bot γυρίσει στον τεκέ (βλ. autoPlayTick).
+        if (!enabled && inCombat) {
+            autoPendingStop = true;
+            setStatus("AutoPlay: υποχώρηση πριν κλείσει...");
+            if (typeof toggleRetreat === 'function') toggleRetreat();
+            return;
+        }
+
+        autoPendingStop = false;
         autoPlayEnabled = enabled;
 
         if (toggleBtn) {
@@ -8128,6 +8298,22 @@ if (
         });
     }
 
+    const retreatBtn = document.getElementById('autoplay-retreat-btn');
+    if (retreatBtn) {
+        retreatBtn.addEventListener('click', function () {
+            // Ξεκινά τη ρουτίνα της υποχώρησης με τους κανόνες του παιχνιδιού
+            // (ισοδύναμο με το κουμπί "Τρέξε"): το toggleRetreat θέτει
+            // isAttemptingRetreat = true και η μάχη ολοκληρώνει την υποχώρηση
+            // στο σωστό σημείο. Δεν κάνουμε άμεσο forceRetreat.
+            if (inCombat) {
+                setStatus("AutoPlay: υποχώρηση...");
+                if (typeof toggleRetreat === 'function') toggleRetreat();
+            } else {
+                setStatus("AutoPlay: δεν υπάρχει μάχη — δεν χρειάζεται υποχώρηση.");
+            }
+        });
+    }
+
     if (speedSelect) {
         speedSelect.addEventListener('change', function () {
             const oldSpeed = autoPlaySpeedFactor;
@@ -8148,6 +8334,7 @@ if (
         document.getElementById('settings-depth').value = AUTO_DEPTH_BELOW_PLAYER;
         document.getElementById('settings-depth-val').textContent = AUTO_DEPTH_BELOW_PLAYER;
         document.getElementById('settings-use-ratio').checked = AUTO_USE_TARGET_RATIO;
+        document.getElementById('settings-use-selected-depth').checked = AUTO_USE_SELECTED_DEPTH;
         document.getElementById('settings-ratio').value = AUTO_TARGET_COMBAT_RATIO;
         document.getElementById('settings-ratio-val').textContent = AUTO_TARGET_COMBAT_RATIO;
         document.getElementById('settings-beer').value = AUTO_BEER_HP_PCT;
@@ -8166,15 +8353,22 @@ if (
     }
 
     function updateRatioEnabled() {
+        const useSelected = document.getElementById('settings-use-selected-depth').checked;
         const enabled = document.getElementById('settings-use-ratio').checked;
+        const useSelectedBox = document.getElementById('settings-use-selected-depth');
+        const useRatioBox = document.getElementById('settings-use-ratio');
+        useSelectedBox.disabled = enabled;
+        useSelectedBox.parentElement.style.opacity = enabled ? '0.4' : '1';
+        useRatioBox.disabled = useSelected;
+        useRatioBox.parentElement.style.opacity = useSelected ? '0.4' : '1';
         const ratioInput = document.getElementById('settings-ratio');
         const ratioLabel = ratioInput.parentElement;
-        ratioInput.disabled = !enabled;
-        ratioLabel.style.opacity = enabled ? '1' : '0.4';
+        ratioInput.disabled = useSelected || !enabled;
+        ratioLabel.style.opacity = (useSelected || !enabled) ? '0.4' : '1';
         const depthInput = document.getElementById('settings-depth');
         const depthLabel = depthInput.parentElement;
-        depthInput.disabled = enabled;
-        depthLabel.style.opacity = enabled ? '0.4' : '1';
+        depthInput.disabled = useSelected || enabled;
+        depthLabel.style.opacity = (useSelected || enabled) ? '0.4' : '1';
     }
 
     // Live preview στα range sliders
@@ -8186,6 +8380,7 @@ if (
     });
 
     document.getElementById('settings-use-ratio').addEventListener('change', updateRatioEnabled);
+    document.getElementById('settings-use-selected-depth').addEventListener('change', updateRatioEnabled);
 
     if (settingsBtn) {
         settingsBtn.addEventListener('click', openSettingsModal);
@@ -8194,12 +8389,26 @@ if (
     document.getElementById('settings-ok').addEventListener('click', function () {
         AUTO_DEPTH_BELOW_PLAYER = parseInt(document.getElementById('settings-depth').value, 10);
         AUTO_USE_TARGET_RATIO = document.getElementById('settings-use-ratio').checked;
+        AUTO_USE_SELECTED_DEPTH = document.getElementById('settings-use-selected-depth').checked;
         AUTO_TARGET_COMBAT_RATIO = parseFloat(document.getElementById('settings-ratio').value);
         AUTO_BEER_HP_PCT = parseFloat(document.getElementById('settings-beer').value);
         AUTO_RETREAT_HP_PCT = parseFloat(document.getElementById('settings-retreat').value);
         AUTO_RETREAT_BEER_CHARGE_PCT = parseFloat(document.getElementById('settings-beer-charge').value);
+        updateAutoplayDepthState();
         closeSettingsModal();
     });
+
+    // Ενεργό/ανενεργό του επιλογέα βάθους στα autoplay controls:
+    // ενεργός ΜΟΝΟ όταν χρησιμοποιείται το επιλεγμένο βάθος (AUTO_USE_SELECTED_DEPTH).
+    function updateAutoplayDepthState() {
+        const autoSel = document.getElementById('autoplay-area-selector');
+        if (!autoSel) return;
+        const enabled = !!AUTO_USE_SELECTED_DEPTH;
+        autoSel.disabled = !enabled;
+        autoSel.style.opacity = enabled ? '' : '0.4';
+        autoSel.style.cursor = enabled ? '' : 'not-allowed';
+    }
+    updateAutoplayDepthState();
 
     document.getElementById('settings-cancel').addEventListener('click', closeSettingsModal);
 
