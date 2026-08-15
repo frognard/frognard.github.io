@@ -1999,7 +1999,7 @@ function formatNumber(num) {
 //   4.3 γύροι/kill, 6 kills/κατάβαση + 9 ρεστ γύροι, μαγκιά = totalXP·1000/totalTurns.
 // Η μαγκιά-στόχος δίνεται ΣΥΝΕΧΩΣ σε σχέση με το αθροιστικό XP (γραμμική παρεμβολή μέσα
 // στο επίπεδο), ώστε το % να αλλάζει ομαλά όσο κερδίζεται XP και όχι απότομα στο level up.
-// Ο ιδανικός χαρακτήρας μετράει ΠΑΝΤΑ σαν να έχει σκοτώσει τον Κόνανο → η μαγκιά του ×1.5.
+// Ο ιδανικός χαρακτήρας μετράει ΠΑΝΤΑ τη μαγκιά του με ×1.5 ωστε το ποσοστο να ειναι λογικα χαμηλο.
 const _refMagkiaXP = { 1: 0 };
 const _refMagkiaTurns = { 1: 0 };
 let _refMagkiaMaxLevel = 1;
@@ -4923,11 +4923,9 @@ function checkLevelUp() {
         fText.style.top = isHpBar ? `50%` : `0px`;
         if (isHpBar) fText.classList.add(hpBarFloat ? 'hp-bar-float' : 'hp-bar-fixed');
 
-        // Η κίνηση είναι γρήγορη (1 τικ, όπως τα XP/GP floating texts). Το drop text
-        // όμως μένει στην οθόνη 1.5 τικ πριν εξαφανιστεί (το animation μένει στο τέλος
-        // του με forwards και το κείμενο απομακρύνεται μόνο στο 1.5 τικ).
+        // Η κίνηση είναι γρήγορη (1 τικ, όπως τα XP/GP floating texts).
         const tickMs = effTick();
-        const floatDurationMs = tickMs * (hpBarFloat ? 1.5 : 1);
+        const floatDurationMs = tickMs;
         fText.style.animationDuration = `${tickMs}ms`;
         
         parent.appendChild(fText);
