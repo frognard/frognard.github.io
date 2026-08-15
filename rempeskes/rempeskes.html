@@ -4869,12 +4869,12 @@ function checkLevelUp() {
         fText.style.top = isHpBar ? `50%` : `0px`;
         if (isHpBar) fText.classList.add(hpBarFloat ? 'hp-bar-float' : 'hp-bar-fixed');
 
-        // Το animation (χωρίς delay) τελειώνει ΑΚΡΙΒΩΣ μαζί με το combat tick -
-        // effTick() ήδη scalάρει με την ταχύτητα (COMBAT_TICK_MS / speedFactor),
-        // άρα εδώ απλά το ακολουθούμε 1-προς-1 αντί να το χωρίζουμε σε fraction.
-        // Το float-up drop text μένει 2 τικ, ώστε να προλαβαίνει να διαβαστεί.
-        const floatDurationMs = effTick() * (hpBarFloat ? 2 : 1);
-        fText.style.animationDuration = `${floatDurationMs}ms`;
+        // Η κίνηση είναι γρήγορη (1 τικ, όπως τα XP/GP floating texts). Το drop text
+        // όμως μένει στην οθόνη 1.5 τικ πριν εξαφανιστεί (το animation μένει στο τέλος
+        // του με forwards και το κείμενο απομακρύνεται μόνο στο 1.5 τικ).
+        const tickMs = effTick();
+        const floatDurationMs = tickMs * (hpBarFloat ? 1.5 : 1);
+        fText.style.animationDuration = `${tickMs}ms`;
         
         parent.appendChild(fText);
 
