@@ -378,6 +378,13 @@
         min-height: 0;
         overflow-y: auto;
     }
+    .info-tab.no-scrollbar {
+        scrollbar-width: none;       /* Firefox */
+        -ms-overflow-style: none;    /* Edge/IE παλιό */
+    }
+    .info-tab.no-scrollbar::-webkit-scrollbar {
+        display: none;              /* Chrome, Safari, νεότερο Edge */
+    }
     .stats-modal-box h2 {
         color: var(--brass);
         font-family: 'Roboto', sans-serif;
@@ -516,6 +523,216 @@ function romanish(n) {
 
 function formatScore(n) {
     return Number(n).toLocaleString('el-GR');
+}
+
+// --- Μαγκιά-στόχος (reference) του "ιδανικού" χαρακτήρα (ίδιος υπολογισμός με το παιχνίδι) ---
+const _refMagkiaXP = { 1: 0 };
+const _refMagkiaTurns = { 1: 0 };
+let _refMagkiaMaxLevel = 1;
+
+function _refMagkiaEnsureLevel(targetLevel) {
+    while (_refMagkiaMaxLevel < targetLevel) {
+        const lvl = _refMagkiaMaxLevel;
+        const req = Math.round(500 * Math.pow(lvl, 1.5));
+        const reward = Math.round(35 * Math.pow(lvl, 1.05));
+        const needed = Math.round(req / reward);
+        _refMagkiaXP[lvl + 1] = _refMagkiaXP[lvl] + needed * reward;
+        _refMagkiaTurns[lvl + 1] = _refMagkiaTurns[lvl] + needed * 4.3 + Math.ceil(needed / 6) * 9;
+        _refMagkiaMaxLevel++;
+    }
+}
+
+function refMagkiaAtXP(totalXp, ironman) {
+    _refMagkiaEnsureLevel(100);
+    const cap = _refMagkiaXP[100];
+    const xp = Math.min(Math.max(0, totalXp || 0), cap);
+    let L = 1;
+    while (L < 100 && _refMagkiaXP[L + 1] <= xp) L++;
+    const xp0 = _refMagkiaXP[L];
+    const xp1 = _refMagkiaXP[L + 1];
+    const turns0 = _refMagkiaTurns[L];
+    const turns1 = _refMagkiaTurns[L + 1];
+    let turns;
+    if (xp <= xp0) {
+        turns = turns0;
+    } else if (xp <= xp1) {
+        turns = turns0 + (xp - xp0) * ((turns1 - turns0) / (xp1 - xp0));
+    } else {
+        turns = turns1;
+    }
+    if (turns <= 0) return 0;
+    return (xp * 1000 / turns) * 1.5 * (ironman ? 1.5 : 1);
+}
+
+// Μαγκιά% ενός ορόσημου: αν έχει αποθηκευμένο pct το χρησιμοποιεί, αλλιώς το υπολογίζει
+// από το σκορ έναντι του ιδανικού στο συγκεκριμένο επίπεδο (για παλιά ορόσημα).
+function magkiaMilestonePct(m, ironman) {
+    const score = m.score || 0;
+    if (!(score > 0)) return null;
+    if (typeof m.pct === 'number' && Number.isFinite(m.pct)) return m.pct;
+    const L = Math.min(Math.max(1, m.level), 100);
+    _refMagkiaEnsureLevel(100);
+    const ref = refMagkiaAtXP(_refMagkiaXP[L] || 0, ironman === true);
+    if (!Number.isFinite(ref) || ref <= 0) return null;
+    return score / ref * 100;
+}
+
+// Σημεία για το γράφημα: ένα ανά 5 επίπεδα (level % 5 === 0), με το μαγκιά% τότε.
+function getMagkiaGraphData(milestones, ironman) {
+    const byLevel = {};
+    (milestones || []).forEach(m => {
+        if (typeof m.level !== 'number' || m.level % 5 !== 0) return;
+        const pct = magkiaMilestonePct(m, ironman);
+        if (pct === null || !Number.isFinite(pct)) return;
+        byLevel[m.level] = { level: m.level, pct };
+    });
+    return Object.values(byLevel).sort((a, b) => a.level - b.level);
+}
+
+// Το γράφημα "Μαγκιά% ανά 5 επίπεδα" στο τέλος του tab Ορόσημα.
+function buildMagkiaGraphHTML(milestones, ironman, idSuffix) {
+    const pts = getMagkiaGraphData(milestones, ironman);
+    let html = '<div style="padding:12px 0 2px 0;color:var(--brass);font-weight:bold;border-top:1px solid var(--ledger-line);">Μαγκιά% ανά 5 επίπεδα</div>';
+    if (pts.length === 0) {
+        return html + '<div style="color:var(--parchment-dim);font-style:italic;padding:6px 0;">Δεν υπάρχουν ακόμη σημεία.</div>';
+    }
+    html += `<canvas id="magkia-graph-${idSuffix}" style="width:100%;height:150px;display:block;margin-top:6px;"></canvas>`;
+    return html;
+}
+
+// Σχεδίαση του γραφήματος σαν χρηματιστηριακό chart (ανοδική πράσινη / καθοδική κόκκινη).
+function drawMagkiaGraph(canvas, milestones, ironman) {
+    if (!canvas) return;
+    const pts = getMagkiaGraphData(milestones, ironman);
+    if (pts.length === 0) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = Math.max(Math.round(canvas.clientWidth || canvas.parentElement.clientWidth || 400), 200);
+    const cssH = 150;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+
+    const padL = 42, padR = 12, padT = 12, padB = 22;
+    const plotW = cssW - padL - padR;
+    const plotH = cssH - padT - padB;
+    if (plotW < 40 || plotH < 20) return;
+
+    const vals = pts.map(p => p.pct);
+    let yMin = Math.min(...vals);
+    let yMax = Math.max(...vals);
+    let range = yMax - yMin;
+    if (range < 1) { yMin -= 5; yMax += 5; range = yMax - yMin; }
+
+    const X = i => padL + (pts.length === 1 ? plotW / 2 : i * (plotW / (pts.length - 1)));
+    const Y = v => padT + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+
+    // --- Οριζόντιες γραμμές πάντα σε στρογγυλά πολλαπλάσια του 10,
+    //     με όρια μόνο γύρω από τα δεδομένα ---
+    const niceSteps = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
+    let step = 10;
+    for (const s of niceSteps) {
+        if (range / s <= 8) { step = s; break; }
+    }
+    let gridStart = Math.floor(yMin / step) * step;
+    let gridEnd = Math.ceil(yMax / step) * step;
+    if (gridEnd - gridStart < 2 * step) {
+        gridStart -= step;
+        gridEnd += step;
+    }
+    // μικρό περιθώριο αν τα δεδομένα φτάνουν ως την άκρη
+    if (yMin <= gridStart + 0.15 * step) gridStart -= step;
+    if (yMax >= gridEnd - 0.15 * step) gridEnd += step;
+    yMin = gridStart;
+    yMax = gridEnd;
+
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let v = gridStart; v <= gridEnd; v += step) {
+        const y = Y(v);
+        ctx.strokeStyle = 'rgba(217,201,160,0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(padL + plotW, y);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(156,140,106,0.75)';
+        ctx.fillText(v + '%', padL - 5, y);
+    }
+
+    if (100 >= yMin && 100 <= yMax) {
+        const y100 = Y(100);
+        ctx.save();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = 'rgba(201,162,39,0.5)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padL, y100);
+        ctx.lineTo(padL + plotW, y100);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    ctx.fillStyle = 'rgba(217,201,160,0.6)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    pts.forEach((p, i) => { ctx.fillText(p.level, X(i), padT + plotH + 6); });
+
+    const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+    grad.addColorStop(0, 'rgba(201,162,39,0.25)');
+    grad.addColorStop(1, 'rgba(201,162,39,0.02)');
+    ctx.beginPath();
+    pts.forEach((p, i) => {
+        const x = X(i), y = Y(p.pct);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.lineTo(X(pts.length - 1), padT + plotH);
+    ctx.lineTo(X(0), padT + plotH);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    for (let i = 0; i < pts.length - 1; i++) {
+        ctx.strokeStyle = (pts[i + 1].pct >= pts[i].pct) ? '#2ecc71' : '#e74c3c';
+        ctx.beginPath();
+        ctx.moveTo(X(i), Y(pts[i].pct));
+        ctx.lineTo(X(i + 1), Y(pts[i + 1].pct));
+        ctx.stroke();
+    }
+
+    pts.forEach((p, i) => {
+        ctx.beginPath();
+        ctx.arc(X(i), Y(p.pct), 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = (i === pts.length - 1) ? '#ffd700' : '#ffffff';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    });
+
+    const last = pts[pts.length - 1];
+    const prev = pts.length > 1 ? pts[pts.length - 2].pct : last.pct;
+    const rising = last.pct >= prev;
+    const color = rising ? '#2ecc71' : '#e74c3c';
+    const label = last.pct.toFixed(1) + '%';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+    const tw = ctx.measureText(label).width + 8;
+    const bx = Math.min(Math.max(X(pts.length - 1) - tw / 2, padL), padL + plotW - tw);
+    const by = Math.max(Y(last.pct) - 14, padT);
+    ctx.fillStyle = 'rgba(20,20,20,0.85)';
+    ctx.fillRect(bx, by, tw, 13);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx, by, tw, 13);
+    ctx.fillStyle = color;
+    ctx.fillText(label, bx + 4, by + 12);
 }
 
 function renderEntry(s, i, isVictory, isIronman) {
@@ -797,6 +1014,7 @@ function showCharInfoPopup(idx) {
                 </div>
                 <div class="info-tab" id="info-tab-milestones" style="display:none;">
                     ${milRows}
+                    ${buildMagkiaGraphHTML(milestones, s.ironman === true, idx)}
                 </div>
                 <button class="stats-close-btn" onclick="closeStatsPopup()">Κλείσιμο</button>
             </div>
@@ -804,6 +1022,8 @@ function showCharInfoPopup(idx) {
     `;
     const el = document.createElement('div');
     el.innerHTML = html;
+    const boxEl = el.querySelector('.stats-modal-box');
+    if (boxEl) boxEl._magkiaData = { milestones: milestones || [], ironman: s.ironman === true };
     document.body.appendChild(el);
     document.body.classList.add('modal-open');
 }
@@ -812,8 +1032,16 @@ function switchInfoTab(event, tab) {
     const box = event.target.closest('.stats-modal-box');
     if (!box) return;
     box.querySelectorAll('.modal-tab').forEach(t => t.classList.toggle('active', t === event.target));
-    box.querySelector('#info-tab-stats').style.display = tab === 'stats' ? '' : 'none';
-    box.querySelector('#info-tab-milestones').style.display = tab === 'milestones' ? '' : 'none';
+    const statsTab = box.querySelector('#info-tab-stats');
+    const milTab = box.querySelector('#info-tab-milestones');
+    if (statsTab) statsTab.style.display = tab === 'stats' ? '' : 'none';
+    if (milTab) milTab.style.display = tab === 'milestones' ? '' : 'none';
+    if (milTab) milTab.classList.toggle('no-scrollbar', tab === 'milestones');
+    if (tab === 'milestones') {
+        const data = box._magkiaData || { milestones: [], ironman: false };
+        const canvas = box.querySelector('canvas[id^="magkia-graph-"]');
+        if (canvas) drawMagkiaGraph(canvas, data.milestones, data.ironman);
+    }
 }
 
 function closeStatsPopup() {

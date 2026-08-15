@@ -1989,6 +1989,15 @@ function getMagkiaPercent() {
     return score / ref * 100;
 }
 
+// Μαγκιά% από ένα σκορ (με το τρέχον totalXp): score / ref * 100.
+// Χρησιμοποιείται στα ορόσημα ανά 5 επίπεδα, ώστε το γράφημα να δείχνει το πραγματικό %.
+function magkiaPctFromScore(score) {
+    if (!score || !(score > 0)) return null;
+    const ref = refMagkiaAtXP(player.totalXpGained || 0, !!player.ironman);
+    if (!Number.isFinite(ref) || ref <= 0) return null;
+    return score / ref * 100;
+}
+
 // ΣΚΟΡ: totalXpGained * 100 / totalTurns * deathFactor (2.5% penalty ανά θάνατο) --- PROS TO PARON DE METRAEI
 function computeScore() {
     const totalXp = (player.level >= 100) ? (player.totalXpAtLevel100 || 0) : (player.totalXpGained || 0);
@@ -2123,6 +2132,9 @@ function switchStatsTab(tab) {
     btnTotal.classList.toggle('active', tab === 'total');
     btnDescent.classList.toggle('active', tab === 'descent');
     btnMilestones.classList.toggle('active', tab === 'milestones');
+    const modalBody = document.getElementById('info-modal-body');
+    if (modalBody) modalBody.classList.toggle('no-scrollbar', tab === 'milestones');
+    if (tab === 'milestones') drawMagkiaGraph();
 }
 
 function renderMagkiaScore() {
@@ -2145,6 +2157,184 @@ function depthLabelBracketed(depth) {
     if (!entry) return `[${depth}]`;
     const name = entry.replace(/^\d+\.\s*/, '');
     return `[${depth}] ${name}`;
+}
+
+// Μαγκιά% ενός ορόσημου: αν αποθηκεύτηκε pct το χρησιμοποιεί, αλλιώς το υπολογίζει
+// από το σκορ έναντι του ιδανικού στο συγκεκριμένο επίπεδο (για παλιά ορόσημα).
+function magkiaMilestonePct(m) {
+    const score = m.score || 0;
+    if (!(score > 0)) return null;
+    if (typeof m.pct === 'number' && Number.isFinite(m.pct)) return m.pct;
+    const L = Math.min(Math.max(1, m.level), 100);
+    _refMagkiaEnsureLevel(100);
+    const ref = refMagkiaAtXP(_refMagkiaXP[L] || 0, !!player.ironman);
+    if (!Number.isFinite(ref) || ref <= 0) return null;
+    return score / ref * 100;
+}
+
+// Σημεία για το γράφημα: ένα ανά 5 επίπεδα (level % 5 === 0), με το μαγκιά% τότε.
+function getMagkiaGraphData() {
+    const byLevel = {};
+    (player.magkiaMilestones || []).forEach(m => {
+        if (typeof m.level !== 'number' || m.level % 5 !== 0) return;
+        const pct = magkiaMilestonePct(m);
+        if (pct === null || !Number.isFinite(pct)) return;
+        byLevel[m.level] = { level: m.level, pct };
+    });
+    return Object.values(byLevel).sort((a, b) => a.level - b.level);
+}
+
+// Το γράφημα "Μαγκιά% ανά 5 επίπεδα" στο τέλος του tab Ορόσημα.
+function buildMagkiaGraphHTML() {
+    const pts = getMagkiaGraphData();
+    let html = '<div style="padding:10px 0 2px 0;color:#e8b84b;font-weight:bold;border-top:1px solid #333;">Μαγκιά% ανά 5 επίπεδα</div>';
+    if (pts.length === 0) {
+        return html + '<div style="color:#ccc;font-style:italic;padding:6px 0;">Δεν υπάρχουν ακόμη σημεία — θα συμπληρωθεί καθώς ανεβαίνεις επίπεδα.</div>';
+    }
+    html += '<canvas id="magkia-graph" style="width:100%;height:150px;display:block;margin-top:6px;"></canvas>';
+    return html;
+}
+
+// Σχεδίαση του γραφήματος σαν χρηματιστηριακό chart (ανοδική πράσινη / καθοδική κόκκινη).
+function drawMagkiaGraph() {
+    const canvas = document.getElementById('magkia-graph');
+    if (!canvas) return;
+    const pts = getMagkiaGraphData();
+    if (pts.length === 0) return;
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = Math.max(Math.round(canvas.clientWidth || canvas.parentElement.clientWidth || 400), 200);
+    const cssH = 150;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, cssW, cssH);
+
+    const padL = 42, padR = 12, padT = 12, padB = 22;
+    const plotW = cssW - padL - padR;
+    const plotH = cssH - padT - padB;
+    if (plotW < 40 || plotH < 20) return;
+
+    const vals = pts.map(p => p.pct);
+    let yMin = Math.min(...vals);
+    let yMax = Math.max(...vals);
+    let range = yMax - yMin;
+    if (range < 1) { yMin -= 5; yMax += 5; range = yMax - yMin; }
+
+    const X = i => padL + (pts.length === 1 ? plotW / 2 : i * (plotW / (pts.length - 1)));
+    const Y = v => padT + (1 - (v - yMin) / (yMax - yMin)) * plotH;
+
+    // --- Οριζόντιες γραμμές πάντα σε στρογγυλά πολλαπλάσια του 10,
+    //     με όρια μόνο γύρω από τα δεδομένα ---
+    const niceSteps = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
+    let step = 10;
+    for (const s of niceSteps) {
+        if (range / s <= 8) { step = s; break; }
+    }
+    let gridStart = Math.floor(yMin / step) * step;
+    let gridEnd = Math.ceil(yMax / step) * step;
+    if (gridEnd - gridStart < 2 * step) {
+        gridStart -= step;
+        gridEnd += step;
+    }
+    // μικρό περιθώριο αν τα δεδομένα φτάνουν ως την άκρη
+    if (yMin <= gridStart + 0.15 * step) gridStart -= step;
+    if (yMax >= gridEnd - 0.15 * step) gridEnd += step;
+    yMin = gridStart;
+    yMax = gridEnd;
+
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let v = gridStart; v <= gridEnd; v += step) {
+        const y = Y(v);
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(padL + plotW, y);
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(200,200,200,0.55)';
+        ctx.fillText(v + '%', padL - 5, y);
+    }
+
+    // Διακεκομμένη γραμμή αναφοράς στο 100% (ιδανική μαγκιά)
+    if (100 >= yMin && 100 <= yMax) {
+        const y100 = Y(100);
+        ctx.save();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = 'rgba(232,184,75,0.5)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padL, y100);
+        ctx.lineTo(padL + plotW, y100);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // Ετικέτες επιπέδων κάτω από κάθε σημείο
+    ctx.fillStyle = 'rgba(200,200,200,0.6)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    pts.forEach((p, i) => { ctx.fillText(p.level, X(i), padT + plotH + 6); });
+
+    // Γέμισμα κάτω από τη γραμμή (gradient)
+    const grad = ctx.createLinearGradient(0, padT, 0, padT + plotH);
+    grad.addColorStop(0, 'rgba(232,184,75,0.25)');
+    grad.addColorStop(1, 'rgba(232,184,75,0.02)');
+    ctx.beginPath();
+    pts.forEach((p, i) => {
+        const x = X(i), y = Y(p.pct);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.lineTo(X(pts.length - 1), padT + plotH);
+    ctx.lineTo(X(0), padT + plotH);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    // Γραμμή ανά τμήμα: πράσινη σε άνοδο, κόκκινη σε πτώση
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    for (let i = 0; i < pts.length - 1; i++) {
+        ctx.strokeStyle = (pts[i + 1].pct >= pts[i].pct) ? '#2ecc71' : '#e74c3c';
+        ctx.beginPath();
+        ctx.moveTo(X(i), Y(pts[i].pct));
+        ctx.lineTo(X(i + 1), Y(pts[i + 1].pct));
+        ctx.stroke();
+    }
+
+    // Κουκκίδες στα σημεία
+    pts.forEach((p, i) => {
+        ctx.beginPath();
+        ctx.arc(X(i), Y(p.pct), 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = (i === pts.length - 1) ? '#ffd700' : '#ffffff';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    });
+
+    // "Φυσαλίδα" με την τελευταία τιμή
+    const last = pts[pts.length - 1];
+    const prev = pts.length > 1 ? pts[pts.length - 2].pct : last.pct;
+    const rising = last.pct >= prev;
+    const color = rising ? '#2ecc71' : '#e74c3c';
+    const label = last.pct.toFixed(1) + '%';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+    const tw = ctx.measureText(label).width + 8;
+    const bx = Math.min(Math.max(X(pts.length - 1) - tw / 2, padL), padL + plotW - tw);
+    const by = Math.max(Y(last.pct) - 14, padT);
+    ctx.fillStyle = 'rgba(20,20,20,0.85)';
+    ctx.fillRect(bx, by, tw, 13);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx, by, tw, 13);
+    ctx.fillStyle = color;
+    ctx.fillText(label, bx + 4, by + 12);
 }
 
 function buildMilestonesHTML() {
@@ -2177,7 +2367,7 @@ function buildMilestonesHTML() {
             text = `<span style="color:#ccc;">Επίπεδο ${m.level}: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι</span>`;
         }
         return `<div style="padding:8px 0;border-bottom:1px solid #333;line-height:1.5;">${icon ? icon + ' ' : ''}${text}</div>`;
-    }).join('');
+    }).join('') + buildMagkiaGraphHTML();
 }
 
 function buildPlayerRecord() {
@@ -3662,7 +3852,7 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όταν προσπαθείς να ξεφύγεις από ένα τέρας, έχεις 15% πιθανότητα το γύρο να τη σκαπουλάρεις.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι αν είσαι κωλόφαρδος μπορεί να βρείς στο λαβύρινθο θρυλικά τέρατα, που ρίχνουν τα πανίσχυρα θρυλικά τους αντικείμενα!''" ,
     "Ένας μεθυσμένος παπάς φωνάζει: ''ΠΟΙΟΣ ΑΛΗΤΗΣ ΜΟΥ ΕΦΑΓΕ ΤΟ ΙΕΡΟ ΤΖΑΤΖΙΚΙ;;;''" ,
-    "Ακούς σαματά. Δυο εύσωμοι ρεμπεσκέδες έχουν πιαστεί στα χέρια παραδίπλα. Ο ψηλός φωνάζει: ''ΣΑ ΜΥΓΑ ΚΑΙ ΣΑ ΚΟΥΝΟΥΠΙ ΣΕ ΒΛΕΠΩ ΑΥΓΕΡΗ! ΕΙΣΑΙ ΠΙΑ ΕΝΑΣ ΡΕΜΠΕΣΚΕΣ!''. Ο μουσάτος γουρλώνει τα μάτια: ''ΜΑΥΡΕ ΓΟΡΙΛΑ ΚΑΘΑΡΜΑ! ΤΙ ΓΥΡΕΥΕΙΣ ΕΣΥ ΕΔΩ!;" ,
+    "Ακούς σαματά. Δυο εύσωμοι ρεμπεσκέδες έχουν πιαστεί στα χέρια παραδίπλα. Ο ψηλός φωνάζει: ''ΣΑ ΜΥΓΑ ΚΑΙ ΣΑ ΚΟΥΝΟΥΠΙ ΣΕ ΒΛΕΠΩ ΑΥΓΕΡΗ! ΕΙΣΑΙ ΠΙΑ ΕΝΑΣ ΡΕΜΠΕΣΚΕΣ!''. Ο μουσάτος γουρλώνει τα μάτια: ''ΜΑΥΡΕ ΓΟΡΙΛΑ ΚΑΘΑΡΜΑ! ΤΙ ΓΥΡΕΥΕΙΣ ΕΣΥ ΕΔΩ!;''" ,
     "Ακούγεται μια κραυγή από τα βάθη του τεκέ: ''ΕΠΕΣΕΝ ΜΟΥ ΤΟ ΧΕΛΜΕΤ! ΕΠΕΣΕΝ ΜΟΥ ΤΟ ΧΕΛΜΕΤ!''" ,
     "Μια παρέα από φωνακλάδες ρεμπεσκέδες παίζουν Κρύπτες & Καθάρματα σε μια γωνιά του τεκέ.",
     "Ο Σταύρακας έρχεται τρεκλίζοντας μπροστά σου και σε κοιτάει με το βλέμμα των χιλίων χιλιομέτρων. Ξερνάει στις μπότες σου. Μετά φεύγει.",
@@ -4599,7 +4789,8 @@ function checkLevelUp() {
 
         if (player.level % 5 === 0) {
             if (!player.magkiaMilestones) player.magkiaMilestones = [];
-            player.magkiaMilestones.push({ level: player.level, score: Math.max(computeScore(), player._displayedScore || 0), turns: player.activeTime || 0, deaths: player.deaths || 0 });
+            const msScore = Math.max(computeScore(), player._displayedScore || 0);
+            player.magkiaMilestones.push({ level: player.level, score: msScore, turns: player.activeTime || 0, deaths: player.deaths || 0, pct: magkiaPctFromScore(msScore) });
         }
 
         if (player.level === 100) {
