@@ -5404,7 +5404,7 @@ function slotSelectPlay(i) {
     startTownRegen();
     updateCooldownBars();
     saveGame();
-    liveUploadIfEnabled();
+ //   liveUploadIfEnabled();
 
     // Re-fetch & re-apply blacklists with the new character's data
     reloadLivingPool();
@@ -7152,7 +7152,7 @@ function clearPkBlacklist() {
     if (!confirm(`Να αδειάσει το blacklist των ρεμπεσκεδών (${count} σκοτωμένοι); Θα μπορέσουν να ξαναεμφανιστούν!`)) return;
     player.pkKills = [];
     saveGame();
-    liveUploadIfEnabled();
+ //   liveUploadIfEnabled();
     logMessage(`Το blacklist των ρεμπεσκεδών άδειασε (${count}). Οι παλιοί σου αντίπαλοι ίσως ξαναεμφανιστούν...`, 'system');
     reloadLivingPool();
 }
