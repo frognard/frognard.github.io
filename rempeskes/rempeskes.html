@@ -9233,11 +9233,13 @@ if ('serviceWorker' in navigator) {
             }
         }
 
+        const isK = n => n.name && (n.name.startsWith('[K]') || n.name.startsWith('[Κ]'));
         const pool = Array.from(seen.values()).filter(s =>
             s.ironman === true &&   // ironmen
             !!s.killer &&           // νεκροί (έχουν killer)
             !s.victory &&           // όχι θεοσφάχτες
             !(s.apateon === true) &&// όχι απατεώνες
+            !isK(s) &&              // όχι κυβόργια
             typeof s.level === 'number' && s.level >= 10
         );
         return pool.map(s => ({ name: s.name, level: s.level }));
@@ -9270,10 +9272,12 @@ if ('serviceWorker' in navigator) {
             }
         }
 
+        const isK = n => n.name && (n.name.startsWith('[K]') || n.name.startsWith('[Κ]'));
         const pool = Array.from(seen.values()).filter(s =>
             !s.killer &&            // ζωντανοί (δεν έχουν killer)
             !s.victory &&           // όχι θεοσφάχτες
             !(s.apateon === true) &&// όχι απατεώνες
+            !isK(s) &&              // όχι κυβόργια
             typeof s.level === 'number' && s.level >= 10
         );
         return pool.map(s => ({
