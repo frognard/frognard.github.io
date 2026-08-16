@@ -974,6 +974,10 @@ function showCharInfoPopup(idx) {
                 rows += `<div style="padding:5px 0;line-height:1.6;color:var(--brass);">[${m.level}] Σκότωσε: "${escapeHtml(m.legendaryKill)}" &#8594; "${escapeHtml(m.legendaryDrop)}" &middot; γύρος ${formatNumber(m.turns)}</div>`;
             } else if (m.soulKill) {
                 rows += `<div style="padding:5px 0;line-height:1.6;color:#a0703f;">[${m.level}] Στοιχειό! Σκότωσε: "${escapeHtml(m.soulKill)}" και βρήκε: "Ψυχή (${escapeHtml(m.soulKill)})" &middot; γύρος ${formatNumber(m.turns)}</div>`;
+            } else if (m.pkKill) {
+                rows += `<div style="padding:5px 0;line-height:1.6;color:#2ecc71;">[${m.level}] Ταπείνωση ρεμπεσκέ: "${escapeHtml(m.pkKill)}"${m.pkLevel ? ` (lvl ${m.pkLevel})` : ''} - Βρήκε: ${escapeHtml(m.pkDrop || 'κανένα')} &middot; γύρος ${formatNumber(m.turns)}</div>`;
+            } else if (m.pkDeath) {
+                rows += `<div style="padding:5px 0;line-height:1.6;color:#e74c3c;">[${m.level}] Ήττα από ρεμπεσκέ: "${escapeHtml(m.pkName || '')}"${m.pkLevel ? ` (lvl ${m.pkLevel})` : ''} &middot; Έχασε: ${escapeHtml(m.lostItem || '')} &middot; γύρος ${formatNumber(m.turns)}</div>`;
             } else {
                 rows += `<div style="padding:5px 0;line-height:1.6;color:#ccc;">[${m.level}] Μαγκιά ${formatNumber(m.score)} &middot; ${formatNumber(m.turns)} γύροι &middot; ${formatNumber(m.deaths)} ψόφοι</div>`;
             }
@@ -995,6 +999,7 @@ function showCharInfoPopup(idx) {
                     <div class="stats-row"><span class="stats-label">Φόνοι σπάνιων τεράτων</span><span class="stats-value">${formatNumber(s.kills_weapon || 0)}-${formatNumber(s.kills_armor || 0)}-${formatNumber(s.kills_magic || 0)}</span></div>
                     <div class="stats-row"><span class="stats-label">Θάνατοι</span><span class="stats-value">${s.ironman ? 'IRONMAN' : formatNumber(d)}</span></div>
                     <div class="stats-row"><span class="stats-label">Θάνατοι από σπάνια</span><span class="stats-value">${formatNumber(s.deaths_weapon || 0)}-${formatNumber(s.deaths_armor || 0)}-${formatNumber(s.deaths_magic || 0)}</span></div>
+                    <div class="stats-row"><span class="stats-label">PK K/D</span><span class="stats-value">${formatNumber(s.pk_kills_count || 0)}-${formatNumber(s.pk_deaths || 0)}${(s.pk_deaths || 0) > 0 ? ` (${((s.pk_kills_count || 0) / s.pk_deaths).toFixed(2)})` : ''}</span></div>
                     <div class="stats-row"><span class="stats-label">Κατανάλωση μπύρας</span><span class="stats-value">${formatNumber(s.beers_drunk || 0)} λίτρα</span></div>
                     <div class="stats-row"><span class="stats-label">Γύροι</span><span class="stats-value">${formatNumber(s.turns || 0)}</span></div>
                     <div class="stats-row"><span class="stats-label">Ρίσκο</span><span class="stats-value">${(s.risk || 0) > 0 ? '+' : ''}${(s.risk || 0).toFixed(3)}</span></div>

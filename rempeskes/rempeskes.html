@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v441</title>
+    <title>Ρεμπεσκές v450</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -363,6 +363,65 @@ padding: 20px;
     color: #c0c0c0 !important;
     text-shadow: 0 0 8px rgba(140,130,220,1.0), 0 0 22px rgba(90,50,210,0.75);
 }
+.pk-monster-glow {
+    color: #2ecc71 !important;
+    font-weight: 700;
+    text-shadow: 0 0 8px rgba(46,204,113,0.9), 0 0 22px rgba(46,204,113,0.5);
+}
+
+.pk-recharge-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+}
+.pk-bar-label {
+    width: 16px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: #999;
+    flex-shrink: 0;
+    user-select: none;
+}
+.pk-bar {
+    flex: 1;
+    min-width: 0;
+    height: 8px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+.pk-bar-fill {
+    display: block;
+    height: 100%;
+    width: var(--fill, 0%);
+    transition: width 0.12s linear;
+}
+.pk-bar-fill.pk-bar-skill { background: #e74c3c; box-shadow: 0 0 6px rgba(231,76,60,0.6); }
+.pk-bar-fill.pk-bar-precise { background: #f39c12; box-shadow: 0 0 6px rgba(243,156,18,0.6); }
+.pk-bar-fill.pk-bar-beer { background: #2ecc71; box-shadow: 0 0 6px rgba(46,204,113,0.6); }
+.pk-flee-btn {
+    width: 20px;
+    height: 14px;
+    line-height: 12px;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #999;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 2px;
+    cursor: default;
+    flex: none;
+}
+.pk-flee-btn.pk-flee-active {
+    color: #fff;
+    background: #e74c3c;
+    border-color: #ff8a80;
+    box-shadow: 0 0 8px rgba(231,76,60,0.9), 0 0 16px rgba(231,76,60,0.6);
+}
 
 .legendary-monster-glow {
     color: #ffde21 !important;
@@ -376,7 +435,8 @@ padding: 20px;
 #m-name.legendary-glow-weapon,
 #m-name.legendary-glow-armor,
 #m-name.legendary-glow-magic,
-#m-name.soul-monster-glow {
+#m-name.soul-monster-glow,
+#m-name.pk-monster-glow {
     overflow: visible !important;
 }
 
@@ -780,6 +840,25 @@ padding: 20px;
 
         .btn-psofo:hover {
             background-color: #9b69b3 !important;
+            color: #fff;
+        }
+
+        .btn-clear-pk {
+            border: none;
+            padding: 0;
+            width: 34px;
+            height: 34px;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            background-color: #1a1a1a;
+            color: #e74c3c;
+        }
+
+        .btn-clear-pk:hover {
+            background-color: #e74c3c !important;
             color: #fff;
         }
 
@@ -1383,6 +1462,7 @@ padding: 20px;
 .log-milestone-legendary { color: #ffde21; }
 .log-milestone-soul { color: #a0703f; }
 .log-milestone-title { color: #2ecc71; font-weight: bold; }
+.log-pk { color: #ffde21; }
 
 .label-gold {
     color: #f5d142; /* χρυσό */
@@ -1738,6 +1818,10 @@ body {
 
     <button class="btn-psofo" title="Hi-Scores" onclick="window.open('https://frognard.github.io/rempeskes/psofologio.html', '_blank')">
         🏆
+    </button>
+
+    <button class="btn-clear-pk" title="Άδειασμα blacklist ρεμπεσκεδών (σκοτωμένων/αποκλεισμένων) — μπορεί να ξαναεμφανιστούν" onclick="clearPkBlacklist()" style="display:none;">
+        🗑️
     </button>
 
     <button class="btn-delete-save" title="Επιλογή Χαρακτήρα" onclick="showCharacterSelect()" style="margin-left:auto;">
@@ -2142,6 +2226,12 @@ function showStats() {
     appendInfoLine(totalDiv, `Φόνοι: ${formatNumber(player.kills)}`, "stats");
     appendInfoLine(totalDiv, `Φόνοι σπάνιων τεράτων: ${formatNumber(player.killsWeapon || 0)}-${formatNumber(player.killsArmor || 0)}-${formatNumber(player.killsMagic || 0)}`, "stats");
     appendInfoLine(totalDiv, `Θάνατοι: ${player.ironman ? 'IRONMAN' : formatNumber(player.deaths)}`, "stats");
+    {
+        const pkK = player.pkKillsCount || 0;
+        const pkD = player.pkDeaths || 0;
+        const pkKD = pkD > 0 ? (pkK / pkD).toFixed(2) : pkK.toFixed(2);
+        appendInfoLine(totalDiv, `PK K/D: ${formatNumber(pkK)}-${formatNumber(pkD)} (${pkKD})`, "stats");
+    }
     appendInfoLine(totalDiv, `Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`, "stats");
     appendInfoLine(totalDiv, `Γύροι: ${formatNumber(player.activeTime)}`, "stats");
     appendInfoLine(totalDiv, `Ρίσκο: ${(player.risk || 0) > 0 ? '+' : ''}${(player.risk || 0).toFixed(3)}`, "stats");
@@ -2429,6 +2519,12 @@ function buildMilestonesHTML() {
         } else if (m.soulKill) {
             icon = '💀';
             text = `<span style="color:#a0703f;">Επίπεδο ${m.level}: Στοιχειό! Σκότωσε: "${m.soulKill}" και βρήκε: "Ψυχή (${m.soulKill})" - γύρος ${formatNumber(m.turns)}</span>`;
+        } else if (m.pkKill) {
+            icon = '👤';
+            text = `<span style="color:#2ecc71;">Επίπεδο ${m.level}: Ταπείνωση ρεμπεσκέ: "${m.pkKill}"${m.pkLevel ? ` (lvl ${m.pkLevel})` : ''} - Βρήκε: ${m.pkDrop || 'κανένα'} - γύρος ${formatNumber(m.turns)}</span>`;
+        } else if (m.pkDeath) {
+            icon = '👤';
+            text = `<span style="color:#e74c3c;">Επίπεδο ${m.level}: Ήττα από ρεμπεσκέ: "${m.pkName}"${m.pkLevel ? ` (lvl ${m.pkLevel})` : ''} - Έχασε: ${m.lostItem} - γύρος ${formatNumber(m.turns)}</span>`;
         } else {
             text = `<span style="color:#ccc;">Επίπεδο ${m.level}: Μαγκιά ${formatNumber(m.score)} - ${formatNumber(m.turns)} γύροι - ${formatNumber(m.deaths)} ψόφοι</span>`;
         }
@@ -2471,6 +2567,8 @@ function buildPlayerRecord() {
         beersDrunk: player.beersDrunk || 0,
         pentaria: player.pentaria || 0,
         soulsKilled: player.soulsKilled || 0,
+        pkKillsCount: player.pkKillsCount || 0,
+        pkDeaths: player.pkDeaths || 0,
         legendaryEncounters: player.legendaryEncounters || 0,
         legendaryDrops: player.legendaryDrops || 0,
         avgKillTime: player.kills > 0 ? (player.combatRounds / player.kills) : 0,
@@ -2519,6 +2617,11 @@ function flashSkillButton(buttonId) {
 
 function getMonsterDisplayName(monster) {
     if (!monster) return "";
+
+    // Ζωντανοί ρεμπεσκέδες (PK): κανονικό όνομα χαρακτήρα
+    if (monster.isPk) {
+        return monster.pkName;
+    }
 
     // Ψυχές νεκρών ironmen: νεκροκεφαλή + κανονικό όνομα χαρακτήρα
     if (monster.variant === 'soul' || monster.isSoul) {
@@ -4397,6 +4500,8 @@ const AREA_TYPE_COLOR = {
     let descentStats = { turns: 0, damageDealt: 0, damageTaken: 0, kills: 0, xp: 0, gp: 0 };
     let sessionSoulPool = null;        // λίστα ψυχών νεκρών ironmen (τοπική, από το online ψοφολόγιο)
     let sessionSoulPoolLoaded = false; // true μόνο αν η λίστα φορτώθηκε επιτυχώς σε αυτό το session
+    let sessionLivingPool = null;        // λίστα ζωντανών ρεμπεσκεδών (τοπική, από το online database)
+    let sessionLivingPoolLoaded = false; // true μόνο αν η λίστα φορτώθηκε επιτυχώς σε αυτό το session
     let currentRunConanosChance = 0;
     let killStreakBonus = 0; // ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΟ: δεν δίνει πλέον XP bonus
  
@@ -4521,7 +4626,13 @@ const AREA_TYPE_COLOR = {
 function getMonsterDangerScore() {
     if (!monster) return 16; // neutral default
     const pComp = getPlayerAtk() * 0.1 + getPlayerDef();
-    const mStats = getMonsterNormalStatsAt(monster.level);
+    // Για τους ρεμπεσκέδες (PK) τα στατιστικά είναι ΤΑ ΠΡΑΓΜΑΤΙΚΑ του χαρακτήρα (από το database).
+    let mStats;
+    if (monster.isPk) {
+        mStats = { atk: monster.atk, def: monster.def };
+    } else {
+        mStats = getMonsterNormalStatsAt(monster.level);
+    }
     const mComp = mStats.atk + mStats.def * 0.1;
     let rawDiff = mComp - pComp;
     if (monster.variant === 'legendary') rawDiff += 10;
@@ -4767,6 +4878,22 @@ function getMonsterVariantText() {
 function updateBattleAreaRow() {
     const areaRow = document.getElementById('battle-area-row');
     if (!areaRow) return;
+
+    // Ζωντανός ρεμπεσκές (PK): στη θέση των πληροφοριών του βάθους δείχνουμε τις
+    // μπάρες recharge των επιθέσεών του (Κ=Κατραπακιά, Ε=Εκτέλεση, Μ=Μπύρα) και
+    // ένδειξη φυγής (Τ) όταν επιχειρεί να το σκάσει.
+    if (monster && monster.isPk) {
+        areaRow.innerHTML =
+            `<div class="pk-recharge-row">` +
+            `<span class="pk-bar-label" title="Κατραπακιά">Κ</span><div class="pk-bar"><div class="pk-bar-fill pk-bar-skill" id="pk-bar-skill"></div></div>` +
+            `<span class="pk-bar-label" title="Εκτέλεση">Ε</span><div class="pk-bar"><div class="pk-bar-fill pk-bar-precise" id="pk-bar-precise"></div></div>` +
+            `<span class="pk-bar-label" title="Μπύρα">Μ</span><div class="pk-bar"><div class="pk-bar-fill pk-bar-beer" id="pk-bar-beer"></div></div>` +
+            `<span class="pk-bar-label pk-flee-btn" id="pk-flee-btn" title="Επιχειρεί φυγή">Τ</span>` +
+            `</div>`;
+        updatePkRechargeBars();
+        return;
+    }
+
     const areaType = getAreaType(currentSelectedLevel);
     const areaColor = AREA_TYPE_COLOR[areaType] || '#d9d9d9';
     const atMaxStreakChance = currentRunKills >= STREAK_CHANCE_TABLE.length - 1;
@@ -5158,6 +5285,9 @@ function normalizePlayerAfterLoad() {
     if (typeof player.totalDescents !== 'number') player.totalDescents = 0;
     if (typeof player.pentaria !== 'number') player.pentaria = 0;
     if (typeof player.soulsKilled !== 'number') player.soulsKilled = 0;
+    if (typeof player.pkKillsCount !== 'number') player.pkKillsCount = 0;
+    if (typeof player.pkDeaths !== 'number') player.pkDeaths = 0;
+    if (!Array.isArray(player.pkKills)) player.pkKills = [];
     if (typeof player.legendaryEncounters !== 'number') player.legendaryEncounters = 0;
     if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
     if (typeof player.portrait !== 'string') player.portrait = '';
@@ -5275,6 +5405,20 @@ function slotSelectPlay(i) {
     updateCooldownBars();
     saveGame();
     liveUploadIfEnabled();
+
+    // Re-apply blacklists to the already-fetched pools (they were loaded before the
+    // player selected a slot, so player.pkKills / milestones were empty at that point).
+    if (Array.isArray(sessionLivingPool)) {
+        const killed = new Set(Array.isArray(player.pkKills) ? player.pkKills : []);
+        sessionLivingPool = sessionLivingPool.filter(s => !killed.has(s.name));
+        if (sessionLivingPool.length === 0) sessionLivingPool = null;
+    }
+    if (Array.isArray(sessionSoulPool)) {
+        const collected = new Set((player.magkiaMilestones || [])
+            .filter(m => m.soulKill).map(m => m.soulKill));
+        sessionSoulPool = sessionSoulPool.filter(s => !collected.has(s.name));
+        if (sessionSoulPool.length === 0) sessionSoulPool = null;
+    }
 }
 
 function slotSelectDelete(i) {
@@ -5699,6 +5843,34 @@ function importSave() {
     };
     tryLoadSoulPool();
 
+    // ΖΩΝΤΑΝΟΙ ΡΕΜΠΕΣΚΕΔΕΣ (PK): στην εκκίνηση φορτώνουμε τη λίστα των ζωντανών παικτών
+    // από το online database. Ίδια λογική με τις ψυχές: retry με polling όσο το supabase
+    // client (σε μεταγενέστερο script block) δεν είναι ακόμα διαθέσιμο.
+    let livingPoolAttempts = 0;
+    const tryLoadLivingPool = () => {
+        if (typeof window.fetchLivingPool === 'function') {
+            window.fetchLivingPool().then(pool => {
+                pool = Array.isArray(pool) ? pool : [];
+                // Αφαίρεσε τον ίδιο τον χαρακτήρα (δεν παλεύεις με τον εαυτό σου)
+                pool = pool.filter(s => s.name !== player.name);
+                // Αφαίρεσε όσους έχει ήδη ξεκαθαρίσει ο παίκτης (blacklist: λίστα σκοτωμένων PK)
+                const killed = new Set(Array.isArray(player.pkKills) ? player.pkKills : []);
+                pool = pool.filter(s => !killed.has(s.name));
+                sessionLivingPool = pool.length > 0 ? pool : null;
+                sessionLivingPoolLoaded = true;
+                if (pool.length > 0) {
+                    logMessage(`Ακούς πως ${pool.length} ρεμπεσκέδες τριγυρνούν στο λαβύρινθο...`, 'system');
+                }
+            }).catch(() => { sessionLivingPoolLoaded = false; });
+        } else if (livingPoolAttempts < 20) {
+            livingPoolAttempts++;
+            setTimeout(tryLoadLivingPool, 250);
+        } else {
+            sessionLivingPoolLoaded = false;
+        }
+    };
+    tryLoadLivingPool();
+
 let rateStartTime = Date.now();
 let sessionXp = 0;
 let sessionGold = 0;
@@ -5960,6 +6132,15 @@ function refreshAreaSelectorAppearance() {
         // Προσθήκη επιπέδου (χρώμα = επικινδυνότητα τέρατος)
         displayedName += ` <span style="color:${getMonsterDangerColor()}; font-size:1.1rem;">(${monster.level})</span>`;
 
+        // Ζωντανός ρεμπεσκές (PK): τα στατιστικά του εξοπλισμού του με χρώματα ανά
+        // τύπο (weapon #ec6868, armor #1ab2ff, magic #cc66ff) — ό,τι φοράει από το database.
+        if (monster.isPk) {
+            const w = monster.pkEquip.weapon.power;
+            const a = monster.pkEquip.armor.power;
+            const m = monster.pkEquip.magic.power;
+            displayedName += ` <span style="color:#ec6868;">${w}</span>-<span style="color:#1ab2ff;">${a}</span>-<span style="color:#cc66ff;">${m}</span>`;
+        }
+
         // Χρώματα για SPECIAL τέρατα — ΑΚΡΙΒΩΣ ίδια με τα χρώματα των αντίστοιχων
         // αντικειμένων στο πεδίο των αντικειμένων (weapon #ec6868, armor #1ab2ff, magic #cc66ff).
         if (monster.variant === 'weapon') {
@@ -6003,10 +6184,16 @@ function refreshAreaSelectorAppearance() {
             mNameEl.classList.add('soul-monster-glow');
             mNameEl.style.color = ""; // αφήνει την κλάση να ορίσει το χρώμα/glow
         }
+        else if (monster.isPk) {
+            mNameEl.classList.remove('legendary-monster-glow', 'legendary-glow-weapon', 'legendary-glow-armor', 'legendary-glow-magic', 'soul-monster-glow');
+            mNameEl.classList.add('pk-monster-glow');
+            mNameEl.style.color = ""; // αφήνει την κλάση να ορίσει το χρώμα/glow
+        }
         else {
             mNameEl.classList.remove('legendary-monster-glow');
             mNameEl.classList.remove('legendary-glow-weapon', 'legendary-glow-armor', 'legendary-glow-magic');
             mNameEl.classList.remove('soul-monster-glow');
+            mNameEl.classList.remove('pk-monster-glow');
 
             if (monster.variant === 'normal' || !monster.variant) {
                 mNameEl.style.color = "#fff";
@@ -6038,6 +6225,7 @@ function refreshAreaSelectorAppearance() {
             mNameEl.classList.remove('legendary-monster-glow');
             mNameEl.classList.remove('legendary-glow-weapon', 'legendary-glow-armor', 'legendary-glow-magic');
             mNameEl.classList.remove('soul-monster-glow');
+            mNameEl.classList.remove('pk-monster-glow');
             mNameEl.innerText = "";
             mNameEl.style.color = "#888";
         }
@@ -6292,6 +6480,9 @@ function updateCooldownBars() {
     setBar('btn-precise', preciseCooldownActive, preciseCdStart, function() { return effCDMod(preciseCdModifier); });
     const huntBtn = document.getElementById('btn-hunt-retreat');
     if (huntBtn) huntBtn.style.setProperty('--fill', '100%');
+
+    // Ζωντανός ρεμπεσκές (PK): οι μπάρες recharge των επιθέσεών του
+    if (monster && monster.isPk) updatePkRechargeBars();
 }
 
 let lastCooldownLoopTick = Date.now();
@@ -6459,6 +6650,64 @@ function trySpawnSoulMonster(lvl, baseAtk, baseDef, baseHp) {
     };
 }
 
+// ΖΩΝΤΑΝΟΙ ΡΕΜΠΕΣΚΕΔΕΣ (PK): επιχειρεί 1/800 να βρει ζωντανό παίκτη από τη λίστα που
+// φορτώθηκε στην εκκίνηση (βάθος ±2). Αν βρει, τον αφαιρεί από το τοπικό pool και
+// φτιάχνει τον αντίπαλο με τα ΠΡΑΓΜΑΤΙΚΑ στατιστικά του χαρακτήρα (τύποι παικτών,
+// με βάση τα tiers του εξοπλισμού του από το database).
+function trySpawnPkMonster(lvl, baseAtk, baseDef, baseHp) {
+    if (!sessionLivingPoolLoaded || !sessionLivingPool || sessionLivingPool.length === 0) return null;
+    if (Math.random() >= 1 / 800) return null;
+
+    const candidates = sessionLivingPool.filter(s => Math.abs(s.level - lvl) <= 2);
+    if (candidates.length === 0) return null;
+
+    const pk = candidates[Math.floor(Math.random() * candidates.length)];
+
+    // ΣΗΜΕΙΩΣΗ: ο ρεμπεσκές ΔΕΝ βγαίνει από το pool εδώ. Παραμένει "ζωντανός"
+    // στο database μέχρι να ΣΚΟΤΩΘΕΙ πραγματικά — αν ξεφύγει από τη μάχη (ή
+    // υποχωρήσεις εσύ), μπορεί να τον ξανασυναντήσεις σε επόμενη εμφάνιση.
+    // Βγαίνει από το pool μόνο στο endCombat όταν τον ξεκαθαρίσεις.
+
+    const pLevel = Math.max(1, pk.level || lvl);
+    const weaponTier = Math.max(1, pk.weapon || 1);
+    const armorTier = Math.max(1, pk.armor || 1);
+    const magicTier = Math.max(1, pk.magic || 1);
+
+    // Οι τύποι των παικτών: atk/def/hp
+    const atk = pLevel * 0.75 + weaponTier + magicTier / 2;
+    const def = pLevel * 0.75 + armorTier + magicTier / 2;
+    const hp = Math.floor(pLevel * 150);
+
+    logMessage(`Συνάντηση ρεμπεσκέ: ${pk.name} (${pLevel})!`, 'pk');
+
+    return {
+        name: pk.name,
+        isPk: true,
+        pkName: pk.name,
+        pkLevel: pLevel,
+        pkDepth: lvl,
+        pkEquip: {
+            weapon: { type: 'weapon', name: pk.weapon_name || getItemName('weapon', weaponTier), power: weaponTier, legendary: !!pk.weapon_legendary },
+            armor: { type: 'armor', name: pk.armor_name || getItemName('armor', armorTier), power: armorTier, legendary: !!pk.armor_legendary },
+            magic: { type: 'magic', name: pk.magic_name || getItemName('magic', magicTier), power: magicTier, legendary: !!pk.magic_legendary }
+        },
+        level: pLevel,
+        atk: atk,
+        def: def,
+        hp: hp,
+        maxHp: hp,
+        variant: 'pk',
+        firstName: pk.name,
+        title: '',
+        pkAttackType: 'basic',
+        pkAttemptingRetreat: false,
+        pkSkillCd: { active: false, start: 0 },
+        pkPreciseCd: { active: false, start: 0 },
+        pkBeerCd: { active: false, start: 0 },
+        pkDroppedItem: null
+    };
+}
+
 function spawnMonster() {
 
     // Cross-closure marker: κάθε φορά που γεννιέται νέο τέρας, ενημερώνουμε αυτό
@@ -6505,6 +6754,12 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
     if (soulMonster) {
         monster = soulMonster;
         variant = 'soul';
+    } else {
+    // --- ΖΩΝΤΑΝΟΣ ΡΕΜΠΕΣΚΕΣ (PK): 1/800 αν έχουμε φορτώσει τη λίστα ---
+    const pkMonster = trySpawnPkMonster(lvl, baseAtk, baseDef, baseHp);
+    if (pkMonster) {
+        monster = pkMonster;
+        variant = 'pk';
     } else {
 
     // Βασική πιθανότητα Legendary (1 στις x). Σκαλάρει με το βάθος λαβυρίνθου
@@ -6610,6 +6865,8 @@ else if (Math.random() < specialChance) {
         lootType: legendaryLootType,
         lootItemName: legendaryItemName
     };
+
+    }
 
     }
 
@@ -6869,6 +7126,179 @@ function forceRetreat() {
     liveUploadIfEnabled();
 }
 
+// ============ PK: ΖΩΝΤΑΝΟΙ ΡΕΜΠΕΣΚΕΔΕΣ (bot) ============
+
+// Modifier ταχύτητας cooldowns του ρεμπεσκέ (κατραπακιά/εκτέλεση): ίδια λογική με τον
+// παίκτη — η επίθεσή του σε σχέση με την άμυνά σου καθορίζει πόσο γρήγορα ξαναγεμίζουν.
+function getPkCdModifier() {
+    if (!monster || !monster.isPk) return 1;
+    return calcDmgModifier(monster.atk - getPlayerDef());
+}
+
+// Πόσο "γεμάτο" (0..1) είναι ένα cooldown του ρεμπεσκέ.
+function getPkCdCharge(cd, duration) {
+    if (!cd || !cd.active) return 1;
+    return Math.min(1, (Date.now() - cd.start) / duration);
+}
+
+// Ξανα-φέρνει τη λίστα των ζωντανών ρεμπεσκεδών από το online database, εφαρμόζοντας
+// το τρέχον blacklist (player.pkKills). Χρησιμοποιείται και μετά το άδειασμα του blacklist.
+function reloadLivingPool() {
+    if (typeof window.fetchLivingPool !== 'function') return;
+    window.fetchLivingPool().then(pool => {
+        pool = Array.isArray(pool) ? pool : [];
+        if (player) pool = pool.filter(s => s.name !== player.name);
+        const killed = new Set(Array.isArray(player.pkKills) ? player.pkKills : []);
+        pool = pool.filter(s => !killed.has(s.name));
+        sessionLivingPool = pool.length > 0 ? pool : null;
+        sessionLivingPoolLoaded = true;
+        if (pool.length > 0) {
+            logMessage(`Ακούς ${pool.length} ρεμπεσκέδες να τριγυρνάνε στους διαδρόμους...`, 'system');
+        }
+    }).catch(() => { sessionLivingPoolLoaded = false; });
+}
+
+// Άδειασμα του blacklist των σκοτωμένων/αποκλεισμένων ρεμπεσκεδών: ξανα-αποκτούν δικαίωμα
+// εμφάνισης. Το στατιστικό pkKillsCount (K/D) δεν πειράζεται.
+function clearPkBlacklist() {
+    if (!player) return;
+    const count = (player.pkKills || []).length;
+    if (count === 0) {
+        logMessage('Το blacklist των ρεμπεσκεδών είναι ήδη άδειο.', 'system');
+        return;
+    }
+    if (!confirm(`Να αδειάσει το blacklist των ρεμπεσκεδών (${count} σκοτωμένοι); Θα μπορέσουν να ξαναεμφανιστούν!`)) return;
+    player.pkKills = [];
+    saveGame();
+    liveUploadIfEnabled();
+    logMessage(`Το blacklist των ρεμπεσκεδών άδειασε (${count}). Οι παλιοί σου αντίπαλοι ίσως ξαναεμφανιστούν...`, 'system');
+    reloadLivingPool();
+}
+
+// Οι μικρές μπάρες recharge + το κουμπάκι Τ (φυγή) στην πάνω σειρά της μάχης.
+// Ίδια λογική με τα κουμπιά των παικτών (--fill 0→100%): αδειάζουν όταν ο ρεμπεσκές
+// χρησιμοποιεί την επίθεση και γεμίζουν όσο είναι σε cooldown, πλήρεις όταν είναι έτοιμες.
+function updatePkRechargeBars() {
+    if (!monster || !monster.isPk) return;
+    const now = Date.now();
+    const skillDur = effCDMod(getPkCdModifier());
+    const preciseDur = effCDMod(getPkCdModifier());
+    const beerDur = effCDPotion();
+
+    const setFill = (id, cd, duration) => {
+        const el = document.getElementById(id);
+        if (!el) return; // αμυντικά: αν οι μπάρες δεν υπάρχουν ακόμα (π.χ. μεταβατικό state)
+        const charge = Math.max(0, Math.min(1, getPkCdCharge(cd, duration)));
+        el.style.setProperty('--fill', (charge * 100) + '%');
+    };
+    setFill('pk-bar-skill', monster.pkSkillCd, skillDur);
+    setFill('pk-bar-precise', monster.pkPreciseCd, preciseDur);
+    setFill('pk-bar-beer', monster.pkBeerCd, beerDur);
+
+    const fleeBtn = document.getElementById('pk-flee-btn');
+    if (fleeBtn) fleeBtn.classList.toggle('pk-flee-active', monster.pkAttemptingRetreat === true);
+}
+
+// Ο bot "σκέφτεται" για τον ρεμπεσκέ κάθε γύρο (ίδια λογική με το κυβόργιο auto-mode):
+// μπύρα όταν έχει ≤90% ζωή, υποχώρηση κάτω από 40%, κατραπακιά στο ξεκίνημα/όταν φεύγει,
+// εκτέλεση όταν ο εχθρός είναι κάτω από 25%. Επιστρέφει true αν ξέφυγε από τη μάχη.
+function runPkBotRound() {
+    if (!monster || !monster.isPk) return false;
+    const now = Date.now();
+    const maxHp = monster.maxHp || 1;
+    const hpPct = monster.hp / maxHp;
+
+    // 0) Αμεση υποχώρηση: αν ο παίκτης υπερτερεί σε στατιστικά κατά 7.5+,
+    // ο ρεμπεσκές καταλαβαίνει ότι δεν έχει ελπίδα και επιχειρεί να ξεφύγει αμέσως.
+    // (ίδιος υπολογισμός με το challenge color: atk ζυγίζει περισσότερο για τον επιτιθέμενο,
+    // def περισσότερο για τον αμυνόμενο).
+    const pComp = getPlayerAtk() * 0.1 + getPlayerDef();
+    const mComp = monster.atk + monster.def * 0.1;
+    if (pComp - mComp >= 7.5) {
+        if (!monster.pkAttemptingRetreat) logMessage(`${monster.pkName}: κατάλαβε ότι δεν έχει ελπίδα και προσπαθεί να ξεφύγει!`, 'pk');
+        monster.pkAttemptingRetreat = true;
+    }
+
+    // 0.5) Επαναφορά cooldowns που έχουν λήξει — ώστε τα skills να επαναχρησιμοποιούνται
+    const skillDur = effCDMod(getPkCdModifier());
+    const preciseDur = effCDMod(getPkCdModifier());
+    const beerDur = effCDPotion();
+    if (monster.pkSkillCd && monster.pkSkillCd.active && (now - monster.pkSkillCd.start) >= skillDur) {
+        monster.pkSkillCd.active = false;
+    }
+    if (monster.pkPreciseCd && monster.pkPreciseCd.active && (now - monster.pkPreciseCd.start) >= preciseDur) {
+        monster.pkPreciseCd.active = false;
+    }
+    if (monster.pkBeerCd && monster.pkBeerCd.active && (now - monster.pkBeerCd.start) >= beerDur) {
+        monster.pkBeerCd.active = false;
+    }
+
+    // 1) Μπύρα: όταν ≤90% ζωή και δεν είναι σε cooldown (10-50% αναπλήρωση, όπως ο παίκτης)
+    if (hpPct <= 0.90 && (!monster.pkBeerCd || !monster.pkBeerCd.active)) {
+        const pct = Math.floor(Math.random() * 41) + 10;
+        const heal = Math.round(maxHp * (pct / 100));
+        monster.hp = Math.min(maxHp, monster.hp + heal);
+        monster.pkBeerCd = { active: true, start: now };
+        logMessage(`${monster.pkName}: έσφιξε μια μπύρα και αναπλήρωσε ${formatNumber(heal)} HP!`, 'pk');
+    }
+
+    // 2) Υποχώρηση: κάτω από 40% ζωή -> επιχειρεί να ξεφύγει
+    if (hpPct < 0.40) {
+        if (!monster.pkAttemptingRetreat) logMessage(`${monster.pkName}: έκλασε μέντες και προσπαθεί να ξεφύγει!`, 'pk');
+        monster.pkAttemptingRetreat = true;
+    }
+
+    // 3) Αν επιχειρεί φυγή, κάθε γύρο έχει 15% πιθανότητα να τα καταφέρει
+    if (monster.pkAttemptingRetreat) {
+        if (Math.random() < 0.15) {
+            return true;
+        }
+    }
+
+    // 4) Απόφαση επίθεσης (κατραπακιά / εκτέλεση / βασική)
+    const dmgMod = calcDmgModifier(monster.atk - getPlayerDef());
+    const estimatedKatrapakiaDmg = 7.5 * 5 * monster.level * dmgMod * monsterDmgFinetune;
+    const skillReady = !monster.pkSkillCd || !monster.pkSkillCd.active;
+    const preciseReady = !monster.pkPreciseCd || !monster.pkPreciseCd.active;
+
+    monster.pkAttackType = 'basic';
+    if (skillReady && (monster.pkAttemptingRetreat || player.hp >= estimatedKatrapakiaDmg)) {
+        monster.pkAttackType = 'katrapakia';
+        monster.pkSkillCd = { active: true, start: now };
+    } else if (preciseReady && player.hp <= getPlayerMaxHp() * skills.preciseStrike.executeThreshold) {
+        monster.pkAttackType = 'precise';
+        monster.pkPreciseCd = { active: true, start: now };
+    }
+
+    return false;
+}
+
+// Ο ρεμπεσκές ξέφυγε: η μάχη τελειώνει χωρίς ανταμοιβές και η περιπλάνηση συνεχίζεται
+// κανονικά (το επόμενο τέρας θα βγει στον κανονικό του χρόνο).
+function endCombatPkFled() {
+    document.getElementById('monster-hp-flash').classList.remove('monster-death');
+    if (monster && monster.isPk) {
+        logMessage(`${monster.pkName}: κατάφερε να ξεφύγει από τη μάχη!`, 'pk');
+    }
+    isSkillQueued = false;
+    queuedSkill = null;
+    monster = null;
+    waitingForNextMonster = true;
+    refreshCooldownModifiers();
+    logMessage("Περιπλανιέσαι στο λαβύρινθο...", "system");
+    updateUI();
+    if (nextMonsterTimeoutId) clearTimeout(nextMonsterTimeoutId);
+    nextMonsterTimeoutId = setTimeout(() => {
+        nextMonsterTimeoutId = null;
+        if (!inCombat || !waitingForNextMonster) return;
+        waitingForNextMonster = false;
+        spawnMonster();
+        updateUI();
+        if (combatInterval) clearInterval(combatInterval);
+        combatInterval = setInterval(executeCombatRound, effTick());
+    }, effTick());
+}
+
 function executeCombatRound() {
    
     if (!inCombat) return;
@@ -6895,6 +7325,17 @@ if (isAttemptingRetreat) {
         logMessage("Υποχώρηση...");
     }
 }
+
+    // --- ΖΩΝΤΑΝΟΣ ΡΕΜΠΕΣΚΕΣ (PK): ο bot σκέφτεται και ενεργεί αυτόν τον γύρο ---
+    // (μπύρα / φυγή / κατραπακιά / εκτέλεση). Αν επέστρεψε true, ο ρεμπεσκές
+    // ξέφυγε και η μάχη τελειώνει αμέσως χωρίς ανταμοιβές.
+    if (monster && monster.isPk) {
+        const pkFled = runPkBotRound();
+        if (pkFled) {
+            endCombatPkFled();
+            return;
+        }
+    }
 
     // ==========================================
     // ΦΑΣΗ 1: ΥΠΟΛΟΓΙΣΜΟΣ ΕΠΙΘΕΣΕΩΝ (ταυτόχρονα)
@@ -6937,10 +7378,30 @@ if (isAttemptingRetreat) {
     let monsterHitChance = 80;
     monsterHitChance = Math.max(10, Math.min(100, monsterHitChance));
 
+    // Ο ρεμπεσκές (PK) χρησιμοποιεί τις δικές του επιθέσεις, όπως αποφάσισε ο bot:
+    // κατραπακιά (ζάρι 5-10, 90% ευστοχία) ή εκτέλεση (σταθερό ζάρι 5, 90% ευστοχία).
+    if (monster && monster.isPk) {
+        if (monster.pkAttackType === 'katrapakia') {
+            monsterHitChance = 90;
+            let d6 = Math.floor(Math.random() * 6) + 5; // 5..10
+            let dmgModifier = calcDmgModifier(monster.atk - getPlayerDef());
+            let dmg = d6 * 5 * monster.level * dmgModifier * monsterDmgFinetune;
+            monsterDamageCalculated = Math.max(1, Math.round(dmg));
+            monsterActionLog = `${getMonsterDisplayName(monster)}: ΚΑΤΡΑΠΑΚΙΑ! Σου έκανε ${formatNumber(monsterDamageCalculated)} ζημιά.`;
+        } else if (monster.pkAttackType === 'precise') {
+            monsterHitChance = 90;
+            let d6 = 5;
+            let dmgModifier = calcDmgModifier(monster.atk - getPlayerDef());
+            let dmg = d6 * 5 * monster.level * dmgModifier * monsterDmgFinetune;
+            monsterDamageCalculated = Math.max(1, Math.round(dmg));
+            monsterActionLog = `${getMonsterDisplayName(monster)}: ΕΚΤΕΛΕΣΗ! Σου έκανε ${formatNumber(monsterDamageCalculated)} ζημιά.`;
+        }
+    }
+
     if (Math.floor(Math.random() * 100) >= monsterHitChance) {
         monsterActionLog = `${getMonsterDisplayName(monster)}: αστόχησε.`;
         monsterDamageCalculated = 0;
-    } else {
+    } else if (monsterDamageCalculated === 0) {
         let d6 = Math.floor(Math.random() * 6) + 1;
         let diff = monster.atk - getPlayerDef();
         let dmgModifier = calcDmgModifier(diff);
@@ -7143,6 +7604,72 @@ let finalType = type;
     }
 }
 
+// Ζωντανός ρεμπεσκές (PK): ρίχνει ένα από τα αντικείμενα που ΦΟΡΑΕΙ (τα πραγματικά
+// του στατιστικά). Αν υπάρχει upgrade για τον παίκτη πέφτει το υψηλότερο (τυχαία
+// μεταξύ ισόβαθμων). Αν δεν υπάρχει κανένα upgrade, πέφτει το υψηλότερο τier και
+// πουλιέται. Αν δεν έχει καθόλου αντικείμενα, δεν ρίχνει τίποτα.
+function handlePkItemDrop(monster) {
+    if (!monster || !monster.isPk || !monster.pkEquip) return false;
+    const items = ['weapon', 'armor', 'magic']
+        .map(t => ({ type: t, tier: monster.pkEquip[t].power, name: monster.pkEquip[t].name, legendary: monster.pkEquip[t].legendary }))
+        .filter(it => it.tier > 0)
+        .sort((a, b) => b.tier - a.tier);
+    if (items.length === 0) return false;
+
+    const upgrades = items.filter(it => it.tier > player[it.type].power);
+    let pool;
+    if (upgrades.length > 0) {
+        const maxTier = Math.max(...upgrades.map(it => it.tier));
+        pool = upgrades.filter(it => it.tier === maxTier);
+    } else {
+        pool = items.filter(it => it.tier === items[0].tier);
+    }
+    const dropped = pool[Math.floor(Math.random() * pool.length)];
+    monster.pkDroppedItem = dropped.name;
+    givePkItem(dropped);
+    return true;
+}
+
+// Δίνει στον παίκτη το αντικείμενο του ρεμπεσκέ (εξοπλίζει αν είναι upgrade, αλλιώς πουλάει).
+function givePkItem(item) {
+    const dropColor = item.type === 'weapon' ? '#ec6868' : item.type === 'armor' ? '#1ab2ff' : '#cc66ff';
+    createFloatingText('monster-hp-parent', `${item.name} T${item.tier}`, dropColor, { floatUp: true });
+    logMessage(`[DROP] Ο ρεμπεσκές είχε: ${item.name} (T${item.tier})!`, 'pk');
+
+    if (item.tier > player[item.type].power) {
+        const oldTier = player[item.type].power;
+        const tierGain = item.tier - oldTier;
+        player[item.type] = {
+            name: item.name,
+            power: item.tier,
+            legendary: item.legendary,
+            soul: false
+        };
+        itemDropSound();
+        logMessage(`[EQUIP] Αναβάθμιση εξοπλισμού! (T${oldTier} → T${item.tier}) (+${tierGain})`, 'pk');
+
+        const targetBox = item.type === 'weapon' ? 'stat-atk-box' : item.type === 'armor' ? 'stat-def-box' : 'stat-magic-box';
+        const box = document.getElementById(targetBox);
+        if (box) {
+            box.classList.add('item-upgrade-flash');
+            setTimeout(() => box.classList.remove('item-upgrade-flash'), 400);
+        }
+        if (item.type !== 'magic') {
+            createFloatingText(targetBox, "NEW EQUIP!", "var(--accent-gold)");
+        } else {
+            createFloatingText('player-hp-parent', "MAX HP UP!", "var(--hp-player)");
+        }
+    } else {
+        const sellValue = rollGoldForLevel(item.tier) * 9;
+        player.gold += sellValue;
+        player.totalGoldGained += sellValue;
+        logMessage(`[DROP] Θα πουληθεί για ${formatNumber(sellValue)} χρυσά.`, 'pk');
+        setTimeout(() => {
+            createFloatingText('stat-gold-box', `+${formatNumber(sellValue)}g`, "var(--accent-gold)");
+        }, 500 / getSpeedFactor());
+    }
+}
+
 function showLegendaryPopup() {
     showAnnouncementPopup('ΘΡΥΛΙΚΟ DROP!');
 }
@@ -7184,7 +7711,9 @@ function showAnnouncementPopup(text, styleClass, color) {
             document.getElementById('monster-hp-flash').classList.add('monster-death');
             setTimeout(() => document.getElementById('monster-hp-flash').classList.remove('monster-death'), 500);
             
-            logMessage(`${getMonsterDisplayName(monster)}: εξοντώθηκε.`, 'victory');
+            if (!monster.isPk) {
+                logMessage(`${getMonsterDisplayName(monster)}: εξοντώθηκε.`, 'victory');
+            }
             monsterDeathSound();
             player.kills++;
             descentStats.kills++;
@@ -7203,6 +7732,31 @@ function showAnnouncementPopup(text, styleClass, color) {
                     level: player.level,
                     soulKill: monster.soulName,
                     soulDrop: `Ψυχή (${monster.soulName})`,
+                    score: Math.max(computeScore(), player._displayedScore || 0),
+                    turns: player.activeTime || 0,
+                    deaths: player.deaths || 0
+                });
+            }
+
+            // --- ΖΩΝΤΑΝΟΣ ΡΕΜΠΕΣΚΕΣ (PK): μήνυμα + ορόσημο μαγκιάς + λίστα εξαίρεσης ---
+            if (monster.isPk) {
+                logMessage(`Ταπείνωσες: ${monster.pkName}!`, 'pk');
+                player.pkKills = player.pkKills || [];
+                if (!player.pkKills.includes(monster.pkName)) player.pkKills.push(monster.pkName);
+                player.pkKillsCount = (player.pkKillsCount || 0) + 1;
+
+                // Μόλις σκοτωθεί, βγαίνει και από το τοπικό pool — δεν ξαναεμφανίζεται
+                // σε αυτό το session (η λίστα φορτώθηκε μόνο στην εκκίνηση).
+                if (Array.isArray(sessionLivingPool)) {
+                    const poolIdx = sessionLivingPool.findIndex(s => s.name === monster.pkName);
+                    if (poolIdx > -1) sessionLivingPool.splice(poolIdx, 1);
+                }
+
+                if (!player.magkiaMilestones) player.magkiaMilestones = [];
+                player.magkiaMilestones.push({
+                    level: player.level,
+                    pkKill: monster.pkName,
+                    pkLevel: monster.pkLevel,
                     score: Math.max(computeScore(), player._displayedScore || 0),
                     turns: player.activeTime || 0,
                     deaths: player.deaths || 0
@@ -7313,6 +7867,7 @@ function showAnnouncementPopup(text, styleClass, color) {
         //ta variants me o dynamic difficulty system den pairnoun perissotera edw - pairnoun apo to diff - ektos an einai kleisto to dynamic
             let xpMultiplier =
                 monster.variant === 'legendary' ? 2 :
+                monster.isPk ? 5 :
                 monster.variant !== 'normal' ? 1.5 :
                 1;
             let effectiveStreakBonus = (currentSelectedLevel >= player.level) ? killStreakBonus : 0;
@@ -7351,6 +7906,15 @@ function showAnnouncementPopup(text, styleClass, color) {
                 magicChance  = 1.00;
             }
 
+            // Ζωντανός ρεμπεσκές (PK): ΔΕΝ ρίχνει τυχαία αντικείμενα. Αντί αυτού,
+            // ρίχνει ένα τυχαίο από τα αντικείμενα που ΦΟΡΑΕΙ (τα πραγματικά του
+            // στατιστικά από το database), μόνο αν είναι upgrade για τον παίκτη.
+            if (monster.isPk) {
+                weaponChance = 0.000;
+                armorChance  = 0.000;
+                magicChance  = 0.000;
+            }
+
             
             let rolledPower = monster.level;
             let droppedSomething = false;
@@ -7375,6 +7939,17 @@ function showAnnouncementPopup(text, styleClass, color) {
             if (Math.random() < weaponChance) handleEquipmentDrop('weapon', rolledPower, monster, forceSell);
             if (Math.random() < armorChance) handleEquipmentDrop('armor', rolledPower, monster, forceSell);
             if (Math.random() < magicChance) handleEquipmentDrop('magic', rolledPower, monster, forceSell);
+
+            // Ζωντανός ρεμπεσκές (PK): το drop του είναι ένα από τα αντικείμενα που φοράει
+            if (monster.isPk) {
+                if (handlePkItemDrop(monster)) {
+                    droppedSomething = true;
+                    if (monster.pkDroppedItem && player.magkiaMilestones && player.magkiaMilestones.length) {
+                        const lastMs = player.magkiaMilestones[player.magkiaMilestones.length - 1];
+                        if (lastMs && lastMs.pkKill) lastMs.pkDrop = monster.pkDroppedItem;
+                    }
+                }
+            }
 
             if (monster.variant === 'legendary') {
                 if (!player.magkiaMilestones) player.magkiaMilestones = [];
@@ -7505,7 +8080,23 @@ function showAnnouncementPopup(text, styleClass, color) {
     }
 
 function applyDefeatPenalties() {
-    if (player.ironman) {
+    // Θάνατος από ρεμπεσκέ (PK): ΔΕΝ μετράει ως θάνατος. Ο ρεμπεσκές σε νικά,
+    // αρπάζει το καλύτερό σου αντικείμενο και σε αφήνει τραυματισμένο στον τεκέ.
+    const pkDeath = monster && monster.isPk === true;
+
+    // Το αντικείμενο που θα αρπάξει ο ρεμπεσκές: το ΥΨΗΛΟΤΕΡΟ (τυχαία μεταξύ ισόβαθμων).
+    const slots = ['weapon', 'armor', 'magic'];
+    let lostSlot;
+    if (pkDeath) {
+        const maxPower = Math.max(player.weapon.power, player.armor.power, player.magic.power);
+        const topSlots = slots.filter(s => player[s].power === maxPower);
+        lostSlot = topSlots[Math.floor(Math.random() * topSlots.length)];
+    } else {
+        lostSlot = slots[Math.floor(Math.random() * slots.length)];
+    }
+    const pkGrabbedItemName = pkDeath ? player[lostSlot].name : "";
+
+    if (player.ironman && !pkDeath) {
         if (!player.magkiaMilestones) player.magkiaMilestones = [];
         player.magkiaMilestones.push({
             level: 'death',
@@ -7520,17 +8111,21 @@ function applyDefeatPenalties() {
 
     generateAreaModifiers();
     refreshAreaSelectorAppearance();
-    logMessage(
-        `Σκοτώθηκες! Έσφαξες ${currentRunKills} εχθρούς και βρήκες ${currentRunItems} αντικείμενα πριν σε ξεκάνουν. Έχασες ${formatNumber(player.gold)} GP και μεταφέρθηκες στον τεκέ με 1 HP.`,
-        'monster');
-    player.goldLost += player.gold;
-    player.gold = 0;
+
+    if (pkDeath) {
+        logMessage(
+            `${getMonsterDisplayName(monster)}: σε νίκησε, άρπαξε: ${pkGrabbedItemName} και σε παράτησε ζαλισμένο. Γυρίζεις ντροπιασμένος στον τεκέ...`,
+            'pk');
+    } else {
+        logMessage(
+            `Σκοτώθηκες! Έσφαξες ${currentRunKills} εχθρούς και βρήκες ${currentRunItems} αντικείμενα πριν σε ξεκάνουν. Έχασες ${formatNumber(player.gold)} GP και μεταφέρθηκες στον τεκέ με 1 HP.`,
+            'monster');
+        player.goldLost += player.gold;
+        player.gold = 0;
+    }
     player.hp = 1;
 
     // xasimo eksoplismou
-    const slots = ['weapon', 'armor', 'magic'];
-    const lostSlot = slots[Math.floor(Math.random() * slots.length)];
-
     const slotNames = {
         weapon: "Το όπλο",
         armor: "Η θωράκιση",
@@ -7540,7 +8135,23 @@ function applyDefeatPenalties() {
     currentRunKills = 0;
     currentRunItems = 0;
     resetKillStreak();
-    player.deaths++;
+    if (pkDeath) {
+        player.pkDeaths = (player.pkDeaths || 0) + 1;
+        // Ορόσημο ήττας από ρεμπεσκέ (κόκκινο χρώμα στα milestones)
+        if (!player.magkiaMilestones) player.magkiaMilestones = [];
+        player.magkiaMilestones.push({
+            pkDeath: true,
+            pkName: monster.pkName,
+            pkLevel: monster.pkLevel,
+            lostItem: pkGrabbedItemName,
+            lostSlot: lostSlot,
+            level: player.level,
+            turns: player.activeTime || 0,
+            deaths: player.pkDeaths
+        });
+    } else {
+        player.deaths++;
+    }
     player._displayedScore = computeScore();
 
     // Καταμέτρηση θανάτων ανά "χρώμα" τέρατος (κόκκινο=weapon, μπλε=armor, μωβ=magic).
@@ -7550,11 +8161,13 @@ function applyDefeatPenalties() {
         ? monster.variant
         : (monster.variant === 'legendary' ? monster.lootType : null);
 
-    if (deathColorType === 'weapon') player.deathsWeapon++;
-    else if (deathColorType === 'armor') player.deathsArmor++;
-    else if (deathColorType === 'magic') player.deathsMagic++;
+    if (!pkDeath) {
+        if (deathColorType === 'weapon') player.deathsWeapon++;
+        else if (deathColorType === 'armor') player.deathsArmor++;
+        else if (deathColorType === 'magic') player.deathsMagic++;
+    }
 
-    if (player.ironman) {
+    if (player.ironman && !pkDeath) {
         player.ironmanDead = true;
         const killerName = getMonsterDisplayName(monster);
         player.lastKillerName = killerName;
@@ -7564,24 +8177,44 @@ function applyDefeatPenalties() {
 
     if (player[lostSlot].power > 1) {
         const oldPower = player[lostSlot].power;
-        const rawLoss = rollDeathPenaltyAmount();
+        const rawLoss = pkDeath ? 5 : rollDeathPenaltyAmount();
         // δεν πάει κάτω από 1
         const actualLoss = Math.min(rawLoss, oldPower - 1);
 
         player[lostSlot].power -= actualLoss;
+
+        // Θάνατος από ρεμπεσκέ (PK): χάνεται και το legendary flag και το αντικείμενο
+        // παίρνει πίσω το κανονικό του όνομα στο νέο tier. Αν το tier παραμένει πάνω
+        // από το μέγιστο κανονικό (105), κόβεται στο 105 — η κανονική λίστα ονομάτων
+        // δεν έχει αντικείμενα πιο πάνω, οπότε αλλιώς θα έμενε με "στραβό" όνομα.
+        if (pkDeath) {
+            player[lostSlot].legendary = false;
+            player[lostSlot].soul = false;
+            if (player[lostSlot].power > 105) player[lostSlot].power = 105;
+            player[lostSlot].name = getItemName(lostSlot, player[lostSlot].power);
+        }
+        const effectiveLoss = oldPower - player[lostSlot].power;
      
      //τα αντικείμενα απλα πέφτουν τιερ
         //   if (!player[lostSlot].legendary) {
      //       player[lostSlot].name = getItemName(lostSlot, player[lostSlot].power);
      //   }
 
-        logMessage(
-            `${slotNames[lostSlot]} σου φθείρεται: (T${oldPower} → T${player[lostSlot].power})`,
-            'monster'
-        );
+        if (pkDeath) {
+            logMessage(
+                `${slotNames[lostSlot]} χάνει ${effectiveLoss} Tiers: (T${oldPower} → T${player[lostSlot].power})`,
+                'monster'
+            );
+        } else {
+            logMessage(
+                `${slotNames[lostSlot]} σου φθείρεται: (T${oldPower} → T${player[lostSlot].power})`,
+                'monster'
+            );
+        }
 
-        // Πλήρης φθορά (5 πόντοι) → popup ΚΑΤΑΣΤΡΟΦΗ! με το χρώμα του αντικειμένου
-        if (actualLoss >= 5) {
+        // Πλήρης φθορά (5 πόντοι ή περισσότερο, συμπεριλαμβανομένου cap σε 105)
+        // → popup ΚΑΤΑΣΤΡΟΦΗ! με το χρώμα του αντικειμένου
+        if (effectiveLoss >= 5) {
             const slotColor =
                 lostSlot === 'weapon' ? '#ec6868' :
                 lostSlot === 'armor'  ? '#1ab2ff' :
@@ -8546,6 +9179,8 @@ if ('serviceWorker' in navigator) {
                     pentaria: r.pentaria || 0,
                     legendary_encounters: r.legendaryEncounters || 0,
                     legendary_drops: r.legendaryDrops || 0,
+                    pk_kills_count: r.pkKillsCount || 0,
+                    pk_deaths: r.pkDeaths || 0,
                     avg_kill_time: r.avgKillTime || 0,
                     total_xp_gained: r.totalXpGained || 0,
                     total_xp_at_level_100: r.totalXpAtLevel100 || 0,
@@ -8598,16 +9233,62 @@ if ('serviceWorker' in navigator) {
             }
         }
 
-        const isK = n => n.name && (n.name.startsWith('[K]') || n.name.startsWith('[Κ]'));
         const pool = Array.from(seen.values()).filter(s =>
             s.ironman === true &&   // ironmen
             !!s.killer &&           // νεκροί (έχουν killer)
             !s.victory &&           // όχι θεοσφάχτες
             !(s.apateon === true) &&// όχι απατεώνες
-            !isK(s) &&              // όχι κυβόργια
-            typeof s.level === 'number'
+            typeof s.level === 'number' && s.level >= 10
         );
         return pool.map(s => ({ name: s.name, level: s.level }));
+    };
+
+    // Φέρνει τη λίστα των ΖΩΝΤΑΝΩΝ παικτών (χωρίς killer) από το online database,
+    // χωρίς τους απατεώνες και θεοσφάχτες. Χρησιμοποιείται για τα PK στο dungeon.
+    window.fetchLivingPool = async function () {
+        if (!sbClient) return [];
+        const { data, error } = await sbClient
+            .from('ironman_deaths')
+            .select('*');
+        if (error) { console.error('[LivingPool] fetch error:', error); return []; }
+        if (!data || data.length === 0) return [];
+
+        // Dedupe κατά name, ίδια λογική με το ψοφολόγιο
+        const seen = new Map();
+        for (const entry of data) {
+            const name = entry.name;
+            if (!name) continue;
+            if (seen.has(name)) {
+                const existing = seen.get(name);
+                const replace = (entry.score ?? 0) > (existing.score ?? 0) ||
+                    ((entry.score ?? 0) === (existing.score ?? 0) && (entry.level || 0) > (existing.level || 0)) ||
+                    ((entry.score ?? 0) === (existing.score ?? 0) && (entry.level || 0) === (existing.level || 0) &&
+                        new Date(entry.death_date) > new Date(existing.death_date));
+                if (replace) seen.set(name, entry);
+            } else {
+                seen.set(name, entry);
+            }
+        }
+
+        const pool = Array.from(seen.values()).filter(s =>
+            !s.killer &&            // ζωντανοί (δεν έχουν killer)
+            !s.victory &&           // όχι θεοσφάχτες
+            !(s.apateon === true) &&// όχι απατεώνες
+            typeof s.level === 'number' && s.level >= 10
+        );
+        return pool.map(s => ({
+            name: s.name,
+            level: s.level,
+            weapon: s.weapon || 1,
+            armor: s.armor || 1,
+            magic: s.magic || 1,
+            weapon_name: s.weapon_name || '',
+            armor_name: s.armor_name || '',
+            magic_name: s.magic_name || '',
+            weapon_legendary: !!s.weapon_legendary,
+            armor_legendary: !!s.armor_legendary,
+            magic_legendary: !!s.magic_legendary
+        }));
     };
 })();
 </script>
