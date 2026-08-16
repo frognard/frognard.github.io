@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v450</title>
+    <title>Ρεμπεσκές v451</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -366,7 +366,6 @@ padding: 20px;
 .pk-monster-glow {
     color: #2ecc71 !important;
     font-weight: 700;
-    text-shadow: 0 0 8px rgba(46,204,113,0.9), 0 0 22px rgba(46,204,113,0.5);
 }
 
 .pk-recharge-row {
@@ -5360,6 +5359,7 @@ function slotSelectPlay(i) {
     const data = charSlots[i];
     if (!data) return;
     currentSlot = i;
+    document.getElementById('log').innerHTML = '';
     player = JSON.parse(JSON.stringify(PLAYER_DEFAULTS));
     Object.assign(player, data);
     normalizePlayerAfterLoad();
@@ -5406,19 +5406,14 @@ function slotSelectPlay(i) {
     saveGame();
     liveUploadIfEnabled();
 
-    // Re-apply blacklists to the already-fetched pools (they were loaded before the
-    // player selected a slot, so player.pkKills / milestones were empty at that point).
-    if (Array.isArray(sessionLivingPool)) {
-        const killed = new Set(Array.isArray(player.pkKills) ? player.pkKills : []);
-        sessionLivingPool = sessionLivingPool.filter(s => !killed.has(s.name));
-        if (sessionLivingPool.length === 0) sessionLivingPool = null;
-    }
-    if (Array.isArray(sessionSoulPool)) {
-        const collected = new Set((player.magkiaMilestones || [])
-            .filter(m => m.soulKill).map(m => m.soulKill));
-        sessionSoulPool = sessionSoulPool.filter(s => !collected.has(s.name));
-        if (sessionSoulPool.length === 0) sessionSoulPool = null;
-    }
+    // Re-fetch & re-apply blacklists with the new character's data
+    reloadLivingPool();
+    reloadSoulPool();
+
+    // 2 ticks pause: απενεργοποίηση "Σφάξε" για 2 ticks μετά την επιλογή χαρακτήρα
+    const huntBtn = document.getElementById('btn-hunt-retreat');
+    if (huntBtn) huntBtn.disabled = true;
+    setTimeout(() => { if (huntBtn) huntBtn.disabled = !!(player.ironman && player.ironmanDead); }, effTick() * 2);
 }
 
 function slotSelectDelete(i) {
@@ -5812,28 +5807,12 @@ function importSave() {
     applyPortrait();
     refreshTekePatrons();
 
-    // ΨΥΧΕΣ IRONMEN: στην εκκίνηση ελέγχουμε την πρόσβαση στο online ψοφολόγιο και
-    // φορτώνουμε τη λίστα των νεκρών ironmen. Το κάνουμε ασύγχρονα γιατί το supabase
-    // client ορίζεται σε μεταγενέστερο script block (και στο πρώτο άνοιγμα χωρίς cache
-    // το CDN script μπορεί να μην έχει φορτώσει ακόμα — γι' αυτό retry με polling).
+    // ΨΥΧΕΣ IRONMEN: η `reloadSoulPool()` τρέχει στην επιλογή χαρακτήρα (slotSelectPlay).
+    // Εδώ απλά κάνουμε poll μέχρι να είναι έτοιμο το fetchSoulPool wrapper.
     let soulPoolAttempts = 0;
     const tryLoadSoulPool = () => {
         if (typeof window.fetchSoulPool === 'function') {
-            window.fetchSoulPool().then(pool => {
-                pool = Array.isArray(pool) ? pool : [];
-                // Αφαίρεσε τις ψυχές που ο παίκτης έχει ήδη πάρει (υπάρχουν στα ορόσημά του)
-                const collected = new Set((player.magkiaMilestones || [])
-                    .filter(m => m.soulKill)
-                    .map(m => m.soulKill));
-                pool = pool.filter(s => !collected.has(s.name));
-                sessionSoulPool = pool.length > 0 ? pool : null;
-                sessionSoulPoolLoaded = true;
-                if (pool.length > 0) {
-                    logMessage(`Αισθάνεσαι ${pool.length} ψυχές πεσόντων ironmen να στοιχειώνουν τα βάθη...`, 'system');
-                } else {
-                    logMessage('Καμία ψυχή ironman δεν στοιχειώνει ακόμα τα βάθη...', 'system');
-                }
-            }).catch(() => { sessionSoulPoolLoaded = false; });
+            reloadSoulPool();
         } else if (soulPoolAttempts < 20) {
             soulPoolAttempts++;
             setTimeout(tryLoadSoulPool, 250);
@@ -5849,19 +5828,7 @@ function importSave() {
     let livingPoolAttempts = 0;
     const tryLoadLivingPool = () => {
         if (typeof window.fetchLivingPool === 'function') {
-            window.fetchLivingPool().then(pool => {
-                pool = Array.isArray(pool) ? pool : [];
-                // Αφαίρεσε τον ίδιο τον χαρακτήρα (δεν παλεύεις με τον εαυτό σου)
-                pool = pool.filter(s => s.name !== player.name);
-                // Αφαίρεσε όσους έχει ήδη ξεκαθαρίσει ο παίκτης (blacklist: λίστα σκοτωμένων PK)
-                const killed = new Set(Array.isArray(player.pkKills) ? player.pkKills : []);
-                pool = pool.filter(s => !killed.has(s.name));
-                sessionLivingPool = pool.length > 0 ? pool : null;
-                sessionLivingPoolLoaded = true;
-                if (pool.length > 0) {
-                    logMessage(`Ακούς πως ${pool.length} ρεμπεσκέδες τριγυρνούν στο λαβύρινθο...`, 'system');
-                }
-            }).catch(() => { sessionLivingPoolLoaded = false; });
+            reloadLivingPool();
         } else if (livingPoolAttempts < 20) {
             livingPoolAttempts++;
             setTimeout(tryLoadLivingPool, 250);
@@ -6130,7 +6097,7 @@ function refreshAreaSelectorAppearance() {
         let displayedName = getMonsterDisplayName(monster);
         
         // Προσθήκη επιπέδου (χρώμα = επικινδυνότητα τέρατος)
-        displayedName += ` <span style="color:${getMonsterDangerColor()}; font-size:1.1rem;">(${monster.level})</span>`;
+        displayedName += ` <span style="color:${getMonsterDangerColor()};">(${monster.level})</span>`;
 
         // Ζωντανός ρεμπεσκές (PK): τα στατιστικά του εξοπλισμού του με χρώματα ανά
         // τύπο (weapon #ec6868, armor #1ab2ff, magic #cc66ff) — ό,τι φοράει από το database.
@@ -6138,7 +6105,7 @@ function refreshAreaSelectorAppearance() {
             const w = monster.pkEquip.weapon.power;
             const a = monster.pkEquip.armor.power;
             const m = monster.pkEquip.magic.power;
-            displayedName += ` <span style="color:#ec6868;">${w}</span>-<span style="color:#1ab2ff;">${a}</span>-<span style="color:#cc66ff;">${m}</span>`;
+            displayedName += ` <span style="color:#ec6868;">${w}</span> <span style="color:#1ab2ff;">${a}</span> <span style="color:#cc66ff;">${m}</span>`;
         }
 
         // Χρώματα για SPECIAL τέρατα — ΑΚΡΙΒΩΣ ίδια με τα χρώματα των αντίστοιχων
@@ -6161,9 +6128,16 @@ function refreshAreaSelectorAppearance() {
         }
         
         document.getElementById('m-name').innerHTML = displayedName;
-        
-        // === ΧΡΩΜΑ ΚΑΙ ΕΦΕ ΟΝΟΜΑΤΟΣ ===
+
+        // Auto-shrink: μείωση font-size αν δεν χωράει (με βάση το πλάτος της μπάρας ζωής)
         const mNameEl = document.getElementById('m-name');
+        const hpBarWidth = document.getElementById('monster-hp-parent').clientWidth;
+        mNameEl.style.fontSize = '';
+        let fs = 1.2;
+        while (mNameEl.scrollWidth > hpBarWidth && fs > 0.5) {
+            fs -= 0.05;
+            mNameEl.style.fontSize = fs + 'rem';
+        }
         
         // Έλεγχος για τη σπέσιαλ λάμψη του Θεού Κόνανου
         if (monster.name === "Θεός Κόνανος") {
@@ -6656,7 +6630,7 @@ function trySpawnSoulMonster(lvl, baseAtk, baseDef, baseHp) {
 // με βάση τα tiers του εξοπλισμού του από το database).
 function trySpawnPkMonster(lvl, baseAtk, baseDef, baseHp) {
     if (!sessionLivingPoolLoaded || !sessionLivingPool || sessionLivingPool.length === 0) return null;
-    if (Math.random() >= 1 / 800) return null;
+    if (Math.random() >= 1 / 1) return null;
 
     const candidates = sessionLivingPool.filter(s => Math.abs(s.level - lvl) <= 2);
     if (candidates.length === 0) return null;
@@ -6909,6 +6883,7 @@ else if (Math.random() < specialChance) {
     }
 
 function handleHuntRetreatClick() {
+    if (player.ironman && player.ironmanDead) return;
     if (inCombat) {
         toggleRetreat();
     } else if (player.level > player.lastGoldCashedLevel && player.gold > 0) {
@@ -7141,21 +7116,28 @@ function getPkCdCharge(cd, duration) {
     return Math.min(1, (Date.now() - cd.start) / duration);
 }
 
-// Ξανα-φέρνει τη λίστα των ζωντανών ρεμπεσκεδών από το online database, εφαρμόζοντας
-// το τρέχον blacklist (player.pkKills). Χρησιμοποιείται και μετά το άδειασμα του blacklist.
 function reloadLivingPool() {
     if (typeof window.fetchLivingPool !== 'function') return;
+    const blacklist = new Set(Array.isArray(player.pkKills) ? player.pkKills : []);
     window.fetchLivingPool().then(pool => {
-        pool = Array.isArray(pool) ? pool : [];
-        if (player) pool = pool.filter(s => s.name !== player.name);
-        const killed = new Set(Array.isArray(player.pkKills) ? player.pkKills : []);
-        pool = pool.filter(s => !killed.has(s.name));
+        pool = (Array.isArray(pool) ? pool : []).filter(s => s.name !== player.name && !blacklist.has(s.name));
         sessionLivingPool = pool.length > 0 ? pool : null;
         sessionLivingPoolLoaded = true;
-        if (pool.length > 0) {
-            logMessage(`Ακούς ${pool.length} ρεμπεσκέδες να τριγυρνάνε στους διαδρόμους...`, 'system');
-        }
+        if (pool.length > 0) logMessage(`Ακούς πως ${pool.length} ρεμπεσκέδες τριγυρνούν στο λαβύρινθο...`, 'system');
+        else logMessage('Ακούς πως κανένας ρεμπεσκές δεν τριγυρνά τώρα στο λαβύρινθο...', 'system');
     }).catch(() => { sessionLivingPoolLoaded = false; });
+}
+
+function reloadSoulPool() {
+    if (typeof window.fetchSoulPool !== 'function') return;
+    const blacklist = new Set((player.magkiaMilestones || []).filter(m => m.soulKill).map(m => m.soulKill));
+    window.fetchSoulPool().then(pool => {
+        pool = (Array.isArray(pool) ? pool : []).filter(s => s.name !== player.name && !blacklist.has(s.name));
+        sessionSoulPool = pool.length > 0 ? pool : null;
+        sessionSoulPoolLoaded = true;
+        if (pool.length > 0) logMessage(`Αισθάνεσαι ${pool.length} ψυχές πεσόντων ironmen να στοιχειώνουν τα βάθη...`, 'system');
+        else logMessage('Καμία ψυχή ironman δεν στοιχειώνει ακόμα το λαβύρινθο...', 'system');
+    }).catch(() => { sessionSoulPoolLoaded = false; });
 }
 
 // Άδειασμα του blacklist των σκοτωμένων/αποκλεισμένων ρεμπεσκεδών: ξανα-αποκτούν δικαίωμα
