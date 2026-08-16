@@ -8485,7 +8485,7 @@ if ('serviceWorker' in navigator) {
 
             const { data: existingRows, error: selErr } = await sbClient
                 .from('ironman_deaths')
-                .select('turns')
+                .select('turns, killer')
                 .eq('name', name);
 
             if (selErr) { console.error('[Upload] Select error:', selErr); dbErrors = selErr.message || 'select failed'; }
@@ -8494,6 +8494,15 @@ if ('serviceWorker' in navigator) {
             const bestExistTurns = existingList.reduce((max, row) => Math.max(max, row.turns ?? 0), -1);
 
             console.log('[Upload] existingCount:', existingList.length, 'bestExistTurns:', bestExistTurns);
+
+            // Ο νεκρός ΔΕΝ αντικαθίσταται ΠΟΤΕ — ούτε από ζωντανό, ούτε από άλλον
+            // νεκρό (ακόμα κι αν φέρνει περισσότερα turns). Μόλις ανέβει θάνατος,
+            // το record γίνεται μόνιμο.
+            if (existingList.some(row => row.killer && String(row.killer).length > 0)) {
+                console.log('[Upload] SKIPPED — dead record exists, it is permanent');
+                skipped++;
+                continue;
+            }
 
             if (bestExistTurns >= 0 && entryTurns < bestExistTurns && !r.killer) {
                 console.log('[Upload] SKIPPED — not more turns than existing');
