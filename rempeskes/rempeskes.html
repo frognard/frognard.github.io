@@ -5807,37 +5807,6 @@ function importSave() {
     applyPortrait();
     refreshTekePatrons();
 
-    // ΨΥΧΕΣ IRONMEN: η `reloadSoulPool()` τρέχει στην επιλογή χαρακτήρα (slotSelectPlay).
-    // Εδώ απλά κάνουμε poll μέχρι να είναι έτοιμο το fetchSoulPool wrapper.
-    let soulPoolAttempts = 0;
-    const tryLoadSoulPool = () => {
-        if (typeof window.fetchSoulPool === 'function') {
-            reloadSoulPool();
-        } else if (soulPoolAttempts < 20) {
-            soulPoolAttempts++;
-            setTimeout(tryLoadSoulPool, 250);
-        } else {
-            sessionSoulPoolLoaded = false;
-        }
-    };
-    tryLoadSoulPool();
-
-    // ΖΩΝΤΑΝΟΙ ΡΕΜΠΕΣΚΕΔΕΣ (PK): στην εκκίνηση φορτώνουμε τη λίστα των ζωντανών παικτών
-    // από το online database. Ίδια λογική με τις ψυχές: retry με polling όσο το supabase
-    // client (σε μεταγενέστερο script block) δεν είναι ακόμα διαθέσιμο.
-    let livingPoolAttempts = 0;
-    const tryLoadLivingPool = () => {
-        if (typeof window.fetchLivingPool === 'function') {
-            reloadLivingPool();
-        } else if (livingPoolAttempts < 20) {
-            livingPoolAttempts++;
-            setTimeout(tryLoadLivingPool, 250);
-        } else {
-            sessionLivingPoolLoaded = false;
-        }
-    };
-    tryLoadLivingPool();
-
 let rateStartTime = Date.now();
 let sessionXp = 0;
 let sessionGold = 0;
