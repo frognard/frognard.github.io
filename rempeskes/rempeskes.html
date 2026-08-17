@@ -768,6 +768,10 @@ padding: 20px;
             background-color: #c0392b !important;
             color: #fff;
         }
+        .btn-delete-save.btn-disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
 
         .btn-showRules {
             border-color: #218518; 
@@ -1832,7 +1836,7 @@ body {
         🗑️
     </button>
 
-    <button class="btn-delete-save" title="Επιλογή Χαρακτήρα" onclick="showCharacterSelect()" style="margin-left:auto;">
+    <button id="btn-char-select" class="btn-delete-save" title="Επιλογή Χαρακτήρα" onclick="showCharacterSelect()" style="margin-left:auto;">
         👤
     </button>
 
@@ -5250,6 +5254,8 @@ function stopGameActivity() {
     if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
     if (nextMonsterTimeoutId) { clearTimeout(nextMonsterTimeoutId); nextMonsterTimeoutId = null; }
     inCombat = false;
+    const _bcs = document.getElementById('btn-char-select');
+    if (_bcs) _bcs.classList.remove('btn-disabled');
     const ti = document.getElementById('town-interface');
     const ci = document.getElementById('combat-interface');
     if (ti) ti.classList.remove('hidden');
@@ -6576,7 +6582,8 @@ setInterval(function () {
     updateUI();
 
     inCombat = true;
-    isAttemptingRetreat = false;
+    const _bcs = document.getElementById('btn-char-select');
+    if (_bcs) _bcs.classList.add('btn-disabled');
     isSkillQueued = false;
     currentRunConanosChance = currentSelectedLevel === 100 ? 0.5 : 0;
 
@@ -7090,6 +7097,8 @@ function forceRetreat() {
 
     // 3. Επαναφορά μεταβλητών κατάστασης
     inCombat = false;
+    const _bcs4 = document.getElementById('btn-char-select');
+    if (_bcs4) _bcs4.classList.remove('btn-disabled');
     isAttemptingRetreat = false;
     isSkillQueued = false;
     queuedSkill = null;
@@ -7811,6 +7820,8 @@ function showAnnouncementPopup(text, styleClass, color) {
                 
                 if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
                 inCombat = false;
+                const _bcs5 = document.getElementById('btn-char-select');
+                if (_bcs5) _bcs5.classList.remove('btn-disabled');
                 monster = null;
                 isAttemptingRetreat = false;
 
@@ -7977,6 +7988,8 @@ function showAnnouncementPopup(text, styleClass, color) {
 
                     if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
                     inCombat = false;
+                    const _bcs6 = document.getElementById('btn-char-select');
+                    if (_bcs6) _bcs6.classList.remove('btn-disabled');
                     monster = null;
                     isAttemptingRetreat = false;
 
@@ -8057,12 +8070,16 @@ function showAnnouncementPopup(text, styleClass, color) {
             if (outcome === 'mutual_death') {
                 if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
                 inCombat = false;
+                const _bcs7 = document.getElementById('btn-char-select');
+                if (_bcs7) _bcs7.classList.remove('btn-disabled');
                 applyDefeatPenalties();
                 
             }
         } else {
             if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
             inCombat = false;
+            const _bcs8 = document.getElementById('btn-char-select');
+            if (_bcs8) _bcs8.classList.remove('btn-disabled');
 
             if (outcome === 'defeat') {
                 applyDefeatPenalties();
