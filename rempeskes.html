@@ -2,6 +2,9 @@
 <html lang="el">
 <head>
 
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v454</title>
+    <title>Ρεμπεσκές v455</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -9426,7 +9429,7 @@ function openOptionsModal() {
     if (portraitEl) portraitEl.checked = player.showPortrait === true;
     const screenStatsEl = document.getElementById('options-screen-stats');
     if (screenStatsEl) screenStatsEl.checked = player.onScreenStats === true;
-    const musicEl = document.getElementById('options-music');
+    const musicEl = document.getElementById('options-music-toggle');
     if (musicEl) musicEl.checked = musicEnabled;
     const musicVolEl = document.getElementById('options-music-volume');
     if (musicVolEl) musicVolEl.value = musicVolumeDb;
