@@ -6665,7 +6665,7 @@ function trySpawnPkMonster(lvl, baseAtk, baseDef, baseHp) {
     // Οι τύποι των παικτών: atk/def/hp
     const atk = pLevel * 0.75 + weaponTier + magicTier / 2;
     const def = pLevel * 0.75 + armorTier + magicTier / 2;
-    const hp = Math.floor(pLevel * 150);
+    const hp = Math.floor(pLevel * 100);
 
     logMessage(`Συνάντηση ρεμπεσκέ: ${pk.name} (${pLevel})!`, 'pk');
 
