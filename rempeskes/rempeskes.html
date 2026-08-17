@@ -2,6 +2,9 @@
 <html lang="el">
 <head>
 
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v453</title>
+    <title>Ρεμπεσκές v454</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -1847,6 +1850,10 @@ body {
 
     <button class="btn-showRules btn-icon-square" title="Βοήθεια" onclick="showRules()">
         ❓
+    </button>
+
+    <button id="btn-pause" class="btn-icon-square" title="Παύση (P)" onclick="doPause()" style="background-color:#1a1a1a; color:#f1c40f;">
+        ⏸
     </button>
 
 </div>
@@ -4551,7 +4558,27 @@ const AREA_TYPE_COLOR = {
     let sessionLivingPoolLoaded = false; // true μόνο αν η λίστα φορτώθηκε επιτυχώς σε αυτό το session
     let currentRunConanosChance = 0;
     let killStreakBonus = 0; // ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΟ: δεν δίνει πλέον XP bonus
- 
+
+    function doPause() {
+        const _pauseT = Date.now();
+        const _cdRemain = {};
+        if (potionCooldownActive) { _cdRemain.potion = Math.max(0, effCDPotion() - (_pauseT - potionCdStart)); if (potionCdTimer) { clearTimeout(potionCdTimer); potionCdTimer = null; } }
+        if (skillCooldownActive) { _cdRemain.skill = Math.max(0, effCDMod(skillCdModifier) - (_pauseT - skillCdStart)); if (skillCdTimer) { clearTimeout(skillCdTimer); skillCdTimer = null; } }
+        if (preciseCooldownActive) { _cdRemain.precise = Math.max(0, effCDMod(preciseCdModifier) - (_pauseT - preciseCdStart)); if (preciseCdTimer) { clearTimeout(preciseCdTimer); preciseCdTimer = null; } }
+        if (monster) {
+            if (monster.pkSkillCd && monster.pkSkillCd.active) { _cdRemain.pkSkill = Math.max(0, effCDMod(getPkCdModifier()) - (_pauseT - monster.pkSkillCd.start)); }
+            if (monster.pkPreciseCd && monster.pkPreciseCd.active) { _cdRemain.pkPrecise = Math.max(0, effCDMod(getPkCdModifier()) - (_pauseT - monster.pkPreciseCd.start)); }
+            if (monster.pkBeerCd && monster.pkBeerCd.active) { _cdRemain.pkBeer = Math.max(0, effCDPotion() - (_pauseT - monster.pkBeerCd.start)); }
+        }
+        confirm('ΠΑΥΣΗ — Πάτα OK για συνέχεια.');
+        if (_cdRemain.potion > 0) { potionCdStart = Date.now() - (effCDPotion() - _cdRemain.potion); potionCdTimer = setTimeout(function() { potionCooldownActive = false; updateUI(); }, _cdRemain.potion); }
+        if (_cdRemain.skill > 0) { skillCdStart = Date.now() - (effCDMod(skillCdModifier) - _cdRemain.skill); skillCdTimer = setTimeout(function() { skillCooldownActive = false; updateUI(); }, _cdRemain.skill); }
+        if (_cdRemain.precise > 0) { preciseCdStart = Date.now() - (effCDMod(preciseCdModifier) - _cdRemain.precise); preciseCdTimer = setTimeout(function() { preciseCooldownActive = false; updateUI(); }, _cdRemain.precise); }
+        if (_cdRemain.pkSkill > 0) { monster.pkSkillCd.start = Date.now() - (effCDMod(getPkCdModifier()) - _cdRemain.pkSkill); }
+        if (_cdRemain.pkPrecise > 0) { monster.pkPreciseCd.start = Date.now() - (effCDMod(getPkCdModifier()) - _cdRemain.pkPrecise); }
+        if (_cdRemain.pkBeer > 0) { monster.pkBeerCd.start = Date.now() - (effCDPotion() - _cdRemain.pkBeer); }
+    }
+
     const CD_DURATION = 10000; // βασική διάρκεια cooldown (ms) σε κανονική ταχύτητα (x1)
     const COMBAT_TICK_MS = 2000; // βασικός χρόνος γύρου μάχης (ms) σε κανονική ταχύτητα (x1)
 
@@ -6443,6 +6470,7 @@ function logMessageHTML(html, type = 'system') {
     appendInfoLine(body, "• Ρίχνε ΚΑΤΡΑΠΑΚΙΑ στην αρχή της μάχης, ΕΚΤΕΛΕΣΗ στο τέλος! Φρόντισε να μένεις πάντα μεθυσμένος!", "help");
     appendInfoLine(body, "• Όταν νιώθεις οτι ρισκάρεις ψόφο, ΤΡΕΞΕ πίσω στον τεκέ!", "help");
     appendInfoLine(body, "• Προσπάθησε να μην γίνεσαι άπληστος, ειδικά στο Ironman Mode!", "help");
+    appendInfoLine(body, "• ΜΗΝ ΚΛΕΙΝΕΙΣ Η ΚΑΝΕΙΣ ΡΗΦΡΕΣ το παιχνίδι ποτέ κατα τη διάρκεια της μάχης! Θα χαθείς στο τάτσεο και θα σκοτωθείς!", "help");
 
 }
 
@@ -8356,6 +8384,10 @@ function applyDefeatPenalties() {
 
     cooldownLoop();
 
+    window.addEventListener('beforeunload', (event) => {
+        // αποτροπή refresh θανάτου — το _leftMidCombat system χειρίζεται την ποινή
+    });
+
     window.addEventListener('keydown', (event) => {
 
     // Block F5, Ctrl+R, Cmd+R — αποτροπή refresh
@@ -8432,6 +8464,14 @@ function applyDefeatPenalties() {
         showStats();
         return;
     }
+
+    // P = Παύση
+    if (key === 'p' || key === 'P' || code === 'KeyP') {
+        event.preventDefault();
+        doPause();
+        return;
+    }
+
 
     // ===== ΑΛΛΑΓΗ ΒΑΘΟΥΣ (5/8) — λειτουργεί και μέσα σε μάχη/autoplay =====
     // μέσα σε μάχη η αλλαγή ισχύει στην ΕΠΟΜΕΝΗ κατάβαση, όχι στην τρέχουσα
