@@ -11,7 +11,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v451</title>
+    <title>Ρεμπεσκές v452</title>
     <style>
         :root {
             --bg-color: #121212;
@@ -671,6 +671,15 @@ padding: 20px;
 
 .skill-cast-flash {
     animation: skillCastFlash 280ms ease-out;
+}
+
+@keyframes pkBarFlash {
+    0%   { box-shadow: none; }
+    25%  { box-shadow: 0 0 8px #fff, 0 0 16px #fff, 0 0 24px #fff; border-color: #fff; }
+    100% { box-shadow: none; border-color: #444; }
+}
+.pk-bar-flash {
+    animation: pkBarFlash 300ms ease-out;
 }
 
 /*
@@ -2241,7 +2250,8 @@ function showStats() {
     appendInfoLine(totalDiv, `Θρυλικοί εχθροί: ${formatNumber(player.legendaryEncounters || 0)}`, "stats");
     appendInfoLine(totalDiv, `Θρυλικά drops: ${formatNumber(player.legendaryDrops || 0)}`, "stats");
     appendInfoLine(totalDiv, ``);
-    appendInfoLineHTML(totalDiv, `<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #0099ff; text-decoration: underline; cursor: pointer;">Ανέβασμα χαρακτήρα σε online rankings</a>`, "stats");
+    appendInfoLineHTML(totalDiv, `<a href="#" onclick="uploadCurrentPlayerToHiScores(); return false;" style="color: #2ecc71; cursor: pointer;">Ανέβασμα χαρακτήρα σε online rankings</a>`, "stats");
+    appendInfoLineHTML(totalDiv, `<a href="#" onclick="deletePlayerFromHiScores(); return false;" style="color: #d35400; cursor: pointer; display:none;">Διαγραφή χαρακτήρα από τα online rankings</a>`, "stats");
 
     // --- Tab "Κατάβασης" ---
     const d = descentStats || { turns: 0, damageDealt: 0, damageTaken: 0, kills: 0, xp: 0, gp: 0 };
@@ -2590,6 +2600,30 @@ function uploadCurrentPlayerToHiScores() {
     }
 }
 
+async function deletePlayerFromHiScores() {
+    if (!player || !player.name) return;
+    if (!confirm(`Σίγουρα θέλεις να διαγραφεί ο χαρακτήρας "${player.name}" από τα online rankings;`)) return;
+    if (typeof window.deletePlayerFromDb !== 'function') {
+        logMessage('Αποτυχία σύνδεσης με το database.', 'system');
+        return;
+    }
+    const turns = player.activeTime || 0;
+    const { error } = await window.deletePlayerFromDb(player.name, turns);
+    if (error === 'not enough turns') {
+        logMessage('Δεν έχεις αρκετούς γύρους για να διαγράψεις το record σου.', 'system');
+        return;
+    }
+    if (error) {
+        logMessage('Αποτυχία διαγραφής από το database.', 'system');
+        return;
+    }
+    player.liveUpload = false;
+    const liveEl = document.getElementById('options-live-upload');
+    if (liveEl) liveEl.checked = false;
+    saveGame();
+    logMessage(`Ο χαρακτήρας "${player.name}" διαγράφηκε από τα online rankings.`, 'system');
+}
+
 function liveUploadIfEnabled() {
     if (player.liveUpload === false) return;
     if (typeof syncIronmanRecordsToCloud !== 'function') return;
@@ -2611,6 +2645,15 @@ function flashSkillButton(buttonId) {
 
     // ενεργοποίηση flash
     btn.classList.add("skill-cast-flash");
+}
+
+function flashPkBar(barId) {
+    const fill = document.getElementById(barId);
+    if (!fill || !fill.parentElement) return;
+    const bar = fill.parentElement;
+    bar.classList.remove("pk-bar-flash");
+    void bar.offsetWidth;
+    bar.classList.add("pk-bar-flash");
 }
 
 
@@ -4882,13 +4925,16 @@ function updateBattleAreaRow() {
     // μπάρες recharge των επιθέσεών του (Κ=Κατραπακιά, Ε=Εκτέλεση, Μ=Μπύρα) και
     // ένδειξη φυγής (Τ) όταν επιχειρεί να το σκάσει.
     if (monster && monster.isPk) {
-        areaRow.innerHTML =
-            `<div class="pk-recharge-row">` +
-            `<span class="pk-bar-label" title="Κατραπακιά">Κ</span><div class="pk-bar"><div class="pk-bar-fill pk-bar-skill" id="pk-bar-skill"></div></div>` +
-            `<span class="pk-bar-label" title="Εκτέλεση">Ε</span><div class="pk-bar"><div class="pk-bar-fill pk-bar-precise" id="pk-bar-precise"></div></div>` +
-            `<span class="pk-bar-label" title="Μπύρα">Μ</span><div class="pk-bar"><div class="pk-bar-fill pk-bar-beer" id="pk-bar-beer"></div></div>` +
-            `<span class="pk-bar-label pk-flee-btn" id="pk-flee-btn" title="Επιχειρεί φυγή">Τ</span>` +
-            `</div>`;
+        // Only rebuild HTML if bars don't already exist (avoid wiping flash animations)
+        if (!document.getElementById('pk-bar-skill')) {
+            areaRow.innerHTML =
+                `<div class="pk-recharge-row">` +
+                `<span class="pk-bar-label" title="Κατραπακιά">Κ</span><div class="pk-bar"><div class="pk-bar-fill pk-bar-skill" id="pk-bar-skill"></div></div>` +
+                `<span class="pk-bar-label" title="Εκτέλεση">Ε</span><div class="pk-bar"><div class="pk-bar-fill pk-bar-precise" id="pk-bar-precise"></div></div>` +
+                `<span class="pk-bar-label" title="Μπύρα">Μ</span><div class="pk-bar"><div class="pk-bar-fill pk-bar-beer" id="pk-bar-beer"></div></div>` +
+                `<span class="pk-bar-label pk-flee-btn" id="pk-flee-btn" title="Επιχειρεί φυγή">Τ</span>` +
+                `</div>`;
+        }
         updatePkRechargeBars();
         return;
     }
@@ -6599,7 +6645,7 @@ function trySpawnSoulMonster(lvl, baseAtk, baseDef, baseHp) {
 // με βάση τα tiers του εξοπλισμού του από το database).
 function trySpawnPkMonster(lvl, baseAtk, baseDef, baseHp) {
     if (!sessionLivingPoolLoaded || !sessionLivingPool || sessionLivingPool.length === 0) return null;
-    if (Math.random() >= 1 / 800) return null;
+    if (Math.random() >= 1 / 1) return null;
 
     const candidates = sessionLivingPool.filter(s => Math.abs(s.level - lvl) <= 2);
     if (candidates.length === 0) return null;
@@ -7190,6 +7236,7 @@ function runPkBotRound() {
         const heal = Math.round(maxHp * (pct / 100));
         monster.hp = Math.min(maxHp, monster.hp + heal);
         monster.pkBeerCd = { active: true, start: now };
+        flashPkBar('pk-bar-beer');
         logMessage(`${monster.pkName}: έσφιξε μια μπύρα και αναπλήρωσε ${formatNumber(heal)} HP!`, 'pk');
     }
 
@@ -7216,9 +7263,11 @@ function runPkBotRound() {
     if (skillReady && (monster.pkAttemptingRetreat || player.hp >= estimatedKatrapakiaDmg)) {
         monster.pkAttackType = 'katrapakia';
         monster.pkSkillCd = { active: true, start: now };
+        flashPkBar('pk-bar-skill');
     } else if (preciseReady && player.hp <= getPlayerMaxHp() * skills.preciseStrike.executeThreshold) {
         monster.pkAttackType = 'precise';
         monster.pkPreciseCd = { active: true, start: now };
+        flashPkBar('pk-bar-precise');
     }
 
     return false;
@@ -7659,8 +7708,10 @@ function showAnnouncementPopup(text, styleClass, color) {
         isSkillQueued = false;
 
         if (outcome === 'victory' || outcome === 'mutual_death') {
-            document.getElementById('monster-hp-flash').classList.add('monster-death');
-            setTimeout(() => document.getElementById('monster-hp-flash').classList.remove('monster-death'), 500);
+            if (!monster.isPk) {
+                document.getElementById('monster-hp-flash').classList.add('monster-death');
+                setTimeout(() => document.getElementById('monster-hp-flash').classList.remove('monster-death'), 500);
+            }
             
             if (!monster.isPk) {
                 logMessage(`${getMonsterDisplayName(monster)}: εξοντώθηκε.`, 'victory');
@@ -7914,7 +7965,7 @@ function showAnnouncementPopup(text, styleClass, color) {
                 });
             }
 
-            if (droppedSomething) { triggerSmoothTransition('#3e3200', 1.0); }
+            if (droppedSomething && !monster.isPk) { triggerSmoothTransition('#3e3200', 1.0); }
 
             checkLevelUp();
 
@@ -9079,16 +9130,8 @@ if ('serviceWorker' in navigator) {
 
             console.log('[Upload] existingCount:', existingList.length, 'bestExistTurns:', bestExistTurns);
 
-            // Ο νεκρός ΔΕΝ αντικαθίσταται ΠΟΤΕ — ούτε από ζωντανό, ούτε από άλλον
-            // νεκρό (ακόμα κι αν φέρνει περισσότερα turns). Μόλις ανέβει θάνατος,
-            // το record γίνεται μόνιμο.
-            if (existingList.some(row => row.killer && String(row.killer).length > 0)) {
-                console.log('[Upload] SKIPPED — dead record exists, it is permanent');
-                skipped++;
-                continue;
-            }
 
-            if (bestExistTurns >= 0 && entryTurns < bestExistTurns && !r.killer) {
+            if (bestExistTurns >= 0 && entryTurns < bestExistTurns) {
                 console.log('[Upload] SKIPPED — not more turns than existing');
                 skipped++;
                 continue;
@@ -9244,6 +9287,18 @@ if ('serviceWorker' in navigator) {
             armor_legendary: !!s.armor_legendary,
             magic_legendary: !!s.magic_legendary
         }));
+    };
+
+    window.deletePlayerFromDb = async function (name, turns) {
+        if (!sbClient) return { error: 'no client' };
+        const { data: existing, error: selErr } = await sbClient
+            .from('ironman_deaths').select('turns').eq('name', name);
+        if (selErr) return { error: selErr };
+        const bestExistTurns = (existing || []).reduce((max, r) => Math.max(max, r.turns ?? 0), -1);
+        if (bestExistTurns >= 0 && (turns || 0) < bestExistTurns) {
+            return { error: 'not enough turns' };
+        }
+        return await sbClient.from('ironman_deaths').delete().eq('name', name);
     };
 })();
 </script>
