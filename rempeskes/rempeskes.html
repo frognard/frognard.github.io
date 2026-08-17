@@ -11,8 +11,9 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v452</title>
+    <title>Ρεμπεσκές v453</title>
     <style>
+        html, body { overscroll-behavior: none; }
         :root {
             --bg-color: #121212;
             --panel-bg: #1e1e1e;
@@ -8356,6 +8357,10 @@ function applyDefeatPenalties() {
     cooldownLoop();
 
     window.addEventListener('keydown', (event) => {
+
+    // Block F5, Ctrl+R, Cmd+R — αποτροπή refresh
+    if (event.key === 'F5' || event.code === 'F5') { event.preventDefault(); return; }
+    if ((event.ctrlKey || event.metaKey) && event.code === 'KeyR') { event.preventDefault(); return; }
 
     // αν γράφεις όνομα, μη γίνονται hotkeys
     const active = document.activeElement;
