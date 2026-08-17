@@ -6645,7 +6645,7 @@ function trySpawnSoulMonster(lvl, baseAtk, baseDef, baseHp) {
 // με βάση τα tiers του εξοπλισμού του από το database).
 function trySpawnPkMonster(lvl, baseAtk, baseDef, baseHp) {
     if (!sessionLivingPoolLoaded || !sessionLivingPool || sessionLivingPool.length === 0) return null;
-    if (Math.random() >= 1 / 1) return null;
+    if (Math.random() >= 1 / 800) return null;
 
     const candidates = sessionLivingPool.filter(s => Math.abs(s.level - lvl) <= 2);
     if (candidates.length === 0) return null;
