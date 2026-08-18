@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v455</title>
+    <title>Ρεμπεσκές v456</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -799,6 +799,15 @@ padding: 20px;
 
         .btn-showRules:hover {
             background-color: #336297 !important;
+            color: #fff;
+        }
+
+        .btn-pause {
+            background-color: #1a1a1a;
+            color: #aaa;
+        }
+        .btn-pause:hover {
+            background-color: #555 !important;
             color: #fff;
         }
 
@@ -1852,7 +1861,7 @@ body {
         ❓
     </button>
 
-    <button id="btn-pause" class="btn-icon-square" title="Παύση (P)" onclick="doPause()" style="background-color:#1a1a1a; color:#f1c40f;">
+    <button id="btn-pause" class="btn-icon-square btn-pause" title="Παύση (P)" onclick="doPause()">
         ⏸
     </button>
 
@@ -3225,7 +3234,7 @@ const armorNames = [
   "Ελαφριά Ζάβα",
   "Παλιό Κλιβάνιο",
   "Ενισχυμένο Σκουτάρι",
-  "Υφασμάτινη Πανόπλια",
+  "Υφασμάτινη Πανοπλία",
   "Σιδηρόπλεκτο Λωρίκιο",
   "Θυρεός",
   "Καββάδιο της Φρουράς",
@@ -4044,6 +4053,7 @@ function getRandomItemName() {
 function getZaladourasMessages() {
 const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Το καζάνι βράζει, του κόβαλου ο κώλος γιορτάζει!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Αν συναντήσεις άλλο ρεμπεσκέ στο λαβύρινθο, δεν είναι μάχη μέχρι θανάτου: υπάρχουν αυστηροί κανόνες μονομαχίας! Ο νικητής κερδίζει το καλύτερο αντικείμενο του ηττημένο.''" ,
     `Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''${getRandomMonsterFullName()}! Δεν έχεις ακούσει τίποτα; Λένε πως έχει κατασφάξει πολύ κόσμο στα πιο βαθιά!''`,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: Αν νιώθεις ότι το τέρας πρόκειται να σε φάει, πάτα έγκαιρα το ''ΤΡΕΞΕ''! Του χέστη η μάνα δεν έκλαψε ποτέ!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Δώσε βάση στο χρώμα του κάθε βάθους στο λαβύρινθο: δείχνει τι είδους ή τι πλήθους ονομαστά τέρατα κυκλοφορούν εκεί.''",
@@ -4068,6 +4078,7 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Παλουκώσου λιγάκι, κι άκουσε...''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι οι απλές επιθέσεις εχουν 80% ευστοχία. Αλλά οι κατραπακιές και οι εκτελέσεις έχουν 90%.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως όταν ψοφολογάς, τα αντικείμενά σου φθείρονται!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε πως στη Μεδουσιανή θα βρείς το καλύτερο πιτόγυρο!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι όσο περισσότερους θαλάμους ψάχνεις σε μία κατάβαση, τόσο αυξάνει και η πιθανότητα να συναντήσεις σπάνια τέρατα!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι ο λόρδος Φίρκραχος ήταν ο πρώτος Θεοσφάχτης.''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι βαθύτερα στο λαβύρινθο τριγυρνούν περισσότεροι θρυλικοί εχθροί.''" ,
@@ -6690,7 +6701,7 @@ function trySpawnSoulMonster(lvl, baseAtk, baseDef, baseHp) {
     if (!sessionSoulPoolLoaded || !sessionSoulPool || sessionSoulPool.length === 0) return null;
     if (Math.random() >= 1 / 800) return null;
 
-    const candidates = sessionSoulPool.filter(s => Math.abs(s.level - lvl) <= 3);
+    const candidates = sessionSoulPool.filter(s => Math.abs(s.level - lvl) <= 2);
     if (candidates.length === 0) return null;
 
     const soul = candidates[Math.floor(Math.random() * candidates.length)];
