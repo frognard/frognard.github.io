@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v456</title>
+    <title>Ρεμπεσκές v457</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -5481,37 +5481,7 @@ function slotSelectPlay(i) {
     if (typeof window.rearmTimers === 'function') window.rearmTimers();
 
     if (_wasLeftMidCombat && !(player.ironman && player.ironmanDead)) {
-        logMessage("Χάθηκες στο λαβύρινθο και σκοτώθηκες!", 'monster');
-        const _penaltySlots = ['weapon', 'armor', 'magic'];
-        const _lostSlot = _penaltySlots[Math.floor(Math.random() * _penaltySlots.length)];
-        player.goldLost += player.gold;
-        player.gold = 0;
-        player.hp = 1;
-        if (player[_lostSlot].power > 1) {
-            const _rawLoss = rollDeathPenaltyAmount();
-            const _actualLoss = Math.min(_rawLoss, player[_lostSlot].power - 1);
-            player[_lostSlot].power -= _actualLoss;
-        }
-        player.deaths++;
-        player._displayedScore = computeScore();
-        if (player.ironman) {
-            player.ironmanDead = true;
-            player.lastKillerName = 'άγνωστο τέρας';
-            if (!player.magkiaMilestones) player.magkiaMilestones = [];
-            player.magkiaMilestones.push({
-                level: 'death',
-                score: Math.max(computeScore(), player._displayedScore || 0),
-                deathLevel: player.level,
-                deathDepth: player._combatDepth || '?',
-                killerName: 'άγνωστο τέρας',
-                turns: player.activeTime || 0,
-                deaths: (player.deaths || 0) + 1
-            });
-            logMessage(`ΥΣΤΑΤΗ ΠΝΟΗ: ${player.name}, επίπεδο ${player.level}, χάθηκε στο λαβύρινθο και σκοτώθηκε από άγνωστο τέρας.`, 'monster');
-        } else {
-            logMessage(`Έχασες ${formatNumber(player.gold)} GP και μεταφέρθηκες στον τεκέ με 1 HP.`, 'monster');
-        }
-        saveGame();
+        applyDefeatPenalties({ labyrinthDeath: true });
     } else if (isFirstPlay) {
         logMessage(`Μπαίνεις για πρώτη φορά στον Τεκέ του Ζαλαδούρα. Οι άλλοι ρεμπεσκέδες σε κοιτάνε στραβά.`, 'bright');
         logMessage(``);
@@ -8188,10 +8158,11 @@ function showAnnouncementPopup(text, styleClass, color) {
         }
     }
 
-function applyDefeatPenalties() {
+function applyDefeatPenalties(opts = {}) {
+    const labyrinthDeath = !!opts.labyrinthDeath;
     // Θάνατος από ρεμπεσκέ (PK): ΔΕΝ μετράει ως θάνατος. Ο ρεμπεσκές σε νικά,
     // αρπάζει το καλύτερό σου αντικείμενο και σε αφήνει τραυματισμένο στον τεκέ.
-    const pkDeath = monster && monster.isPk === true;
+    const pkDeath = !labyrinthDeath && monster && monster.isPk === true;
 
     // Το αντικείμενο που θα αρπάξει ο ρεμπεσκές: το ΥΨΗΛΟΤΕΡΟ (τυχαία μεταξύ ισόβαθμων).
     const slots = ['weapon', 'armor', 'magic'];
@@ -8211,8 +8182,8 @@ function applyDefeatPenalties() {
             level: 'death',
             score: Math.max(computeScore(), player._displayedScore || 0),
             deathLevel: player.level,
-            deathDepth: monster.level,
-            killerName: getMonsterDisplayName(monster),
+            deathDepth: labyrinthDeath ? (player._combatDepth || player.level) : monster.level,
+            killerName: labyrinthDeath ? (opts.killerName || 'άγνωστο τέρας') : getMonsterDisplayName(monster),
             turns: player.activeTime || 0,
             deaths: (player.deaths || 0) + 1
         });
@@ -8225,6 +8196,8 @@ function applyDefeatPenalties() {
         logMessage(
             `${getMonsterDisplayName(monster)}: σε νίκησε, άρπαξε: ${pkGrabbedItemName} και σε παράτησε ζαλισμένο. Γυρίζεις ντροπιασμένος στον τεκέ...`,
             'pk');
+    } else if (labyrinthDeath) {
+        logMessage("Χάθηκες στο λαβύρινθο και σκοτώθηκες!", 'monster');
     } else {
         logMessage(
             `Σκοτώθηκες! Έσφαξες ${currentRunKills} εχθρούς και βρήκες ${currentRunItems} αντικείμενα πριν σε ξεκάνουν. Έχασες ${formatNumber(player.gold)} GP και μεταφέρθηκες στον τεκέ με 1 HP.`,
@@ -8266,9 +8239,11 @@ function applyDefeatPenalties() {
     // Καταμέτρηση θανάτων ανά "χρώμα" τέρατος (κόκκινο=weapon, μπλε=armor, μωβ=magic).
     // Τα legendary τέρατα δεν έχουν δικό τους variant χρώματος, αλλά ανήκουν σε τύπο
     // μέσω του monster.lootType (weapon/armor/magic) - το χρησιμοποιούμε κι εκεί.
-    const deathColorType = (monster.variant === 'weapon' || monster.variant === 'armor' || monster.variant === 'magic')
-        ? monster.variant
-        : (monster.variant === 'legendary' ? monster.lootType : null);
+    const deathColorType = monster ? (
+        (monster.variant === 'weapon' || monster.variant === 'armor' || monster.variant === 'magic')
+            ? monster.variant
+            : (monster.variant === 'legendary' ? monster.lootType : null)
+    ) : null;
 
     if (!pkDeath) {
         if (deathColorType === 'weapon') player.deathsWeapon++;
@@ -8278,9 +8253,9 @@ function applyDefeatPenalties() {
 
     if (player.ironman && !pkDeath) {
         player.ironmanDead = true;
-        const killerName = getMonsterDisplayName(monster);
+        const killerName = labyrinthDeath ? (opts.killerName || 'άγνωστο τέρας') : getMonsterDisplayName(monster);
         player.lastKillerName = killerName;
-        const deathDepth = monster.level;
+        const deathDepth = labyrinthDeath ? (player._combatDepth || player.level) : monster.level;
         logMessage(`ΥΣΤΑΤΗ ΠΝΟΗ: ${player.name}, επίπεδο ${player.level}, σκοτώθηκε στο βάθος ${deathDepth} από ${killerName}.`, 'monster');
     }
 
