@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v458</title>
+    <title>Ρεμπεσκές v460</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -1285,6 +1285,16 @@ padding: 20px;
     animation: hpFlashOverlayAnim 0.5s ease-out forwards;
 }
 
+@keyframes pkRetreatFlash {
+    0% { opacity: 0; }
+    25% { opacity: 1; background: #00d2ff; box-shadow: 0 0 12px #00d2ff, 0 0 30px #00d2ff; }
+    100% { opacity: 0; }
+}
+
+.hp-flash-overlay.pk-retreat {
+    animation: pkRetreatFlash 0.6s ease-out forwards;
+}
+
 .equipment-row {
     display: grid;
     grid-template-columns: min-content 1fr min-content;
@@ -1845,7 +1855,7 @@ body {
         🏆
     </button>
 
-    <button class="btn-clear-pk" title="Άδειασμα blacklist ρεμπεσκεδών (σκοτωμένων/αποκλεισμένων) — μπορεί να ξαναεμφανιστούν" onclick="clearPkBlacklist()" style="display:none;">
+    <button class="btn-clear-pk" title="Άδειασμα blacklist ρεμπεσκεδών (σκοτωμένων/αποκλεισμένων) — μπορεί να ξαναεμφανιστούν" onclick="clearPkBlacklist()">
         🗑️
     </button>
 
@@ -4558,6 +4568,8 @@ const AREA_TYPE_COLOR = {
     let isSkillQueued = false; 
     let queuedSkill = null;
     let waitingForNextMonster = false;
+    let pkPauseActive = false;
+    let pkCountdownId = null;
     let nextMonsterTimeoutId = null; // id του setTimeout που κάνει spawn το επόμενο τέρας (endCombat) — ώστε να μπορεί να ακυρωθεί σε forceRetreat/θάνατο
     let currentRunKills = 0;
     let currentRunItems = 0;
@@ -6315,6 +6327,14 @@ function refreshAreaSelectorAppearance() {
         btnHuntRetreat.disabled = player.hp < getPlayerMaxHp();
     }
 
+    // PK COUNTDOWN: κλείδωμα όλων των κουμπιών κατά τη μέτρηση
+    if (pkPauseActive) {
+        btnHuntRetreat.disabled = true;
+        document.getElementById('btn-skill').disabled = true;
+        document.getElementById('btn-precise').disabled = true;
+        document.getElementById('btn-potion').disabled = true;
+    } else {
+
     const btnSkill = document.getElementById('btn-skill');
     btnSkill.disabled = !inCombat || !monster || skillCooldownActive || isSkillQueued;
 
@@ -6342,6 +6362,8 @@ function refreshAreaSelectorAppearance() {
     const btnPotion = document.getElementById('btn-potion');
   //  btnPotion.disabled = potionCooldownActive;   // gia mpyra ektos maxhs
     btnPotion.disabled = potionCooldownActive || !inCombat;
+
+    } // end pkPauseActive else
 
     //   updateAreaSelector();
 const nameElement = document.getElementById("p-name");
@@ -6657,7 +6679,9 @@ setInterval(function () {
     updateUI();
     
     if (combatInterval) clearInterval(combatInterval);
-    combatInterval = setInterval(executeCombatRound, effTick());
+    if (!pkPauseActive) {
+        combatInterval = setInterval(executeCombatRound, effTick());
+    }
 }
 
 
@@ -6722,7 +6746,7 @@ function trySpawnPkMonster(lvl, baseAtk, baseDef, baseHp) {
     // Οι τύποι των παικτών: atk/def/hp
     const atk = pLevel * 0.75 + weaponTier + magicTier / 2;
     const def = pLevel * 0.75 + armorTier + magicTier / 2;
-    const hp = Math.floor(pLevel * 125);
+    const hp = Math.floor(pLevel * 150);
 
     logMessage(`Συνάντηση ρεμπεσκέ: ${pk.name} (${pLevel})!`, 'pk');
 
@@ -6806,6 +6830,7 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
     if (pkMonster) {
         monster = pkMonster;
         variant = 'pk';
+        startPkCountdown();
     } else {
 
     // Βασική πιθανότητα Legendary (1 στις x). Σκαλάρει με το βάθος λαβυρίνθου
@@ -6938,7 +6963,8 @@ else if (Math.random() < specialChance) {
 }
 
     function toggleRetreat() {
-        if (!inCombat) return;
+    if (!inCombat) return;
+    if (pkPauseActive) return;
 
         // Αν έχει ήδη πατηθεί, αγνόησε κάθε επόμενο πάτημα
         if (isAttemptingRetreat) return;
@@ -7069,7 +7095,7 @@ if (skill) {
 
 
     function queueSpecialAttack() {
-        if (!inCombat || !monster || skillCooldownActive || isSkillQueued) return;
+        if (!inCombat || pkPauseActive || !monster || skillCooldownActive || isSkillQueued) return;
         isSkillQueued = true;
         queuedSkill = skills.heavyStrike;
         logMessage("[QUEUE] Η Κατραπακιά προετοιμάστηκε για τον επόμενο γύρο.", 'system');
@@ -7077,7 +7103,7 @@ if (skill) {
     }
 
     function queuePreciseStrike() {
-    if (!inCombat || !monster || preciseCooldownActive) return;
+    if (!inCombat || pkPauseActive || !monster || preciseCooldownActive) return;
     if (monster.hp > monster.maxHp * skills.preciseStrike.executeThreshold) return;
 
     let result = performPlayerAttack(skills.preciseStrike);
@@ -7337,7 +7363,13 @@ function runPkBotRound() {
 // Ο ρεμπεσκές ξέφυγε: η μάχη τελειώνει χωρίς ανταμοιβές και η περιπλάνηση συνεχίζεται
 // κανονικά (το επόμενο τέρας θα βγει στον κανονικό του χρόνο).
 function endCombatPkFled() {
-    document.getElementById('monster-hp-flash').classList.remove('monster-death');
+    const flashEl = document.getElementById('monster-hp-flash');
+    flashEl.classList.remove('monster-death');
+    flashEl.classList.remove('pk-retreat');
+    void flashEl.offsetWidth;
+    flashEl.classList.add('pk-retreat');
+    setTimeout(() => flashEl.classList.remove('pk-retreat'), 650);
+    retreatSound();
     if (monster && monster.isPk) {
         logMessage(`${monster.pkName}: κατάφερε να ξεφύγει από τη μάχη!`, 'pk');
     }
@@ -7356,19 +7388,23 @@ function endCombatPkFled() {
         spawnMonster();
         updateUI();
         if (combatInterval) clearInterval(combatInterval);
-        combatInterval = setInterval(executeCombatRound, effTick());
+        if (!pkPauseActive) {
+            combatInterval = setInterval(executeCombatRound, effTick());
+        }
     }, effTick());
 }
 
 function executeCombatRound() {
    
     if (!inCombat) return;
+    if (pkPauseActive) return;
     player.activeTime += 1;
     if (waitingForNextMonster) return;
 
     if (!monster || monster.hp <= 0) {
         spawnMonster();
         updateUI();
+        if (pkPauseActive) return;
     }
     descentStats.turns++;
     player.combatRounds = (player.combatRounds || 0) + 1;
@@ -7761,6 +7797,65 @@ function showAnnouncementPopup(text, styleClass, color) {
     }, 900);
 }
 
+// ΡΕΜΠΕΣΚΕΣ PK COUNTDOWN: σταματά τη μάχη, δείχνει "ΡΕΜΠΕΣΚΕΣ!", μετράει 5..1 και ξεκινάει "ΦΑΗΤ!"
+function startPkCountdown() {
+    pkPauseActive = true;
+    if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+
+    const popup = document.getElementById('legendary-popup');
+    if (!popup) { pkPauseActive = false; return; }
+
+    const tick = effTick();
+    const steps = ['ΜΟΝΟΜΑΧΙΑ!', '5', '4', '3', '2', '1', 'ΦΑΗΤ!'];
+
+    let i = 0;
+    let fightFired = false;
+
+    function showStep() {
+        if (i >= steps.length) {
+            popup.classList.remove('show');
+            popup.classList.add('hidden');
+            popup.style.color = '';
+            popup.style.textShadow = '';
+            pkPauseActive = false;
+            updateUI();
+            if (inCombat && !waitingForNextMonster) {
+                combatInterval = setInterval(executeCombatRound, effTick());
+            }
+            return;
+        }
+        popup.textContent = steps[i];
+        popup.style.color = '#ffffff';
+        popup.style.textShadow = '0 0 10px #ff2222, 0 0 25px #ff2222, 0 0 40px #ff2222';
+        popup.classList.remove('hidden');
+        popup.classList.remove('show');
+        void popup.offsetWidth;
+        popup.classList.add('show');
+
+        // Hit sound σε κάθε αριθμό του countdown
+        if (/^\d$/.test(steps[i])) hitSound();
+
+        // ΦΑΗΤ!: reset cooldowns + HP αμέσως
+        if (steps[i] === 'ΦΑΗΤ!' && !fightFired) {
+            fightFired = true;
+            skillCooldownActive = false;
+            if (skillCdTimer) { clearTimeout(skillCdTimer); skillCdTimer = null; }
+            preciseCooldownActive = false;
+            if (preciseCdTimer) { clearTimeout(preciseCdTimer); preciseCdTimer = null; }
+            potionCooldownActive = false;
+            if (potionCdTimer) { clearTimeout(potionCdTimer); potionCdTimer = null; }
+            isSkillQueued = false;
+            queuedSkill = null;
+            player.hp = getPlayerMaxHp();
+            updateUI();
+        }
+
+        i++;
+        pkCountdownId = setTimeout(showStep, tick);
+    }
+
+    showStep();
+}
 
    function endCombat(outcome) {
         if (outcome !== 'victory') {
@@ -8117,7 +8212,9 @@ function showAnnouncementPopup(text, styleClass, color) {
                         // RESET: το ρολόι της μάχης ξεκινά ξανά από το spawn,
                         // ώστε το τέρας να έχει πάντα 2 πλήρη δευτ. πριν τον πρώτο γύρο
                         if (combatInterval) clearInterval(combatInterval);
-                        combatInterval = setInterval(executeCombatRound, effTick());
+                        if (!pkPauseActive) {
+                            combatInterval = setInterval(executeCombatRound, effTick());
+                        }
                     }, effTick());
                 }
             }
@@ -8326,7 +8423,7 @@ function applyDefeatPenalties(opts = {}) {
 }
 
     function usePotion() {
-        if (potionCooldownActive) return;
+        if (potionCooldownActive || pkPauseActive) return;
             if (!inCombat) {
         logMessage("Δεν μπορείς να πιεις μπύρα όσο κοιμάσαι!", 'system');
         return;
@@ -8393,6 +8490,9 @@ function applyDefeatPenalties(opts = {}) {
     ) {
         return;
     }
+
+    // PK COUNTDOWN: μηδενική δραστηριότητα πληκτρολογίου κατά τη μέτρηση
+    if (pkPauseActive) return;
 
     const code = event.code;
     const key = event.key;
@@ -8557,6 +8657,7 @@ function applyDefeatPenalties(opts = {}) {
     }
 
     function gamepadHandlePress(buttonIndex) {
+        if (pkPauseActive) return;
         switch (buttonIndex) {
             case 0: usePotion(); break;               // X / κάτω → Μπύρα
             case 1: queuePreciseStrike(); break;      // Circle / δεξιά → Εκτέλεση
@@ -8760,7 +8861,9 @@ function applyDefeatPenalties(opts = {}) {
 
         if (typeof inCombat !== 'undefined' && inCombat) {
             if (combatInterval) clearInterval(combatInterval);
-            combatInterval = setInterval(executeCombatRound, effTick());
+            if (!pkPauseActive) {
+                combatInterval = setInterval(executeCombatRound, effTick());
+            }
         } else if (typeof townRegenInterval !== 'undefined' && townRegenInterval) {
             startTownRegen();
         }
