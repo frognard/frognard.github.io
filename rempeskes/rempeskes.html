@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v460</title>
+    <title>Ρεμπεσκές v461</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -7819,11 +7819,6 @@ function startPkCountdown() {
             popup.classList.add('hidden');
             popup.style.color = '';
             popup.style.textShadow = '';
-            pkPauseActive = false;
-            updateUI();
-            if (inCombat && !waitingForNextMonster) {
-                combatInterval = setInterval(executeCombatRound, effTick());
-            }
             return;
         }
         popup.textContent = steps[i];
@@ -7837,9 +7832,8 @@ function startPkCountdown() {
         // Hit sound σε κάθε αριθμό του countdown
         if (/^\d$/.test(steps[i])) hitSound();
 
-        // ΦΑΗΤ!: reset cooldowns + HP αμέσως
-        if (steps[i] === 'ΦΑΗΤ!' && !fightFired) {
-            fightFired = true;
+        // 5: reset cooldowns + HP
+        if (steps[i] === '5') {
             skillCooldownActive = false;
             if (skillCdTimer) { clearTimeout(skillCdTimer); skillCdTimer = null; }
             preciseCooldownActive = false;
@@ -7850,6 +7844,16 @@ function startPkCountdown() {
             queuedSkill = null;
             player.hp = getPlayerMaxHp();
             updateUI();
+        }
+
+        // ΦΑΗΤ!: ξεκιναει η μαχη αμεσως
+        if (steps[i] === 'ΦΑΗΤ!' && !fightFired) {
+            fightFired = true;
+            pkPauseActive = false;
+            updateUI();
+            if (inCombat && !waitingForNextMonster) {
+                combatInterval = setInterval(executeCombatRound, effTick());
+            }
         }
 
         i++;
