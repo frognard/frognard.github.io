@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v462</title>
+    <title>Ρεμπεσκές v472</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -810,6 +810,45 @@ padding: 20px;
         .btn-pause:hover {
             background-color: #555 !important;
             color: #fff;
+        }
+
+        #game-container.game-paused-grayscale {
+            filter: grayscale(1) brightness(0.65);
+        }
+        #game-container.game-paused-grayscale * {
+            animation-play-state: paused !important;
+        }
+
+        #pause-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 10, 0.55);
+            z-index: 99999;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #eee;
+            text-align: center;
+            user-select: none;
+        }
+        #pause-overlay.show { display: flex; }
+        #pause-overlay .pause-icon {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+        }
+        #pause-overlay .pause-text {
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            font-weight: bold;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+        }
+        #pause-overlay .pause-hint {
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-top: 10px;
         }
 
         .btn-options {
@@ -1644,6 +1683,12 @@ body {
 <script src="https://cdn.jsdelivr.net/combine/npm/tone@14.7.58,npm/@magenta/music@1.23.1/es6/core.js,npm/focus-visible@5,npm/html-midi-player@1.5.0"></script>
 </head>
 <body>
+
+<div id="pause-overlay" onclick="doPause()">
+    <div class="pause-icon">⏸</div>
+    <div class="pause-text">ΠΑΥΣΗ</div>
+    <div class="pause-hint">Πάτα οπουδήποτε για συνέχεια</div>
+</div>
 
 <midi-player
     id="bg-midi-player"
@@ -4074,6 +4119,7 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Τα όπλα βελτιώνουν τη ζημιά. Οι πανοπλίες την προστασία. Τα μαγικά αντικείμενα καί τα δύο, από λίγο!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ΄΄Λένε ότι η πιο καλή στιγμή να υποχωρήσεις είναι ανάμεσα στις μάχες: τότε η υποχώρηση είναι αυτόματη!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Όποιος τη νύχτα περπατεί, μάζες μελανές πατεί!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Για κάποιο λόγο ποτέ δεν μπορώ να σφάξω πάνω από 30 τέρατα τη φορά. Μουδιάζει το χέρι μου!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι αν πολεμάς πιο ρηχά ή πιο βαθιά από το επίπεδό σου, παίρνεις ποινή ή μπόνους στα XP!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Το σήμερα είναι το χθεσινό αύριο!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Μπουγαρομαζώματα, κοβαλοσκορπίσματα!''" ,
@@ -4567,6 +4613,7 @@ const AREA_TYPE_COLOR = {
 
     let monster = null;
     let combatInterval = null;
+    let combatPhaseTimeout = null; // one-shot που ευθυγραμμίζει τον πρώτο γύρο μετά από pause/rearm
     let townRegenInterval = null; 
     let inCombat = false;
    let currentSelectedLevel = 1;
@@ -4579,6 +4626,9 @@ const AREA_TYPE_COLOR = {
     let nextMonsterTimeoutId = null; // id του setTimeout που κάνει spawn το επόμενο τέρας (endCombat) — ώστε να μπορεί να ακυρωθεί σε forceRetreat/θάνατο
     let currentRunKills = 0;
     let currentRunItems = 0;
+    // Μετά από 30 φόνους (30 θάλαμοι) σε μία κατάβαση, ο χαρακτήρας κουράζεται
+    // και στην επόμενη περιπλάνηση παίρνει αυτόματα τον δρόμο για τον τεκέ.
+    const FATIGUE_RUN_LIMIT = 30;
     // Στατιστικά τελευταίας κατάβασης (δεν αποθηκεύονται, μηδενίζονται σε κάθε νέα κατάβαση)
     let descentStats = { turns: 0, damageDealt: 0, damageTaken: 0, kills: 0, xp: 0, gp: 0 };
     let sessionSoulPool = null;        // λίστα ψυχών νεκρών ironmen (τοπική, από το online ψοφολόγιο)
@@ -4588,24 +4638,152 @@ const AREA_TYPE_COLOR = {
     let currentRunConanosChance = 0;
     let killStreakBonus = 0; // ΑΠΕΝΕΡΓΟΠΟΙΗΜΕΝΟ: δεν δίνει πλέον XP bonus
 
-    function doPause() {
-        const _pauseT = Date.now();
-        const _cdRemain = {};
-        if (potionCooldownActive) { _cdRemain.potion = Math.max(0, effCDPotion() - (_pauseT - potionCdStart)); if (potionCdTimer) { clearTimeout(potionCdTimer); potionCdTimer = null; } }
-        if (skillCooldownActive) { _cdRemain.skill = Math.max(0, effCDMod(skillCdModifier) - (_pauseT - skillCdStart)); if (skillCdTimer) { clearTimeout(skillCdTimer); skillCdTimer = null; } }
-        if (preciseCooldownActive) { _cdRemain.precise = Math.max(0, effCDMod(preciseCdModifier) - (_pauseT - preciseCdStart)); if (preciseCdTimer) { clearTimeout(preciseCdTimer); preciseCdTimer = null; } }
-        if (monster) {
-            if (monster.pkSkillCd && monster.pkSkillCd.active) { _cdRemain.pkSkill = Math.max(0, effCDMod(getPkCdModifier()) - (_pauseT - monster.pkSkillCd.start)); }
-            if (monster.pkPreciseCd && monster.pkPreciseCd.active) { _cdRemain.pkPrecise = Math.max(0, effCDMod(getPkCdModifier()) - (_pauseT - monster.pkPreciseCd.start)); }
-            if (monster.pkBeerCd && monster.pkBeerCd.active) { _cdRemain.pkBeer = Math.max(0, effCDPotion() - (_pauseT - monster.pkBeerCd.start)); }
+    // === ΠΑΥΣΗ (πραγματική, όχι browser confirm()) ===
+    // Παγώνει ΟΛΟ το παιχνίδι: combat tick, town regen, autoplay, ΚΑΙ όλα τα cooldowns/recharge
+    // μπάρες μένουν ακριβώς εκεί που ήταν. Στο unpause συνεχίζουν από το ίδιο σημείο.
+    let manualPauseActive = false;
+    let manualPauseStartTime = 0;
+    let _mpCdRemain = {};          // remaining ms για potion/skill/precise/pk cooldowns κατά την παύση
+    let _mpNextMonster = null;     // { remaining, callback } για το nextMonsterTimeoutId
+    let _mpPkCountdown = null;     // { remaining, callback } για το pkCountdownId (μονομαχία)
+    let _gtMeta = { nextMonster: null, pkCountdown: null }; // metadata (start/delay/callback) των παραπάνω one-shot timeouts
+
+    // Βοηθητικές για να μπορεί η παύση να βρει πόσος χρόνος έμεινε σε ένα προγραμματισμένο setTimeout.
+    function scheduleNextMonster(callback, delay) {
+        _gtMeta.nextMonster = { start: Date.now(), delay: delay, callback: callback };
+        nextMonsterTimeoutId = setTimeout(callback, delay);
+    }
+    function schedulePkCountdown(callback, delay) {
+        _gtMeta.pkCountdown = { start: Date.now(), delay: delay, callback: callback };
+        pkCountdownId = setTimeout(callback, delay);
+    }
+
+    // Combat tick με διατήρηση φάσης: δεν ξαναρχίζει από μηδέν σε pause/resume.
+    // Το window.__combatRoundStartTime είναι το σημείο αναφοράς του κύκλου· στην παύση
+    // μετατοπίζεται κατά pauseDuration ώστε η φάση να μείνει η ίδια.
+    function armCombatTick() {
+        if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+        if (combatPhaseTimeout) { clearTimeout(combatPhaseTimeout); combatPhaseTimeout = null; }
+        if (!inCombat || pkPauseActive || manualPauseActive) return;
+
+        const tick = Math.max(1, effTick());
+        if (typeof window.__combatRoundStartTime !== 'number') {
+            window.__combatRoundStartTime = Date.now();
         }
-        confirm('ΠΑΥΣΗ — Πάτα OK για συνέχεια.');
-        if (_cdRemain.potion > 0) { potionCdStart = Date.now() - (effCDPotion() - _cdRemain.potion); potionCdTimer = setTimeout(function() { potionCooldownActive = false; updateUI(); }, _cdRemain.potion); }
-        if (_cdRemain.skill > 0) { skillCdStart = Date.now() - (effCDMod(skillCdModifier) - _cdRemain.skill); skillCdTimer = setTimeout(function() { skillCooldownActive = false; updateUI(); }, _cdRemain.skill); }
-        if (_cdRemain.precise > 0) { preciseCdStart = Date.now() - (effCDMod(preciseCdModifier) - _cdRemain.precise); preciseCdTimer = setTimeout(function() { preciseCooldownActive = false; updateUI(); }, _cdRemain.precise); }
-        if (_cdRemain.pkSkill > 0) { monster.pkSkillCd.start = Date.now() - (effCDMod(getPkCdModifier()) - _cdRemain.pkSkill); }
-        if (_cdRemain.pkPrecise > 0) { monster.pkPreciseCd.start = Date.now() - (effCDMod(getPkCdModifier()) - _cdRemain.pkPrecise); }
-        if (_cdRemain.pkBeer > 0) { monster.pkBeerCd.start = Date.now() - (effCDPotion() - _cdRemain.pkBeer); }
+        const elapsed = ((Date.now() - window.__combatRoundStartTime) % tick + tick) % tick;
+        // elapsed==0 → ακριβώς στην αρχή κύκλου (π.χ. μόλις spawn) → περίμενε πλήρες tick
+        const remaining = (elapsed === 0) ? tick : (tick - elapsed);
+
+        combatPhaseTimeout = setTimeout(function combatPhaseFire() {
+            combatPhaseTimeout = null;
+            if (!inCombat || pkPauseActive || manualPauseActive) return;
+            executeCombatRound();
+            // Νέο σημείο αναφοράς αμέσως μετά τον γύρο, ώστε re-arm / autoplay να μένουν συγχρονισμένα
+            window.__combatRoundStartTime = Date.now();
+            if (!inCombat || pkPauseActive || manualPauseActive) return;
+            const nextTick = Math.max(1, effTick());
+            combatInterval = setInterval(function () {
+                if (!inCombat || pkPauseActive || manualPauseActive) return;
+                executeCombatRound();
+                window.__combatRoundStartTime = Date.now();
+            }, nextTick);
+        }, remaining);
+    }
+    window.armCombatTick = armCombatTick;
+
+    function doPause() {
+        if (manualPauseActive) resumeGame(); else pauseGame();
+    }
+
+    function pauseGame() {
+        if (manualPauseActive) return;
+        manualPauseActive = true;
+        manualPauseStartTime = Date.now();
+
+        // 1) "Παγώνει" τα cooldowns (μπύρα/κατραπακιά/εκτέλεση + PK) κρατώντας ακριβώς
+        //    το υπόλοιπο τους, ώστε η μπάρα recharge να μείνει στη θέση της.
+        _mpCdRemain = {};
+        if (potionCooldownActive) { _mpCdRemain.potion = Math.max(0, effCDPotion() - (manualPauseStartTime - potionCdStart)); if (potionCdTimer) { clearTimeout(potionCdTimer); potionCdTimer = null; } }
+        if (skillCooldownActive) { _mpCdRemain.skill = Math.max(0, effCDMod(skillCdModifier) - (manualPauseStartTime - skillCdStart)); if (skillCdTimer) { clearTimeout(skillCdTimer); skillCdTimer = null; } }
+        if (preciseCooldownActive) { _mpCdRemain.precise = Math.max(0, effCDMod(preciseCdModifier) - (manualPauseStartTime - preciseCdStart)); if (preciseCdTimer) { clearTimeout(preciseCdTimer); preciseCdTimer = null; } }
+        if (monster) {
+            if (monster.pkSkillCd && monster.pkSkillCd.active) { _mpCdRemain.pkSkill = Math.max(0, effCDMod(getPkCdModifier()) - (manualPauseStartTime - monster.pkSkillCd.start)); }
+            if (monster.pkPreciseCd && monster.pkPreciseCd.active) { _mpCdRemain.pkPrecise = Math.max(0, effCDMod(getPkCdModifier()) - (manualPauseStartTime - monster.pkPreciseCd.start)); }
+            if (monster.pkBeerCd && monster.pkBeerCd.active) { _mpCdRemain.pkBeer = Math.max(0, effCDPotion() - (manualPauseStartTime - monster.pkBeerCd.start)); }
+        }
+
+        // 2) Ακυρώνει (προσωρινά) το χρονόμετρο εμφάνισης επόμενου τέρατος / μονομαχίας,
+        //    κρατώντας πόσος χρόνος είχε μείνει, για να ξαναρχίσει ακριβώς από εκεί.
+        if (nextMonsterTimeoutId && _gtMeta.nextMonster) {
+            _mpNextMonster = { remaining: Math.max(0, _gtMeta.nextMonster.delay - (manualPauseStartTime - _gtMeta.nextMonster.start)), callback: _gtMeta.nextMonster.callback };
+            clearTimeout(nextMonsterTimeoutId);
+            nextMonsterTimeoutId = null;
+        }
+        if (pkCountdownId && _gtMeta.pkCountdown) {
+            _mpPkCountdown = { remaining: Math.max(0, _gtMeta.pkCountdown.delay - (manualPauseStartTime - _gtMeta.pkCountdown.start)), callback: _gtMeta.pkCountdown.callback };
+            clearTimeout(pkCountdownId);
+            pkCountdownId = null;
+        }
+
+        // 3) Σταματάει εντελώς τον γύρο μάχης και το regen του τεκέ (θα ξαναφτιαχτούν στο unpause).
+        if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+        if (combatPhaseTimeout) { clearTimeout(combatPhaseTimeout); combatPhaseTimeout = null; }
+        if (townRegenInterval) { clearInterval(townRegenInterval); } // ΔΕΝ μηδενίζουμε τη μεταβλητή -> σημάδι στο rearmTimers() να το ξανανάψει
+
+        // 4) Οπτικά: γκριζάρισμα οθόνης + overlay παύσης.
+        const gc = document.getElementById('game-container');
+        if (gc) gc.classList.add('game-paused-grayscale');
+        const overlay = document.getElementById('pause-overlay');
+        if (overlay) overlay.classList.add('show');
+
+        updateUI();
+    }
+
+    function resumeGame() {
+        if (!manualPauseActive) return;
+        const pauseDuration = Date.now() - manualPauseStartTime;
+        manualPauseActive = false;
+
+        // Μετατοπίζει τα timestamps έναρξης όσο κράτησε η παύση, ώστε το ποσοστό γεμίσματος
+        // (now - start)/duration να παραμείνει ΑΚΡΙΒΩΣ ίδιο με πριν την παύση.
+        if (potionCooldownActive) potionCdStart += pauseDuration;
+        if (skillCooldownActive) skillCdStart += pauseDuration;
+        if (preciseCooldownActive) preciseCdStart += pauseDuration;
+        if (monster) {
+            if (monster.pkSkillCd && monster.pkSkillCd.active) monster.pkSkillCd.start += pauseDuration;
+            if (monster.pkPreciseCd && monster.pkPreciseCd.active) monster.pkPreciseCd.start += pauseDuration;
+            if (monster.pkBeerCd && monster.pkBeerCd.active) monster.pkBeerCd.start += pauseDuration;
+        }
+
+        // Ξαναπρογραμματίζει τα cooldowns με το ΑΚΡΙΒΕΣ υπόλοιπο που είχε μείνει στην παύση.
+        if (_mpCdRemain.potion > 0) potionCdTimer = setTimeout(function() { potionCooldownActive = false; updateUI(); }, _mpCdRemain.potion);
+        if (_mpCdRemain.skill > 0) skillCdTimer = setTimeout(function() { skillCooldownActive = false; updateUI(); }, _mpCdRemain.skill);
+        if (_mpCdRemain.precise > 0) preciseCdTimer = setTimeout(function() { preciseCooldownActive = false; updateUI(); }, _mpCdRemain.precise);
+        _mpCdRemain = {};
+
+        // Ξαναπρογραμματίζει το spawn επόμενου τέρατος / μονομαχία με το ακριβές υπόλοιπο.
+        if (_mpNextMonster) { nextMonsterTimeoutId = setTimeout(_mpNextMonster.callback, _mpNextMonster.remaining); _mpNextMonster = null; }
+        if (_mpPkCountdown) { pkCountdownId = setTimeout(_mpPkCountdown.callback, _mpPkCountdown.remaining); _mpPkCountdown = null; }
+
+        // Διατήρηση φάσης combat tick: μετατόπιση του anchor όσο κράτησε η παύση
+        // ώστε στο unpause να συνεχίσει από το ίδιο σημείο του γύρου (όχι full reset).
+        if (typeof window.__combatRoundStartTime === 'number') {
+            window.__combatRoundStartTime += pauseDuration;
+        }
+
+        // Ξανανάβει combat tick / autoplay / town regen ανάλογα με την τρέχουσα κατάσταση.
+        if (typeof window.rearmTimers === 'function') window.rearmTimers();
+        else {
+            if (inCombat && !pkPauseActive) armCombatTick();
+            else if (townRegenInterval) startTownRegen();
+        }
+
+        const gc = document.getElementById('game-container');
+        if (gc) gc.classList.remove('game-paused-grayscale');
+        const overlay = document.getElementById('pause-overlay');
+        if (overlay) overlay.classList.remove('show');
+
+        updateUI();
     }
 
     const CD_DURATION = 10000; // βασική διάρκεια cooldown (ms) σε κανονική ταχύτητα (x1)
@@ -6335,8 +6513,8 @@ function refreshAreaSelectorAppearance() {
         btnHuntRetreat.disabled = player.hp < getPlayerMaxHp();
     }
 
-    // PK COUNTDOWN: κλείδωμα όλων των κουμπιών κατά τη μέτρηση
-    if (pkPauseActive) {
+    // PK COUNTDOWN / ΧΕΙΡΟΚΙΝΗΤΗ ΠΑΥΣΗ: κλείδωμα όλων των κουμπιών
+    if (pkPauseActive || manualPauseActive) {
         btnHuntRetreat.disabled = true;
         document.getElementById('btn-skill').disabled = true;
         document.getElementById('btn-precise').disabled = true;
@@ -6567,7 +6745,9 @@ let lastCooldownLoopTick = Date.now();
 function cooldownLoop() {
     lastCooldownLoopTick = Date.now();
     try {
-        updateCooldownBars();
+        // Χειροκίνητη παύση: ΜΗΝ ενημερώνεις τις μπάρες recharge — μένουν
+        // "παγωμένες" ακριβώς στο ποσοστό που είχαν τη στιγμή της παύσης.
+        if (!manualPauseActive) updateCooldownBars();
     } catch (e) {
         // Ό,τι κι αν σκάσει εδώ μέσα, ΔΕΝ πρέπει να σκοτώσει το requestAnimationFrame chain.
         console.error('cooldownLoop: σφάλμα (αγνοήθηκε, το loop συνεχίζει):', e);
@@ -6692,9 +6872,10 @@ setInterval(function () {
     updateUI();
     
     if (combatInterval) clearInterval(combatInterval);
-    if (!pkPauseActive) {
-        combatInterval = setInterval(executeCombatRound, effTick());
-    }
+        if (combatPhaseTimeout) { clearTimeout(combatPhaseTimeout); combatPhaseTimeout = null; }
+        if (!pkPauseActive && !manualPauseActive) {
+            armCombatTick();
+        }
 }
 
 
@@ -6977,7 +7158,7 @@ else if (Math.random() < specialChance) {
 
     function toggleRetreat() {
     if (!inCombat) return;
-    if (pkPauseActive) return;
+    if (pkPauseActive || manualPauseActive) return;
 
         // Αν έχει ήδη πατηθεί, αγνόησε κάθε επόμενο πάτημα
         if (isAttemptingRetreat) return;
@@ -7108,7 +7289,7 @@ if (skill) {
 
 
     function queueSpecialAttack() {
-        if (!inCombat || pkPauseActive || !monster || skillCooldownActive || isSkillQueued) return;
+        if (!inCombat || pkPauseActive || manualPauseActive || !monster || skillCooldownActive || isSkillQueued) return;
         isSkillQueued = true;
         queuedSkill = skills.heavyStrike;
         logMessage("[QUEUE] Η Κατραπακιά προετοιμάστηκε για τον επόμενο γύρο.", 'system');
@@ -7116,7 +7297,7 @@ if (skill) {
     }
 
     function queuePreciseStrike() {
-    if (!inCombat || pkPauseActive || !monster || preciseCooldownActive) return;
+    if (!inCombat || pkPauseActive || manualPauseActive || !monster || preciseCooldownActive) return;
     if (monster.hp > monster.maxHp * skills.preciseStrike.executeThreshold) return;
 
     let result = performPlayerAttack(skills.preciseStrike);
@@ -7394,15 +7575,16 @@ function endCombatPkFled() {
     logMessage("Περιπλανιέσαι στο λαβύρινθο...", "system");
     updateUI();
     if (nextMonsterTimeoutId) clearTimeout(nextMonsterTimeoutId);
-    nextMonsterTimeoutId = setTimeout(() => {
+    scheduleNextMonster(() => {
         nextMonsterTimeoutId = null;
         if (!inCombat || !waitingForNextMonster) return;
         waitingForNextMonster = false;
         spawnMonster();
         updateUI();
         if (combatInterval) clearInterval(combatInterval);
-        if (!pkPauseActive) {
-            combatInterval = setInterval(executeCombatRound, effTick());
+        if (combatPhaseTimeout) { clearTimeout(combatPhaseTimeout); combatPhaseTimeout = null; }
+        if (!pkPauseActive && !manualPauseActive) {
+            armCombatTick();
         }
     }, effTick());
 }
@@ -7410,14 +7592,14 @@ function endCombatPkFled() {
 function executeCombatRound() {
    
     if (!inCombat) return;
-    if (pkPauseActive) return;
+    if (pkPauseActive || manualPauseActive) return;
     player.activeTime += 1;
     if (waitingForNextMonster) return;
 
     if (!monster || monster.hp <= 0) {
         spawnMonster();
         updateUI();
-        if (pkPauseActive) return;
+        if (pkPauseActive || manualPauseActive) return;
     }
     descentStats.turns++;
     player.combatRounds = (player.combatRounds || 0) + 1;
@@ -7863,12 +8045,12 @@ function startPkCountdown() {
             pkPauseActive = false;
             updateUI();
             if (inCombat && !waitingForNextMonster) {
-                combatInterval = setInterval(executeCombatRound, effTick());
+                armCombatTick();
             }
         }
 
         i++;
-        pkCountdownId = setTimeout(showStep, tick);
+        schedulePkCountdown(showStep, tick);
     }
 
     showStep();
@@ -8206,11 +8388,28 @@ function startPkCountdown() {
                     // κανονικό τέρας του βάθους (όχι το variant που σκοτώθηκε).
                     refreshCooldownModifiers();
 
+                    // --- ΚΟΥΡΑΣΗ ΜΕΤΑ ΤΟ 30Ο ΘΑΛΑΜΟ: αντί για spawn επόμενου τέρατος,
+                    // ο χαρακτήρας μπαίνει στην περιπλάνηση και μετά γυρίζει στον τεκέ ---
+                    if (currentRunKills >= FATIGUE_RUN_LIMIT) {
+                        logMessage("Περιπλανιέσαι στο λαβύρινθο...", "system");
+                        logMessage("Μούδιασε το χέρι σου από την πολλή σφαγή. Παίρνεις το δρόμο για τον τεκέ...", 'retreat');
+                        updateUI();
+
+                        if (nextMonsterTimeoutId) clearTimeout(nextMonsterTimeoutId);
+                        scheduleNextMonster(() => {
+                            nextMonsterTimeoutId = null;
+                            // Αν στο μεταξύ έγινε ήδη retreat (π.χ. από autoplay), μην ξανατρέξεις τη ρουτίνα
+                            if (!inCombat || !waitingForNextMonster) return;
+                            forceRetreat();
+                        }, effTick());
+                        return;
+                    }
+
                     logMessage("Περιπλανιέσαι στο λαβύρινθο...", "system");
                     updateUI();
 
                     if (nextMonsterTimeoutId) clearTimeout(nextMonsterTimeoutId);
-                    nextMonsterTimeoutId = setTimeout(() => {
+                    scheduleNextMonster(() => {
                         nextMonsterTimeoutId = null;
 
                         // ΣΗΜΑΝΤΙΚΟ: αν στο μεταξύ έγινε retreat (forceRetreat) ή ξεκίνησε
@@ -8229,9 +8428,10 @@ function startPkCountdown() {
                         // RESET: το ρολόι της μάχης ξεκινά ξανά από το spawn,
                         // ώστε το τέρας να έχει πάντα 2 πλήρη δευτ. πριν τον πρώτο γύρο
                         if (combatInterval) clearInterval(combatInterval);
-                        if (!pkPauseActive) {
-                            combatInterval = setInterval(executeCombatRound, effTick());
-                        }
+        if (combatPhaseTimeout) { clearTimeout(combatPhaseTimeout); combatPhaseTimeout = null; }
+        if (!pkPauseActive && !manualPauseActive) {
+            armCombatTick();
+        }
                     }, effTick());
                 }
             }
@@ -8440,7 +8640,7 @@ function applyDefeatPenalties(opts = {}) {
 }
 
     function usePotion() {
-        if (potionCooldownActive || pkPauseActive) return;
+        if (potionCooldownActive || pkPauseActive || manualPauseActive) return;
             if (!inCombat) {
         logMessage("Δεν μπορείς να πιεις μπύρα όσο κοιμάσαι!", 'system');
         return;
@@ -8575,6 +8775,10 @@ function applyDefeatPenalties(opts = {}) {
         return;
     }
 
+    // ΧΕΙΡΟΚΙΝΗΤΗ ΠΑΥΣΗ: κανένα άλλο πλήκτρο δεν κάνει τίποτα όσο είναι παγωμένο το παιχνίδι
+    // (το P παραμένει πάντα ενεργό, βλ. παραπάνω, για να μπορεί να γίνει unpause).
+    if (manualPauseActive) return;
+
 
     // ===== ΑΛΛΑΓΗ ΒΑΘΟΥΣ (5/8) — λειτουργεί και μέσα σε μάχη/autoplay =====
     // μέσα σε μάχη η αλλαγή ισχύει στην ΕΠΟΜΕΝΗ κατάβαση, όχι στην τρέχουσα
@@ -8674,7 +8878,7 @@ function applyDefeatPenalties(opts = {}) {
     }
 
     function gamepadHandlePress(buttonIndex) {
-        if (pkPauseActive) return;
+        if (pkPauseActive || manualPauseActive) return;
         switch (buttonIndex) {
             case 0: usePotion(); break;               // X / κάτω → Μπύρα
             case 1: queuePreciseStrike(); break;      // Circle / δεξιά → Εκτέλεση
@@ -8871,23 +9075,23 @@ function applyDefeatPenalties(opts = {}) {
             autoPlayInterval = null;
         }
 
-        if (autoPlayEnabled) {
+        if (autoPlayEnabled && !manualPauseActive) {
             const tickMs = Math.max(4, AUTO_TICK_MS / getSpeedFactor());
             autoPlayInterval = setInterval(autoPlayTick, tickMs);
         }
 
         if (typeof inCombat !== 'undefined' && inCombat) {
-            if (combatInterval) clearInterval(combatInterval);
-            if (!pkPauseActive) {
-                combatInterval = setInterval(executeCombatRound, effTick());
-            }
+            // Διατηρεί τη φάση του γύρου (armCombatTick), δεν κάνει full reset
+            if (typeof armCombatTick === 'function') armCombatTick();
+            else if (typeof window.armCombatTick === 'function') window.armCombatTick();
         } else if (typeof townRegenInterval !== 'undefined' && townRegenInterval) {
-            startTownRegen();
+            if (!manualPauseActive) startTownRegen();
         }
     }
 
     function autoPlayTick() {
         if (!autoPlayEnabled) return;
+        if (manualPauseActive) return;
 
         // Κλείσιμο σε εξέλιξη (autoPendingStop): όταν επιστρέψουμε στον τεκέ
         // (εκτός μάχης), ολοκληρώνουμε το κλείσιμο — τώρα είναι ασφαλές.
