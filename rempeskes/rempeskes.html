@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v473</title>
+    <title>Ρεμπεσκές v475</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -7059,10 +7059,21 @@ if (currentSelectedLevel === 100 && !player.hasBeatenConanos && currentRunConano
     variant = 'legendary';
     player.legendaryEncounters = (player.legendaryEncounters || 0) + 1;
 
-    // Πρώτα αποφασίζουμε τον τύπο (33/33/33) - καθορίζει ΚΑΙ το χρώμα/λάμψη
+    // Πρώτα αποφασίζουμε τον τύπο - καθορίζει ΚΑΙ το χρώμα/λάμψη
     // ΚΑΙ τι είδους αντικείμενο θα πέσει.
-    let lootRoll = Math.random();
-    legendaryLootType = lootRoll < 0.333 ? 'weapon' : (lootRoll < 0.666 ? 'armor' : 'magic');
+    // WEAPON/ARMOR/MAGIC areas: extra 33% check να είναι ο "δικός" τους τύπος,
+    // αλλιώς γίνεται το κανονικό τυχαίο 33/33/33 (ίδια λογική με τα special monsters)
+    let favoredLegendary = null;
+    if (areaType === AREA_TYPES.WEAPON) favoredLegendary = 'weapon';
+    else if (areaType === AREA_TYPES.ARMOR) favoredLegendary = 'armor';
+    else if (areaType === AREA_TYPES.MAGIC) favoredLegendary = 'magic';
+
+    if (favoredLegendary && Math.random() < 0.333) {
+        legendaryLootType = favoredLegendary;
+    } else {
+        let lootRoll = Math.random();
+        legendaryLootType = lootRoll < 0.333 ? 'weapon' : (lootRoll < 0.666 ? 'armor' : 'magic');
+    }
 
     // Μετά διαλέγουμε το ζευγάρι όνομα+αντικείμενο που ταιριάζει με τύπο & επίπεδο
     const legendaryPair = getLegendaryMonster(lvl, legendaryLootType);
