@@ -742,11 +742,11 @@ function renderEntry(s, i, isVictory, isIronman) {
     const turnsStr = s.turns ? formatScore(s.turns) : '';
     let detailLine;
     if (isVictory) {
-        detailLine = `Νίκησε τον θεό Κόνανο στο ${escapeHtml(depthLabel(s.depth))}, το γυρο ${turnsStr} &middot; ${formattedDate}`;
+        detailLine = `Νίκησε τον θεό Κόνανο στο ${escapeHtml(depthLabel(s.depth))}, το γύρο ${turnsStr} &middot; ${formattedDate}`;
     } else if (isAlive) {
-        detailLine = `Ζωντανός στο ${escapeHtml(depthLabel(s.depth))}, γυρος ${turnsStr} &middot; ${formattedDate}`;
+        detailLine = `Ζωντανός στο ${escapeHtml(depthLabel(s.depth))}, γύρος ${turnsStr} &middot; ${formattedDate}`;
     } else {
-        detailLine = `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)}, το γυρο ${turnsStr} &middot; ${formattedDate}`;
+        detailLine = `Σκοτώθηκε στο <em>${escapeHtml(depthLabel(s.depth))}</em>, από ${escapeHtml(s.killer)}, το γύρο ${turnsStr} &middot; ${formattedDate}`;
     }
     const skull = isIronman ? '<span class="ironman-skull">&#128128;</span> ' : '';
     const rank = s._rank || (i + 1);

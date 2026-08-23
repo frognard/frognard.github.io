@@ -825,7 +825,7 @@ padding: 20px;
             inset: 0;
             background: rgba(10, 10, 10, 0.55);
             z-index: 99999;
-            cursor: pointer;
+            cursor: default;
             align-items: center;
             justify-content: center;
             flex-direction: column;
@@ -838,17 +838,37 @@ padding: 20px;
             font-size: 4rem;
             margin-bottom: 10px;
             filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+            pointer-events: none;
         }
         #pause-overlay .pause-text {
             font-size: 1.5rem;
             letter-spacing: 3px;
             font-weight: bold;
             text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+            pointer-events: none;
         }
         #pause-overlay .pause-hint {
             font-size: 0.9rem;
             color: #ccc;
             margin-top: 10px;
+            pointer-events: none;
+        }
+        #pause-overlay .btn-resume {
+            margin-top: 18px;
+            padding: 10px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: var(--accent-gold);
+            color: #1a1a1a;
+            border-color: var(--accent-gold);
+            border-radius: 4px;
+            text-shadow: none;
+            cursor: pointer;
+        }
+        #pause-overlay .btn-resume:hover {
+            background-color: #ffe14d !important;
+            border-color: #ffe14d !important;
+            color: #000 !important;
         }
 
         .btn-options {
@@ -1684,10 +1704,11 @@ body {
 </head>
 <body>
 
-<div id="pause-overlay" onclick="doPause()">
+<div id="pause-overlay">
     <div class="pause-icon">⏸</div>
     <div class="pause-text">ΠΑΥΣΗ</div>
-    <div class="pause-hint">Πάτα οπουδήποτε για συνέχεια</div>
+    <button id="btn-resume" class="btn-resume" onclick="doPause()">▶ Συνέχεια</button>
+    <div class="pause-hint">Πάτα το κουμπί ή το P για συνέχεια</div>
 </div>
 
 <midi-player
@@ -4111,7 +4132,7 @@ function getRandomItemName() {
 function getZaladourasMessages() {
 const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Το καζάνι βράζει, του κόβαλου ο κώλος γιορτάζει!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Αν συναντήσεις άλλο ρεμπεσκέ στο λαβύρινθο, δεν είναι μάχη μέχρι θανάτου: υπάρχουν αυστηροί κανόνες μονομαχίας! Ο νικητής κερδίζει το καλύτερο αντικείμενο του ηττημένο.''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Αν συναντήσεις άλλο ρεμπεσκέ στο λαβύρινθο, δεν είναι μάχη μέχρι θανάτου: υπάρχουν αυστηροί κανόνες μονομαχίας! Ο νικητής κερδίζει το καλύτερο αντικείμενο του ηττημένου.''" ,
     `Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''${getRandomMonsterFullName()}! Δεν έχεις ακούσει τίποτα; Λένε πως έχει κατασφάξει πολύ κόσμο στα πιο βαθιά!''`,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: Αν νιώθεις ότι το τέρας πρόκειται να σε φάει, πάτα έγκαιρα το ''ΤΡΕΞΕ''! Του χέστη η μάνα δεν έκλαψε ποτέ!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Δώσε βάση στο χρώμα του κάθε βάθους στο λαβύρινθο: δείχνει τι είδους ή τι πλήθους ονομαστά τέρατα κυκλοφορούν εκεί.''",
@@ -4119,9 +4140,9 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Τα όπλα βελτιώνουν τη ζημιά. Οι πανοπλίες την προστασία. Τα μαγικά αντικείμενα καί τα δύο, από λίγο!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ΄΄Λένε ότι η πιο καλή στιγμή να υποχωρήσεις είναι ανάμεσα στις μάχες: τότε η υποχώρηση είναι αυτόματη!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Όποιος τη νύχτα περπατεί, μάζες μελανές πατεί!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Για κάποιο λόγο ποτέ δεν μπορώ να σφάξω πάνω από 30 τέρατα τη φορά. Μουδιάζει το χέρι μου!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Για κάποιο λόγο ποτέ δεν μπορώ να σφάξω πάνω από 30 τέρατα τη φορά! Μουδιάζει το χέρι μου!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι αν πολεμάς πιο ρηχά ή πιο βαθιά από το επίπεδό σου, παίρνεις ποινή ή μπόνους στα XP!''" ,
-    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Το σήμερα είναι το χθεσινό αύριο!''" ,
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Το σήμερα είναι το άυριο του χθές!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Μπουγαρομαζώματα, κοβαλοσκορπίσματα!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Είναι καλό να τολμάς να μπαίνεις όσο πιο βαθιά μπορείς στο λαβύρινθο, αφού εκεί βρίσκονται τα δυνατότερα αντικείμενα. Πρόσεχε όμως πόσο ρισκάρεις, γιατί η απληστία τιμωρείται!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Έκαν' το σκιτάλι κώλο, κι έχεσε τον κόσμο όλο!''" ,
@@ -8853,7 +8874,7 @@ function applyDefeatPenalties(opts = {}) {
 
 // ==== CONTROLLER SUPPORT (Gamepad API) ====
 // Face buttons (PS): Τετράγωνο=Κατραπακιά, Τρίγωνο=Εκτέλεση, Χ=Μπύρα, Κύκλος=Σφάξε
-// Shoulders: LB/L1 και RB/R1 = Σφάξε (τρέξε/γλέντα). Τα βάθη μόνο από D-pad.
+// Shoulders: LB/L1 και RB/R1 = Σφάξε (τρέξε/γλέντα). Start = Παύση/Συνέχεια. Τα βάθη μόνο από D-pad.
 // Edge detection: ενέργεια μόνο τη στιγμή που πατιέται το κουμπί, όχι σε επανάληψη.
 (function initGamepadSupport() {
     if (!('getGamepads' in navigator)) {
@@ -8878,6 +8899,11 @@ function applyDefeatPenalties(opts = {}) {
     }
 
     function gamepadHandlePress(buttonIndex) {
+        // Start = Παύση/Συνέχεια — δουλεύει πάντα (εκτός PK countdown), ακόμα και ενώ είναι παυμένο
+        if (buttonIndex === 9) {
+            if (!pkPauseActive) doPause();
+            return;
+        }
         if (pkPauseActive || manualPauseActive) return;
         switch (buttonIndex) {
             case 0: usePotion(); break;               // X / κάτω → Μπύρα
