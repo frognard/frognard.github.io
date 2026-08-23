@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v475</title>
+    <title>Ρεμπεσκές v476</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -4987,8 +4987,9 @@ function computeMonsterDangerColor() {
 
 
  // 1. ypologismos "effective level" lamvanontas ypopsin ta expected equip tiers tou rempeske -- to 1.00 einai normal / no effective level mod.
-let effectivePlayerLevel = Math.min(104, 1.04 * player.level);
-let lvl = effectivePlayerLevel;
+//let effectivePlayerLevel = Math.min(104, 1.04 * player.level);
+// let lvl = effectivePlayerLevel;
+let lvl = player.level;
 
 let diff = lvl - monsterLvl;
 const FLAT_RATE = 0.13; // % penalty/bonus ανά επίπεδο διαφοράς
