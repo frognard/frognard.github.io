@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v476</title>
+    <title>Ρεμπεσκές v477</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -4961,8 +4961,10 @@ function computeMonsterDangerColor() {
     return `rgb(${r},${g},${bb})`;
 }
     
-   // XP REQ FORMULA == prepei na einai arketa argh wste na mhn ksefeygoun poly ta levels apo to equipment
-    function calculateNextXpRequirement(lvl) { return Math.round(500 * Math.pow(lvl, 1.5)); }
+function calculateNextXpRequirement(lvl) {
+    const xpSlowdownFactor = Math.pow(1.40, lvl / 100);
+    return Math.round(500 * Math.pow(lvl, 1.5) * xpSlowdownFactor);
+}
 
     // Πόσο XP θα χρειαζόταν ακόμα ο παίκτης (από το τρέχον level/xp του) για να έφτανε level 100.
     // Χρησιμοποιείται ΜΟΝΟ για το σκορ (πρόωρος Κόνανος), όχι για πραγματικό level up.
