@@ -2178,7 +2178,7 @@ let _refMagkiaMaxLevel = 1;
 function _refMagkiaEnsureLevel(targetLevel) {
     while (_refMagkiaMaxLevel < targetLevel) {
         const lvl = _refMagkiaMaxLevel;
-        const req = Math.round(500 * Math.pow(lvl, 1.5));
+        const req = calculateNextXpRequirement(lvl);
         const reward = Math.round(35 * Math.pow(lvl, 1.05));
         const needed = Math.round(req / reward);
         _refMagkiaXP[lvl + 1] = _refMagkiaXP[lvl] + needed * reward;
@@ -4961,6 +4961,7 @@ function computeMonsterDangerColor() {
     return `rgb(${r},${g},${bb})`;
 }
     
+//xp requirement
 function calculateNextXpRequirement(lvl) {
     const xpSlowdownFactor = Math.pow(1.40, lvl / 100);
     return Math.round(500 * Math.pow(lvl, 1.5) * xpSlowdownFactor);
