@@ -533,7 +533,7 @@ let _refMagkiaMaxLevel = 1;
 function _refMagkiaEnsureLevel(targetLevel) {
     while (_refMagkiaMaxLevel < targetLevel) {
         const lvl = _refMagkiaMaxLevel;
-        const req = Math.round(500 * Math.pow(lvl, 1.5));
+        const req = Math.round(500 * Math.pow(lvl, 1.5) * Math.pow(1.40, lvl / 100));
         const reward = Math.round(35 * Math.pow(lvl, 1.05));
         const needed = Math.round(req / reward);
         _refMagkiaXP[lvl + 1] = _refMagkiaXP[lvl] + needed * reward;

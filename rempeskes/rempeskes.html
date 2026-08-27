@@ -2162,7 +2162,7 @@ function formatNumber(num) {
     return Number(num).toLocaleString('el-GR');
 }
 
-// Μαγκιά-στόχος (reference) του "ιδανικού" χαρακτήρα — υπολογίζεται από τους ίδιους τύπους
+// Μαγκιά-στόχος (reference) του "ιδανικού" χαρακτήρα Θαμβόπουλου — υπολογίζεται από τους ίδιους τύπους
 // του παιχνιδιού αντί για σκληροδεμένο πίνακα:
 //   req(L)    = round(500·L^1.5)                 (calculateNextXpRequirement)
 //   reward(L) = round(35·L^1.05)                 (getMonsterXpReward, χωρίς diff)
@@ -3549,7 +3549,7 @@ const monsterFirstNames = [
 { name: "Τσίφσα", gender: "male" },
 { name: "Παξ", gender: "male" },
 { name: "Κλασορέψ", gender: "male" },
-{ name: "Τλακοτακοατλ", gender: "male" },
+{ name: "Τλακοτακοάτλ", gender: "male" },
 { name: "Ουλγκαραθίρ", gender: "female" },
 { name: "Τσαραμπόκ", gender: "male" },
 { name: "Κραβούλναχ", gender: "male" },
@@ -4120,6 +4120,7 @@ const msgs = [
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Φρόντιζε να έχεις εξοπλισμό τουλάχιστον ίδιου επιπέδου με το βάθος που θες να πάς! Το επίπεδό σου δεν αρκεί από μόνο του!΄΄",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Τα όπλα βελτιώνουν τη ζημιά. Οι πανοπλίες την προστασία. Τα μαγικά αντικείμενα καί τα δύο, από λίγο!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ΄΄Λένε ότι η πιο καλή στιγμή να υποχωρήσεις είναι ανάμεσα στις μάχες: τότε η υποχώρηση είναι αυτόματη!''",
+    "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ΄΄Λένε ότι η Μαγκιά% υπολογίζεται με βάση τη μαγκιά του Θαμβόπουλου. Πρώτος μάγκας!''",
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Όποιος τη νύχτα περπατεί, μάζες μελανές πατεί!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Για κάποιο λόγο ποτέ δεν μπορώ να σφάξω πάνω από 30 τέρατα τη φορά! Μουδιάζει το χέρι μου!''" ,
     "Ο Ζαλαδούρας σκύβει στο αυτί σου και σου λέει: ''Λένε ότι αν πολεμάς πιο ρηχά ή πιο βαθιά από το επίπεδό σου, παίρνεις ποινή ή μπόνους στα XP!''" ,
@@ -8107,6 +8108,7 @@ function startPkCountdown() {
                     soulKill: monster.soulName,
                     soulDrop: `Ψυχή (${monster.soulName})`,
                     score: Math.max(computeScore(), player._displayedScore || 0),
+                    pct: magkiaPctFromScore(Math.max(computeScore(), player._displayedScore || 0)),
                     turns: player.activeTime || 0,
                     deaths: player.deaths || 0
                 });
@@ -8132,6 +8134,7 @@ function startPkCountdown() {
                     pkKill: monster.pkName,
                     pkLevel: monster.pkLevel,
                     score: Math.max(computeScore(), player._displayedScore || 0),
+                    pct: magkiaPctFromScore(Math.max(computeScore(), player._displayedScore || 0)),
                     turns: player.activeTime || 0,
                     deaths: player.deaths || 0
                 });
@@ -8336,6 +8339,7 @@ function startPkCountdown() {
                     legendaryKill: getMonsterDisplayName(monster),
                     legendaryDrop: monster.lootItemName || '?',
                     score: Math.max(computeScore(), player._displayedScore || 0),
+                    pct: magkiaPctFromScore(Math.max(computeScore(), player._displayedScore || 0)),
                     turns: player.activeTime || 0,
                     deaths: player.deaths || 0
                 });
