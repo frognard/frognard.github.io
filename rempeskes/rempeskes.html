@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v477</title>
+    <title>Ρεμπεσκές v478</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -4996,7 +4996,7 @@ function calculateNextXpRequirement(lvl) {
 let lvl = player.level;
 
 let diff = lvl - monsterLvl;
-const FLAT_RATE = 0.13; // % penalty/bonus ανά επίπεδο διαφοράς
+const FLAT_RATE = 0.10; // % penalty/bonus ανά επίπεδο διαφοράς
 
 if (diff > 0) { // Ο παίκτης είναι μεγαλύτερο επίπεδο: Πέναλτι ανά επίπεδο διαφοράς
         xp *= Math.max(0, 1 - FLAT_RATE * diff);
