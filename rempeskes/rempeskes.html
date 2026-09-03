@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v478</title>
+    <title>Ρεμπεσκές v479</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -2179,7 +2179,17 @@ function _refMagkiaEnsureLevel(targetLevel) {
     while (_refMagkiaMaxLevel < targetLevel) {
         const lvl = _refMagkiaMaxLevel;
         const req = calculateNextXpRequirement(lvl);
-        const reward = Math.round(35 * Math.pow(lvl, 1.05));
+        // Ο ιδανικός χαρακτήρας δεν πολεμά πια στο ίδιο επίπεδο με τον πραγματικό παίκτη.
+        // Ο πραγματικός παίκτης, όσο συσσωρεύει καλύτερο εξοπλισμό, τείνει να πολεμά σε
+        // βαθύτερα επίπεδα (και να παίρνει το 10% bonus XP ανά βαθύτερο επίπεδο), οπότε το
+        // μαγκιά% του ανεβαίνει τεχνητά καθώς προχωρά. Για να μείνει το μαγκιά% σταθερό και
+        // συγκρίσιμο ανεξάρτητα από το επίπεδο, ο υποθετικός παίκτης πολεμά ~4% βαθύτερα:
+        // π.χ. στο level 80 πολεμά στο 80*1.04 = 83.2 και παίρνει 10%*3.2 = 32% περισσότερο XP.
+        const fightLevel = lvl * 1.04;
+        let reward = 35 * Math.pow(fightLevel, 1.05);
+        const diff = lvl - fightLevel; // αρνητικό → πιο βαθύ → μπόνους XP
+        reward *= 1 + 0.10 * Math.abs(diff);
+        reward = Math.round(reward);
         const needed = Math.round(req / reward);
         _refMagkiaXP[lvl + 1] = _refMagkiaXP[lvl] + needed * reward;
         _refMagkiaTurns[lvl + 1] = _refMagkiaTurns[lvl] + needed * 4.3 + Math.ceil(needed / 6) * 9;
