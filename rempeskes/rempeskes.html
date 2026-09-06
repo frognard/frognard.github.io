@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v479</title>
+    <title>Ρεμπεσκές v480</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -2167,10 +2167,10 @@ function formatNumber(num) {
 //   req(L)    = round(500·L^1.5)                 (calculateNextXpRequirement)
 //   reward(L) = round(35·L^1.05)                 (getMonsterXpReward, χωρίς diff)
 //   kills(L)  = round(req/reward)
-//   4.3 γύροι/kill, 6 kills/κατάβαση + 9 ρεστ γύροι, μαγκιά = totalXP·1000/totalTurns.
+//   4.3 γύροι/kill, 8 kills/κατάβαση + 9 ρεστ γύροι, μαγκιά = totalXP·1000/totalTurns.
 // Η μαγκιά-στόχος δίνεται ΣΥΝΕΧΩΣ σε σχέση με το αθροιστικό XP (γραμμική παρεμβολή μέσα
 // στο επίπεδο), ώστε το % να αλλάζει ομαλά όσο κερδίζεται XP και όχι απότομα στο level up.
-// Ο ιδανικός χαρακτήρας μετράει ΠΑΝΤΑ τη μαγκιά του με ×1.5 ωστε το ποσοστο να ειναι λογικα χαμηλο.
+// Ο ιδανικός χαρακτήρας μετράει ΠΑΝΤΑ τη μαγκιά του με ×1.25 ωστε το ποσοστο να ειναι λογικα χαμηλο.
 const _refMagkiaXP = { 1: 0 };
 const _refMagkiaTurns = { 1: 0 };
 let _refMagkiaMaxLevel = 1;
@@ -2185,14 +2185,14 @@ function _refMagkiaEnsureLevel(targetLevel) {
         // μαγκιά% του ανεβαίνει τεχνητά καθώς προχωρά. Για να μείνει το μαγκιά% σταθερό και
         // συγκρίσιμο ανεξάρτητα από το επίπεδο, ο υποθετικός παίκτης πολεμά ~4% βαθύτερα:
         // π.χ. στο level 80 πολεμά στο 80*1.04 = 83.2 και παίρνει 10%*3.2 = 32% περισσότερο XP.
-        const fightLevel = lvl * 1.04;
+        const fightLevel = lvl * 1.07;
         let reward = 35 * Math.pow(fightLevel, 1.05);
         const diff = lvl - fightLevel; // αρνητικό → πιο βαθύ → μπόνους XP
         reward *= 1 + 0.10 * Math.abs(diff);
         reward = Math.round(reward);
         const needed = Math.round(req / reward);
         _refMagkiaXP[lvl + 1] = _refMagkiaXP[lvl] + needed * reward;
-        _refMagkiaTurns[lvl + 1] = _refMagkiaTurns[lvl] + needed * 4.3 + Math.ceil(needed / 6) * 9;
+        _refMagkiaTurns[lvl + 1] = _refMagkiaTurns[lvl] + needed * 4.3 + Math.ceil(needed / 8) * 9;
         _refMagkiaMaxLevel++;
     }
 }
@@ -2217,7 +2217,7 @@ function refMagkiaAtXP(totalXp, ironman) {
         turns = turns1;
     }
     if (turns <= 0) return 0;
-    return (xp * 1000 / turns) * 1.5 * (ironman ? 1.5 : 1);
+    return (xp * 1000 / turns) * 1.0 * (ironman ? 1.5 : 1);
 }
 
 function getMagkiaPercent() {

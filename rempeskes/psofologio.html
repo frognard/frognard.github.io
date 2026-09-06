@@ -534,10 +534,16 @@ function _refMagkiaEnsureLevel(targetLevel) {
     while (_refMagkiaMaxLevel < targetLevel) {
         const lvl = _refMagkiaMaxLevel;
         const req = Math.round(500 * Math.pow(lvl, 1.5) * Math.pow(1.40, lvl / 100));
-        const reward = Math.round(35 * Math.pow(lvl, 1.05));
+        // Ο ιδανικός χαρακτήρας πολεμά ~7% βαθύτερα (lvl*1.07) και παίρνει το μπόνους
+        // 10% XP ανά βαθύτερο επίπεδο — ΑΚΡΙΒΩΣ ο ίδιος υπολογισμός με το rempeskes.html.
+        const fightLevel = lvl * 1.07;
+        let reward = 35 * Math.pow(fightLevel, 1.05);
+        const diff = lvl - fightLevel; // αρνητικό → πιο βαθύ → μπόνους XP
+        reward *= 1 + 0.10 * Math.abs(diff);
+        reward = Math.round(reward);
         const needed = Math.round(req / reward);
         _refMagkiaXP[lvl + 1] = _refMagkiaXP[lvl] + needed * reward;
-        _refMagkiaTurns[lvl + 1] = _refMagkiaTurns[lvl] + needed * 4.3 + Math.ceil(needed / 6) * 9;
+        _refMagkiaTurns[lvl + 1] = _refMagkiaTurns[lvl] + needed * 4.3 + Math.ceil(needed / 8) * 9;
         _refMagkiaMaxLevel++;
     }
 }
@@ -561,15 +567,56 @@ function refMagkiaAtXP(totalXp, ironman) {
         turns = turns1;
     }
     if (turns <= 0) return 0;
-    return (xp * 1000 / turns) * 1.5 * (ironman ? 1.5 : 1);
+    return (xp * 1000 / turns) * 1.0 * (ironman ? 1.5 : 1);
+}
+
+// Αναπαράγει ΑΚΡΙΒΩΣ τη μαγκιά του παιχνιδιού (computeScore στο rempeskes.html) από
+// τα ωμά δεδομένα του χαρακτήρα: totalXp, turns, deaths, ironman και Κόνανος (victory).
+// Για τους Θεοσφάχτες το σκορ «κλειδώνει» τη στιγμή που σκοτώθηκε ο Θεός Κόνανος,
+// οπότε χρησιμοποιείται ο γύρος της νίκης (victoryTurns), όχι οι τωρινοί γύροι.
+function recomputeMagkiaScore(s, victoryTurns) {
+    const totalXp = (s.level >= 100) ? (s.total_xp_at_level_100 || 0) : (s.total_xp_gained || 0);
+    const turns = (s.victory === true && victoryTurns) ? victoryTurns : (s.turns || 0);
+    const deaths = s.ironman ? 0 : (s.deaths || 0);
+    const deathFactor = Math.pow(0.99, deaths);
+    const raw = (turns === 0) ? totalXp : totalXp * 1000 / turns;
+    let score = raw * deathFactor;
+    if (s.ironman) score *= 1.5;
+    if (s.victory) score *= 1.5;
+    return Math.round(score);
+}
+
+// Αναπαράγει ΑΚΡΙΒΩΣ το μαγκιά% του παιχνιδιού (getMagkiaPercent στο rempeskes.html):
+// το σκορ χωρίς το ×1.5 του Κόνανου, προς τη μαγκιά-στόχο στο ίδιο αθροιστικό XP.
+function recomputeMagkiaPct(s, victoryTurns) {
+    let score = recomputeMagkiaScore(s, victoryTurns);
+    if (s.victory) score /= 1.5;
+    const totalXp = (s.level >= 100) ? (s.total_xp_at_level_100 || 0) : (s.total_xp_gained || 0);
+    const ref = refMagkiaAtXP(totalXp, s.ironman === true);
+    if (!Number.isFinite(ref) || ref <= 0) return null;
+    return score / ref * 100;
+}
+
+// Ο γύρος στον οποίο σκοτώθηκε ο Θεός Κόνανος, από το αντίστοιχο ορόσημο.
+// Αν λείπει (παλιό save), επιστρέφει null και πέφτει στους τωρινούς γύρους.
+function getConanosTurns(s) {
+    let turns = null;
+    try {
+        const ms = (typeof s.magkia_milestones === 'string') ? JSON.parse(s.magkia_milestones || '[]') : (s.magkia_milestones || []);
+        const con = ms.find(m => m && m.level === 'conanos');
+        if (con && typeof con.turns === 'number' && con.turns > 0) turns = con.turns;
+    } catch (e) { turns = null; }
+    return turns;
 }
 
 // Μαγκιά% ενός ορόσημου: αν έχει αποθηκευμένο pct το χρησιμοποιεί, αλλιώς το υπολογίζει
 // από το σκορ έναντι του ιδανικού στο συγκεκριμένο επίπεδο (για παλιά ορόσημα).
-function magkiaMilestonePct(m, ironman) {
-    const score = m.score || 0;
+// Το σκορ μετράει ΧΩΡΙΣ το ×1.5 του Κόνανου, όπως κάνει και το παιχνίδι.
+function magkiaMilestonePct(m, ironman, victory) {
+    let score = m.score || 0;
     if (!(score > 0)) return null;
     if (typeof m.pct === 'number' && Number.isFinite(m.pct)) return m.pct;
+    if (victory) score /= 1.5;
     const L = Math.min(Math.max(1, m.level), 100);
     _refMagkiaEnsureLevel(100);
     const ref = refMagkiaAtXP(_refMagkiaXP[L] || 0, ironman === true);
@@ -578,11 +625,11 @@ function magkiaMilestonePct(m, ironman) {
 }
 
 // Σημεία για το γράφημα: ένα ανά 5 επίπεδα (level % 5 === 0), με το μαγκιά% τότε.
-function getMagkiaGraphData(milestones, ironman) {
+function getMagkiaGraphData(milestones, ironman, victory) {
     const byLevel = {};
     (milestones || []).forEach(m => {
         if (typeof m.level !== 'number' || m.level % 5 !== 0) return;
-        const pct = magkiaMilestonePct(m, ironman);
+        const pct = magkiaMilestonePct(m, ironman, victory);
         if (pct === null || !Number.isFinite(pct)) return;
         byLevel[m.level] = { level: m.level, pct };
     });
@@ -590,8 +637,8 @@ function getMagkiaGraphData(milestones, ironman) {
 }
 
 // Το γράφημα "Μαγκιά% ανά 5 επίπεδα" στο τέλος του tab Ορόσημα.
-function buildMagkiaGraphHTML(milestones, ironman, idSuffix) {
-    const pts = getMagkiaGraphData(milestones, ironman);
+function buildMagkiaGraphHTML(milestones, ironman, idSuffix, victory) {
+    const pts = getMagkiaGraphData(milestones, ironman, victory);
     let html = '<div style="padding:12px 0 2px 0;color:var(--brass);font-weight:bold;border-top:1px solid var(--ledger-line);">Μαγκιά% ανά 5 επίπεδα</div>';
     if (pts.length === 0) {
         return html + '<div style="color:var(--parchment-dim);font-style:italic;padding:6px 0;">Δεν υπάρχουν ακόμη σημεία.</div>';
@@ -601,9 +648,9 @@ function buildMagkiaGraphHTML(milestones, ironman, idSuffix) {
 }
 
 // Σχεδίαση του γραφήματος σαν χρηματιστηριακό chart (ανοδική πράσινη / καθοδική κόκκινη).
-function drawMagkiaGraph(canvas, milestones, ironman) {
+function drawMagkiaGraph(canvas, milestones, ironman, victory) {
     if (!canvas) return;
-    const pts = getMagkiaGraphData(milestones, ironman);
+    const pts = getMagkiaGraphData(milestones, ironman, victory);
     if (pts.length === 0) return;
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
@@ -882,6 +929,16 @@ async function load() {
         return;
     }
 
+    // Η Μαγκιά και το Μαγκιά% υπολογίζονται ΞΑΝΑ εδώ με τους ίδιους ακριβώς τύπους
+    // με το παιχνίδι (rempeskes.html), από τα ωμά δεδομένα του χαρακτήρα
+    // (totalXP, turns, deaths, ironman, Κόνανος) — όχι από τις σταλμένες τιμές.
+    data.forEach(s => {
+        const vt = s.victory === true ? getConanosTurns(s) : null;
+        s.score = recomputeMagkiaScore(s, vt);
+        const pct = recomputeMagkiaPct(s, vt);
+        s.magkia_pct = (pct === null || !Number.isFinite(pct)) ? 0 : pct;
+    });
+
     const deduped = deduplicate(data);
     if (deduped.length === 0) {
         document.getElementById('empty').style.display = 'block';
@@ -1019,7 +1076,7 @@ function showCharInfoPopup(idx) {
                 </div>
                 <div class="info-tab" id="info-tab-milestones" style="display:none;">
                     ${milRows}
-                    ${buildMagkiaGraphHTML(milestones, s.ironman === true, idx)}
+                    ${buildMagkiaGraphHTML(milestones, s.ironman === true, idx, s.victory === true)}
                 </div>
                 <button class="stats-close-btn" onclick="closeStatsPopup()">Κλείσιμο</button>
             </div>
@@ -1028,7 +1085,7 @@ function showCharInfoPopup(idx) {
     const el = document.createElement('div');
     el.innerHTML = html;
     const boxEl = el.querySelector('.stats-modal-box');
-    if (boxEl) boxEl._magkiaData = { milestones: milestones || [], ironman: s.ironman === true };
+    if (boxEl) boxEl._magkiaData = { milestones: milestones || [], ironman: s.ironman === true, victory: s.victory === true };
     document.body.appendChild(el);
     document.body.classList.add('modal-open');
 }
@@ -1043,9 +1100,9 @@ function switchInfoTab(event, tab) {
     if (milTab) milTab.style.display = tab === 'milestones' ? '' : 'none';
     if (milTab) milTab.classList.toggle('no-scrollbar', tab === 'milestones');
     if (tab === 'milestones') {
-        const data = box._magkiaData || { milestones: [], ironman: false };
+        const data = box._magkiaData || { milestones: [], ironman: false, victory: false };
         const canvas = box.querySelector('canvas[id^="magkia-graph-"]');
-        if (canvas) drawMagkiaGraph(canvas, data.milestones, data.ironman);
+        if (canvas) drawMagkiaGraph(canvas, data.milestones, data.ironman, data.victory);
     }
 }
 
