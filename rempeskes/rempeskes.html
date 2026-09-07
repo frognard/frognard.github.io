@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v480</title>
+    <title>Ρεμπεσκές v481</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -2245,12 +2245,18 @@ function magkiaPctFromScore(score) {
 }
 
 // ΣΚΟΡ: totalXpGained * 100 / totalTurns * deathFactor (2.5% penalty ανά θάνατο) --- PROS TO PARON DE METRAEI
+// Smoothing constant στον παρονομαστή: χωρίς αυτό, στους πρώτους γύρους (turns μικρό) ο
+// λόγος XP/turns έχει τεράστια διακύμανση και ένα τυχερό πρώιμο kill μπορεί να δώσει
+// εξωπραγματικά υψηλό σκορ, το οποίο μετά "κλειδώνει" στο _displayedScore (ratchet-max)
+// μέχρι να το ξεπεράσει το πραγματικό σκορ αργότερα. Το K μετριάζει τη διακύμανση όσο τα
+// turns είναι μικρά, και σβήνει την επίδρασή του καθώς turns >> K.
+const SCORE_TURNS_SMOOTHING_K = 60;
 function computeScore() {
     const totalXp = (player.level >= 100) ? (player.totalXpAtLevel100 || 0) : (player.totalXpGained || 0);
     const turns = player.activeTime || 0;
     const deaths = player.ironman ? 0 : (player.deaths || 0);
     const deathFactor = Math.pow(0.99, deaths);
-    const raw = (turns === 0) ? totalXp : totalXp * 1000 / turns;
+    const raw = totalXp * 1000 / (turns + SCORE_TURNS_SMOOTHING_K);
     let score = raw * deathFactor;
     if (player.ironman) score *= 1.5;
     if (player.hasBeatenConanos) score *= 1.5;
