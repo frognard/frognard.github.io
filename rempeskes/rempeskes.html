@@ -14,7 +14,7 @@
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ρεμπεσκές v481</title>
+    <title>Ρεμπεσκές v482</title>
     <style>
         html, body { overscroll-behavior: none; }
         :root {
@@ -2332,8 +2332,8 @@ function showStats() {
     {
         const pkK = player.pkKillsCount || 0;
         const pkD = player.pkDeaths || 0;
-        const pkKD = pkD > 0 ? (pkK / pkD).toFixed(2) : pkK.toFixed(2);
-        appendInfoLine(totalDiv, `PK K/D: ${formatNumber(pkK)}-${formatNumber(pkD)} (${pkKD})`, "stats");
+        const pkDr = player.pkDraws || 0;
+        appendInfoLine(totalDiv, `PK: ${formatNumber(pkK)} φόνοι / ${formatNumber(pkD)} θάνατοι / ${formatNumber(pkDr)} ισοπαλίες`, "stats");
     }
     appendInfoLine(totalDiv, `Κατανάλωση μπύρας: ${formatNumber(player.beersDrunk)} λίτρα`, "stats");
     appendInfoLine(totalDiv, `Γύροι: ${formatNumber(player.activeTime)}`, "stats");
@@ -2623,6 +2623,9 @@ function buildMilestonesHTML() {
         } else if (m.soulKill) {
             icon = '💀';
             text = `<span style="color:#a0703f;">Επίπεδο ${m.level}: Στοιχειό! Σκότωσε: "${m.soulKill}" και βρήκε: "Ψυχή (${m.soulKill})" - γύρος ${formatNumber(m.turns)}</span>`;
+        } else if (m.pkDraw) {
+            icon = '⚔';
+            text = `<span style="color:#f39c12;">Επίπεδο ${m.level}: Ισοπαλία με ρεμπεσκέ: "${m.pkDraw}"${m.pkLevel ? ` (lvl ${m.pkLevel})` : ''} - γύρος ${formatNumber(m.turns)}</span>`;
         } else if (m.pkKill) {
             icon = '👤';
             text = `<span style="color:#2ecc71;">Επίπεδο ${m.level}: Ταπείνωση ρεμπεσκέ: "${m.pkKill}"${m.pkLevel ? ` (lvl ${m.pkLevel})` : ''} - Βρήκε: ${m.pkDrop || 'κανένα'} - γύρος ${formatNumber(m.turns)}</span>`;
@@ -2673,6 +2676,7 @@ function buildPlayerRecord() {
         soulsKilled: player.soulsKilled || 0,
         pkKillsCount: player.pkKillsCount || 0,
         pkDeaths: player.pkDeaths || 0,
+        pkDraws: player.pkDraws || 0,
         legendaryEncounters: player.legendaryEncounters || 0,
         legendaryDrops: player.legendaryDrops || 0,
         avgKillTime: player.kills > 0 ? (player.combatRounds / player.kills) : 0,
@@ -5600,6 +5604,7 @@ function normalizePlayerAfterLoad() {
     if (typeof player.soulsKilled !== 'number') player.soulsKilled = 0;
     if (typeof player.pkKillsCount !== 'number') player.pkKillsCount = 0;
     if (typeof player.pkDeaths !== 'number') player.pkDeaths = 0;
+    if (typeof player.pkDraws !== 'number') player.pkDraws = 0;
     if (!Array.isArray(player.pkKills)) player.pkKills = [];
     if (typeof player.legendaryEncounters !== 'number') player.legendaryEncounters = 0;
     if (typeof player.combatRounds !== 'number') player.combatRounds = 0;
@@ -8096,6 +8101,48 @@ function startPkCountdown() {
         }
         isSkillQueued = false;
 
+        // ΙΣΟΠΑΛΙΑ ΜΟΝΟΜΑΧΙΑΣ: αν πεθάνουν και οι δύο ταυτόχρονα σε PK,
+        // δεν γίνεται looting, δεν υπάρχει penalty - απλά γυρίζουν στον τεκέ.
+        if (outcome === 'mutual_death' && monster && monster.isPk) {
+            logMessage(`ΙΣΟΠΑΛΙΑ! Η μονομαχία με τον ρεμπεσκέ ${monster.pkName} ήταν ισόπαλη. Γυρίζεις στον τεκέ...`, 'pk');
+
+            // Milestone ισοπαλίας
+            if (!player.magkiaMilestones) player.magkiaMilestones = [];
+            player.magkiaMilestones.push({
+                level: player.level,
+                pkDraw: monster.pkName,
+                pkLevel: monster.pkLevel,
+                score: Math.max(computeScore(), player._displayedScore || 0),
+                pct: magkiaPctFromScore(Math.max(computeScore(), player._displayedScore || 0)),
+                turns: player.activeTime || 0,
+                deaths: player.deaths || 0
+            });
+
+            // Μετρητής ισοπαλιών
+            player.pkDraws = (player.pkDraws || 0) + 1;
+
+            // Επιστροφή στον τεκέ
+            if (combatInterval) { clearInterval(combatInterval); combatInterval = null; }
+            inCombat = false;
+            delete player._leftMidCombat;
+            delete player._combatDepth;
+            const _bcsDraw = document.getElementById('btn-char-select');
+            if (_bcsDraw) _bcsDraw.classList.remove('btn-disabled');
+
+            player.hp = 1;
+            resetCooldowns();
+            generateAreaModifiers();
+            refreshAreaSelectorAppearance();
+            startTownRegen();
+            saveGame();
+            liveUploadIfEnabled();
+            document.getElementById('town-interface').classList.remove('hidden');
+            document.getElementById('combat-interface').classList.add('hidden');
+            refreshTekePatrons();
+            updateUI();
+            return;
+        }
+
         if (outcome === 'victory' || outcome === 'mutual_death') {
             if (!monster.isPk) {
                 document.getElementById('monster-hp-flash').classList.add('monster-death');
@@ -9639,6 +9686,7 @@ if ('serviceWorker' in navigator) {
                     legendary_drops: r.legendaryDrops || 0,
                     pk_kills_count: r.pkKillsCount || 0,
                     pk_deaths: r.pkDeaths || 0,
+                    pk_draws: r.pkDraws || 0,
                     avg_kill_time: r.avgKillTime || 0,
                     total_xp_gained: r.totalXpGained || 0,
                     total_xp_at_level_100: r.totalXpAtLevel100 || 0,
